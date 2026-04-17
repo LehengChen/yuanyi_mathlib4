@@ -10,7 +10,8 @@ public import Mathlib.Probability.Kernel.Composition.AbsolutelyContinuous
 /-!
 # Condition for two kernels to be equal almost everywhere
 
-We prove that two finite kernels `κ, η : Kernel α β` are `μ`-a.e. equal for a finite measure `μ` iff
+We prove that two finite kernels `κ, η : Kernel α β` are `μ`-a.e. equal for a sigma-finite
+measure `μ` iff
 the composition-products `μ ⊗ₘ κ` and `μ ⊗ₘ η` are equal.
 The result requires `α` to be countable or `β` to be a countably generated measurable space.
 
@@ -35,16 +36,19 @@ namespace MeasureTheory.Measure
 
 /-- A composition-product of a measure with a kernel defined with `withDensity` is equal to the
 `withDensity` of the composition-product. -/
-lemma compProd_withDensity [SFinite μ] [IsSFiniteKernel κ] [IsSFiniteKernel (κ.withDensity f)]
+lemma compProd_withDensity [IsSFiniteKernel κ] [IsSFiniteKernel (κ.withDensity f)]
     (hf : Measurable (Function.uncurry f)) :
     μ ⊗ₘ (κ.withDensity f) = (μ ⊗ₘ κ).withDensity (fun p ↦ f p.1 p.2) := by
-  ext s hs
-  rw [compProd_apply hs, withDensity_apply _ hs, ← lintegral_indicator hs,
-    lintegral_compProd]
-  · congr with a
-    rw [Kernel.withDensity_apply' _ hf, ← lintegral_indicator (measurable_prodMk_left hs)]
-    rfl
-  · exact hf.indicator hs
+  by_cases hμ : SFinite μ
+  · letI := hμ
+    ext s hs
+    rw [compProd_apply hs, withDensity_apply _ hs, ← lintegral_indicator hs,
+      lintegral_compProd]
+    · congr with a
+      rw [Kernel.withDensity_apply' _ hf, ← lintegral_indicator (measurable_prodMk_left hs)]
+      rfl
+    · exact hf.indicator hs
+  · rw [compProd_of_not_sfinite _ _ hμ, compProd_of_not_sfinite _ _ hμ, withDensity_zero_left]
 
 end MeasureTheory.Measure
 
@@ -52,9 +56,32 @@ namespace ProbabilityTheory.Kernel
 
 variable {η : Kernel α β} [MeasurableSpace.CountableOrCountablyGenerated α β]
 
-lemma ae_eq_of_compProd_eq [IsFiniteMeasure μ] [IsFiniteKernel κ] [IsFiniteKernel η]
+lemma ae_eq_of_compProd_eq [SigmaFinite μ] [IsFiniteKernel κ] [IsFiniteKernel η]
     (h : μ ⊗ₘ κ = μ ⊗ₘ η) :
     κ =ᵐ[μ] η := by
+  have h_compProd : SigmaFinite (μ ⊗ₘ η) := by
+    refine ⟨⟨⟨fun n ↦ spanningSets μ n ×ˢ (Set.univ : Set β), ?_, ?_, ?_⟩⟩⟩
+    · intro n
+      trivial
+    · intro n
+      rw [Measure.compProd_apply_prod (measurableSet_spanningSets μ n) MeasurableSet.univ]
+      calc
+        ∫⁻ a in spanningSets μ n, η a Set.univ ∂μ ≤ ∫⁻ a in spanningSets μ n, η.bound ∂μ := by
+          refine lintegral_mono fun a ↦ ?_
+          exact Kernel.measure_le_bound η a Set.univ
+        _ = η.bound * μ (spanningSets μ n) := by
+          simp only [MeasureTheory.lintegral_const, Measure.restrict_apply, MeasurableSet.univ,
+            Set.univ_inter]
+        _ < ∞ := ENNReal.mul_lt_top η.bound_lt_top (measure_spanningSets_lt_top μ n)
+    · ext x
+      constructor
+      · intro hx
+        trivial
+      · intro _
+        have hx : x.1 ∈ ⋃ n, spanningSets μ n := by
+          simp [iUnion_spanningSets]
+        simpa only [Set.mem_iUnion, Set.mem_prod, Set.mem_univ, and_true] using hx
+  letI := h_compProd
   have h_ac : ∀ᵐ a ∂μ, κ a ≪ η a := (Measure.absolutelyContinuous_of_eq h).kernel_of_compProd
   have hκ_eq : ∀ᵐ a ∂μ, κ a = η.withDensity (κ.rnDeriv η) a := by
     filter_upwards [h_ac] with a ha using (Kernel.withDensity_rnDeriv_eq ha).symm
@@ -71,8 +98,8 @@ lemma ae_eq_of_compProd_eq [IsFiniteMeasure μ] [IsFiniteKernel κ] [IsFiniteKer
   _ = (μ ⊗ₘ η) s := by rw [h]
 
 /-- Two finite kernels `κ` and `η` are `μ`-a.e. equal iff the composition-products `μ ⊗ₘ κ`
-and `μ ⊗ₘ η` are equal. -/
-lemma compProd_eq_iff [IsFiniteMeasure μ] [IsFiniteKernel κ] [IsFiniteKernel η] :
+and `μ ⊗ₘ η` are equal, for a sigma-finite measure `μ`. -/
+lemma compProd_eq_iff [SigmaFinite μ] [IsFiniteKernel κ] [IsFiniteKernel η] :
     μ ⊗ₘ κ = μ ⊗ₘ η ↔ κ =ᵐ[μ] η :=
   ⟨Kernel.ae_eq_of_compProd_eq, Measure.compProd_congr⟩
 

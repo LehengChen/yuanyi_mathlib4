@@ -79,9 +79,36 @@ lemma AbsolutelyContinuous.kernel_of_compProd [SFinite μ] (h : μ ⊗ₘ κ ≪
   refine compProd_eq_zero_iff.mp ?_
   exact eq_zero_of_absolutelyContinuous_of_mutuallySingular h.2 this
 
-lemma absolutelyContinuous_compProd_iff' [SFinite μ] [SFinite ν] [∀ a, NeZero (κ a)] :
+omit [IsFiniteKernel η] [MeasurableSpace.CountableOrCountablyGenerated α β] in
+lemma absolutelyContinuous_of_compProd_ae [SFinite μ] (hκ : ∀ᵐ a ∂μ, NeZero (κ a))
+    (h : μ ⊗ₘ κ ≪ ν ⊗ₘ η) :
+    μ ≪ ν := by
+  refine Measure.AbsolutelyContinuous.mk fun s hs hs0 ↦ ?_
+  have h1 : (ν ⊗ₘ η) (s ×ˢ Set.univ) = 0 := by
+    by_cases hν : SFinite ν
+    swap; · simp [compProd_of_not_sfinite _ _ hν]
+    by_cases hη : IsSFiniteKernel η
+    swap; · simp [compProd_of_not_isSFiniteKernel _ _ hη]
+    rw [Measure.compProd_apply_prod hs MeasurableSet.univ]
+    exact setLIntegral_measure_zero _ _ hs0
+  have h2 : (μ ⊗ₘ κ) (s ×ˢ Set.univ) = 0 := h h1
+  rw [Measure.compProd_apply_prod hs MeasurableSet.univ, lintegral_eq_zero_iff] at h2
+  swap; · exact Kernel.measurable_coe _ MeasurableSet.univ
+  by_contra hμs
+  have : Filter.NeBot (ae (μ.restrict s)) := by simp [hμs]
+  have hκs : ∀ᵐ a ∂μ.restrict s, NeZero (κ a) := ae_restrict_of_ae hκ
+  obtain ⟨a, ha_zero, ha_nonzero⟩ : ∃ a, κ a Set.univ = 0 ∧ NeZero (κ a) := by
+    have h_comb : ∀ᵐ a ∂μ.restrict s, κ a Set.univ = 0 ∧ NeZero (κ a) := by
+      filter_upwards [h2, hκs] with a ha_zero ha_nonzero
+      exact ⟨ha_zero, ha_nonzero⟩
+    exact h_comb.exists
+  exact ha_nonzero.out ((Measure.measure_univ_eq_zero.mp ha_zero))
+
+lemma absolutelyContinuous_compProd_iff' [SFinite μ] [SFinite ν]
+    (hκ : ∀ᵐ a ∂μ, NeZero (κ a)) :
     μ ⊗ₘ κ ≪ ν ⊗ₘ η ↔ μ ≪ ν ∧ ∀ᵐ a ∂μ, κ a ≪ η a :=
-  ⟨fun h ↦ ⟨absolutelyContinuous_of_compProd h, h.kernel_of_compProd⟩, fun h ↦ h.1.compProd h.2⟩
+  ⟨fun h ↦ ⟨absolutelyContinuous_of_compProd_ae hκ h, h.kernel_of_compProd⟩,
+    fun h ↦ h.1.compProd h.2⟩
 
 lemma absolutelyContinuous_compProd_right_iff [SFinite μ] :
     μ ⊗ₘ κ ≪ μ ⊗ₘ η ↔ ∀ᵐ a ∂μ, κ a ≪ η a :=

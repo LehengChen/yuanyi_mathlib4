@@ -71,23 +71,34 @@ set_option backward.isDefEq.respectTransparency false in
 variable (u) in
 @[simp] lemma setBernoulli_one : setBer(u, 1) = dirac u := by simp [setBernoulli_eq_map]
 
+lemma setBernoulli_ae_subset [Countable ↥(uᶜ : Set ι)] : ∀ᵐ s ∂setBer(u, p), s ⊆ u := by
+  classical
+  rw [ae_iff]
+  calc
+    setBer(u, p) {s | ¬ s ⊆ u}
+    _ = setBer(u, p) (⋃ i : ↥(uᶜ : Set ι), {s | (i : ι) ∈ s}) := by
+      congr 1
+      ext s
+      constructor
+      · intro hs
+        obtain ⟨i, his, hiu⟩ := Set.not_subset_iff_exists_mem_notMem.mp hs
+        exact Set.mem_iUnion.2 ⟨⟨i, hiu⟩, his⟩
+      · intro hs
+        rcases Set.mem_iUnion.1 hs with ⟨i, his⟩
+        exact Set.not_subset_iff_exists_mem_notMem.mpr ⟨i, his, i.2⟩
+    _ = 0 := by
+      rw [measure_iUnion_null_iff]
+      intro i
+      have hi : (i : ι) ∉ u := i.2
+      calc
+        setBer(u, p) {s | (i : ι) ∈ s}
+        _ = infinitePi (fun i ↦ toNNReal p • dirac (i ∈ u) + toNNReal (σ p) • dirac False)
+              (cylinder {(i : ι)} {fun _ ↦ True}) := by
+          rw [setBernoulli_apply']; congr!; ext; simp [funext_iff]
+        _ = 0 := by simp [infinitePi_cylinder, hi]
+
 section Countable
 variable [Countable ι]
-
-lemma setBernoulli_ae_subset : ∀ᵐ s ∂setBer(u, p), s ⊆ u := by
-  classical
-  simp only [Filter.Eventually, mem_ae_iff, Set.compl_setOf, Set.not_subset_iff_exists_mem_notMem,
-    Set.setOf_exists, Set.setOf_and, measure_iUnion_null_iff]
-  rintro i
-  by_cases hi : i ∈ u
-  · simp [*]
-  calc
-    setBer(u, p) ({s | i ∈ s} ∩ {s | i ∉ u})
-    _ = setBer(u, p) {s | i ∈ s} := by simp [hi]
-    _ = infinitePi (fun i ↦ toNNReal p • dirac (i ∈ u) + toNNReal (σ p) • dirac False)
-          (cylinder {i} {fun _ ↦ True}) := by
-      rw [setBernoulli_apply']; congr!; ext; simp [funext_iff]
-    _ = 0 := by simp [infinitePi_cylinder, hi]
 
 variable (u p) in
 @[simp] lemma setBernoulli_singleton (hsu : s ⊆ u) (hu : u.Finite) :
@@ -119,9 +130,21 @@ abbrev IsSetBernoulli : Prop := HasLaw X setBer(u, p) P
 lemma isSetBernoulli_congr (hXY : X =ᵐ[P] Y) : IsSetBernoulli X u p P ↔ IsSetBernoulli Y u p P :=
   hasLaw_congr hXY
 
-variable [Countable ι]
-
-lemma IsSetBernoulli.ae_subset (hX : IsSetBernoulli X u p P) : ∀ᵐ ω ∂P, X ω ⊆ u :=
-  (hX.ae_iff <| by fun_prop).2 setBernoulli_ae_subset
+lemma IsSetBernoulli.ae_subset [Countable ↥(uᶜ : Set ι)] (hX : IsSetBernoulli X u p P) :
+    ∀ᵐ ω ∂P, X ω ⊆ u := by
+  have hp : Measurable fun s : Set ι ↦ s ⊆ u := by
+    rw [← measurableSet_setOf]
+    have hs_eq : {t : Set ι | t ⊆ u} = ⋂ i : ↥(uᶜ : Set ι), {t | (i : ι) ∉ t} := by
+      ext t
+      simp only [Set.mem_setOf_eq, Set.mem_iInter]
+      constructor
+      · intro ht i hit
+        exact i.2 (ht hit)
+      · intro ht i hit
+        by_contra hiu
+        exact ht ⟨i, hiu⟩ hit
+    rw [hs_eq]
+    exact MeasurableSet.iInter fun i ↦ (measurable_set_notMem (i : ι)).setOf
+  exact (hX.ae_iff hp).2 setBernoulli_ae_subset
 
 end ProbabilityTheory

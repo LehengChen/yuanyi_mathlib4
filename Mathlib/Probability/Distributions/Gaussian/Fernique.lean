@@ -113,10 +113,10 @@ lemma integral_dual_conv_map_neg_eq_zero (L : StrongDual ℝ E) :
     rw [integral_map (by fun_prop) (by fun_prop)]
     simp [integral_neg]
 
-/-- If `x ↦ exp (C * ‖x‖ ^ 2)` is integrable with respect to the centered Gaussian
-`μ ∗ (μ.map (ContinuousLinearEquiv.neg ℝ))`, then for all `C' < C`, `x ↦ exp (C' * ‖x‖ ^ 2)`
-is integrable with respect to `μ`. -/
-lemma integrable_exp_sq_of_conv_neg (μ : Measure E) [IsGaussian μ] {C C' : ℝ}
+/-- If `x ↦ exp (C * ‖x‖ ^ 2)` is integrable with respect to the symmetrization
+`μ ∗ (μ.map (ContinuousLinearEquiv.neg ℝ))` of a probability measure `μ`, then for all
+`C' < C`, `x ↦ exp (C' * ‖x‖ ^ 2)` is integrable with respect to `μ`. -/
+lemma integrable_exp_sq_of_conv_neg (μ : Measure E) [IsProbabilityMeasure μ] {C C' : ℝ}
     (hint : Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2))
       (μ ∗ (μ.map (ContinuousLinearEquiv.neg ℝ))))
     (hC'_pos : 0 < C') (hC'_lt : C' < C) :

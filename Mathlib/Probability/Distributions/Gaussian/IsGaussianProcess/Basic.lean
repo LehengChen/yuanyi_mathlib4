@@ -63,41 +63,64 @@ lemma congr (hX : IsGaussianProcess X P) (hXY : ∀ t, X t =ᵐ[P] Y t) :
 
 end Basic
 
-variable [NormedAddCommGroup E] [MeasurableSpace E] [BorelSpace E]
+variable [SeminormedAddCommGroup E] [MeasurableSpace E] [BorelSpace E]
 
 section Maps
 
 /-! ### Gaussian Marginals -/
 
-variable [NormedSpace ℝ E]
+variable [Module ℝ E]
 
 lemma hasGaussianLaw_eval (hX : IsGaussianProcess X P) (t : T) : HasGaussianLaw (X t) P := by
-  -- removing `by exact` fails
-  exact (hX.hasGaussianLaw {t}).map (.proj ⟨t, by simp⟩)
+  let i : ({t} : Finset T) := ⟨t, by simp⟩
+  let L : (({t} : Finset T) → E) →L[ℝ] E := .proj i
+  simpa [L, i] using (hX.hasGaussianLaw ({t} : Finset T)).map_of_measurable L (by
+    simpa [L] using L.measurable)
 
 variable [SecondCountableTopology E]
 
 lemma hasGaussianLaw_prodMk (hX : IsGaussianProcess X P) {s t : T} :
     HasGaussianLaw (fun ω ↦ (X s ω, X t ω)) P := by
   classical
-  exact (hX.hasGaussianLaw {s, t}).prodMk ⟨s, by simp⟩ ⟨t, by simp⟩
+  let is : ({s, t} : Finset T) := ⟨s, by simp⟩
+  let it : ({s, t} : Finset T) := ⟨t, by simp⟩
+  let L : (({s, t} : Finset T) → E) →L[ℝ] E × E := .prod (.proj is) (.proj it)
+  simpa [L, is, it] using (hX.hasGaussianLaw ({s, t} : Finset T)).map_of_measurable L (by
+    simpa [L] using L.measurable)
 
 lemma hasGaussianLaw_add (hX : IsGaussianProcess X P) {s t : T} :
-    HasGaussianLaw (X s + X t) P := hX.hasGaussianLaw_prodMk.add
+    HasGaussianLaw (X s + X t) P := by
+  classical
+  let is : ({s, t} : Finset T) := ⟨s, by simp⟩
+  let it : ({s, t} : Finset T) := ⟨t, by simp⟩
+  let L : (({s, t} : Finset T) → E) →L[ℝ] E := .proj is + .proj it
+  simpa [L, is, it] using (hX.hasGaussianLaw ({s, t} : Finset T)).map_of_measurable L (by
+    simpa [L] using L.measurable)
 
 lemma hasGaussianLaw_fun_add (hX : IsGaussianProcess X P) {s t : T} :
     HasGaussianLaw (fun ω ↦ X s ω + X t ω) P := hX.hasGaussianLaw_add
 
 lemma hasGaussianLaw_sub (hX : IsGaussianProcess X P) {s t : T} :
-    HasGaussianLaw (X s - X t) P := hX.hasGaussianLaw_prodMk.sub
+    HasGaussianLaw (X s - X t) P := by
+  classical
+  let is : ({s, t} : Finset T) := ⟨s, by simp⟩
+  let it : ({s, t} : Finset T) := ⟨t, by simp⟩
+  let L : (({s, t} : Finset T) → E) →L[ℝ] E := .proj is - .proj it
+  simpa [L, is, it] using (hX.hasGaussianLaw ({s, t} : Finset T)).map_of_measurable L (by
+    simpa [L] using L.measurable)
 
 lemma hasGaussianLaw_fun_sub (hX : IsGaussianProcess X P) {s t : T} :
     HasGaussianLaw (fun ω ↦ X s ω - X t ω) P := hX.hasGaussianLaw_sub
 
 lemma hasGaussianLaw_sum (hX : IsGaussianProcess X P) {I : Finset T} :
     HasGaussianLaw (∑ i ∈ I, X i) P := by
-  convert (hX.hasGaussianLaw I).sum
-  simp [I.sum_attach X]
+  classical
+  let L : (I → E) →L[ℝ] E := ∑ i, .proj i
+  have hL : Measurable L := by
+    simpa using L.measurable
+  convert (hX.hasGaussianLaw I).map_of_measurable L hL using 1
+  ext ω
+  simpa [L] using (congrArg (fun f => f ω) (I.sum_attach (fun t => X t))).symm
 
 lemma hasGaussianLaw_fun_sum (hX : IsGaussianProcess X P) {I : Finset T} :
     HasGaussianLaw (fun ω ↦ ∑ i ∈ I, X i ω) P := by
@@ -111,9 +134,11 @@ lemma hasGaussianLaw_increments (hX : IsGaussianProcess X P) {n : ℕ} {t : Fin 
   let L : ((univ.image t) → E) →L[ℝ] Fin n → E :=
     { toFun x i := x ⟨t i.succ, by simp⟩ - x ⟨t i.castSucc, by simp⟩
       map_add' x y := by ext; simp; abel
-      map_smul' m x := by ext; simp; module
+      map_smul' m x := by ext; simp [smul_sub]
       cont := by fun_prop }
-  exact (hX.hasGaussianLaw _).map L
+  have hL : Measurable L := by
+    simpa [L] using L.measurable
+  exact (hX.hasGaussianLaw _).map_of_measurable L hL
 
 end Maps
 
@@ -121,8 +146,8 @@ section Transformations
 
 /-! ### Operations that preserve Gaussianity -/
 
-variable [NormedSpace ℝ E] [SecondCountableTopology E]
-  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [MeasurableSpace F]
+variable [Module ℝ E] [SecondCountableTopology E]
+  {F : Type*} [SeminormedAddCommGroup F] [Module ℝ F] [MeasurableSpace F]
   [BorelSpace F] [SecondCountableTopology F] {Y : S → Ω → F}
 
 /-- If a stochastic process `Y` is such that for each `s`, `Y s` can be written as a linear
@@ -138,10 +163,12 @@ lemma of_isGaussianProcess (hX : IsGaussianProcess X P)
         map_add' x y := by ext; simp [← Pi.add_def]
         map_smul' c x := by ext; simp [← Pi.smul_def]
         cont := by fun_prop }
+    have hK : Measurable K := by
+      simpa using K.measurable
     have : (fun ω ↦ I.restrict (Y · ω)) = K ∘ (fun ω ↦ (I.biUnion J).restrict (X · ω)) := by
       ext; simp [K, hL, Finset.restrict_def]
     rw [this]
-    exact (hX.hasGaussianLaw _).map _
+    exact (hX.hasGaussianLaw _).map_of_measurable K hK
 
 lemma comp_right (h : IsGaussianProcess X P) (f : S → T) : IsGaussianProcess (X ∘ f) P :=
   h.of_isGaussianProcess fun s ↦ ⟨{f s},
@@ -158,9 +185,20 @@ lemma comp_left (L : T → E →L[ℝ] F) (h : IsGaussianProcess X P) :
       map_smul' := by simp },
     by simp⟩
 
+section Smul
+
+variable [ContinuousConstSMul ℝ E]
+
 lemma smul (c : T → ℝ) (hX : IsGaussianProcess X P) :
-    IsGaussianProcess (fun t ω ↦ c t • (X t ω)) P :=
-  hX.comp_left (fun t ↦ .lsmul ℝ ℝ (c t))
+    IsGaussianProcess (fun t ω ↦ c t • (X t ω)) P := by
+  exact hX.of_isGaussianProcess fun t ↦ ⟨{t},
+    { toFun x := c t • x ⟨t, by simp⟩
+      map_add' := by simp [smul_add]
+      map_smul' := by simp [smul_smul, mul_comm]
+      cont := by fun_prop },
+    by simp⟩
+
+end Smul
 
 lemma shift [Add T] (h : IsGaussianProcess X P) (t₀ : T) :
     IsGaussianProcess (fun t ω ↦ X (t₀ + t) ω - X t₀ ω) P := by
@@ -168,7 +206,7 @@ lemma shift [Add T] (h : IsGaussianProcess X P) (t₀ : T) :
   exact h.of_isGaussianProcess fun t ↦ ⟨{t₀, t₀ + t},
     { toFun x := x ⟨t₀ + t, by simp⟩ - x ⟨t₀, by simp⟩
       map_add' x y := by simp; abel
-      map_smul' c x := by simp; module },
+      map_smul' c x := by simp [smul_sub] },
     by simp⟩
 
 lemma restrict (h : IsGaussianProcess X P) (s : Set T) :

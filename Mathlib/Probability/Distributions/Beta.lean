@@ -63,13 +63,19 @@ lemma betaPDF_eq (α β x : ℝ) :
       ENNReal.ofReal (if 0 < x ∧ x < 1 then
         (1 / beta α β) * x ^ (α - 1) * (1 - x) ^ (β - 1) else 0) := rfl
 
+lemma betaPDF_eq_zero_of_not_mem_Ioo {α β x : ℝ} (hx : x ∉ Ioo 0 1) :
+    betaPDF α β x = 0 := by
+  rw [betaPDF_eq]
+  simp only [Set.mem_Ioo] at hx
+  simp [hx]
+
 lemma betaPDF_eq_zero_of_nonpos {α β x : ℝ} (hx : x ≤ 0) :
     betaPDF α β x = 0 := by
-  simp [betaPDF_eq, hx.not_gt]
+  exact betaPDF_eq_zero_of_not_mem_Ioo (fun hx' ↦ not_lt_of_ge hx hx'.1)
 
 lemma betaPDF_eq_zero_of_one_le {α β x : ℝ} (hx : 1 ≤ x) :
     betaPDF α β x = 0 := by
-  simp [betaPDF_eq, hx.not_gt]
+  exact betaPDF_eq_zero_of_not_mem_Ioo (fun hx' ↦ not_lt_of_ge hx hx'.2)
 
 lemma betaPDF_of_pos_lt_one {α β x : ℝ} (hx_pos : 0 < x) (hx_lt : x < 1) :
     betaPDF α β x = ENNReal.ofReal ((1 / beta α β) * x ^ (α - 1) * (1 - x) ^ (β - 1)) := by
@@ -86,12 +92,12 @@ lemma lintegral_betaPDF {α β : ℝ} :
     setLIntegral_congr_fun measurableSet_Ioo
       (fun x ⟨hx_pos, hx_lt⟩ ↦ betaPDF_of_pos_lt_one hx_pos hx_lt)]
 
-/-- The beta pdf is positive for all positive reals with positive parameters. -/
-lemma betaPDFReal_pos {α β x : ℝ} (hx1 : 0 < x) (hx2 : x < 1) (hα : 0 < α) (hβ : 0 < β) :
+/-- The beta pdf is positive on `(0, 1)` whenever its normalizing constant is positive. -/
+lemma betaPDFReal_pos {α β x : ℝ} (hx1 : 0 < x) (hx2 : x < 1) (hβ : 0 < beta α β) :
     0 < betaPDFReal α β x := by
   rw [betaPDFReal, if_pos ⟨hx1, hx2⟩]
-  exact mul_pos (mul_pos (one_div_pos.2 (beta_pos hα hβ)) (Real.rpow_pos_of_pos hx1 (α - 1)))
-    (Real.rpow_pos_of_pos (by linarith) (β - 1))
+  exact mul_pos (mul_pos (one_div_pos.2 hβ) (Real.rpow_pos_of_pos hx1 (α - 1)))
+    (Real.rpow_pos_of_pos (sub_pos.2 hx2) (β - 1))
 
 /-- The beta pdf is measurable. -/
 @[fun_prop]
@@ -122,7 +128,7 @@ lemma lintegral_betaPDF_eq_one {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
     convert betaIntegral_convergent (u := α) (v := β) (by simpa) (by simpa)
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by simp), IntegrableOn]
   · refine ae_restrict_of_forall_mem measurableSet_Ioo (fun x hx ↦ ?_)
-    convert betaPDFReal_pos hx.1 hx.2 hα hβ |>.le using 1
+    convert betaPDFReal_pos hx.1 hx.2 (beta_pos hα hβ) |>.le using 1
     rw [betaPDFReal, if_pos ⟨hx.1, hx.2⟩]
   · exact Measurable.aestronglyMeasurable (by fun_prop)
 

@@ -258,21 +258,24 @@ section Transformations
 variable {μ : ℝ} {v : ℝ≥0}
 
 lemma _root_.MeasurableEmbedding.gaussianReal_comap_apply (hv : v ≠ 0)
-    {f : ℝ → ℝ} (hf : MeasurableEmbedding f)
-    {f' : ℝ → ℝ} (h_deriv : ∀ x, HasDerivAt f (f' x) x) {s : Set ℝ} (hs : MeasurableSet s) :
+    {f : ℝ → ℝ} (hf : MeasurableEmbedding f) {s : Set ℝ} (hs : MeasurableSet s)
+    {f' : ℝ → ℝ} (h_deriv : ∀ x ∈ s, HasDerivWithinAt f (f' x) s x) :
     (gaussianReal μ v).comap f s
       = ENNReal.ofReal (∫ x in s, |f' x| * gaussianPDFReal μ v (f x)) := by
   rw [gaussianReal_of_var_ne_zero _ hv, gaussianPDF_def]
-  exact hf.withDensity_ofReal_comap_apply_eq_integral_abs_deriv_mul' hs h_deriv
-    (ae_of_all _ (gaussianPDFReal_nonneg _ _)) (integrable_gaussianPDFReal _ _)
+  exact hf.withDensity_ofReal_comap_apply_eq_integral_abs_deriv_mul hs
+    (ae_of_all _ fun x _ ↦ gaussianPDFReal_nonneg _ _ x)
+    (integrable_gaussianPDFReal _ _).integrableOn h_deriv
 
-lemma _root_.MeasurableEquiv.gaussianReal_map_symm_apply (hv : v ≠ 0) (f : ℝ ≃ᵐ ℝ) {f' : ℝ → ℝ}
-    (h_deriv : ∀ x, HasDerivAt f (f' x) x) {s : Set ℝ} (hs : MeasurableSet s) :
+lemma _root_.MeasurableEquiv.gaussianReal_map_symm_apply (hv : v ≠ 0) (f : ℝ ≃ᵐ ℝ)
+    {s : Set ℝ} (hs : MeasurableSet s) {f' : ℝ → ℝ}
+    (h_deriv : ∀ x ∈ s, HasDerivWithinAt f (f' x) s x) :
     (gaussianReal μ v).map f.symm s
       = ENNReal.ofReal (∫ x in s, |f' x| * gaussianPDFReal μ v (f x)) := by
   rw [gaussianReal_of_var_ne_zero _ hv, gaussianPDF_def]
-  exact f.withDensity_ofReal_map_symm_apply_eq_integral_abs_deriv_mul' hs h_deriv
-    (ae_of_all _ (gaussianPDFReal_nonneg _ _)) (integrable_gaussianPDFReal _ _)
+  exact f.withDensity_ofReal_map_symm_apply_eq_integral_abs_deriv_mul hs
+    (ae_of_all _ fun x _ ↦ gaussianPDFReal_nonneg _ _ x)
+    (integrable_gaussianPDFReal _ _).integrableOn h_deriv
 
 /-- The map of a Gaussian distribution by addition of a constant is a Gaussian. -/
 lemma gaussianReal_map_add_const (y : ℝ) :
@@ -283,7 +286,7 @@ lemma gaussianReal_map_add_const (y : ℝ) :
   have he' : ∀ x, HasDerivAt e ((fun _ ↦ 1) x) x := fun _ ↦ (hasDerivAt_id _).sub_const y
   change (gaussianReal μ v).map e.symm = gaussianReal (μ + y) v
   ext s' hs'
-  rw [MeasurableEquiv.gaussianReal_map_symm_apply hv e he' hs']
+  rw [MeasurableEquiv.gaussianReal_map_symm_apply hv e hs' (fun x _ ↦ (he' x).hasDerivWithinAt)]
   simp only [abs_one, one_mul]
   rw [gaussianReal_apply_eq_integral _ hv s']
   simp [e, gaussianPDFReal_sub _ y, Homeomorph.addRight, ← sub_eq_add_neg]
@@ -307,7 +310,8 @@ lemma gaussianReal_map_const_mul (c : ℝ) :
     exact fun _ ↦ HasDerivAt.const_mul _ (hasDerivAt_id _)
   change (gaussianReal μ v).map e.symm = gaussianReal (c * μ) (.mk (c ^ 2) (sq_nonneg _) * v)
   ext s' hs'
-  rw [MeasurableEquiv.gaussianReal_map_symm_apply hv e he' hs',
+  rw [MeasurableEquiv.gaussianReal_map_symm_apply hv e hs'
+      (fun x _ ↦ (he' x).hasDerivWithinAt),
     gaussianReal_apply_eq_integral _ _ s']
   swap
   · simp only [ne_eq, mul_eq_zero, hv, or_false]

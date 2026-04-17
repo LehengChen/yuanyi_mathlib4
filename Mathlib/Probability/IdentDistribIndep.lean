@@ -34,21 +34,27 @@ variable {Ω Ω' ι E F : Type*} {mΩ : MeasurableSpace Ω} {mΩ' : MeasurableSp
     {μ : Measure Ω} {ν : Measure Ω'}
 
 /-- If `X` and `Y` are independent random variables on `Ω`, `Z` and `W` are independent random
-variables on `Ω'`, such that `X` and `Z` are identically distributed and `Y` and `W` are identically
-distributed, then the pairs `(X, Y)`  and `(Z, W)` are identically distributed. -/
-lemma IdentDistrib.prodMk [IsFiniteMeasure μ]
-    {X : Ω → E} {Y : Ω → F} {Z : Ω' → E} {W : Ω' → F}
+variables on `Ω'`, the laws of `X` and `Y` are sigma-finite, and `X` and `Z` and `Y` and `W` are
+respectively identically distributed, then the pairs `(X, Y)` and `(Z, W)` are identically
+distributed. -/
+lemma IdentDistrib.prodMk {X : Ω → E} {Y : Ω → F} {Z : Ω' → E} {W : Ω' → F}
+    [SigmaFinite (μ.map X)] [SigmaFinite (μ.map Y)]
     (hXZ : IdentDistrib X Z μ ν) (hYW : IdentDistrib Y W μ ν)
     (hXY : X ⟂ᵢ[μ] Y) (hZW : Z ⟂ᵢ[ν] W) :
     IdentDistrib (fun ω ↦ (X ω, Y ω)) (fun ω' ↦ (Z ω', W ω')) μ ν where
   aemeasurable_fst := hXZ.aemeasurable_fst.prodMk hYW.aemeasurable_fst
   aemeasurable_snd := hXZ.aemeasurable_snd.prodMk hYW.aemeasurable_snd
   map_eq := by
-    have : IsFiniteMeasure ν := by
-      have : IsFiniteMeasure (ν.map Z) := by rw [← hXZ.map_eq]; infer_instance
-      exact Measure.isFiniteMeasure_of_map hXZ.aemeasurable_snd
-    rw [(indepFun_iff_map_prod_eq_prod_map_map hXZ.aemeasurable_fst hYW.aemeasurable_fst).mp hXY,
-      (indepFun_iff_map_prod_eq_prod_map_map hXZ.aemeasurable_snd hYW.aemeasurable_snd).mp hZW,
+    have : SigmaFinite (ν.map Z) := by
+      rw [← hXZ.map_eq]
+      infer_instance
+    have : SigmaFinite (ν.map W) := by
+      rw [← hYW.map_eq]
+      infer_instance
+    rw [(indepFun_iff_map_prod_eq_prod_map_map' hXZ.aemeasurable_fst hYW.aemeasurable_fst
+        inferInstance inferInstance).mp hXY,
+      (indepFun_iff_map_prod_eq_prod_map_map' hXZ.aemeasurable_snd hYW.aemeasurable_snd
+        inferInstance inferInstance).mp hZW,
       hXZ.map_eq, hYW.map_eq]
 
 /-- If `(X i)` and `(Y i)` are families of independent random variables indexed by a countable

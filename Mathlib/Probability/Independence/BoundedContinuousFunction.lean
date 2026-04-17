@@ -184,7 +184,7 @@ lemma indepFun_of_bcf (mZ : AEMeasurable Z P) (mU : AEMeasurable U P)
 
 end IndepFun
 
-variable [IsProbabilityMeasure P]
+variable [IsZeroOrProbabilityMeasure P]
 
 section Indicator
 
@@ -193,38 +193,45 @@ lemma indicator_indepFun_pi_of_prod_bcf
     (h : ∀ f : (s : S) → E s →ᵇ ℝ, ∫ ω in A, ∏ s, f s (X s ω) ∂P =
       P.real A * ∫ ω, ∏ s, f s (X s ω) ∂P) :
     (A.indicator (1 : Ω → ℝ)) ⟂ᵢ[P] (fun ω s ↦ X s ω) := by
-  refine indepFun_pi_of_prod_bcf
-    ((aemeasurable_indicator_const_iff 1).2 mA) mX fun f g ↦ ?_
-  have h1 ω : f (A.indicator 1 ω) * ∏ s, g s (X s ω) =
-      A.indicator (fun ω ↦ f 1 * ∏ s, g s (X s ω)) ω +
-      f 0 * ∏ s, g s (X s ω) - A.indicator (fun ω ↦ f 0 * ∏ s, g s (X s ω)) ω := by
-    classical
-    rw [Set.indicator_apply]
-    split_ifs <;> simp_all
-  have h2 ω : f (A.indicator 1 ω) =
-      A.indicator (fun _ ↦ f 1) ω + Aᶜ.indicator (fun _ ↦ f 0) ω := by
-    classical
-    rw [Set.indicator_apply]
-    split_ifs <;> simp_all
-  have hg {c : ℝ} : Integrable (fun ω ↦ c * ∏ s, g s (X s ω)) P := by
-    refine Integrable.of_bound ?_ (‖c‖ * ∏ s, ‖g s‖) (ae_of_all _ fun ω ↦ ?_)
-    · exact (Finset.aestronglyMeasurable_fun_prod _ fun s _ ↦
-        (g s).continuous.aestronglyMeasurable.comp_aemeasurable (mX s)).const_mul _
-    · rw [norm_mul, norm_prod]
-      gcongr with s
-      exact (g s).norm_coe_le_norm _
-  simp_rw [Pi.mul_apply, Finset.prod_apply, Function.comp_apply, h1, h2]
-  rw [integral_sub, integral_add, integral_indicator₀ mA, integral_indicator₀ mA,
-    integral_const_mul, integral_const_mul, integral_const_mul, integral_add,
-    integral_indicator₀ mA, integral_indicator₀ mA.compl, integral_const, integral_const, h]
-  · simp [measureReal_compl₀ mA]
-    ring
-  · exact (integrable_const _).indicator₀ mA
-  · exact (integrable_const _).indicator₀ mA.compl
-  · exact hg.indicator₀ mA
-  · exact hg
-  · exact (hg.indicator₀ mA).add hg
-  · exact hg.indicator₀ mA
+  rcases IsZeroOrProbabilityMeasure.measure_univ (μ := P) with hP | hP
+  · have hP0 : P = 0 := Measure.measure_univ_eq_zero.1 hP
+    subst hP0
+    rw [indepFun_iff_measure_inter_preimage_eq_mul]
+    intro s t hs ht
+    simp
+  · letI : IsProbabilityMeasure P := ⟨hP⟩
+    refine indepFun_pi_of_prod_bcf
+      ((aemeasurable_indicator_const_iff 1).2 mA) mX fun f g ↦ ?_
+    have h1 ω : f (A.indicator 1 ω) * ∏ s, g s (X s ω) =
+        A.indicator (fun ω ↦ f 1 * ∏ s, g s (X s ω)) ω +
+        f 0 * ∏ s, g s (X s ω) - A.indicator (fun ω ↦ f 0 * ∏ s, g s (X s ω)) ω := by
+      classical
+      rw [Set.indicator_apply]
+      split_ifs <;> simp_all
+    have h2 ω : f (A.indicator 1 ω) =
+        A.indicator (fun _ ↦ f 1) ω + Aᶜ.indicator (fun _ ↦ f 0) ω := by
+      classical
+      rw [Set.indicator_apply]
+      split_ifs <;> simp_all
+    have hg {c : ℝ} : Integrable (fun ω ↦ c * ∏ s, g s (X s ω)) P := by
+      refine Integrable.of_bound ?_ (‖c‖ * ∏ s, ‖g s‖) (ae_of_all _ fun ω ↦ ?_)
+      · exact (Finset.aestronglyMeasurable_fun_prod _ fun s _ ↦
+          (g s).continuous.aestronglyMeasurable.comp_aemeasurable (mX s)).const_mul _
+      · rw [norm_mul, norm_prod]
+        gcongr with s
+        exact (g s).norm_coe_le_norm _
+    simp_rw [Pi.mul_apply, Finset.prod_apply, Function.comp_apply, h1, h2]
+    rw [integral_sub, integral_add, integral_indicator₀ mA, integral_indicator₀ mA,
+      integral_const_mul, integral_const_mul, integral_const_mul, integral_add,
+      integral_indicator₀ mA, integral_indicator₀ mA.compl, integral_const, integral_const, h]
+    · simp [measureReal_compl₀ mA]
+      ring
+    · exact (integrable_const _).indicator₀ mA
+    · exact (integrable_const _).indicator₀ mA.compl
+    · exact hg.indicator₀ mA
+    · exact hg
+    · exact (hg.indicator₀ mA).add hg
+    · exact hg.indicator₀ mA
 
 omit [Fintype S] in variable [Finite S] in
 /-- The indicator of a set $A$ and a family of random variables $(X_1, ..., X_p)$ are independent
@@ -371,7 +378,7 @@ lemma process_indepFun_of_bcf
 
 end IndepFun
 
-variable [IsProbabilityMeasure P]
+variable [IsZeroOrProbabilityMeasure P]
 
 section Indicator
 

@@ -50,21 +50,31 @@ theorem measure_eq_zero_or_one_or_top_of_indepSet_self {t : Set Ω}
   simpa only [ae_dirac_eq, Filter.eventually_pure]
     using Kernel.measure_eq_zero_or_one_or_top_of_indepSet_self h_indep
 
-theorem Kernel.measure_eq_zero_or_one_of_indepSet_self' (h : ∀ᵐ a ∂μα, IsFiniteMeasure (κ a))
-    {t : Set Ω} (h_indep : IndepSet t t κ μα) :
+theorem Kernel.measure_eq_zero_or_one_of_indepSet_self' {t : Set Ω}
+    (h : ∀ᵐ a ∂μα, κ a t ≠ ∞) (h_indep : IndepSet t t κ μα) :
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 := by
   filter_upwards [measure_eq_zero_or_one_or_top_of_indepSet_self h_indep, h] with a h_0_1_top h'
-  simpa only [measure_ne_top (κ a), or_false] using h_0_1_top
+  rcases h_0_1_top with h0 | h1 | h_top
+  · exact Or.inl h0
+  · exact Or.inr h1
+  · exact (h' h_top).elim
 
 theorem Kernel.measure_eq_zero_or_one_of_indepSet_self [h : ∀ a, IsFiniteMeasure (κ a)] {t : Set Ω}
     (h_indep : IndepSet t t κ μα) :
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 :=
-  Kernel.measure_eq_zero_or_one_of_indepSet_self' (ae_of_all μα h) h_indep
+  Kernel.measure_eq_zero_or_one_of_indepSet_self' (ae_of_all μα fun a => measure_ne_top (κ a) t)
+    h_indep
+
+theorem measure_eq_zero_or_one_of_indepSet_self_of_ne_top {t : Set Ω}
+    (hμt : μ t ≠ ∞) (h_indep : IndepSet t t μ) : μ t = 0 ∨ μ t = 1 := by
+  rcases measure_eq_zero_or_one_or_top_of_indepSet_self h_indep with h0 | h1 | h_top
+  · exact Or.inl h0
+  · exact Or.inr h1
+  · exact (hμt h_top).elim
 
 theorem measure_eq_zero_or_one_of_indepSet_self [IsFiniteMeasure μ] {t : Set Ω}
     (h_indep : IndepSet t t μ) : μ t = 0 ∨ μ t = 1 := by
-  simpa only [ae_dirac_eq, Filter.eventually_pure]
-    using Kernel.measure_eq_zero_or_one_of_indepSet_self h_indep
+  exact measure_eq_zero_or_one_of_indepSet_self_of_ne_top (measure_ne_top μ t) h_indep
 
 theorem condExp_eq_zero_or_one_of_condIndepSet_self
     [StandardBorelSpace Ω]
@@ -213,7 +223,9 @@ theorem Kernel.measure_zero_or_one_of_measurableSet_limsup (h_le : ∀ n, s n �
   apply measure_eq_zero_or_one_of_indepSet_self' ?_
     ((indep_limsup_self h_le h_indep hf hns hnsp hns_univ).indepSet_of_measurableSet ht_tail
       ht_tail)
-  filter_upwards [h_indep.ae_isProbabilityMeasure] with a ha using by infer_instance
+  filter_upwards [h_indep.ae_isProbabilityMeasure] with a ha
+  letI : IsProbabilityMeasure (κ a) := ha
+  exact measure_ne_top (κ a) t
 
 theorem measure_zero_or_one_of_measurableSet_limsup
     (h_le : ∀ n, s n ≤ m0) (h_indep : iIndep s μ)
@@ -271,7 +283,9 @@ theorem Kernel.measure_zero_or_one_of_measurableSet_limsup_atTop (h_le : ∀ n, 
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 := by
   apply measure_eq_zero_or_one_of_indepSet_self' ?_
     ((indep_limsup_atTop_self h_le h_indep).indepSet_of_measurableSet ht_tail ht_tail)
-  filter_upwards [h_indep.ae_isProbabilityMeasure] with a ha using by infer_instance
+  filter_upwards [h_indep.ae_isProbabilityMeasure] with a ha
+  letI : IsProbabilityMeasure (κ a) := ha
+  exact measure_ne_top (κ a) t
 
 /-- **Kolmogorov's 0-1 law** : any event in the tail σ-algebra of an independent sequence of
 sub-σ-algebras has probability 0 or 1.
@@ -328,7 +342,9 @@ theorem Kernel.measure_zero_or_one_of_measurableSet_limsup_atBot (h_le : ∀ n, 
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 := by
   apply measure_eq_zero_or_one_of_indepSet_self' ?_
     ((indep_limsup_atBot_self h_le h_indep).indepSet_of_measurableSet ht_tail ht_tail)
-  filter_upwards [h_indep.ae_isProbabilityMeasure] with a ha using by infer_instance
+  filter_upwards [h_indep.ae_isProbabilityMeasure] with a ha
+  letI : IsProbabilityMeasure (κ a) := ha
+  exact measure_ne_top (κ a) t
 
 /-- **Kolmogorov's 0-1 law** : any event in the tail σ-algebra of an independent sequence of
 sub-σ-algebras has probability 0 or 1. -/

@@ -40,9 +40,17 @@ variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
 Notation for `MeasureTheory.Measure.bind` -/
 scoped[ProbabilityTheory] notation:100 κ:101 " ∘ₘ " μ:100 => MeasureTheory.Measure.bind μ κ
 
+lemma comp_apply_univ_of_ae (hκ : ∀ᵐ a ∂μ, κ a Set.univ = 1) :
+    (κ ∘ₘ μ) Set.univ = μ Set.univ := by
+  rw [bind_apply .univ κ.aemeasurable]
+  calc
+    ∫⁻ a, κ a Set.univ ∂μ = ∫⁻ a, 1 ∂μ := by
+      exact lintegral_congr_ae hκ
+    _ = μ Set.univ := by simp
+
 @[simp]
 lemma comp_apply_univ [IsMarkovKernel κ] : (κ ∘ₘ μ) Set.univ = μ Set.univ := by
-  simp [bind_apply .univ κ.aemeasurable]
+  exact comp_apply_univ_of_ae (μ := μ) (κ := κ) <| ae_of_all _ fun _ ↦ by simp
 
 lemma deterministic_comp_eq_map {f : α → β} (hf : Measurable f) :
     Kernel.deterministic f hf ∘ₘ μ = μ.map f :=

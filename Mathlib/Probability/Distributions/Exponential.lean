@@ -71,12 +71,18 @@ lemma stronglyMeasurable_exponentialPDFReal (r : ℝ) :
     StronglyMeasurable (exponentialPDFReal r) := stronglyMeasurable_gammaPDFReal 1 r
 
 /-- The exponential pdf is positive for all positive reals -/
-lemma exponentialPDFReal_pos {x r : ℝ} (hr : 0 < r) (hx : 0 < x) :
-    0 < exponentialPDFReal r x := gammaPDFReal_pos zero_lt_one hr hx
+lemma exponentialPDFReal_pos {x r : ℝ} (hr : 0 < r) (hx : 0 ≤ x) :
+    0 < exponentialPDFReal r x := by
+  rw [exponentialPDFReal, gammaPDFReal]
+  simp [hr, Real.exp_pos, hx]
 
 /-- The exponential pdf is nonnegative -/
-lemma exponentialPDFReal_nonneg {r : ℝ} (hr : 0 < r) (x : ℝ) :
-    0 ≤ exponentialPDFReal r x := gammaPDFReal_nonneg zero_lt_one hr x
+lemma exponentialPDFReal_nonneg {r : ℝ} (hr : 0 ≤ r) (x : ℝ) :
+    0 ≤ exponentialPDFReal r x := by
+  rw [exponentialPDFReal, gammaPDFReal]
+  split_ifs with hx
+  · simp [hr, mul_nonneg, le_of_lt (Real.exp_pos _)]
+  · positivity
 
 open Measure
 
@@ -115,12 +121,11 @@ lemma hasDerivAt_neg_exp_mul_exp {r x : ℝ} :
   simp only [id_eq, neg_mul, mul_one, mul_neg, one_mul, neg_neg, mul_comm]
 
 /-- A negative exponential function is integrable on intervals in `R≥0` -/
-lemma exp_neg_integrableOn_Ioc {b x : ℝ} (hb : 0 < b) :
+lemma exp_neg_integrableOn_Ioc {b x : ℝ} :
     IntegrableOn (fun x ↦ rexp (-(b * x))) (Ioc 0 x) := by
-  simp only [neg_mul_eq_neg_mul]
-  exact (exp_neg_integrableOn_Ioi _ hb).mono_set Ioc_subset_Ioi_self
+  simpa [neg_mul] using (continuous_const_mul (-b)).rexp.integrableOn_Ioc (b := x)
 
-lemma lintegral_exponentialPDF_eq_antiDeriv {r : ℝ} (hr : 0 < r) (x : ℝ) :
+lemma lintegral_exponentialPDF_eq_antiDeriv {r : ℝ} (hr : 0 ≤ r) (x : ℝ) :
     ∫⁻ y in Iic x, exponentialPDF r y
     = ENNReal.ofReal (if 0 ≤ x then 1 - exp (-(r * x)) else 0) := by
   split_ifs with h
@@ -135,8 +140,8 @@ lemma lintegral_exponentialPDF_eq_antiDeriv {r : ℝ} (hr : 0 < r) (x : ℝ) :
     rw [setLIntegral_congr_fun measurableSet_Icc (g := fun x ↦ ENNReal.ofReal (r * rexp (-(r * x))))
       (by intro a ha; simp [ha.1])]
     rw [← ENNReal.toReal_eq_toReal_iff' _ ENNReal.ofReal_ne_top,
-        ← integral_eq_lintegral_of_nonneg_ae (Eventually.of_forall fun _ ↦ le_of_lt
-        (mul_pos hr (exp_pos _)))]
+        ← integral_eq_lintegral_of_nonneg_ae (Eventually.of_forall fun _ ↦
+        mul_nonneg hr (le_of_lt (exp_pos _)))]
     · have : ∫ a in uIoc 0 x, r * rexp (-(r * a)) = ∫ a in 0..x, r * rexp (-(r * a)) := by
         rw [intervalIntegral.intervalIntegral_eq_integral_uIoc, smul_eq_mul, if_pos h, one_mul]
       rw [integral_Icc_eq_integral_Ioc, ← uIoc_of_le h, this]
@@ -146,7 +151,7 @@ lemma lintegral_exponentialPDF_eq_antiDeriv {r : ℝ} (hr : 0 < r) (x : ℝ) :
           (sub_nonneg.2 (Real.exp_le_one_iff.2 <| by nlinarith))]
         norm_num; ring
       · simp only [intervalIntegrable_iff, uIoc_of_le h]
-        exact Integrable.const_mul (exp_neg_integrableOn_Ioc hr) _
+        exact Integrable.const_mul exp_neg_integrableOn_Ioc _
       · have : Continuous (fun a ↦ rexp (-(r * a))) := by
           simp only [← neg_mul]; exact (continuous_const_mul (-r)).rexp
         exact Continuous.continuousOn (Continuous.comp' (continuous_const_mul (-1)) this)
@@ -154,15 +159,15 @@ lemma lintegral_exponentialPDF_eq_antiDeriv {r : ℝ} (hr : 0 < r) (x : ℝ) :
         exact fun _ _ ↦ HasDerivAt.hasDerivWithinAt hasDerivAt_neg_exp_mul_exp
     · refine Integrable.aestronglyMeasurable (Integrable.const_mul ?_ _)
       rw [← IntegrableOn, integrableOn_Icc_iff_integrableOn_Ioc]
-      exact exp_neg_integrableOn_Ioc hr
+      exact exp_neg_integrableOn_Ioc
     · refine ne_of_lt (IntegrableOn.setLIntegral_lt_top ?_)
       rw [integrableOn_Icc_iff_integrableOn_Ioc]
-      exact Integrable.const_mul (exp_neg_integrableOn_Ioc hr) _
+      exact Integrable.const_mul exp_neg_integrableOn_Ioc _
 
 /-- The CDF of the exponential distribution equals ``1 - exp (-(r * x))`` -/
 lemma cdf_expMeasure_eq {r : ℝ} (hr : 0 < r) (x : ℝ) :
     cdf (expMeasure r) x = if 0 ≤ x then 1 - exp (-(r * x)) else 0 := by
-  rw [cdf_expMeasure_eq_lintegral hr, lintegral_exponentialPDF_eq_antiDeriv hr x,
+  rw [cdf_expMeasure_eq_lintegral hr, lintegral_exponentialPDF_eq_antiDeriv hr.le x,
     ENNReal.toReal_ofReal_eq_iff]
   split_ifs with h
   · simp only [sub_nonneg, exp_le_one_iff, Left.neg_nonpos_iff]

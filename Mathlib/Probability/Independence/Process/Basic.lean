@@ -326,13 +326,49 @@ lemma IndepFun.process_congr {𝓧 : S → Type*} {𝓨 : T → Type*}
   Kernel.IndepFun.process_congr hXY (by simpa) (by simpa)
 
 /-- A stochastic process $(X_s)_{s \in S}$ is independent from a random variable $Y$ if
+for all nonempty finite families $s_1, ..., s_p \in S$ the family
+$(X_{s_1}, ..., X_{s_p})$ is independent from $Y$. -/
+lemma IndepFun.process_indepFun_of_nonempty {𝓧 : S → Type*} {𝓨 : Type*}
+    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
+    {Y : Ω → 𝓨} (hX : ∀ i, Measurable (X i)) (hY : Measurable Y)
+    (h : ∀ (I : Finset S), I.Nonempty → (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] Y)
+    [IsZeroOrProbabilityMeasure P] : IndepFun (fun ω i ↦ X i ω) Y P := by
+  refine Kernel.IndepFun.process_indepFun hX hY (fun I ↦ ?_)
+  rcases I.eq_empty_or_nonempty with rfl | hI
+  · let c : (i : (∅ : Finset S)) → 𝓧 i := fun i ↦ isEmptyElim i
+    have hconst : (fun ω (i : (∅ : Finset S)) ↦ X i ω) = fun _ ↦ c := by
+      ext ω i
+      exact isEmptyElim i
+    rw [hconst]
+    exact indepFun_const_left c Y
+  · exact h I hI
+
+/-- A stochastic process $(X_s)_{s \in S}$ is independent from a random variable $Y$ if
 for all $s_1, ..., s_p \in S$ the family $(X_{s_1}, ..., X_{s_p})$ is independent from $Y$. -/
 lemma IndepFun.process_indepFun {𝓧 : S → Type*} {𝓨 : Type*}
     [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (hX : ∀ i, Measurable (X i)) (hY : Measurable Y)
     (h : ∀ (I : Finset S), (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] Y) [IsZeroOrProbabilityMeasure P] :
     IndepFun (fun ω i ↦ X i ω) Y P :=
-  Kernel.IndepFun.process_indepFun hX hY h
+  process_indepFun_of_nonempty hX hY fun I _ ↦ h I
+
+/-- A stochastic process $(X_s)_{s \in S}$ is independent from a random variable $Y$ if
+for all nonempty finite families $s_1, ..., s_p \in S$ the family
+$(X_{s_1}, ..., X_{s_p})$ is independent from $Y$.
+
+This version only requires a.e.-measurability. -/
+lemma IndepFun.process_indepFun₀_of_nonempty {𝓧 : S → Type*} {𝓨 : Type*}
+    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
+    {Y : Ω → 𝓨} (hX : ∀ i, AEMeasurable (X i) P) (hY : AEMeasurable Y P)
+    (h : ∀ (I : Finset S), I.Nonempty → (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] Y)
+    [IsZeroOrProbabilityMeasure P] : IndepFun (fun ω i ↦ X i ω) Y P := by
+  refine IndepFun.congr ?_ (ae_of_all _ fun _ ↦ rfl) hY.ae_eq_mk.symm
+  apply process_congr_left (X := fun i ↦ (hX i).mk (X i))
+  · refine process_indepFun_of_nonempty (P := P) (X := fun i ↦ (hX i).mk (X i))
+      (Y := hY.mk Y) (fun i ↦ (hX i).measurable_mk) hY.measurable_mk fun I hI ↦ ?_
+    exact process_congr_left (X := fun i : I ↦ X i)
+      (IndepFun.congr (h I hI) (ae_of_all _ fun _ ↦ rfl) hY.ae_eq_mk) fun i ↦ (hX i).ae_eq_mk
+  · exact fun i ↦ (hX i).ae_eq_mk.symm
 
 /-- A stochastic process $(X_s)_{s \in S}$ is independent from a random variable $Y$ if
 for all $s_1, ..., s_p \in S$ the family $(X_{s_1}, ..., X_{s_p})$ is independent from $Y$.
@@ -343,7 +379,17 @@ lemma IndepFun.process_indepFun₀ {𝓧 : S → Type*} {𝓨 : Type*}
     {Y : Ω → 𝓨} (hX : ∀ i, AEMeasurable (X i) P) (hY : AEMeasurable Y P)
     (h : ∀ (I : Finset S), (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] Y) [IsZeroOrProbabilityMeasure P] :
     IndepFun (fun ω i ↦ X i ω) Y P :=
-  Kernel.IndepFun.process_indepFun₀ (by simpa) (by simpa) h
+  process_indepFun₀_of_nonempty hX hY fun I _ ↦ h I
+
+/-- A random variable $X$ is independent from a stochastic process $(Y_s)_{s \in S}$ if
+for all nonempty finite families $s_1, ..., s_p \in S$ the variable $Y$ is independent from the
+family $(X_{s_1}, ..., X_{s_p})$. -/
+lemma IndepFun.indepFun_process_of_nonempty {𝓧 : Type*} {𝓨 : S → Type*}
+    [MeasurableSpace 𝓧] [∀ i, MeasurableSpace (𝓨 i)] {X : Ω → 𝓧}
+    {Y : (i : S) → Ω → 𝓨 i} (hX : Measurable X) (hY : ∀ i, Measurable (Y i))
+    (h : ∀ (I : Finset S), I.Nonempty → X ⟂ᵢ[P] (fun ω (i : I) ↦ Y i ω))
+    [IsZeroOrProbabilityMeasure P] : IndepFun X (fun ω i ↦ Y i ω) P :=
+  (process_indepFun_of_nonempty hY hX fun I hI ↦ (h I hI).symm).symm
 
 /-- A random variable $X$ is independent from a stochastic process $(Y_s)_{s \in S}$  if
 for all $s_1, ..., s_p \in S$ the variable $Y$ is independent from the family
@@ -353,7 +399,19 @@ lemma IndepFun.indepFun_process {𝓧 : Type*} {𝓨 : S → Type*}
     {Y : (i : S) → Ω → 𝓨 i} (hX : Measurable X) (hY : ∀ i, Measurable (Y i))
     (h : ∀ (I : Finset S), X ⟂ᵢ[P] (fun ω (i : I) ↦ Y i ω)) [IsZeroOrProbabilityMeasure P] :
     IndepFun X (fun ω i ↦ Y i ω) P :=
-  Kernel.IndepFun.indepFun_process hX hY h
+  indepFun_process_of_nonempty hX hY fun I _ ↦ h I
+
+/-- A random variable $X$ is independent from a stochastic process $(Y_s)_{s \in S}$ if
+for all nonempty finite families $s_1, ..., s_p \in S$ the variable $Y$ is independent from the
+family $(X_{s_1}, ..., X_{s_p})$.
+
+This version only requires a.e.-measurability. -/
+lemma IndepFun.indepFun_process₀_of_nonempty {𝓧 : Type*} {𝓨 : S → Type*}
+    [MeasurableSpace 𝓧] [∀ i, MeasurableSpace (𝓨 i)] {X : Ω → 𝓧}
+    {Y : (i : S) → Ω → 𝓨 i} (hX : AEMeasurable X P) (hY : ∀ i, AEMeasurable (Y i) P)
+    (h : ∀ (I : Finset S), I.Nonempty → X ⟂ᵢ[P] (fun ω (i : I) ↦ Y i ω))
+    [IsZeroOrProbabilityMeasure P] : IndepFun X (fun ω i ↦ Y i ω) P :=
+  (process_indepFun₀_of_nonempty hY hX fun I hI ↦ (h I hI).symm).symm
 
 /-- A random variable $X$ is independent from a stochastic process $(Y_s)_{s \in S}$  if
 for all $s_1, ..., s_p \in S$ the variable $Y$ is independent from the family
@@ -365,7 +423,21 @@ lemma IndepFun.indepFun_process₀ {𝓧 : Type*} {𝓨 : S → Type*}
     {Y : (i : S) → Ω → 𝓨 i} (hX : AEMeasurable X P) (hY : ∀ i, AEMeasurable (Y i) P)
     (h : ∀ (I : Finset S), X ⟂ᵢ[P] (fun ω (i : I) ↦ Y i ω)) [IsZeroOrProbabilityMeasure P] :
     IndepFun X (fun ω i ↦ Y i ω) P :=
-  Kernel.IndepFun.indepFun_process₀ (by simpa) (by simpa) h
+  indepFun_process₀_of_nonempty hX hY fun I _ ↦ h I
+
+/-- Two stochastic processes $(X_s)_{s \in S}$ and $(Y_t)_{t \in T}$ are independent if
+for all nonempty finite families $s_1, ..., s_p \in S$ and $t_1, ..., t_q \in T$ the two
+families $(X_{s_1}, ..., X_{s_p})$ and $(Y_{t_1}, ..., Y_{t_q})$ are independent. -/
+lemma IndepFun.process_indepFun_process_of_nonempty {T : Type*} {𝓧 : S → Type*}
+    {𝓨 : T → Type*} [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)]
+    {X : (i : S) → Ω → 𝓧 i} {Y : (j : T) → Ω → 𝓨 j} (hX : ∀ i, Measurable (X i))
+    (hY : ∀ j, Measurable (Y j))
+    (h : ∀ (I : Finset S) (J : Finset T), I.Nonempty → J.Nonempty →
+      (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] (fun ω (j : J) ↦ Y j ω))
+    [IsZeroOrProbabilityMeasure P] :
+    IndepFun (fun ω i ↦ X i ω) (fun ω j ↦ Y j ω) P := by
+  refine process_indepFun_of_nonempty hX (measurable_pi_lambda _ hY) fun I hI ↦ ?_
+  exact indepFun_process_of_nonempty (measurable_pi_lambda _ fun _ ↦ hX _) hY fun J hJ ↦ h I J hI hJ
 
 /-- Two stochastic processes $(X_s)_{s \in S}$ and $(Y_t)_{t \in T}$ are independent if
 for all $s_1, ..., s_p \in S$ and $t_1, ..., t_q \in T$ the two families
@@ -376,7 +448,27 @@ lemma IndepFun.process_indepFun_process {T : Type*} {𝓧 : S → Type*} {𝓨 :
     (h : ∀ (I : Finset S) (J : Finset T),
       (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] (fun ω (j : J) ↦ Y j ω)) [IsZeroOrProbabilityMeasure P] :
     IndepFun (fun ω i ↦ X i ω) (fun ω j ↦ Y j ω) P :=
-  Kernel.IndepFun.process_indepFun_process hX hY h
+  process_indepFun_process_of_nonempty hX hY fun I J _ _ ↦ h I J
+
+/-- Two stochastic processes $(X_s)_{s \in S}$ and $(Y_t)_{t \in T}$ are independent if
+for all nonempty finite families $s_1, ..., s_p \in S$ and $t_1, ..., t_q \in T$ the two
+families $(X_{s_1}, ..., X_{s_p})$ and $(Y_{t_1}, ..., Y_{t_q})$ are independent.
+
+This version only requires a.e.-measurability. -/
+lemma IndepFun.process_indepFun_process₀_of_nonempty {T : Type*} {𝓧 : S → Type*}
+    {𝓨 : T → Type*} [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)]
+    {X : (i : S) → Ω → 𝓧 i} {Y : (j : T) → Ω → 𝓨 j}
+    (hX : ∀ i, AEMeasurable (X i) P) (hY : ∀ j, AEMeasurable (Y j) P)
+    (h : ∀ (I : Finset S) (J : Finset T), I.Nonempty → J.Nonempty →
+      (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] (fun ω (j : J) ↦ Y j ω))
+    [IsZeroOrProbabilityMeasure P] :
+    IndepFun (fun ω i ↦ X i ω) (fun ω j ↦ Y j ω) P := by
+  refine process_congr ?_ (fun i ↦ (hX i).ae_eq_mk.symm) (fun j ↦ (hY j).ae_eq_mk.symm)
+  refine process_indepFun_process_of_nonempty (P := P) (X := fun i ↦ (hX i).mk (X i))
+    (Y := fun j ↦ (hY j).mk (Y j)) (fun i ↦ (hX i).measurable_mk)
+    (fun j ↦ (hY j).measurable_mk) fun I J hI hJ ↦ ?_
+  exact process_congr (X := fun i : I ↦ X i) (Y := fun j : J ↦ Y j) (h I J hI hJ)
+    (fun i ↦ (hX i).ae_eq_mk) (fun j ↦ (hY j).ae_eq_mk)
 
 /-- Two stochastic processes $(X_s)_{s \in S}$ and $(Y_t)_{t \in T}$ are independent if
 for all $s_1, ..., s_p \in S$ and $t_1, ..., t_q \in T$ the two families
@@ -389,7 +481,7 @@ lemma IndepFun.process_indepFun_process₀ {T : Type*} {𝓧 : S → Type*} {�
     (h : ∀ (I : Finset S) (J : Finset T),
       (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] (fun ω (j : J) ↦ Y j ω)) [IsZeroOrProbabilityMeasure P] :
     IndepFun (fun ω i ↦ X i ω) (fun ω j ↦ Y j ω) P :=
-  Kernel.IndepFun.process_indepFun_process₀ (by simpa) (by simpa) h
+  process_indepFun_process₀_of_nonempty hX hY fun I J _ _ ↦ h I J
 
 /-- If stochastic processes `X : (i : S) → (j : T i) → Ω → 𝓧 i j` are independent and
 for all `i j`, `X' i j` is almost everywhere equal to `X i j`,

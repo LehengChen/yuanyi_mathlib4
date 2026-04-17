@@ -63,13 +63,24 @@ lemma IsGaussian.charFunDual_eq' [IsGaussian μ] (L : StrongDual ℝ E) :
 /-- The measure `μ` is Gaussian if and only if there
 exist `m : E` and `f : StrongDual ℝ E →L[ℝ] StrongDual ℝ E →L[ℝ] ℝ`
 satisfying `f.toBilinForm.IsPosSemidef` and `charFunDual μ L = exp (L m * I - f L L / 2)`. -/
-lemma isGaussian_iff_gaussian_charFunDual [IsFiniteMeasure μ] :
+lemma isGaussian_iff_gaussian_charFunDual :
     IsGaussian μ ↔
     ∃ (m : E) (f : StrongDual ℝ E →L[ℝ] StrongDual ℝ E →L[ℝ] ℝ),
       f.toBilinForm.IsPosSemidef ∧ ∀ L, charFunDual μ L = exp (L m * I - f L L / 2) := by
   refine ⟨fun h ↦ ⟨μ[id], covarianceBilinDual μ, isPosSemidef_covarianceBilinDual,
     h.charFunDual_eq'⟩,
     fun ⟨m, f, hf, h⟩ ↦ isGaussian_of_map_eq_gaussianReal fun L ↦ ⟨L m, (f L L).toNNReal, ?_⟩⟩
+  letI : IsProbabilityMeasure μ := by
+    rw [MeasureTheory.isProbabilityMeasure_iff_real]
+    have h0 := congrArg Complex.re (h (0 : StrongDual ℝ E))
+    have h0' : μ.real Set.univ = 1 := by
+      rw [charFunDual_apply] at h0
+      simp only [ContinuousLinearMap.zero_apply, map_zero, integral_const,
+        Complex.ofReal_zero, zero_mul, zero_div, sub_zero, Complex.exp_zero] at h0
+      calc
+        μ.real Set.univ = Complex.re ((μ.real Set.univ : ℂ) • (1 : ℂ)) := by simp
+        _ = 1 := h0
+    exact h0'
   apply Measure.ext_of_charFun
   ext t
   simp_rw [charFun_map_eq_charFunDual_smul, h, charFun_gaussianReal,
@@ -80,7 +91,7 @@ lemma isGaussian_iff_gaussian_charFunDual [IsFiniteMeasure μ] :
   · ring
   exact hf.nonneg L
 
-lemma gaussian_charFunDual_congr [IsFiniteMeasure μ] {m : E}
+lemma gaussian_charFunDual_congr {m : E}
     {f : StrongDual ℝ E →L[ℝ] StrongDual ℝ E →L[ℝ] ℝ}
     (hf : f.toBilinForm.IsPosSemidef) (h : ∀ L, charFunDual μ L = exp (L m * I - f L L / 2)) :
     m = ∫ x, x ∂μ ∧ f = covarianceBilinDual μ := by
@@ -111,7 +122,7 @@ lemma gaussian_charFunDual_congr [IsFiniteMeasure μ] {m : E}
   · rw [← toBilinForm_inj]
     apply LinearMap.BilinForm.ext_of_isSymm hf.isSymm isPosSemidef_covarianceBilinDual.isSymm
     intro x
-    simp [covarianceBilinDual_self_eq_variance IsGaussian.memLp_two_id, (hn x).1.symm]
+    simp [(hn x).1.symm]
 
 /-- Two Gaussian measures are equal if they have same mean and same covariance. -/
 protected lemma IsGaussian.ext_covarianceBilinDual {ν : Measure E} [IsGaussian μ] [IsGaussian ν]
@@ -144,7 +155,7 @@ lemma IsGaussian.charFun_eq' [IsGaussian μ] (t : E) :
 /-- The measure `μ` is Gaussian if and only if there
 exist `m : E` and `f : E →L[ℝ]  E →L[ℝ] ℝ`
 satisfying `f.toBilinForm.IsPosSemidef` and `charFun μ t = exp (⟪t, m⟫ * I - f t t / 2)`. -/
-lemma isGaussian_iff_gaussian_charFun [IsFiniteMeasure μ] :
+lemma isGaussian_iff_gaussian_charFun :
     IsGaussian μ ↔
     ∃ (m : E) (f : E →L[ℝ] E →L[ℝ] ℝ),
       f.toBilinForm.IsPosSemidef ∧ ∀ t, charFun μ t = exp (⟪t, m⟫ * I - f t t / 2) := by
@@ -164,7 +175,7 @@ lemma isGaussian_iff_gaussian_charFun [IsFiniteMeasure μ] :
 
 /-- If the characteristic function of `μ` takes the form of a gaussian characteristic function,
 then the parameters have to be the expectation and the covariance bilinear form. -/
-lemma gaussian_charFun_congr [IsFiniteMeasure μ] (m : E) (f : E →L[ℝ] E →L[ℝ] ℝ)
+lemma gaussian_charFun_congr (m : E) (f : E →L[ℝ] E →L[ℝ] ℝ)
     (hf : f.toBilinForm.IsPosSemidef) (h : ∀ t, charFun μ t = exp (⟪t, m⟫ * I - f t t / 2)) :
     m = ∫ x, x ∂μ ∧ f = covarianceBilin μ := by
   let g : StrongDual ℝ E →L[ℝ] StrongDual ℝ E →L[ℝ] ℝ :=

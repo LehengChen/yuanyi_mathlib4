@@ -402,8 +402,8 @@ theorem setLIntegral_piecewise (a : α) (g : β → ℝ≥0∞) (t : Set β) :
 
 end Piecewise
 
-lemma exists_ae_eq_isMarkovKernel {μ : Measure α}
-    (h : ∀ᵐ a ∂μ, IsProbabilityMeasure (κ a)) (h' : μ ≠ 0) :
+lemma exists_ae_eq_isMarkovKernel_of_exists {μ : Measure α}
+    (h : ∀ᵐ a ∂μ, IsProbabilityMeasure (κ a)) (ha : ∃ a, IsProbabilityMeasure (κ a)) :
     ∃ (η : Kernel α β), (κ =ᵐ[μ] η) ∧ IsMarkovKernel η := by
   classical
   obtain ⟨s, s_meas, μs, hs⟩ : ∃ s, MeasurableSet s ∧ μ s = 0
@@ -413,15 +413,22 @@ lemma exists_ae_eq_isMarkovKernel {μ : Measure α}
     intro a ha
     contrapose! ha
     exact subset_toMeasurable _ _ ha
-  obtain ⟨a, ha⟩ : sᶜ.Nonempty := by
-    contrapose! h'; simpa [μs, h'] using measure_univ_le_add_compl s (μ := μ)
+  obtain ⟨a, ha⟩ := ha
   refine ⟨Kernel.piecewise s_meas (Kernel.const _ (κ a)) κ, ?_, ?_⟩
   · filter_upwards [measure_eq_zero_iff_ae_notMem.1 μs] with b hb
     simp [hb, piecewise]
   · refine ⟨fun b ↦ ?_⟩
     by_cases hb : b ∈ s
-    · simpa [hb, piecewise] using hs _ ha
+    · simpa [hb, piecewise] using ha
     · simpa [hb, piecewise] using hs _ hb
+
+lemma exists_ae_eq_isMarkovKernel {μ : Measure α}
+    (h : ∀ᵐ a ∂μ, IsProbabilityMeasure (κ a)) (hμ : μ ≠ 0) :
+    ∃ (η : Kernel α β), (κ =ᵐ[μ] η) ∧ IsMarkovKernel η := by
+  refine exists_ae_eq_isMarkovKernel_of_exists h ?_
+  by_contra h_exists
+  have h_false : ∀ᵐ a ∂μ, False := h.mono fun a ha ↦ h_exists ⟨a, ha⟩
+  exact hμ <| Measure.measure_univ_eq_zero.mp <| by simpa [ae_iff] using h_false
 
 section Bool
 

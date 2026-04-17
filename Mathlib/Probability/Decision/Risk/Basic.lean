@@ -90,26 +90,26 @@ lemma avgRisk_const_right (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧
   simp [avgRisk_const_right']
 
 /-- See `bayesRisk_le_iInf` for a simpler result when `P` is a Markov kernel. -/
-lemma bayesRisk_le_iInf' (hl : Measurable (uncurry ℓ)) (P : Kernel Θ 𝓧) (π : Measure Θ) :
+lemma bayesRisk_le_iInf' (hℓ : ∀ θ, Measurable (ℓ θ)) (P : Kernel Θ 𝓧) (π : Measure Θ) :
     bayesRisk ℓ P π ≤ ⨅ y, ∫⁻ θ, ℓ θ y * P θ .univ ∂π := by
   simp_rw [le_iInf_iff, bayesRisk]
   refine fun y ↦ iInf_le_of_le (Kernel.const _ (Measure.dirac y)) ?_
   simp only [iInf_pos, avgRisk_const_right', mul_comm]
   gcongr with θ
-  rw [lintegral_dirac' _ (by fun_prop)]
+  rw [lintegral_dirac' _ (hℓ θ)]
 
 /-- See `bayesRisk_le_iInf'` for a similar result when `P` is not a Markov kernel. -/
-lemma bayesRisk_le_iInf (hl : Measurable (uncurry ℓ)) (P : Kernel Θ 𝓧) [IsMarkovKernel P]
+lemma bayesRisk_le_iInf (hℓ : ∀ θ, Measurable (ℓ θ)) (P : Kernel Θ 𝓧) [IsMarkovKernel P]
     (π : Measure Θ) :
     bayesRisk ℓ P π ≤ ⨅ y, ∫⁻ θ, ℓ θ y ∂π :=
-  (bayesRisk_le_iInf' hl P π).trans_eq (by simp)
+  (bayesRisk_le_iInf' hℓ P π).trans_eq (by simp)
 
 lemma bayesRisk_const' (hl : Measurable (uncurry ℓ))
     (μ : Measure 𝓧) [SFinite μ] (π : Measure Θ) [SFinite π]
     (hl_pos : μ .univ = ∞ → ⨅ y, ∫⁻ θ, ℓ θ y ∂π = 0 → ∃ y, ∫⁻ θ, ℓ θ y ∂π = 0)
     (h_zero : μ = 0 → Nonempty 𝓨) :
     bayesRisk ℓ (Kernel.const Θ μ) π = ⨅ y, ∫⁻ θ, ℓ θ y * μ .univ ∂π := by
-  refine le_antisymm ((bayesRisk_le_iInf' hl _ _).trans_eq (by simp)) ?_
+  refine le_antisymm ((bayesRisk_le_iInf' (fun θ ↦ hl.of_uncurry_left) _ _).trans_eq (by simp)) ?_
   simp_rw [bayesRisk, le_iInf_iff]
   intro κ hκ
   rw [avgRisk_const_left' hl]
@@ -213,7 +213,7 @@ lemma bayesRisk_eq_iInf_measure_of_subsingleton :
 
 lemma bayesRisk_of_subsingleton' [SFinite π] (hl : Measurable (uncurry ℓ)) :
     bayesRisk ℓ P π = ⨅ y, ∫⁻ θ, ℓ θ y * P θ .univ ∂π := by
-  refine le_antisymm (bayesRisk_le_iInf' hl _ _) ?_
+  refine le_antisymm (bayesRisk_le_iInf' (fun θ ↦ hl.of_uncurry_left) _ _) ?_
   rw [bayesRisk_eq_iInf_measure_of_subsingleton]
   simp only [avgRisk_const_right', le_iInf_iff]
   refine fun μ hμ ↦ (iInf_le_lintegral (μ := μ) _).trans_eq ?_

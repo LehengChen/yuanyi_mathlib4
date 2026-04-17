@@ -52,7 +52,7 @@ lemma geometricPMFReal_pos {n : ℕ} (hp_pos : 0 < p) (hp_lt_one : p < 1) :
   rw [geometricPMFReal]
   positivity [sub_pos.mpr hp_lt_one]
 
-lemma geometricPMFReal_nonneg {n : ℕ} (hp_pos : 0 < p) (hp_le_one : p ≤ 1) :
+lemma geometricPMFReal_nonneg {n : ℕ} (hp_nonneg : 0 ≤ p) (hp_le_one : p ≤ 1) :
     0 ≤ geometricPMFReal p n := by
   rw [geometricPMFReal]
   positivity [sub_nonneg.mpr hp_le_one]
@@ -64,7 +64,7 @@ def geometricPMF (hp_pos : 0 < p) (hp_le_one : p ≤ 1) : PMF ℕ :=
     apply ENNReal.hasSum_coe.mpr
     rw [← toNNReal_one]
     exact (geometricPMFRealSum hp_pos hp_le_one).toNNReal
-      (fun n ↦ geometricPMFReal_nonneg hp_pos hp_le_one)⟩
+      (fun n ↦ geometricPMFReal_nonneg (le_of_lt hp_pos) hp_le_one)⟩
 
 /-- The geometric pmf is measurable. -/
 @[fun_prop]

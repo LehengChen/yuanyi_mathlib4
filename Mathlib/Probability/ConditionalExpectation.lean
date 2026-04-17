@@ -37,10 +37,11 @@ open ProbabilityTheory
 variable {Ω E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
   {m₁ m₂ m : MeasurableSpace Ω} {μ : Measure Ω} {f : Ω → E}
 
-/-- If `m₁, m₂` are independent σ-algebras and `f` is `m₁`-measurable, then `𝔼[f | m₂] = 𝔼[f]`
-almost everywhere. -/
-theorem condExp_indep_eq (hle₁ : m₁ ≤ m) (hle₂ : m₂ ≤ m) [SigmaFinite (μ.trim hle₂)]
-    (hf : StronglyMeasurable[m₁] f) (hindp : Indep m₁ m₂ μ) : μ[f | m₂] =ᵐ[μ] fun _ => μ[f] := by
+/-- If `m₁, m₂` are independent σ-algebras and `f` is a.e. `m₁`-measurable, then
+`𝔼[f | m₂] = 𝔼[f]` almost everywhere. -/
+theorem condExp_indep_eq_of_aestronglyMeasurable (hle₁ : m₁ ≤ m) (hle₂ : m₂ ≤ m)
+    [SigmaFinite (μ.trim hle₂)] (hf : AEStronglyMeasurable[m₁] f μ) (hindp : Indep m₁ m₂ μ) :
+    μ[f | m₂] =ᵐ[μ] fun _ => μ[f] := by
   by_cases hfint : Integrable f μ
   swap; · rw [condExp_of_not_integrable hfint, integral_undef hfint]; rfl
   refine (ae_eq_condExp_of_forall_setIntegral_eq hle₂ hfint
@@ -48,8 +49,7 @@ theorem condExp_indep_eq (hle₁ : m₁ ≤ m) (hle₂ : m₂ ≤ m) [SigmaFinit
       stronglyMeasurable_const.aestronglyMeasurable).symm
   rw [setIntegral_const]
   rw [← memLp_one_iff_integrable] at hfint
-  refine MemLp.induction_stronglyMeasurable hle₁ ENNReal.one_ne_top _ ?_ ?_ ?_ ?_ hfint ?_
-  · exact ⟨f, hf, EventuallyEq.rfl⟩
+  refine MemLp.induction_stronglyMeasurable hle₁ ENNReal.one_ne_top _ ?_ ?_ ?_ ?_ hfint hf
   · intro c t hmt _
     rw [Indep_iff] at hindp
     rw [integral_indicator (hle₁ _ hmt), setIntegral_const, smul_smul, measureReal_def,
@@ -70,5 +70,11 @@ theorem condExp_indep_eq (hle₁ : m₁ ≤ m) (hle₂ : m₂ ≤ m) [SigmaFinit
     rwa [← integral_congr_ae huv, ←
       (setIntegral_congr_ae (hle₂ _ hms) _ : ∫ x in s, u x ∂μ = ∫ x in s, v x ∂μ)]
     filter_upwards [huv] with x hx _ using hx
+
+/-- If `m₁, m₂` are independent σ-algebras and `f` is `m₁`-measurable, then `𝔼[f | m₂] = 𝔼[f]`
+almost everywhere. -/
+theorem condExp_indep_eq (hle₁ : m₁ ≤ m) (hle₂ : m₂ ≤ m) [SigmaFinite (μ.trim hle₂)]
+    (hf : StronglyMeasurable[m₁] f) (hindp : Indep m₁ m₂ μ) : μ[f | m₂] =ᵐ[μ] fun _ => μ[f] :=
+  condExp_indep_eq_of_aestronglyMeasurable hle₁ hle₂ hf.aestronglyMeasurable hindp
 
 end MeasureTheory

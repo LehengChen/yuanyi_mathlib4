@@ -849,25 +849,191 @@ lemma iIndepFun.indepFun_finset₀ (S T : Finset ι) (hST : Disjoint S T) (hf_In
     IndepFun (fun a (i : S) ↦ f i a) (fun a (i : T) ↦ f i a) μ :=
   Kernel.iIndepFun.indepFun_finset₀ S T hST hf_Indep (by simp [hf_meas])
 
-lemma iIndepFun.indepFun_prodMk (hf_Indep : iIndepFun f μ) (hf_meas : ∀ i, Measurable (f i))
-    (i j k : ι) (hik : i ≠ k) (hjk : j ≠ k) :
-    IndepFun (fun a => (f i a, f j a)) (f k) μ :=
-  Kernel.iIndepFun.indepFun_prodMk hf_Indep hf_meas i j k hik hjk
+lemma iIndepFun.indepFun_prodMk (hf_Indep : iIndepFun f μ) (i j k : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hik : i ≠ k) (hjk : j ≠ k) :
+    IndepFun (fun a => (f i a, f j a)) (f k) μ := by
+  classical
+  let s : Finset ι := {i, j, k}
+  let f' : ∀ x : s, Ω → β x := fun x ↦ f x
+  let i' : s := ⟨i, by simp [s]⟩
+  let j' : s := ⟨j, by simp [s]⟩
+  let k' : s := ⟨k, by simp [s]⟩
+  have hs_meas : ∀ x : s, Measurable (f' x) := by
+    intro x
+    have hx := x.2
+    change x.1 ∈ ({i, j, k} : Finset ι) at hx
+    rw [Finset.mem_insert, Finset.mem_insert, Finset.mem_singleton] at hx
+    have hx' : x = i' ∨ x = j' ∨ x = k' := by
+      rcases hx with h | h | h
+      · left
+        apply Subtype.ext
+        simpa [i'] using h
+      · right
+        left
+        apply Subtype.ext
+        simpa [j'] using h
+      · right
+        right
+        apply Subtype.ext
+        simpa [k'] using h
+    rcases hx' with rfl | rfl | rfl
+    · simpa [s] using hfi
+    · simpa [f', s] using hfj
+    · simpa [f', s] using hfk
+  have h_indep' : iIndepFun f' μ :=
+    iIndepFun.precomp (g := ((↑) : s → ι)) Subtype.val_injective hf_Indep
+  simpa [IndepFun, f', i', j', k', s] using
+    (Kernel.iIndepFun.indepFun_prodMk (κ := Kernel.const Unit μ)
+      (μ := (Measure.dirac () : Measure Unit)) (f := f') h_indep' hs_meas i' j' k'
+      (by exact fun h ↦ hik (congrArg Subtype.val h))
+      (by exact fun h ↦ hjk (congrArg Subtype.val h)))
 
-lemma iIndepFun.indepFun_prodMk₀ (hf_Indep : iIndepFun f μ) (hf_meas : ∀ i, AEMeasurable (f i) μ)
-    (i j k : ι) (hik : i ≠ k) (hjk : j ≠ k) :
-    IndepFun (fun a => (f i a, f j a)) (f k) μ :=
-  Kernel.iIndepFun.indepFun_prodMk₀ hf_Indep (by simp [hf_meas]) i j k hik hjk
+lemma iIndepFun.indepFun_prodMk₀ (hf_Indep : iIndepFun f μ) (i j k : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hik : i ≠ k) (hjk : j ≠ k) :
+    IndepFun (fun a => (f i a, f j a)) (f k) μ := by
+  classical
+  let s : Finset ι := {i, j, k}
+  let f' : ∀ x : s, Ω → β x := fun x ↦ f x
+  let i' : s := ⟨i, by simp [s]⟩
+  let j' : s := ⟨j, by simp [s]⟩
+  let k' : s := ⟨k, by simp [s]⟩
+  have hs_meas : ∀ x : s, AEMeasurable (f' x) μ := by
+    intro x
+    have hx := x.2
+    change x.1 ∈ ({i, j, k} : Finset ι) at hx
+    rw [Finset.mem_insert, Finset.mem_insert, Finset.mem_singleton] at hx
+    have hx' : x = i' ∨ x = j' ∨ x = k' := by
+      rcases hx with h | h | h
+      · left
+        apply Subtype.ext
+        simpa [i'] using h
+      · right
+        left
+        apply Subtype.ext
+        simpa [j'] using h
+      · right
+        right
+        apply Subtype.ext
+        simpa [k'] using h
+    rcases hx' with rfl | rfl | rfl
+    · simpa [s] using hfi
+    · simpa [f', s] using hfj
+    · simpa [f', s] using hfk
+  have hs_meas' : ∀ x : s, AEMeasurable (f' x) ((Kernel.const Unit μ) ∘ₘ Measure.dirac ()) := by
+    intro x
+    simpa using hs_meas x
+  have h_indep' : iIndepFun f' μ :=
+    iIndepFun.precomp (g := ((↑) : s → ι)) Subtype.val_injective hf_Indep
+  simpa [IndepFun, f', i', j', k', s] using
+    (Kernel.iIndepFun.indepFun_prodMk₀ (κ := Kernel.const Unit μ)
+      (μ := (Measure.dirac () : Measure Unit)) (f := f') h_indep' hs_meas' i' j' k'
+      (by exact fun h ↦ hik (congrArg Subtype.val h))
+      (by exact fun h ↦ hjk (congrArg Subtype.val h)))
 
-lemma iIndepFun.indepFun_prodMk_prodMk (h_indep : iIndepFun f μ) (hf : ∀ i, Measurable (f i))
-    (i j k l : ι) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
-    IndepFun (fun a ↦ (f i a, f j a)) (fun a ↦ (f k a, f l a)) μ :=
-  Kernel.iIndepFun.indepFun_prodMk_prodMk h_indep hf i j k l hik hil hjk hjl
+lemma iIndepFun.indepFun_prodMk_prodMk (h_indep : iIndepFun f μ) (i j k l : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hfl : Measurable (f l)) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
+    IndepFun (fun a ↦ (f i a, f j a)) (fun a ↦ (f k a, f l a)) μ := by
+  classical
+  let s : Finset ι := {i, j, k, l}
+  let f' : ∀ x : s, Ω → β x := fun x ↦ f x
+  let i' : s := ⟨i, by simp [s]⟩
+  let j' : s := ⟨j, by simp [s]⟩
+  let k' : s := ⟨k, by simp [s]⟩
+  let l' : s := ⟨l, by simp [s]⟩
+  have hs_meas : ∀ x : s, Measurable (f' x) := by
+    intro x
+    have hx := x.2
+    change x.1 ∈ ({i, j, k, l} : Finset ι) at hx
+    rw [Finset.mem_insert, Finset.mem_insert, Finset.mem_insert, Finset.mem_singleton] at hx
+    have hx' : x = i' ∨ x = j' ∨ x = k' ∨ x = l' := by
+      rcases hx with h | h | h | h
+      · left
+        apply Subtype.ext
+        simpa [i'] using h
+      · right
+        left
+        apply Subtype.ext
+        simpa [j'] using h
+      · right
+        right
+        left
+        apply Subtype.ext
+        simpa [k'] using h
+      · right
+        right
+        right
+        apply Subtype.ext
+        simpa [l'] using h
+    rcases hx' with rfl | rfl | rfl | rfl
+    · simpa [s] using hfi
+    · simpa [f', s] using hfj
+    · simpa [f', s] using hfk
+    · simpa [f', s] using hfl
+  have h_indep' : iIndepFun f' μ :=
+    iIndepFun.precomp (g := ((↑) : s → ι)) Subtype.val_injective h_indep
+  simpa [IndepFun, f', i', j', k', l', s] using
+    (Kernel.iIndepFun.indepFun_prodMk_prodMk (κ := Kernel.const Unit μ)
+      (μ := (Measure.dirac () : Measure Unit)) (f := f') h_indep' hs_meas i' j' k' l'
+      (by exact fun h ↦ hik (congrArg Subtype.val h))
+      (by exact fun h ↦ hil (congrArg Subtype.val h))
+      (by exact fun h ↦ hjk (congrArg Subtype.val h))
+      (by exact fun h ↦ hjl (congrArg Subtype.val h)))
 
-lemma iIndepFun.indepFun_prodMk_prodMk₀ (h_indep : iIndepFun f μ) (hf : ∀ i, AEMeasurable (f i) μ)
-    (i j k l : ι) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
-    IndepFun (fun a ↦ (f i a, f j a)) (fun a ↦ (f k a, f l a)) μ :=
-  Kernel.iIndepFun.indepFun_prodMk_prodMk₀ h_indep (by simp [hf]) i j k l hik hil hjk hjl
+lemma iIndepFun.indepFun_prodMk_prodMk₀ (h_indep : iIndepFun f μ) (i j k l : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hfl : AEMeasurable (f l) μ) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
+    IndepFun (fun a ↦ (f i a, f j a)) (fun a ↦ (f k a, f l a)) μ := by
+  classical
+  let s : Finset ι := {i, j, k, l}
+  let f' : ∀ x : s, Ω → β x := fun x ↦ f x
+  let i' : s := ⟨i, by simp [s]⟩
+  let j' : s := ⟨j, by simp [s]⟩
+  let k' : s := ⟨k, by simp [s]⟩
+  let l' : s := ⟨l, by simp [s]⟩
+  have hs_meas : ∀ x : s, AEMeasurable (f' x) μ := by
+    intro x
+    have hx := x.2
+    change x.1 ∈ ({i, j, k, l} : Finset ι) at hx
+    rw [Finset.mem_insert, Finset.mem_insert, Finset.mem_insert, Finset.mem_singleton] at hx
+    have hx' : x = i' ∨ x = j' ∨ x = k' ∨ x = l' := by
+      rcases hx with h | h | h | h
+      · left
+        apply Subtype.ext
+        simpa [i'] using h
+      · right
+        left
+        apply Subtype.ext
+        simpa [j'] using h
+      · right
+        right
+        left
+        apply Subtype.ext
+        simpa [k'] using h
+      · right
+        right
+        right
+        apply Subtype.ext
+        simpa [l'] using h
+    rcases hx' with rfl | rfl | rfl | rfl
+    · simpa [s] using hfi
+    · simpa [f', s] using hfj
+    · simpa [f', s] using hfk
+    · simpa [f', s] using hfl
+  have hs_meas' : ∀ x : s, AEMeasurable (f' x) ((Kernel.const Unit μ) ∘ₘ Measure.dirac ()) := by
+    intro x
+    simpa using hs_meas x
+  have h_indep' : iIndepFun f' μ :=
+    iIndepFun.precomp (g := ((↑) : s → ι)) Subtype.val_injective h_indep
+  simpa [IndepFun, f', i', j', k', l', s] using
+    (Kernel.iIndepFun.indepFun_prodMk_prodMk₀ (κ := Kernel.const Unit μ)
+      (μ := (Measure.dirac () : Measure Unit)) (f := f') h_indep' hs_meas' i' j' k' l'
+      (by exact fun h ↦ hik (congrArg Subtype.val h))
+      (by exact fun h ↦ hil (congrArg Subtype.val h))
+      (by exact fun h ↦ hjk (congrArg Subtype.val h))
+      (by exact fun h ↦ hjl (congrArg Subtype.val h)))
 
 lemma iIndepFun_iff_finset : iIndepFun f μ ↔ ∀ s : Finset ι, iIndepFun (s.restrict f) μ where
   mp h s := h.precomp (g := ((↑) : s → ι)) Subtype.val_injective
@@ -886,42 +1052,52 @@ section Mul
 variable {β : Type*} {m : MeasurableSpace β} [Mul β] [MeasurableMul₂ β] {f : ι → Ω → β}
 
 @[to_additive]
-lemma iIndepFun.indepFun_mul_left (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, Measurable (f i)) (i j k : ι) (hik : i ≠ k) (hjk : j ≠ k) :
-    IndepFun (f i * f j) (f k) μ :=
-  Kernel.iIndepFun.indepFun_mul_left hf_indep hf_meas i j k hik hjk
+lemma iIndepFun.indepFun_mul_left (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hik : i ≠ k) (hjk : j ≠ k) :
+    IndepFun (f i * f j) (f k) μ := by
+  have : IndepFun (fun ω => (f i ω, f j ω)) (f k) μ :=
+    hf_indep.indepFun_prodMk i j k hfi hfj hfk hik hjk
+  simpa using this.comp (measurable_fst.mul measurable_snd) measurable_id
 
 @[to_additive]
-lemma iIndepFun.indepFun_mul_left₀ (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, AEMeasurable (f i) μ) (i j k : ι) (hik : i ≠ k) (hjk : j ≠ k) :
-    IndepFun (f i * f j) (f k) μ :=
-  Kernel.iIndepFun.indepFun_mul_left₀ hf_indep (by simp [hf_meas]) i j k hik hjk
+lemma iIndepFun.indepFun_mul_left₀ (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hik : i ≠ k) (hjk : j ≠ k) :
+    IndepFun (f i * f j) (f k) μ := by
+  have : IndepFun (fun ω => (f i ω, f j ω)) (f k) μ :=
+    hf_indep.indepFun_prodMk₀ i j k hfi hfj hfk hik hjk
+  simpa using this.comp (measurable_fst.mul measurable_snd) measurable_id
 
 @[to_additive]
-lemma iIndepFun.indepFun_mul_right (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, Measurable (f i)) (i j k : ι) (hij : i ≠ j) (hik : i ≠ k) :
+lemma iIndepFun.indepFun_mul_right (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hij : i ≠ j) (hik : i ≠ k) :
     IndepFun (f i) (f j * f k) μ :=
-  Kernel.iIndepFun.indepFun_mul_right hf_indep hf_meas i j k hij hik
+  (hf_indep.indepFun_mul_left j k i hfj hfk hfi hij.symm hik.symm).symm
 
 @[to_additive]
-lemma iIndepFun.indepFun_mul_right₀ (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, AEMeasurable (f i) μ) (i j k : ι) (hij : i ≠ j) (hik : i ≠ k) :
+lemma iIndepFun.indepFun_mul_right₀ (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hij : i ≠ j) (hik : i ≠ k) :
     IndepFun (f i) (f j * f k) μ :=
-  Kernel.iIndepFun.indepFun_mul_right₀ hf_indep (by simp [hf_meas]) i j k hij hik
+  (hf_indep.indepFun_mul_left₀ j k i hfj hfk hfi hij.symm hik.symm).symm
 
 @[to_additive]
-lemma iIndepFun.indepFun_mul_mul (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, Measurable (f i))
-    (i j k l : ι) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
+lemma iIndepFun.indepFun_mul_mul (hf_indep : iIndepFun f μ) (i j k l : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hfl : Measurable (f l)) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
     IndepFun (f i * f j) (f k * f l) μ :=
-  Kernel.iIndepFun.indepFun_mul_mul hf_indep hf_meas i j k l hik hil hjk hjl
+  (hf_indep.indepFun_prodMk_prodMk i j k l hfi hfj hfk hfl hik hil hjk hjl).comp
+    measurable_mul measurable_mul
 
 @[to_additive]
-lemma iIndepFun.indepFun_mul_mul₀ (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, AEMeasurable (f i) μ)
-    (i j k l : ι) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
+lemma iIndepFun.indepFun_mul_mul₀ (hf_indep : iIndepFun f μ) (i j k l : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hfl : AEMeasurable (f l) μ) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
     IndepFun (f i * f j) (f k * f l) μ :=
-  Kernel.iIndepFun.indepFun_mul_mul₀ hf_indep (by simp [hf_meas]) i j k l hik hil hjk hjl
+  (hf_indep.indepFun_prodMk_prodMk₀ i j k l hfi hfj hfk hfl hik hil hjk hjl).comp
+    measurable_mul measurable_mul
 
 end Mul
 
@@ -929,42 +1105,52 @@ section Div
 variable {β : Type*} {m : MeasurableSpace β} [Div β] [MeasurableDiv₂ β] {f : ι → Ω → β}
 
 @[to_additive]
-lemma iIndepFun.indepFun_div_left (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, Measurable (f i)) (i j k : ι) (hik : i ≠ k) (hjk : j ≠ k) :
-    IndepFun (f i / f j) (f k) μ :=
-  Kernel.iIndepFun.indepFun_div_left hf_indep hf_meas i j k hik hjk
+lemma iIndepFun.indepFun_div_left (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hik : i ≠ k) (hjk : j ≠ k) :
+    IndepFun (f i / f j) (f k) μ := by
+  have : IndepFun (fun ω => (f i ω, f j ω)) (f k) μ :=
+    hf_indep.indepFun_prodMk i j k hfi hfj hfk hik hjk
+  simpa using this.comp (measurable_fst.div measurable_snd) measurable_id
 
 @[to_additive]
-lemma iIndepFun.indepFun_div_left₀ (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, AEMeasurable (f i) μ) (i j k : ι) (hik : i ≠ k) (hjk : j ≠ k) :
-    IndepFun (f i / f j) (f k) μ :=
-  Kernel.iIndepFun.indepFun_div_left₀ hf_indep (by simp [hf_meas]) i j k hik hjk
+lemma iIndepFun.indepFun_div_left₀ (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hik : i ≠ k) (hjk : j ≠ k) :
+    IndepFun (f i / f j) (f k) μ := by
+  have : IndepFun (fun ω => (f i ω, f j ω)) (f k) μ :=
+    hf_indep.indepFun_prodMk₀ i j k hfi hfj hfk hik hjk
+  simpa using this.comp (measurable_fst.div measurable_snd) measurable_id
 
 @[to_additive]
-lemma iIndepFun.indepFun_div_right (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, Measurable (f i)) (i j k : ι) (hij : i ≠ j) (hik : i ≠ k) :
+lemma iIndepFun.indepFun_div_right (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hij : i ≠ j) (hik : i ≠ k) :
     IndepFun (f i) (f j / f k) μ :=
-  Kernel.iIndepFun.indepFun_div_right hf_indep hf_meas i j k hij hik
+  (hf_indep.indepFun_div_left j k i hfj hfk hfi hij.symm hik.symm).symm
 
 @[to_additive]
-lemma iIndepFun.indepFun_div_right₀ (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, AEMeasurable (f i) μ) (i j k : ι) (hij : i ≠ j) (hik : i ≠ k) :
+lemma iIndepFun.indepFun_div_right₀ (hf_indep : iIndepFun f μ) (i j k : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hij : i ≠ j) (hik : i ≠ k) :
     IndepFun (f i) (f j / f k) μ :=
-  Kernel.iIndepFun.indepFun_div_right₀ hf_indep (by simp [hf_meas]) i j k hij hik
+  (hf_indep.indepFun_div_left₀ j k i hfj hfk hfi hij.symm hik.symm).symm
 
 @[to_additive]
-lemma iIndepFun.indepFun_div_div (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, Measurable (f i))
-    (i j k l : ι) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
+lemma iIndepFun.indepFun_div_div (hf_indep : iIndepFun f μ) (i j k l : ι)
+    (hfi : Measurable (f i)) (hfj : Measurable (f j)) (hfk : Measurable (f k))
+    (hfl : Measurable (f l)) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
     IndepFun (f i / f j) (f k / f l) μ :=
-  Kernel.iIndepFun.indepFun_div_div hf_indep hf_meas i j k l hik hil hjk hjl
+  (hf_indep.indepFun_prodMk_prodMk i j k l hfi hfj hfk hfl hik hil hjk hjl).comp
+    measurable_div measurable_div
 
 @[to_additive]
-lemma iIndepFun.indepFun_div_div₀ (hf_indep : iIndepFun f μ)
-    (hf_meas : ∀ i, AEMeasurable (f i) μ)
-    (i j k l : ι) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
+lemma iIndepFun.indepFun_div_div₀ (hf_indep : iIndepFun f μ) (i j k l : ι)
+    (hfi : AEMeasurable (f i) μ) (hfj : AEMeasurable (f j) μ) (hfk : AEMeasurable (f k) μ)
+    (hfl : AEMeasurable (f l) μ) (hik : i ≠ k) (hil : i ≠ l) (hjk : j ≠ k) (hjl : j ≠ l) :
     IndepFun (f i / f j) (f k / f l) μ :=
-  Kernel.iIndepFun.indepFun_div_div₀ hf_indep (by simp [hf_meas]) i j k l hik hil hjk hjl
+  (hf_indep.indepFun_prodMk_prodMk₀ i j k l hfi hfj hfk hfl hik hil hjk hjl).comp
+    measurable_div measurable_div
 
 end Div
 

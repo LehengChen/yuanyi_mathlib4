@@ -135,9 +135,15 @@ theorem comp_restrict {s : Set γ} (hs : MeasurableSet s) :
 
 end Restrict
 
+/-- Generalization of `lintegral_comp` to ae-measurable functions. -/
+theorem lintegral_comp' (η : Kernel β γ) (κ : Kernel α β) (a : α) {g : γ → ℝ≥0∞}
+    (hg : AEMeasurable g ((η ∘ₖ κ) a)) :
+    ∫⁻ c, g c ∂(η ∘ₖ κ) a = ∫⁻ b, ∫⁻ c, g c ∂η b ∂κ a := by
+  rw [comp_apply, Measure.lintegral_bind (Kernel.aemeasurable _) hg]
+
 theorem lintegral_comp (η : Kernel β γ) (κ : Kernel α β) (a : α) {g : γ → ℝ≥0∞}
-    (hg : Measurable g) : ∫⁻ c, g c ∂(η ∘ₖ κ) a = ∫⁻ b, ∫⁻ c, g c ∂η b ∂κ a := by
-  rw [comp_apply, Measure.lintegral_bind (Kernel.aemeasurable _) hg.aemeasurable]
+    (hg : Measurable g) : ∫⁻ c, g c ∂(η ∘ₖ κ) a = ∫⁻ b, ∫⁻ c, g c ∂η b ∂κ a :=
+  lintegral_comp' η κ a hg.aemeasurable
 
 /-- Composition of kernels is associative. -/
 theorem comp_assoc {δ : Type*} {mδ : MeasurableSpace δ} (ξ : Kernel γ δ)

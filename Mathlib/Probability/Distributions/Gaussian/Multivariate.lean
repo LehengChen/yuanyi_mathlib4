@@ -159,32 +159,34 @@ section multivariateGaussian
 
 /-! ### Multivariate Gaussian measures over `ℝⁿ` -/
 
-variable [DecidableEq ι]
-
 /-- Multivariate Gaussian measure on `EuclideanSpace ℝ ι` with mean `μ` and covariance
 matrix `S`. This only makes sense when `S` is positive semidefinite,
 as then `CFC.sqrt S * CFC.sqrt S = S`. Otherwise `CFC.sqrt S = 0`, and
 `multivariateGaussian μ S = Measure.dirac μ` (see `multivariateGaussian_of_not_posSemidef`). -/
 noncomputable
 def multivariateGaussian (μ : EuclideanSpace ℝ ι) (S : Matrix ι ι ℝ) :
-    Measure (EuclideanSpace ℝ ι) :=
-  (stdGaussian (EuclideanSpace ℝ ι)).map (fun x ↦ μ + toEuclideanCLM (𝕜 := ℝ) (CFC.sqrt S) x)
+    Measure (EuclideanSpace ℝ ι) := by
+  classical
+  exact (stdGaussian (EuclideanSpace ℝ ι)).map
+    (fun x ↦ μ + toEuclideanCLM (𝕜 := ℝ) (CFC.sqrt S) x)
 
 lemma multivariateGaussian_of_not_posSemidef (μ : EuclideanSpace ℝ ι) {S : Matrix ι ι ℝ}
     (hS : ¬ S.PosSemidef) : multivariateGaussian μ S = .dirac μ := by
+  classical
   rw [multivariateGaussian, CFC.sqrt, cfcₙ_apply_of_not_predicate]
   · simp
   change ¬ (S - 0).PosSemidef
   simpa
 
 @[simp]
-lemma multivariateGaussian_zero_one :
+lemma multivariateGaussian_zero_one [DecidableEq ι] :
     multivariateGaussian 0 (1 : Matrix ι ι ℝ) = stdGaussian (EuclideanSpace ℝ ι) := by
   simp [multivariateGaussian]
 
 variable {μ : EuclideanSpace ℝ ι} {S : Matrix ι ι ℝ}
 
 instance isGaussian_multivariateGaussian : IsGaussian (multivariateGaussian μ S) := by
+  classical
   have h : (fun x ↦ μ + (toEuclideanCLM (𝕜 := ℝ) (CFC.sqrt S)) x) =
     (fun x ↦ μ + x) ∘ ((toEuclideanCLM (𝕜 := ℝ) (CFC.sqrt S))) := rfl
   simp only [multivariateGaussian]
@@ -193,6 +195,7 @@ instance isGaussian_multivariateGaussian : IsGaussian (multivariateGaussian μ S
 
 @[simp]
 lemma integral_id_multivariateGaussian : ∫ x, x ∂(multivariateGaussian μ S) = μ := by
+  classical
   rw [multivariateGaussian, integral_map (by fun_prop) (by fun_prop),
     integral_add (integrable_const _), integral_const]
   · simp [ContinuousLinearMap.integral_comp_comm _ IsGaussian.integrable_fun_id]
@@ -203,6 +206,7 @@ lemma integral_id_multivariateGaussian' : (multivariateGaussian μ S)[id] = μ :
 set_option backward.isDefEq.respectTransparency false in
 lemma covarianceBilin_multivariateGaussian (hS : S.PosSemidef) (x y : EuclideanSpace ℝ ι) :
     covarianceBilin (multivariateGaussian μ S) x y = x ⬝ᵥ S *ᵥ y := by
+  classical
   have h : (fun x ↦ μ + x) ∘ ((toEuclideanCLM (𝕜 := ℝ) (CFC.sqrt S))) =
     (fun x ↦ μ + (toEuclideanCLM (𝕜 := ℝ) (CFC.sqrt S)) x) := rfl
   simp only [multivariateGaussian]
@@ -217,6 +221,7 @@ lemma covarianceBilin_multivariateGaussian (hS : S.PosSemidef) (x y : EuclideanS
 set_option backward.isDefEq.respectTransparency false in
 lemma covariance_eval_multivariateGaussian (hS : S.PosSemidef) (i j : ι) :
     cov[fun x ↦ x i, fun x ↦ x j; multivariateGaussian μ S] = S i j := by
+  classical
   have (i : ι) : (fun x : EuclideanSpace ℝ ι ↦ x i) =
       fun x ↦ ⟪EuclideanSpace.basisFun ι ℝ i, x⟫ := by ext; simp [PiLp.inner_apply]
   rw [this, this, ← covarianceBilin_apply_eq_cov, covarianceBilin_multivariateGaussian hS]
@@ -233,6 +238,7 @@ lemma measurePreserving_eval_multivariateGaussian (hS : S.PosSemidef) {i : ι} :
       (gaussianReal (μ i) (S i i).toNNReal) where
   measurable := by fun_prop
   map_eq := by
+    classical
     rw [← EuclideanSpace.coe_proj, IsGaussian.map_eq_gaussianReal,
       ContinuousLinearMap.integral_comp_id_comm]
     · simp [variance_eval_multivariateGaussian hS]
@@ -241,19 +247,21 @@ lemma measurePreserving_eval_multivariateGaussian (hS : S.PosSemidef) {i : ι} :
 lemma charFun_multivariateGaussian (hS : S.PosSemidef) (x : EuclideanSpace ℝ ι) :
     charFun (multivariateGaussian μ S) x =
       exp (⟪x, μ⟫ * I - x ⬝ᵥ S *ᵥ x / 2) := by
+  classical
   simp [IsGaussian.charFun_eq', covarianceBilin_multivariateGaussian hS]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If one restricts a multivariate Gaussian measure indexed by a finite set `I` to
 coordinates indexed by `J ⊆ I`, one obtains the multivariate Gaussian measure whose
 covariance matrix is given by the corresponding submatrix. -/
-lemma measurePreserving_restrict₂_multivariateGaussian {ι : Type*} [DecidableEq ι] {I J : Finset ι}
+lemma measurePreserving_restrict₂_multivariateGaussian {ι : Type*} {I J : Finset ι}
     {μ : EuclideanSpace ℝ I} {S : Matrix I I ℝ} (hS : S.PosSemidef) (hJI : J ⊆ I) :
     MeasurePreserving (EuclideanSpace.restrict₂ hJI) (multivariateGaussian μ S)
       (multivariateGaussian (μ.restrict₂ hJI)
         (S.submatrix (fun i : J ↦ ⟨i.1, hJI i.2⟩) (fun i : J ↦ ⟨i.1, hJI i.2⟩))) where
   measurable := by fun_prop
   map_eq := by
+    classical
     apply IsGaussian.ext
     · simp only [id_eq, integral_id_multivariateGaussian]
       rw [ContinuousLinearMap.integral_id_map, integral_id_multivariateGaussian]

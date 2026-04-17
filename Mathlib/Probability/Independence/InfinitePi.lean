@@ -78,15 +78,20 @@ lemma iIndepFun_iff_map_fun_eq_infinitePi_map (mX : ∀ i, Measurable (X i)) :
     iIndepFun X P ↔ P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) :=
   iIndepFun_iff_map_fun_eq_infinitePi_map₀ <| measurable_pi_iff.2 mX |>.aemeasurable
 
-/-- Given random variables `X i : Ω i → 𝓧 i`, they are independent when viewed as random
+/-- Given `AEMeasurable` maps `X i : Ω i → 𝓧 i`, they are independent when viewed as random
 variables defined on the product space `Π i, Ω i`. -/
 lemma iIndepFun_infinitePi {Ω : ι → Type*} {mΩ : ∀ i, MeasurableSpace (Ω i)}
     {P : (i : ι) → Measure (Ω i)} [∀ i, IsProbabilityMeasure (P i)] {X : (i : ι) → Ω i → 𝓧 i}
-    (mX : ∀ i, Measurable (X i)) :
+    (mX : ∀ i, AEMeasurable (X i) (P i)) :
     iIndepFun (fun i ω ↦ X i (ω i)) (infinitePi P) := by
-  rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop), infinitePi_map_pi _ mX]
-  congrm infinitePi fun i ↦ ?_
-  rw [← infinitePi_map_eval P i, map_map (mX i) (by fun_prop), Function.comp_def]
+  let Y : (i : ι) → Ω i → 𝓧 i := fun i ↦ (mX i).mk (X i)
+  have hY : ∀ i, Measurable (Y i) := fun i ↦ (mX i).measurable_mk
+  have h_indep : iIndepFun (fun i ω ↦ Y i (ω i)) (infinitePi P) := by
+    rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop), infinitePi_map_pi _ hY]
+    congrm infinitePi fun i ↦ ?_
+    rw [← infinitePi_map_eval P i, map_map (hY i) (by fun_prop), Function.comp_def]
+  exact h_indep.congr fun i ↦
+    (measurePreserving_eval_infinitePi P i).quasiMeasurePreserving.ae_eq_comp (mX i).ae_eq_mk.symm
 
 section curry
 
@@ -102,54 +107,75 @@ Assume furthermore that the random variables `((Xᵢⱼ)ⱼ)ᵢ` are independent
 Then the random variables `(Xᵢⱼ)` indexed by pairs `(i, j)` are independent.
 
 This is a dependent version of `iIndepFun_uncurry'`. -/
-lemma iIndepFun_uncurry {X : (i : ι) → (j : κ i) → Ω → 𝓧 i j} (mX : ∀ i j, Measurable (X i j))
+lemma iIndepFun_uncurry
+    {X : (i : ι) → (j : κ i) → Ω → 𝓧 i j}
+    (mX : AEMeasurable (fun ω i j ↦ X i j ω) P)
     (h1 : iIndepFun (fun i ω ↦ (X i · ω)) P) (h2 : ∀ i, iIndepFun (X i) P) :
     iIndepFun (fun (p : (i : ι) × (κ i)) ω ↦ X p.1 p.2 ω) P := by
   have := h1.isProbabilityMeasure
   have : ∀ i j, IsProbabilityMeasure (P.map (X i j)) :=
-    fun i j ↦ isProbabilityMeasure_map (mX i j).aemeasurable
+    fun i j ↦ isProbabilityMeasure_map ((mX.eval i).eval j)
   have : ∀ i, IsProbabilityMeasure (P.map (fun ω ↦ (X i · ω))) :=
-    fun i ↦ isProbabilityMeasure_map (Measurable.aemeasurable (by fun_prop))
+    fun i ↦ isProbabilityMeasure_map (mX.eval i)
+  have hmX :
+      AEMeasurable (fun ω (p : (i : ι) × κ i) ↦ X p.1 p.2 ω) P := by
+    simpa [Function.comp, Sigma.uncurry] using
+      (MeasurableEquiv.piCurry 𝓧).symm.measurable.aemeasurable.comp_aemeasurable mX
   have : (MeasurableEquiv.piCurry 𝓧) ∘ (fun ω p ↦ X p.1 p.2 ω) = fun ω i j ↦ X i j ω := by
     ext; simp [Sigma.curry]
-  rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop),
+  rw [iIndepFun_iff_map_fun_eq_infinitePi_map₀ hmX,
     ← (MeasurableEquiv.piCurry 𝓧).map_measurableEquiv_injective.eq_iff,
-    map_map (by fun_prop) (by fun_prop), this,
-    (iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)).1 h1,
+    AEMeasurable.map_map_of_aemeasurable (by fun_prop) hmX, this,
+    (iIndepFun_iff_map_fun_eq_infinitePi_map₀ mX).1 h1,
     infinitePi_map_piCurry (fun i j ↦ P.map (X i j))]
   congrm infinitePi fun i ↦ ?_
-  rw [(iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)).1 (h2 i)]
+  rw [(iIndepFun_iff_map_fun_eq_infinitePi_map₀ (mX.eval i)).1 (h2 i)]
 
-/-- Given random variables `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
+/-- Given `AEMeasurable` maps `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
 variables defined on the product space `Π i, Π j, Ω i j`. -/
 lemma iIndepFun_uncurry_infinitePi {Ω : (i : ι) → κ i → Type*} {mΩ : ∀ i j, MeasurableSpace (Ω i j)}
     {X : (i : ι) → (j : κ i) → Ω i j → 𝓧 i j}
     (μ : (i : ι) → (j : κ i) → Measure (Ω i j)) [∀ i j, IsProbabilityMeasure (μ i j)]
-    (mX : ∀ i j, Measurable (X i j)) :
+    (mX : ∀ i j, AEMeasurable (X i j) (μ i j)) :
     iIndepFun (fun (p : (i : ι) × κ i) (ω : Π i, Π j, Ω i j) ↦ X p.1 p.2 (ω p.1 p.2))
       (infinitePi (fun i ↦ infinitePi (μ i))) := by
-  refine iIndepFun_uncurry (P := infinitePi (fun i ↦ infinitePi (μ i)))
-    (X := fun i j ω ↦ X i j (ω i j)) (by fun_prop) ?_ fun i ↦ ?_
-  · exact iIndepFun_infinitePi (P := fun i ↦ infinitePi (μ i))
-      (X := fun i u j ↦ X i j (u j)) (by fun_prop)
-  rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)]
-  change map ((fun f ↦ f i) ∘ (fun ω i j ↦ X i j (ω i j)))
-    (infinitePi fun i ↦ infinitePi (μ i)) = _
-  rw [← map_map (by fun_prop) (by fun_prop),
-    infinitePi_map_pi (X := fun i ↦ (j : κ i) → Ω i j) (μ := fun i ↦ infinitePi (μ i))
-      (f := fun i f j ↦ X i j (f j)), @infinitePi_map_eval .., infinitePi_map_pi]
-  · congrm infinitePi fun j ↦ ?_
-    change _ = map (((fun f ↦ f j) ∘ (fun f ↦ f i)) ∘ (fun ω i j ↦ X i j (ω i j)))
-      (infinitePi fun i ↦ infinitePi (μ i))
-    rw [← map_map (by fun_prop) (by fun_prop), infinitePi_map_pi (X := fun i ↦ (j : κ i) → Ω i j)
-        (μ := fun i ↦ infinitePi (μ i)) (f := fun i f j ↦ X i j (f j)),
-        ← map_map (by fun_prop) (by fun_prop),
-        @infinitePi_map_eval .., infinitePi_map_pi, @infinitePi_map_eval ..]
-    any_goals fun_prop
-    · exact fun _ ↦ isProbabilityMeasure_map (by fun_prop)
-    · exact fun _ ↦ isProbabilityMeasure_map (Measurable.aemeasurable (by fun_prop))
-  any_goals fun_prop
-  exact fun _ ↦ isProbabilityMeasure_map (Measurable.aemeasurable (by fun_prop))
+  let Y : (i : ι) → (j : κ i) → Ω i j → 𝓧 i j := fun i j ↦ (mX i j).mk (X i j)
+  have hY : ∀ i j, Measurable (Y i j) := fun i j ↦ (mX i j).measurable_mk
+  have h_indep :
+      iIndepFun (fun (p : (i : ι) × κ i) (ω : Π i, Π j, Ω i j) ↦ Y p.1 p.2 (ω p.1 p.2))
+        (infinitePi (fun i ↦ infinitePi (μ i))) := by
+    refine iIndepFun_uncurry (P := infinitePi (fun i ↦ infinitePi (μ i)))
+      (X := fun i j ω ↦ Y i j (ω i j)) (Measurable.aemeasurable (by fun_prop)) ?_ fun i ↦ ?_
+    · exact iIndepFun_infinitePi (P := fun i ↦ infinitePi (μ i))
+        (X := fun i u j ↦ Y i j (u j)) fun i ↦
+          (measurable_pi_iff.2 fun j ↦ (hY i j).comp (measurable_pi_apply j)).aemeasurable
+    · rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)]
+      change map ((fun f ↦ f i) ∘ (fun ω i j ↦ Y i j (ω i j)))
+        (infinitePi fun i ↦ infinitePi (μ i)) = _
+      rw [← map_map (by fun_prop) (by fun_prop),
+        infinitePi_map_pi (X := fun i ↦ (j : κ i) → Ω i j) (μ := fun i ↦ infinitePi (μ i))
+          (f := fun i f j ↦ Y i j (f j)), @infinitePi_map_eval .., infinitePi_map_pi]
+      · congrm infinitePi fun j ↦ ?_
+        change _ = map (((fun f ↦ f j) ∘ (fun f ↦ f i)) ∘ (fun ω i j ↦ Y i j (ω i j)))
+          (infinitePi fun i ↦ infinitePi (μ i))
+        rw [← map_map (by fun_prop) (by fun_prop),
+          infinitePi_map_pi (X := fun i ↦ (j : κ i) → Ω i j) (μ := fun i ↦ infinitePi (μ i))
+            (f := fun i f j ↦ Y i j (f j)),
+          ← map_map (by fun_prop) (by fun_prop),
+          @infinitePi_map_eval .., infinitePi_map_pi, @infinitePi_map_eval ..]
+        any_goals fun_prop
+        · exact fun _ ↦ isProbabilityMeasure_map (by fun_prop)
+        · exact fun _ ↦ isProbabilityMeasure_map (Measurable.aemeasurable (by fun_prop))
+      any_goals fun_prop
+      exact fun _ ↦ isProbabilityMeasure_map (Measurable.aemeasurable (by fun_prop))
+  exact h_indep.congr fun p ↦ by
+    have hp :
+        QuasiMeasurePreserving (fun ω : Π i, Π j, Ω i j ↦ ω p.1 p.2)
+          (infinitePi (fun i ↦ infinitePi (μ i))) (μ p.1 p.2) := by
+      simpa [Function.comp] using
+        (measurePreserving_eval_infinitePi (μ p.1) p.2).quasiMeasurePreserving.comp
+          (measurePreserving_eval_infinitePi (fun i ↦ infinitePi (μ i)) p.1).quasiMeasurePreserving
+    exact hp.ae_eq_comp (mX p.1 p.2).ae_eq_mk.symm
 
 end dependent
 
@@ -163,17 +189,18 @@ Assume furthermore that the random variables `((Xᵢⱼ)ⱼ)ᵢ` are independent
 Then the random variables `(Xᵢⱼ)` indexed by pairs `(i, j)` are independent.
 
 This is a non-dependent version of `iIndepFun_uncurry`. -/
-lemma iIndepFun_uncurry' {X : (i : ι) → (j : κ) → Ω → 𝓧 i j} (mX : ∀ i j, Measurable (X i j))
+lemma iIndepFun_uncurry' {X : (i : ι) → (j : κ) → Ω → 𝓧 i j}
+    (mX : AEMeasurable (fun ω i j ↦ X i j ω) P)
     (h1 : iIndepFun (fun i ω ↦ (X i · ω)) P) (h2 : ∀ i, iIndepFun (X i) P) :
     iIndepFun (fun (p : ι × κ) ω ↦ X p.1 p.2 ω) P :=
   (iIndepFun_uncurry mX h1 h2).of_precomp (Equiv.sigmaEquivProd ι κ).surjective
 
-/-- Given random variables `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
+/-- Given `AEMeasurable` maps `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
 variables defined on the product space `Π i, Π j, Ω i j`. -/
 lemma iIndepFun_uncurry_infinitePi' {Ω : ι → κ → Type*} {mΩ : ∀ i j, MeasurableSpace (Ω i j)}
     {X : (i : ι) → (j : κ) → Ω i j → 𝓧 i j}
     (μ : (i : ι) → (j : κ) → Measure (Ω i j)) [∀ i j, IsProbabilityMeasure (μ i j)]
-    (mX : ∀ i j, Measurable (X i j)) :
+    (mX : ∀ i j, AEMeasurable (X i j) (μ i j)) :
     iIndepFun (fun (p : ι × κ) (ω : Π i, Π j, Ω i j) ↦ X p.1 p.2 (ω p.1 p.2))
       (infinitePi (fun i ↦ infinitePi (μ i))) :=
   (iIndepFun_uncurry_infinitePi μ mX).of_precomp (Equiv.sigmaEquivProd ι κ).surjective

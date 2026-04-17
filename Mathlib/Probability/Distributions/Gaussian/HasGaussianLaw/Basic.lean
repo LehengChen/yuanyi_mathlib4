@@ -81,6 +81,34 @@ end Basic
 
 namespace HasGaussianLaw
 
+section BasicMaps
+
+variable [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E] [MeasurableSpace E]
+  [OpensMeasurableSpace E] [TopologicalSpace F] [AddCommMonoid F] [Module ℝ F]
+  [MeasurableSpace F] {X : Ω → E} {Y : Ω → F}
+
+lemma fst (hXY : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) : HasGaussianLaw X P :=
+  hXY.map_of_measurable (.fst ℝ E F) measurable_fst
+
+omit [OpensMeasurableSpace E] in
+lemma snd [OpensMeasurableSpace F] (hXY : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) :
+    HasGaussianLaw Y P :=
+  hXY.map_of_measurable (.snd ℝ E F) measurable_snd
+
+section Pi
+
+variable {E : ι → Type*} [∀ i, TopologicalSpace (E i)] [∀ i, AddCommMonoid (E i)]
+  [∀ i, Module ℝ (E i)] [∀ i, MeasurableSpace (E i)] [∀ i, OpensMeasurableSpace (E i)]
+  {X : (i : ι) → Ω → E i}
+
+lemma eval (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (i : ι) :
+    HasGaussianLaw (X i) P :=
+  hX.map_of_measurable (.proj i) (measurable_pi_apply i)
+
+end Pi
+
+end BasicMaps
+
 variable [NormedAddCommGroup E] [MeasurableSpace E] [BorelSpace E] {X : Ω → E}
 
 lemma of_subsingleton [NormedSpace ℝ E] [Subsingleton E] [IsProbabilityMeasure P] :
@@ -176,14 +204,6 @@ lemma toLp_prodMk [SecondCountableTopologyEither E F] (p : ℝ≥0∞) [Fact (1 
     HasGaussianLaw (fun ω ↦ toLp p (X ω, Y ω)) P :=
   hXY.map_equiv (WithLp.prodContinuousLinearEquiv p ℝ E F).symm
 
-omit [BorelSpace F] in
-lemma fst (hXY : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) : HasGaussianLaw X P :=
-  hXY.map_of_measurable (.fst ℝ E F) measurable_fst
-
-omit [BorelSpace E] in
-lemma snd (hXY : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) : HasGaussianLaw Y P :=
-  hXY.map_of_measurable (.snd ℝ E F) measurable_snd
-
 variable [SecondCountableTopology E] {Y : Ω → E}
 
 lemma add (hXY : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) : HasGaussianLaw (X + Y) P :=
@@ -207,9 +227,6 @@ section Pi
 variable {E : ι → Type*} [∀ i, NormedAddCommGroup (E i)]
   [∀ i, NormedSpace ℝ (E i)] [∀ i, MeasurableSpace (E i)] [∀ i, BorelSpace (E i)]
   {X : (i : ι) → Ω → E i}
-
-lemma eval (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (i : ι) :
-    HasGaussianLaw (X i) P := hX.map_of_measurable (.proj i) (measurable_pi_apply i)
 
 variable [∀ i, SecondCountableTopology (E i)]
 

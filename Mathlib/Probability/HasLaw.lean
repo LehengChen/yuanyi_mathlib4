@@ -121,11 +121,17 @@ lemma HasLaw.lintegral_comp {X : Ω → 𝓧} (hX : HasLaw X μ P) {f : 𝓧 →
   rw [← hX.map_eq, lintegral_map' _ hX.aemeasurable]
   rwa [hX.map_eq]
 
+lemma HasLaw.integral_eq_of_aestronglyMeasurable_id {E : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] {mE : MeasurableSpace E} {μ : Measure E} {X : Ω → E}
+    (hX : HasLaw X μ P) (h_id : AEStronglyMeasurable (id : E → E) μ) :
+    P[X] = ∫ x, x ∂μ := by
+  rw [← Function.id_comp X, hX.integral_comp h_id]
+  simp
+
 lemma HasLaw.integral_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [SecondCountableTopology E] {mE : MeasurableSpace E} [OpensMeasurableSpace E] {μ : Measure E}
     {X : Ω → E} (hX : HasLaw X μ P) : P[X] = ∫ x, x ∂μ := by
-  rw [← Function.id_comp X, hX.integral_comp aestronglyMeasurable_id]
-  simp
+  exact hX.integral_eq_of_aestronglyMeasurable_id aestronglyMeasurable_id
 
 lemma HasLaw.covariance_comp (hX : HasLaw X μ P) {f g : 𝓧 → ℝ}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) :

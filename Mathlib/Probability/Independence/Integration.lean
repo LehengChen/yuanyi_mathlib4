@@ -134,7 +134,7 @@ theorem lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun'' (h_meas_f : AEMea
 
 theorem lintegral_prod_eq_prod_lintegral_of_indepFun {ι : Type*}
     (s : Finset ι) (X : ι → Ω → ℝ≥0∞) (hX : iIndepFun X μ)
-    (x_mea : ∀ i, Measurable (X i)) :
+    (x_mea : ∀ i, AEMeasurable (X i) μ) :
     ∫⁻ ω, ∏ i ∈ s, (X i ω) ∂μ = ∏ i ∈ s, ∫⁻ ω, X i ω ∂μ := by
   have : IsProbabilityMeasure μ := hX.isProbabilityMeasure
   induction s using Finset.cons_induction with
@@ -142,25 +142,34 @@ theorem lintegral_prod_eq_prod_lintegral_of_indepFun {ι : Type*}
   | cons j s hj ihs =>
     simp only [← Finset.prod_apply, Finset.prod_cons, ← ihs]
     apply lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun'
-    · exact (x_mea j).aemeasurable
-    · exact s.aemeasurable_prod (fun i _ ↦ (x_mea i).aemeasurable)
-    · exact (iIndepFun.indepFun_finset_prod_of_notMem hX x_mea hj).symm
+    · exact x_mea j
+    · exact s.aemeasurable_prod fun i _ ↦ x_mea i
+    · exact (iIndepFun.indepFun_finset_prod_of_notMem₀ hX x_mea hj).symm
 
 /-- The product of two independent, integrable, real-valued random variables is integrable. -/
 theorem IndepFun.integrable_mul {β : Type*} [MeasurableSpace β] {X Y : Ω → β}
-    [NormedDivisionRing β] [BorelSpace β] (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ)
+    [NormedRing β] [OpensMeasurableSpace β] (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ)
     (hY : Integrable Y μ) : Integrable (X * Y) μ := by
   let nX : Ω → ℝ≥0∞ := fun a => ‖X a‖ₑ
   let nY : Ω → ℝ≥0∞ := fun a => ‖Y a‖ₑ
   have hXY' : nX ⟂ᵢ[μ] nY := hXY.comp measurable_enorm measurable_enorm
-  have hnX : AEMeasurable nX μ := hX.1.aemeasurable.enorm
-  have hnY : AEMeasurable nY μ := hY.1.aemeasurable.enorm
+  have hnX : AEMeasurable nX μ := hX.1.enorm
+  have hnY : AEMeasurable nY μ := hY.1.enorm
   have hmul : ∫⁻ a, nX a * nY a ∂μ = (∫⁻ a, nX a ∂μ) * ∫⁻ a, nY a ∂μ :=
     lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun' hnX hnY hXY'
-  refine ⟨hX.1.mul hY.1, ?_⟩
-  simp only [nX, nY] at hmul
-  simp_rw [hasFiniteIntegral_iff_enorm, Pi.mul_apply, enorm_mul, hmul]
-  exact ENNReal.mul_lt_top hX.2 hY.2
+  have hnorm_mul : Integrable (fun a => ‖X a‖ * ‖Y a‖) μ := by
+    refine ⟨hX.1.norm.mul hY.1.norm, ?_⟩
+    rw [hasFiniteIntegral_iff_ofReal]
+    · calc
+        ∫⁻ a, ENNReal.ofReal (‖X a‖ * ‖Y a‖) ∂μ = ∫⁻ a, nX a * nY a ∂μ := by
+          refine lintegral_congr_ae <| Filter.Eventually.of_forall fun a => ?_
+          simp [nX, nY, ENNReal.ofReal_mul, norm_nonneg]
+        _ = (∫⁻ a, nX a ∂μ) * ∫⁻ a, nY a ∂μ := hmul
+        _ < ∞ := ENNReal.mul_lt_top hX.2 hY.2
+    · exact Filter.Eventually.of_forall fun _ => mul_nonneg (norm_nonneg _) (norm_nonneg _)
+  exact Integrable.mono' hnorm_mul (hX.1.mul hY.1) <|
+    Filter.Eventually.of_forall fun a => by
+      simpa [Pi.mul_apply] using norm_mul_le (X a) (Y a)
 
 /-- If the product of two independent real-valued random variables is integrable and
 the second one is not almost everywhere zero, then the first one is integrable. -/
@@ -177,8 +186,8 @@ theorem IndepFun.integrable_left_of_integrable_mul {β : Type*} [MeasurableSpace
     simpa using hω
   refine hasFiniteIntegral_iff_enorm.mpr <| lt_top_iff_ne_top.2 fun H => ?_
   have J : (‖X ·‖ₑ) ⟂ᵢ[μ] (‖Y ·‖ₑ) := hXY.comp measurable_enorm measurable_enorm
-  have A : ∫⁻ ω, ‖X ω * Y ω‖ₑ ∂μ < ∞ := h'XY.2
-  simp only [enorm_mul] at A
+  have A : ∫⁻ ω, ‖X ω‖ₑ * ‖Y ω‖ₑ ∂μ < ∞ := by
+    simpa [hasFiniteIntegral_iff_enorm, Pi.mul_apply, enorm_mul] using h'XY.2
   rw [lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun'' hX.enorm hY.enorm J, H] at A
   simp only [ENNReal.top_mul I, lt_self_iff_false] at A
 
@@ -198,8 +207,8 @@ theorem IndepFun.integrable_right_of_integrable_mul {β : Type*} [MeasurableSpac
   refine lt_top_iff_ne_top.2 fun H => ?_
   have J : (fun ω => ‖X ω‖ₑ : Ω → ℝ≥0∞) ⟂ᵢ[μ] (fun ω => ‖Y ω‖ₑ : Ω → ℝ≥0∞) :=
     IndepFun.comp hXY measurable_enorm measurable_enorm
-  have A : ∫⁻ ω, ‖X ω * Y ω‖ₑ ∂μ < ∞ := h'XY.2
-  simp only [enorm_mul] at A
+  have A : ∫⁻ ω, ‖X ω‖ₑ * ‖Y ω‖ₑ ∂μ < ∞ := by
+    simpa [hasFiniteIntegral_iff_enorm, Pi.mul_apply, enorm_mul] using h'XY.2
   rw [lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun'' hX.enorm hY.enorm J, H] at A
   simp only [ENNReal.mul_top I, lt_self_iff_false] at A
 

@@ -41,10 +41,10 @@ lemma poissonMeasure_real_singleton (r : ℝ≥0) (n : ℕ) :
     (poissonMeasure r).real {n} = exp (-r) * r ^ n / (n)! := by
   rw [measureReal_def, poissonMeasure_singleton, ENNReal.toReal_ofReal (by positivity)]
 
-lemma poissonMeasure_real_singleton_pos {r : ℝ≥0} (n : ℕ) (hr : 0 < r) :
+lemma poissonMeasure_real_singleton_pos {r : ℝ≥0} {n : ℕ} (h : n = 0 ∨ 0 < r) :
     0 < (poissonMeasure r).real {n} := by
   rw [poissonMeasure_real_singleton]
-  positivity
+  rcases h with rfl | hr <;> positivity
 
 lemma hasSum_one_poissonMeasure (r : ℝ≥0) : HasSum (fun n ↦ exp (-r) * r ^ n / (n)!) 1 := by
   convert (NormedSpace.expSeries_div_hasSum_exp (r : ℝ)).mul_left (exp (-r)) using 1
@@ -113,9 +113,9 @@ alias poissonPMFRealSum := hasSum_one_poissonMeasure
 
 set_option linter.deprecated false in
 @[deprecated poissonMeasure_real_singleton_pos (since := "2026-03-08")]
-lemma poissonPMFReal_pos {r : ℝ≥0} {n : ℕ} (hr : 0 < r) : 0 < poissonPMFReal r n := by
+lemma poissonPMFReal_pos {r : ℝ≥0} {n : ℕ} (h : n = 0 ∨ 0 < r) : 0 < poissonPMFReal r n := by
   rw [poissonPMFReal]
-  positivity
+  rcases h with rfl | hr <;> positivity
 
 set_option linter.deprecated false in
 @[deprecated measureReal_nonneg (since := "2026-03-08")]

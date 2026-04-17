@@ -52,12 +52,10 @@ lemma IndepFun.charFun_map_fun_add_eq_mul {Y : Ω → E}
   hXY.charFun_map_add_eq_mul mX mY
 
 lemma charFun_map_add_prod_eq_mul {μ ν : Measure E}
-    [IsProbabilityMeasure μ] [IsProbabilityMeasure ν] :
+    [IsFiniteMeasure μ] [IsFiniteMeasure ν] :
     charFun ((μ.prod ν).map (fun p ↦ p.1 + p.2)) = charFun μ * charFun ν := by
-  rw [IndepFun.charFun_map_fun_add_eq_mul, measurePreserving_fst.map_eq,
-    measurePreserving_snd.map_eq]
-  any_goals fun_prop
-  exact indepFun_prod (X := id) (Y := id) measurable_id measurable_id
+  ext t
+  simpa [Measure.conv] using (charFun_conv (μ := μ) (ν := ν) t)
 
 /-- Two random variables are independent if and only if their joint characteristic function is equal
 to the product of the characteristic functions. This is the version for Hilbert spaces, see
@@ -86,12 +84,10 @@ lemma IndepFun.charFunDual_map_fun_add_eq_mul {Y : Ω → E}
   hXY.charFunDual_map_add_eq_mul mX mY
 
 lemma charFunDual_map_add_prod_eq_mul {μ ν : Measure E}
-    [IsProbabilityMeasure μ] [IsProbabilityMeasure ν] :
+    [IsFiniteMeasure μ] [IsFiniteMeasure ν] :
     charFunDual ((μ.prod ν).map (fun p ↦ p.1 + p.2)) = charFunDual μ * charFunDual ν := by
-  rw [IndepFun.charFunDual_map_fun_add_eq_mul, measurePreserving_fst.map_eq,
-    measurePreserving_snd.map_eq]
-  any_goals fun_prop
-  exact indepFun_prod (X := id) (Y := id) measurable_id measurable_id
+  ext L
+  simpa [Measure.conv] using (charFunDual_conv (μ := μ) (ν := ν) L)
 
 variable [CompleteSpace E]
 
@@ -172,13 +168,24 @@ lemma iIndepFun.charFunDual_map_fun_sum_eq_prod [Fintype ι] [NormedSpace ℝ E]
   (hX.restrict _).charFunDual_map_fun_finset_sum_eq_prod (by simpa)
 
 lemma charFunDual_map_sum_pi_eq_prod [Fintype ι] [NormedSpace ℝ E] {μ : ι → Measure E}
-    [∀ i, IsProbabilityMeasure (μ i)] :
+    [∀ i, IsFiniteMeasure (μ i)] :
     charFunDual ((Measure.pi μ).map (fun p ↦ ∑ i, p i)) = ∏ i, charFunDual (μ i) := by
-  rw [iIndepFun.charFunDual_map_fun_sum_eq_prod]
-  · refine Finset.prod_congr rfl fun i _ ↦ ?_
-    rw [(measurePreserving_eval μ i).map_eq]
-  · exact aemeasurable_id.eval
-  · exact iIndepFun_pi (X := fun _ ↦ id) (fun _ ↦ aemeasurable_id)
+  classical
+  letI : DecidableEq ι := Classical.decEq ι
+  let S : (Π i : ι, E) →L[ℝ] E := ∑ i, ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι => E) i
+  have hS : (fun p : Π i, E ↦ ∑ i, p i) = S := by
+    ext p
+    simp [S]
+  ext L
+  rw [hS, charFunDual_map, charFunDual_pi]
+  simp only [Finset.prod_apply]
+  apply Finset.prod_congr rfl
+  intro i hi
+  have hLi : ((L.comp S).comp (ContinuousLinearMap.single ℝ (fun _ : ι => E) i)) = L := by
+    ext x
+    change L (S (Pi.single i x)) = L x
+    simp [S]
+  rw [hLi]
 
 lemma iIndepFun.charFun_map_finset_sum_eq_prod [InnerProductSpace ℝ E]
     (mX : ∀ i ∈ s, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
@@ -203,7 +210,7 @@ lemma iIndepFun.charFun_map_fun_sum_eq_prod [Fintype ι] [InnerProductSpace ℝ 
   (hX.restrict _).charFun_map_fun_finset_sum_eq_prod (by simpa)
 
 lemma charFun_map_sum_pi_eq_prod [Fintype ι] [InnerProductSpace ℝ E]
-    (μ : ι → Measure E) [∀ i, IsProbabilityMeasure (μ i)] :
+    (μ : ι → Measure E) [∀ i, IsFiniteMeasure (μ i)] :
     charFun ((Measure.pi μ).map (fun p ↦ ∑ i, p i)) = ∏ i, charFun (μ i) := by
   ext
   simp [charFun_eq_charFunDual_toDualMap, charFunDual_map_sum_pi_eq_prod]

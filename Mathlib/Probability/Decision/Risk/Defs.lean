@@ -78,15 +78,18 @@ lemma avgRisk_zero_prior (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧)
     avgRisk ℓ P κ 0 = 0 := by simp [avgRisk]
 
 @[simp]
-lemma bayesRisk_zero_left [Nonempty 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) (π : Measure Θ) :
+lemma bayesRisk_zero_left [Nonempty {κ : Kernel 𝓧 𝓨 // IsMarkovKernel κ}]
+    (ℓ : Θ → 𝓨 → ℝ≥0∞) (π : Measure Θ) :
     bayesRisk ℓ (0 : Kernel Θ 𝓧) π = 0 := by simp [bayesRisk, iInf_subtype']
 
 @[simp]
-lemma bayesRisk_zero_right [Nonempty 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) :
+lemma bayesRisk_zero_right [Nonempty {κ : Kernel 𝓧 𝓨 // IsMarkovKernel κ}]
+    (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) :
     bayesRisk ℓ P (0 : Measure Θ) = 0 := by simp [bayesRisk, iInf_subtype']
 
 @[simp]
-lemma minimaxRisk_zero [Nonempty 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) :
+lemma minimaxRisk_zero [Nonempty {κ : Kernel 𝓧 𝓨 // IsMarkovKernel κ}]
+    (ℓ : Θ → 𝓨 → ℝ≥0∞) :
     minimaxRisk ℓ (0 : Kernel Θ 𝓧) = 0 := by simp [minimaxRisk, iInf_subtype']
 
 end Zero
@@ -118,7 +121,7 @@ lemma bayesRisk_of_isEmpty' [Nonempty 𝓧] [IsEmpty 𝓨] :
   simp [bayesRisk, iInf_subtype']
 
 @[simp]
-lemma bayesRisk_of_isEmpty'' [IsEmpty Θ] [Nonempty 𝓨] :
+lemma bayesRisk_of_isEmpty'' [IsEmpty Θ] [Nonempty {κ : Kernel 𝓧 𝓨 // IsMarkovKernel κ}] :
     bayesRisk ℓ P π = 0 := by
   simp [bayesRisk, iInf_subtype']
 
@@ -134,7 +137,8 @@ lemma minimaxRisk_of_isEmpty' [Nonempty 𝓧] [IsEmpty 𝓨] : minimaxRisk ℓ P
   simp [minimaxRisk, iInf_subtype']
 
 @[simp]
-lemma minimaxRisk_of_isEmpty'' [Nonempty 𝓨] [IsEmpty Θ] : minimaxRisk ℓ P = 0 := by
+lemma minimaxRisk_of_isEmpty'' [IsEmpty Θ] [Nonempty {κ : Kernel 𝓧 𝓨 // IsMarkovKernel κ}] :
+    minimaxRisk ℓ P = 0 := by
   simp [minimaxRisk, iInf_subtype']
 end Empty
 

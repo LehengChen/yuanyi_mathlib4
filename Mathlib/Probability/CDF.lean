@@ -77,6 +77,19 @@ lemma ofReal_cdf [IsProbabilityMeasure μ] (x : ℝ) : ENNReal.ofReal (cdf μ x)
   have h := lintegral_condCDF ((dirac Unit.unit).prod μ) x
   simpa only [fst_prod, prod_prod, measure_univ, one_mul, lintegral_dirac] using h
 
+lemma measure_univ_mul_ofReal_cdf [IsFiniteMeasure μ] (x : ℝ) :
+    μ univ * ENNReal.ofReal (cdf μ x) = μ (Iic x) := by
+  have h := lintegral_condCDF ((dirac Unit.unit).prod μ) x
+  have hfst : ((dirac Unit.unit).prod μ).fst = μ univ • dirac Unit.unit := by
+    ext s hs
+    rw [Measure.fst_apply hs, Measure.smul_apply]
+    rw [show Prod.fst ⁻¹' s = s ×ˢ (univ : Set ℝ) by ext y; simp]
+    rw [Measure.prod_prod]
+    by_cases hmem : Unit.unit ∈ s <;> simp [hmem]
+  rw [hfst, lintegral_smul_measure, lintegral_dirac, Measure.prod_prod,
+    Measure.dirac_apply_of_mem (by simp)] at h
+  simpa using h
+
 lemma cdf_eq_real [IsProbabilityMeasure μ] (x : ℝ) : cdf μ x = μ.real (Iic x) := by
   rw [measureReal_def, ← ofReal_cdf μ x, ENNReal.toReal_ofReal (cdf_nonneg μ x)]
 
@@ -85,10 +98,16 @@ instance instIsProbabilityMeasurecdf : IsProbabilityMeasure (cdf μ).measure := 
   simp only [StieltjesFunction.measure_univ _ (tendsto_cdf_atBot μ) (tendsto_cdf_atTop μ), sub_zero,
     ENNReal.ofReal_one]
 
+/-- A finite measure is its total mass times the probability measure associated to its cdf. -/
+lemma measure_eq_measure_univ_smul_cdf [IsFiniteMeasure μ] : μ = μ univ • (cdf μ).measure := by
+  refine Measure.ext_of_Iic μ (μ univ • (cdf μ).measure) (fun a ↦ ?_)
+  rw [Measure.smul_apply, StieltjesFunction.measure_Iic _ (tendsto_cdf_atBot μ), sub_zero]
+  symm
+  simpa [mul_comm] using measure_univ_mul_ofReal_cdf μ a
+
 /-- The measure associated to the cdf of a probability measure is the same probability measure. -/
 lemma measure_cdf [IsProbabilityMeasure μ] : (cdf μ).measure = μ := by
-  refine ext_of_Iic (cdf μ).measure μ (fun a ↦ ?_)
-  rw [StieltjesFunction.measure_Iic _ (tendsto_cdf_atBot μ), sub_zero, ofReal_cdf]
+  simpa using (measure_eq_measure_univ_smul_cdf μ).symm
 
 end ExplicitMeasureArg
 
@@ -111,12 +130,18 @@ end ProbabilityTheory
 
 open ProbabilityTheory
 
-/-- If two real probability distributions have the same cdf, they are equal. -/
-lemma MeasureTheory.Measure.eq_of_cdf (μ ν : Measure ℝ) [IsProbabilityMeasure μ]
-    [IsProbabilityMeasure ν] (h : cdf μ = cdf ν) : μ = ν := by
-  rw [← measure_cdf μ, ← measure_cdf ν, h]
+/-- If two finite real measures have the same total mass and the same cdf, they are equal. -/
+lemma MeasureTheory.Measure.eq_of_cdf (μ ν : Measure ℝ) [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+    (h_mass : μ univ = ν univ) (h : cdf μ = cdf ν) : μ = ν := by
+  rw [measure_eq_measure_univ_smul_cdf (μ := μ), measure_eq_measure_univ_smul_cdf (μ := ν),
+    h_mass, h]
+
+lemma MeasureTheory.Measure.cdf_eq_iff_of_measure_univ_eq (μ ν : Measure ℝ) [IsFiniteMeasure μ]
+    [IsFiniteMeasure ν] (h_mass : μ univ = ν univ) :
+    cdf μ = cdf ν ↔ μ = ν :=
+  ⟨eq_of_cdf μ ν h_mass, fun h ↦ by rw [h]⟩
 
 @[simp] lemma MeasureTheory.Measure.cdf_eq_iff (μ ν : Measure ℝ) [IsProbabilityMeasure μ]
     [IsProbabilityMeasure ν] :
     cdf μ = cdf ν ↔ μ = ν :=
-⟨eq_of_cdf μ ν, fun h ↦ by rw [h]⟩
+  cdf_eq_iff_of_measure_univ_eq μ ν (by simp)

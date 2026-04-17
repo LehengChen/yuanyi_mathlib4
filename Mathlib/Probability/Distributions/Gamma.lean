@@ -89,11 +89,16 @@ lemma gammaPDFReal_pos {x a r : ℝ} (ha : 0 < a) (hr : 0 < r) (hx : 0 < x) :
   simp only [gammaPDFReal, if_pos hx.le]
   positivity
 
-/-- The gamma pdf is nonnegative -/
-lemma gammaPDFReal_nonneg {a r : ℝ} (ha : 0 < a) (hr : 0 < r) (x : ℝ) :
+/-- The gamma pdf is nonnegative. This only needs a nonnegative rate. -/
+lemma gammaPDFReal_nonneg_of_nonneg {a r : ℝ} (ha : 0 < a) (hr : 0 ≤ r) (x : ℝ) :
     0 ≤ gammaPDFReal a r x := by
   unfold gammaPDFReal
   split_ifs <;> positivity
+
+/-- The gamma pdf is nonnegative for positive shape and rate. -/
+lemma gammaPDFReal_nonneg {a r : ℝ} (ha : 0 < a) (hr : 0 < r) (x : ℝ) :
+    0 ≤ gammaPDFReal a r x :=
+  gammaPDFReal_nonneg_of_nonneg ha hr.le x
 
 open Measure
 
@@ -139,7 +144,7 @@ lemma cdf_gammaMeasure_eq_integral {a r : ℝ} (ha : 0 < a) (hr : 0 < r) (x : �
   have : IsProbabilityMeasure (gammaMeasure a r) := isProbabilityMeasure_gammaMeasure ha hr
   rw [cdf_eq_real, gammaMeasure, measureReal_def, withDensity_apply _ measurableSet_Iic]
   refine (integral_eq_lintegral_of_nonneg_ae ?_ ?_).symm
-  · exact ae_of_all _ fun b ↦ by simp [gammaPDFReal_nonneg ha hr]
+  · exact ae_of_all _ fun b ↦ by simp [gammaPDFReal_nonneg_of_nonneg ha hr.le]
   · fun_prop
 
 lemma cdf_gammaMeasure_eq_lintegral {a r : ℝ} (ha : 0 < a) (hr : 0 < r) (x : ℝ) :

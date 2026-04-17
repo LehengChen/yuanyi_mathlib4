@@ -28,11 +28,14 @@ the increments is Gaussian. Because increments are independent, it is enough to 
 increment is Gaussian. This follows from the fact that `X tᵢ` and `X tᵢ₊₁` are Gaussian,
 and `X tᵢ` and `X tᵢ₊₁ - X tᵢ` are independent (see `IndepFun.hasGaussianLaw_sub_of_sub`).
 
-## Main statement
+## Main statements
 
 * `HasIndepIncrements.isGaussianProcess`: A stochastic process `X` with independent increments,
   such that `X t` is Gaussian for all `t` and such that `X ⊥ = 0` almost surely
   is a Gaussian process.
+* `HasIndepIncrements.isGaussianProcess_of_bot_ae_eq_zero`: Under `[IsProbabilityMeasure P]`,
+  it is enough to assume Gaussian marginals away from `⊥`, since `X ⊥ = 0` almost surely
+  already forces the marginal at `⊥` to be Gaussian.
 
 ## Tags
 
@@ -111,34 +114,53 @@ lemma incrementsToRestrict_increments_orderEmbOfFinWithBot_ae_eq_restrict [Bot T
   simp [hω, orderEmbOfFin]
 
 /-- A stochastic process `X` with independent increments, such that `X t` is Gaussian for
+all `t ≠ ⊥` and such that `X ⊥ = 0` almost surely is a Gaussian process. -/
+public lemma HasIndepIncrements.isGaussianProcess_of_bot_ae_eq_zero [OrderBot T]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E]
+    [SecondCountableTopology E] [CompleteSpace E] [IsProbabilityMeasure P]
+    {X : T → Ω → E} (law : ∀ t, t ≠ ⊥ → HasGaussianLaw (X t) P)
+    (h_bot : ∀ᵐ ω ∂P, X ⊥ ω = 0) (incr : HasIndepIncrements X P) :
+    IsGaussianProcess X P := by
+  have law_bot : HasGaussianLaw (X ⊥) P := by
+    refine HasGaussianLaw.congr ?_
+      (show (fun _ : Ω ↦ (0 : E)) =ᵐ[P] X ⊥ from
+        (show X ⊥ =ᵐ[P] fun _ : Ω ↦ (0 : E) from h_bot).symm)
+    refine ⟨?_⟩
+    rw [Measure.map_const]
+    simpa using (inferInstance : IsGaussian (Measure.dirac (0 : E)))
+  let law' : ∀ t, HasGaussianLaw (X t) P := fun t ↦
+    if ht : t = ⊥ then by simpa [ht] using law_bot else law t ht
+  refine ⟨fun I ↦ ?_⟩
+  -- Label `t₁ < ... < tₙ` the elements of `I`.
+  -- We want to show that `(X t₁, ..., X tₙ)` is Gaussian.
+  obtain rfl | hI := I.eq_empty_or_nonempty
+  · -- If `I` is empty, there is nothing to say.
+    exact .of_subsingleton
+  -- Otherwise we know that `(X t₁, ..., X tₙ) = f (X t₁ - X ⊥, X t₂ - X t₁, ..., X tₙ - X tₙ₋₁)`
+  -- almost surely (because `X ⊥ = 0` almost surely)
+  -- for a certain continuous linear map `f` called here `incrementsToRestrict I`.
+  have := incrementsToRestrict_increments_orderEmbOfFinWithBot_ae_eq_restrict ℝ h_bot I
+  -- Therefore it is enough to show that `(X t₁ - X ⊥, X t₂ - X t₁, ..., X tₙ - X tₙ₋₁)` is
+  -- Gaussian.
+  refine .congr (.map ?_ _) this.symm
+  -- Because they are independent, it is enough to show that each `X tᵢ₊₁ - X tᵢ` is Gaussian.
+  refine (incr _ _ (monotone_orderEmbOfFinWithBot I)).hasGaussianLaw fun i ↦ ?_
+  -- Because `X tᵢ` and `X tᵢ₊₁` are Gaussian, it is enough to show that
+  -- `X tᵢ` is independent from `X tᵢ₊₁ - X tᵢ`.
+  refine IndepFun.hasGaussianLaw_sub_of_sub (law' _) (law' _) ?_
+  -- This follows from the fact that `X` has independent increments and `X ⊥ = 0` almost surely.
+  exact incr.indepFun_eval_sub bot_le
+    (monotone_orderEmbOfFinWithBot I (Fin.castSucc_le_succ i)) h_bot
+
+/-- A stochastic process `X` with independent increments, such that `X t` is Gaussian for
 all `t` and such that `X ⊥ = 0` almost surely is a Gaussian process. -/
 public lemma HasIndepIncrements.isGaussianProcess [OrderBot T]
     [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E]
     [SecondCountableTopology E] [CompleteSpace E]
     {X : T → Ω → E} (law : ∀ t, HasGaussianLaw (X t) P) (h_bot : ∀ᵐ ω ∂P, X ⊥ ω = 0)
     (incr : HasIndepIncrements X P) :
-    IsGaussianProcess X P where
-  hasGaussianLaw I := by
-    -- Label `t₁ < ... < tₙ` the elements of `I`.
-    -- We want to show that `(X t₁, ..., X tₙ)` is Gaussian.
-    have := (law ⊥).isProbabilityMeasure
-    obtain rfl | hI := I.eq_empty_or_nonempty
-    · -- If `I` is empty, there is nothing to say.
-      exact .of_subsingleton
-    -- Otherwise we know that `(X t₁, ..., X tₙ) = f (X t₁ - X ⊥, X t₂ - X t₁, ..., X tₙ - X tₙ₋₁)`
-    -- almost surely (because `X ⊥ = 0` almost surely)
-    -- for a certain continuous linear map `f` called here `incrementsToRestrict I`.
-    have := incrementsToRestrict_increments_orderEmbOfFinWithBot_ae_eq_restrict ℝ h_bot I
-    -- Therefore it is enough to show that `(X t₁ - X ⊥, X t₂ - X t₁, ..., X tₙ - X tₙ₋₁)` is
-    -- Gaussian.
-    refine .congr (.map ?_ _) this.symm
-    -- Because they are independent, it is enough to show that each `X tᵢ₊₁ - X tᵢ` is Gaussian.
-    refine (incr _ _ (monotone_orderEmbOfFinWithBot I)).hasGaussianLaw fun i ↦ ?_
-    -- Because `X tᵢ` and `X tᵢ₊₁` are Gaussian, it is enough to show that
-    -- `X tᵢ` is independent from `X tᵢ₊₁ - X tᵢ`.
-    refine IndepFun.hasGaussianLaw_sub_of_sub (law _) (law _) ?_
-    -- This follows from the fact that `X` has independent increments and `X ⊥ = 0` almost surely.
-    exact incr.indepFun_eval_sub bot_le
-      (monotone_orderEmbOfFinWithBot I (Fin.castSucc_le_succ i)) h_bot
+    IsGaussianProcess X P := by
+  have := (law ⊥).isProbabilityMeasure
+  exact incr.isGaussianProcess_of_bot_ae_eq_zero (fun t _ ↦ law t) h_bot
 
 end ProbabilityTheory

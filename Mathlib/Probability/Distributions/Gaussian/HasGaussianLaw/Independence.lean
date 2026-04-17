@@ -279,35 +279,33 @@ variable {E F : Type*}
     [NormedAddCommGroup F] [MeasurableSpace F]
     [CompleteSpace F] [BorelSpace F] [SecondCountableTopology F]
 
+omit [CompleteSpace E] [CompleteSpace F] [SecondCountableTopology E]
+  [SecondCountableTopology F] in
 /-- Independent Gaussian random variables are jointly Gaussian. -/
-lemma IndepFun.hasGaussianLaw [NormedSpace ℝ E] [NormedSpace ℝ F] {X : Ω → E} {Y : Ω → F}
-    (hX : HasGaussianLaw X P) (hY : HasGaussianLaw Y P) (hXY : X ⟂ᵢ[P] Y) :
-    HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P where
+lemma IndepFun.hasGaussianLaw [NormedSpace ℝ E] [NormedSpace ℝ F]
+    [SecondCountableTopologyEither E F]
+    {X : Ω → E} {Y : Ω → F} (hX : HasGaussianLaw X P) (hY : HasGaussianLaw Y P)
+    (hXY : X ⟂ᵢ[P] Y) : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P where
   isGaussian_map := by
-    have := hX.isProbabilityMeasure
-    rw [isGaussian_iff_gaussian_charFunDual]
-    classical
-    refine ⟨(∫ x, x ∂P.map X, ∫ y, y ∂P.map Y),
-      .diagonalStrongDualProd (covarianceBilinDual (P.map X)) (covarianceBilinDual (P.map Y)),
-      isPosSemidef_diagonalStrongDualProd isPosSemidef_covarianceBilinDual
-        isPosSemidef_covarianceBilinDual, fun L ↦ ?_⟩
-    rw [(indepFun_iff_charFunDual_prod (by fun_prop) (by fun_prop)).1 hXY]
-    have : (∫ x, x ∂Measure.map X P, ∫ y, y ∂Measure.map Y P) =
-        ContinuousLinearMap.inl ℝ E F (∫ x, x ∂Measure.map X P) +
-        ContinuousLinearMap.inr ℝ E F (∫ y, y ∂Measure.map Y P) := by simp
-    simp only [this, map_add, ofReal_add, add_mul, diagonalStrongDualProd_apply, add_div,
-      add_sub_add_comm, exp_add]
-    congr
-    · rw [hX.isGaussian_map.charFunDual_eq, integral_complex_ofReal, integral_comp_id_comm,
-        covarianceBilinDual_self_eq_variance]
-      · simp
-      · exact hX.isGaussian_map.memLp_two_id
-      · exact hX.isGaussian_map.integrable_id
-    · rw [hY.isGaussian_map.charFunDual_eq, integral_complex_ofReal, integral_comp_id_comm,
-        covarianceBilinDual_self_eq_variance]
-      · simp
-      · exact hY.isGaussian_map.memLp_two_id
-      · exact hY.isGaussian_map.integrable_id
+    change IsGaussian (P.map (fun ω ↦ (X ω, Y ω)))
+    refine isGaussian_of_map_eq_gaussianReal fun L ↦ ?_
+    let X' : Ω → ℝ := (L.comp (.inl ℝ E F)) ∘ X
+    let Y' : Ω → ℝ := (L.comp (.inr ℝ E F)) ∘ Y
+    have h1 : HasGaussianLaw X' P := hX.map_fun _
+    have h2 : HasGaussianLaw Y' P := hY.map_fun _
+    have h12 : IndepFun X' Y' P := hXY.comp (by fun_prop) (by fun_prop)
+    refine ⟨(∫ x, x ∂P.map X') + ∫ y, y ∂P.map Y',
+      Var[id; P.map X'].toNNReal + Var[id; P.map Y'].toNNReal, ?_⟩
+    rw [show (P.map (fun ω ↦ (X ω, Y ω))).map L = P.map (L ∘ (fun ω ↦ (X ω, Y ω))) by
+      rw [AEMeasurable.map_map_of_aemeasurable (by fun_prop) (by fun_prop)]]
+    have hfun : L ∘ (fun ω ↦ (X ω, Y ω)) = X' + Y' := by
+      ext ω
+      simp [X', Y', Function.comp_def, -ContinuousLinearMap.coe_comp',
+        ← comp_inl_add_comp_inr]
+    rw [hfun]
+    simpa [X', Y', Function.comp_def] using gaussianReal_add_gaussianReal_of_indepFun h12
+      (IsGaussian.eq_gaussianReal _ h1.isGaussian_map)
+      (IsGaussian.eq_gaussianReal _ h2.isGaussian_map)
 
 /-- If $(X, Y)$ is Gaussian, then $X$ and $Y$ are independent if they are uncorrelated. -/
 lemma HasGaussianLaw.indepFun_of_covariance_strongDual [NormedSpace ℝ E] [NormedSpace ℝ F]
@@ -395,22 +393,22 @@ lemma iIndepFun.hasGaussianLaw_fun_sum [CompleteSpace E] {ι : Type*} [Fintype �
     HasGaussianLaw (fun ω ↦ ∑ i, X i ω) P :=
     (hX2.hasGaussianLaw hX1).fun_sum
 
-lemma iIndepFun.hasGaussianLaw_add [CompleteSpace E] {X Y : Ω → E}
+lemma iIndepFun.hasGaussianLaw_add {X Y : Ω → E}
     (hX : HasGaussianLaw X P) (hY : HasGaussianLaw Y P) (h : X ⟂ᵢ[P] Y) :
     HasGaussianLaw (X + Y) P :=
   (h.hasGaussianLaw hX hY).add
 
-lemma iIndepFun.hasGaussianLaw_fun_add [CompleteSpace E] {X Y : Ω → E}
+lemma iIndepFun.hasGaussianLaw_fun_add {X Y : Ω → E}
     (hX : HasGaussianLaw X P) (hY : HasGaussianLaw Y P) (h : X ⟂ᵢ[P] Y) :
     HasGaussianLaw (fun ω ↦ X ω + Y ω) P :=
   (h.hasGaussianLaw hX hY).add
 
-lemma iIndepFun.hasGaussianLaw_sub [CompleteSpace E] {X Y : Ω → E}
+lemma iIndepFun.hasGaussianLaw_sub {X Y : Ω → E}
     (hX : HasGaussianLaw X P) (hY : HasGaussianLaw Y P) (h : X ⟂ᵢ[P] Y) :
     HasGaussianLaw (X - Y) P :=
   (h.hasGaussianLaw hX hY).sub
 
-lemma iIndepFun.hasGaussianLaw_fun_sub [CompleteSpace E] {X Y : Ω → E}
+lemma iIndepFun.hasGaussianLaw_fun_sub {X Y : Ω → E}
     (hX : HasGaussianLaw X P) (hY : HasGaussianLaw Y P) (h : X ⟂ᵢ[P] Y) :
     HasGaussianLaw (fun ω ↦ X ω - Y ω) P :=
   (h.hasGaussianLaw hX hY).sub

@@ -135,11 +135,14 @@ lemma parallelComp_comm {η : Kernel Z T} :
   rw [parallelComp_id_left_comp_parallelComp, parallelComp_id_right_comp_parallelComp,
     comp_id, comp_id]
 
-lemma id_parallelComp_comp_parallelComp_id [IsSFiniteKernel κ] (η : Kernel Z T) :
+lemma id_parallelComp_comp_parallelComp_id (η : Kernel Z T) :
     Kernel.id ∥ₖ κ ∘ₖ (η ∥ₖ Kernel.id) = η ∥ₖ κ := by
-  rw [parallelComp_id_left_comp_parallelComp]
-  congr
-  exact comp_id κ
+  by_cases hκ : IsSFiniteKernel κ
+  · let _ : IsSFiniteKernel κ := hκ
+    rw [parallelComp_id_left_comp_parallelComp]
+    congr
+    exact comp_id κ
+  · simp [hκ]
 
 end ParallelComp
 

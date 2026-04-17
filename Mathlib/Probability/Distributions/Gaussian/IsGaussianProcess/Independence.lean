@@ -64,13 +64,12 @@ independent if for all $t_1, t_2 \in T$ with $t_1 \ne t_2$ and
 $s_1 \in S_{t_1}$, $s_2 \in S_{t_2}$, $X^{t_1}_{s_1}$ and $X^{t_2}_{s_2}$ are uncorrelated. -/
 lemma iIndepFun_of_covariance_strongDual [NormedSpace ℝ E]
     (hX : IsGaussianProcess (fun (p : (t : T) × S t) ω ↦ X p.1 p.2 ω) P)
-    (mX : ∀ t s, AEMeasurable (X t s) P)
     (h : ∀ t₁ t₂, t₁ ≠ t₂ → ∀ (s₁ : S t₁) (s₂ : S t₂) (L₁ L₂ : StrongDual ℝ E),
       cov[L₁ ∘ X t₁ s₁, L₂ ∘ X t₂ s₂; P] = 0) :
     iIndepFun (fun t ω s ↦ X t s ω) P := by
   have := hX.isProbabilityMeasure
   classical
-  refine iIndepFun.iIndepFun_process₀ mX fun I J ↦
+  refine iIndepFun.iIndepFun_process₀ (fun t s ↦ hX.aemeasurable ⟨t, s⟩) fun I J ↦
     HasGaussianLaw.iIndepFun_of_covariance_strongDual ?_ fun i j hij L₁ L₂ ↦ ?_
   · let L : (I.sigma (fun i ↦ if hi : i ∈ I then J ⟨i, hi⟩ else ∅) → E) →L[ℝ] (i : I) → J i → E :=
       { toFun x i j := x ⟨⟨i, j⟩, by simp⟩
@@ -92,11 +91,10 @@ independent if for all $t_1, t_2 \in T$ with $t_1 \ne t_2$ and
 $s_1 \in S_{t_1}$, $s_2 \in S_{t_2}$, $X^{t_1}_{s_1}$ and $X^{t_2}_{s_2}$ are uncorrelated. -/
 lemma iIndepFun_of_covariance_inner [InnerProductSpace ℝ E]
     (hX : IsGaussianProcess (fun (p : (t : T) × S t) ω ↦ X p.1 p.2 ω) P)
-    (mX : ∀ t s, AEMeasurable (X t s) P)
     (h : ∀ t₁ t₂, t₁ ≠ t₂ → ∀ (s₁ : S t₁) (s₂ : S t₂) (x y : E),
       cov[fun ω ↦ ⟪x, X t₁ s₁ ω⟫, fun ω ↦ ⟪y, X t₂ s₂ ω⟫; P] = 0) :
     ProbabilityTheory.iIndepFun (fun t ω s ↦ X t s ω) P :=
-  hX.iIndepFun_of_covariance_strongDual mX fun t₁ t₂ ht s₁ s₂ L₁ L₂ ↦ by
+  hX.iIndepFun_of_covariance_strongDual fun t₁ t₂ ht s₁ s₂ L₁ L₂ ↦ by
     simpa using h t₁ t₂ ht s₁ s₂ ((toDual ℝ E).symm L₁) ((toDual ℝ E).symm L₂)
 
 set_option backward.isDefEq.respectTransparency false in
@@ -105,10 +103,9 @@ independent if for all $t_1, t_2 \in T$ with $t_1 \ne t_2$ and
 $s_1 \in S_{t_1}$, $s_2 \in S_{t_2}$, $X^{t_1}_{s_1}$ and $X^{t_2}_{s_2}$ are uncorrelated. -/
 lemma iIndepFun_of_covariance_eq_zero {X : (t : T) → (s : S t) → Ω → ℝ}
     (hX : IsGaussianProcess (fun (p : (t : T) × S t) ω ↦ X p.1 p.2 ω) P)
-    (mX : ∀ t s, AEMeasurable (X t s) P)
     (h : ∀ t₁ t₂, t₁ ≠ t₂ → ∀ (s₁ : S t₁) (s₂ : S t₂), cov[X t₁ s₁, X t₂ s₂; P] = 0) :
     ProbabilityTheory.iIndepFun (fun t ω s ↦ X t s ω) P :=
-  hX.iIndepFun_of_covariance_inner mX fun _ _ h' _ _ _ _ ↦ by
+  hX.iIndepFun_of_covariance_inner fun _ _ h' _ _ _ _ ↦ by
     simp [covariance_mul_const_left, covariance_mul_const_right, h _ _ h']
 
 end iIndepFun
@@ -121,11 +118,11 @@ variable {S : Type*} {X : S → Ω → E} {Y : T → Ω → E}
 are independent if for all $s \in S$ and $t \in T$, $X_s$ and $Y_t$ are uncorrelated. -/
 lemma indepFun_of_covariance_strongDual [NormedSpace ℝ E]
     (hXY : IsGaussianProcess (Sum.elim X Y) P)
-    (mX : ∀ s, AEMeasurable (X s) P) (mY : ∀ t, AEMeasurable (Y t) P)
     (h : ∀ s t (L₁ L₂ : StrongDual ℝ E), cov[L₁ ∘ X s, L₂ ∘ Y t; P] = 0) :
     IndepFun (fun ω s ↦ X s ω) (fun ω t ↦ Y t ω) P := by
   have := hXY.isProbabilityMeasure
-  refine IndepFun.process_indepFun_process₀ mX mY fun I J ↦
+  refine IndepFun.process_indepFun_process₀
+    (fun s ↦ hXY.aemeasurable (.inl s)) (fun t ↦ hXY.aemeasurable (.inr t)) fun I J ↦
     HasGaussianLaw.indepFun_of_covariance_strongDual ?_ fun L₁ L₂ ↦ ?_
   · let L : (I.disjSum J → E) →L[ℝ] (I → E) × (J → E) :=
       { toFun x := (fun s ↦ x ⟨Sum.inl s, inl_mem_disjSum.2 s.2⟩,
@@ -147,20 +144,18 @@ lemma indepFun_of_covariance_strongDual [NormedSpace ℝ E]
 are independent if for all $s \in S$ and $t \in T$, $X_s$ and $Y_t$ are uncorrelated. -/
 lemma indepFun_of_covariance_inner [InnerProductSpace ℝ E]
     (hXY : IsGaussianProcess (Sum.elim X Y) P)
-    (mX : ∀ s, AEMeasurable (X s) P) (mY : ∀ t, AEMeasurable (Y t) P)
     (h : ∀ s t x y, cov[fun ω ↦ ⟪x, X s ω⟫, fun ω ↦ ⟪y, Y t ω⟫; P] = 0) :
     IndepFun (fun ω s ↦ X s ω) (fun ω t ↦ Y t ω) P :=
-  hXY.indepFun_of_covariance_strongDual mX mY fun s t L₁ L₂ ↦ by
+  hXY.indepFun_of_covariance_strongDual fun s t L₁ L₂ ↦ by
     simpa using h s t ((toDual ℝ E).symm L₁) ((toDual ℝ E).symm L₂)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Two Gaussian processes $(X_s)_{s \in S}$ and $(Y_t)_{t \in T}$ that are jointly Gaussian
 are independent if for all $s \in S$ and $t \in T$, $X_s$ and $Y_t$ are uncorrelated. -/
 lemma indepFun_of_covariance_eq_zero {X : S → Ω → ℝ} {Y : T → Ω → ℝ}
-    (hXY : IsGaussianProcess (Sum.elim X Y) P) (mX : ∀ s, AEMeasurable (X s) P)
-    (mY : ∀ t, AEMeasurable (Y t) P) (h : ∀ s t, cov[X s, Y t; P] = 0) :
+    (hXY : IsGaussianProcess (Sum.elim X Y) P) (h : ∀ s t, cov[X s, Y t; P] = 0) :
     IndepFun (fun ω s ↦ X s ω) (fun ω t ↦ Y t ω) P :=
-  hXY.indepFun_of_covariance_inner mX mY fun _ _ _ _ ↦ by
+  hXY.indepFun_of_covariance_inner fun _ _ _ _ ↦ by
     simp [covariance_mul_const_left, covariance_mul_const_right, h]
 
 end IndepFun

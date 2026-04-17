@@ -194,26 +194,21 @@ lemma compProd_preimage_fst {s : Set β} (hs : MeasurableSet s) (κ : Kernel α 
   simp_rw [this]
   rw [lintegral_indicator_const hs, one_mul]
 
-lemma compProd_deterministic_apply [MeasurableSingletonClass γ] {f : α × β → γ} (hf : Measurable f)
+lemma compProd_deterministic_apply {f : α × β → γ} (hf : Measurable f)
     {s : Set (β × γ)} (hs : MeasurableSet s) (κ : Kernel α β) [IsSFiniteKernel κ] (x : α) :
     (κ ⊗ₖ deterministic f hf) x s = κ x {b | (b, f (x, b)) ∈ s} := by
   classical
-  simp only [deterministic_apply, Measure.dirac_apply,
-    Set.indicator_apply, Pi.one_apply, compProd_apply hs]
+  rw [compProd_apply hs]
   let t := {b | (b, f (x, b)) ∈ s}
   have ht : MeasurableSet t := (measurable_id.prodMk (hf.comp measurable_prodMk_left)) hs
-  rw [← lintegral_add_compl _ ht]
-  convert add_zero _
-  · suffices ∀ b ∈ tᶜ, (if f (x, b) ∈ Prod.mk b ⁻¹' s then (1 : ℝ≥0∞) else 0) = 0 by
-      rw [setLIntegral_congr_fun ht.compl this, lintegral_zero]
-    intro b hb
-    simp only [t, Set.mem_compl_iff, Set.mem_setOf_eq] at hb
-    simp [hb]
-  · suffices ∀ b ∈ t, (if f (x, b) ∈ Prod.mk b ⁻¹' s then (1 : ℝ≥0∞) else 0) = 1 by
-      rw [setLIntegral_congr_fun ht this, setLIntegral_one]
-    intro b hb
-    simp only [t, Set.mem_setOf_eq] at hb
-    simp [hb]
+  have h_det :
+      (fun b => deterministic f hf (x, b) (Prod.mk b ⁻¹' s)) =
+        t.indicator (fun _ ↦ (1 : ℝ≥0∞)) := by
+    ext b
+    rw [deterministic_apply' hf (x, b) (measurable_prodMk_left hs)]
+    simp [t, Set.indicator_apply]
+  rw [h_det]
+  simpa [t] using (lintegral_indicator_one (μ := κ x) ht)
 
 section Ae
 
@@ -275,9 +270,10 @@ end Ae
 
 section Restrict
 
-variable {κ : Kernel α β} [IsSFiniteKernel κ] {η : Kernel (α × β) γ} [IsSFiniteKernel η]
+variable {κ : Kernel α β} {η : Kernel (α × β) γ}
 
-theorem compProd_restrict {s : Set β} {t : Set γ} (hs : MeasurableSet s) (ht : MeasurableSet t) :
+theorem compProd_restrict [IsSFiniteKernel κ] [IsSFiniteKernel η]
+    {s : Set β} {t : Set γ} (hs : MeasurableSet s) (ht : MeasurableSet t) :
     Kernel.restrict κ hs ⊗ₖ Kernel.restrict η ht = Kernel.restrict (κ ⊗ₖ η) (hs.prod ht) := by
   ext a u hu
   rw [compProd_apply hu, restrict_apply' _ _ _ hu, compProd_apply (hu.inter (hs.prod ht))]
@@ -293,15 +289,29 @@ theorem compProd_restrict {s : Set β} {t : Set γ} (hs : MeasurableSet s) (ht :
   simp_rw [this]
   rw [lintegral_indicator hs]
 
-theorem compProd_restrict_left {s : Set β} (hs : MeasurableSet s) :
+theorem compProd_restrict_left [IsSFiniteKernel κ] {s : Set β} (hs : MeasurableSet s) :
     Kernel.restrict κ hs ⊗ₖ η = Kernel.restrict (κ ⊗ₖ η) (hs.prod MeasurableSet.univ) := by
-  rw [← compProd_restrict hs MeasurableSet.univ]
-  congr; exact Kernel.restrict_univ.symm
+  by_cases hη : IsSFiniteKernel η
+  · letI := hη
+    rw [← compProd_restrict hs MeasurableSet.univ]
+    congr
+    exact Kernel.restrict_univ.symm
+  · rw [Kernel.compProd_of_not_isSFiniteKernel_right _ _ hη,
+      Kernel.compProd_of_not_isSFiniteKernel_right _ _ hη]
+    ext a u hu
+    simp [Kernel.restrict_apply]
 
-theorem compProd_restrict_right {t : Set γ} (ht : MeasurableSet t) :
+theorem compProd_restrict_right [IsSFiniteKernel η] {t : Set γ} (ht : MeasurableSet t) :
     κ ⊗ₖ Kernel.restrict η ht = Kernel.restrict (κ ⊗ₖ η) (MeasurableSet.univ.prod ht) := by
-  rw [← compProd_restrict MeasurableSet.univ ht]
-  congr; exact Kernel.restrict_univ.symm
+  by_cases hκ : IsSFiniteKernel κ
+  · letI := hκ
+    rw [← compProd_restrict MeasurableSet.univ ht]
+    congr
+    exact Kernel.restrict_univ.symm
+  · rw [Kernel.compProd_of_not_isSFiniteKernel_left _ _ hκ,
+      Kernel.compProd_of_not_isSFiniteKernel_left _ _ hκ]
+    ext a u hu
+    simp [Kernel.restrict_apply]
 
 end Restrict
 
@@ -534,17 +544,23 @@ lemma compProd_sum_right {ι : Type*} [Countable ι]
   · exact fun _ ↦ (measurable_kernel_prodMk_left' hs a).aemeasurable
 
 lemma comapRight_compProd_id_prod {δ : Type*} {mδ : MeasurableSpace δ}
-    (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel (α × β) γ) [IsSFiniteKernel η]
+    (κ : Kernel α β) (η : Kernel (α × β) γ) [IsSFiniteKernel η]
     {f : δ → γ} (hf : MeasurableEmbedding f) :
     comapRight (κ ⊗ₖ η) (MeasurableEmbedding.id.prodMap hf) = κ ⊗ₖ (comapRight η hf) := by
-  ext a t ht
-  rw [comapRight_apply' _ _ _ ht, compProd_apply, compProd_apply ht]
-  · refine lintegral_congr fun b ↦ ?_
-    rw [comapRight_apply']
-    · congr with x
-      grind
-    · exact measurable_prodMk_left ht
-  · exact (MeasurableEmbedding.id.prodMap hf).measurableSet_image.mpr ht
+  by_cases hκ : IsSFiniteKernel κ
+  · letI := hκ
+    ext a t ht
+    rw [comapRight_apply' _ _ _ ht, compProd_apply, compProd_apply ht]
+    · refine lintegral_congr fun b ↦ ?_
+      rw [comapRight_apply']
+      · congr with x
+        grind
+      · exact measurable_prodMk_left ht
+    · exact (MeasurableEmbedding.id.prodMap hf).measurableSet_image.mpr ht
+  · rw [Kernel.compProd_of_not_isSFiniteKernel_left _ _ hκ,
+      Kernel.compProd_of_not_isSFiniteKernel_left _ _ hκ]
+    ext a t ht
+    simp [comapRight_apply' _ _ _ ht]
 
 end CompositionProduct
 

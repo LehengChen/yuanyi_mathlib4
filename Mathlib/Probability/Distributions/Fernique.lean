@@ -516,30 +516,44 @@ The assumptions on `a` and `μ {x | ‖x‖ ≤ a}` are not needed and will be r
 general theorem. -/
 lemma exists_integrable_exp_sq_of_map_rotation_eq_self' [IsProbabilityMeasure μ]
     (h_rot : (μ.prod μ).map (ContinuousLinearMap.rotation (-(π / 4))) = μ.prod μ)
-    {a : ℝ} (ha_pos : 0 < a) (ha_gt : 2⁻¹ < μ {x | ‖x‖ ≤ a}) (ha_lt : μ {x | ‖x‖ ≤ a} < 1) :
+    {a : ℝ} (ha_pos : 0 < a) (ha_gt : 2⁻¹ < μ {x | ‖x‖ ≤ a}) :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
-  let c := μ {x | ‖x‖ ≤ a}
-  replace hc_lt : c < 1 := ha_lt
-  have hc_lt_top : c < ∞ := measure_lt_top _ _
-  have hc_one_sub_lt_top : 1 - c < ∞ := lt_top_of_lt (b := 2) (tsub_le_self.trans_lt (by simp))
-  have h_one_sub_lt_self : 1 - c < c := by
-    refine ENNReal.sub_lt_of_lt_add hc_lt.le ?_
-    rw [← two_mul]
-    rwa [inv_eq_one_div, ENNReal.div_lt_iff (by simp) (by simp), mul_comm] at ha_gt
-  have h_pos : 0 < logRatio c * a⁻¹ ^ 2 := mul_pos (logRatio_pos ha_gt hc_lt) (by positivity)
-  refine ⟨logRatio c * a⁻¹ ^ 2, h_pos, ⟨by fun_prop, ?_⟩⟩
-  simp only [HasFiniteIntegral, ← ofReal_norm_eq_enorm, Real.norm_eq_abs, Real.abs_exp]
-  -- `⊢ ∫⁻ x, ENNReal.ofReal (rexp (logRatio c * a⁻¹ ^ 2 * ‖x‖ ^ 2)) ∂μ < ∞`
-  refine (lintegral_exp_mul_sq_norm_le_of_map_rotation_eq_self h_rot le_rfl ha_gt).trans_lt ?_
-  refine ENNReal.add_lt_top.mpr ⟨ENNReal.ofReal_lt_top, ?_⟩
-  refine Summable.tsum_ofReal_lt_top <|
-    Real.summable_exp_nat_mul_of_ge ?_ (fun i ↦ mod_cast (Nat.lt_pow_self (by simp)).le)
-  refine mul_neg_of_neg_of_pos (by simp) (Real.log_pos ?_)
-  change 1 < (c / (1 - c)).toReal
-  simp only [ENNReal.toReal_div, one_lt_div_iff, ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt,
-    hc_one_sub_lt_top, and_self, true_and]
-  rw [ENNReal.toReal_lt_toReal hc_one_sub_lt_top.ne hc_lt_top.ne]
-  exact .inl h_one_sub_lt_self
+  by_cases ha_lt : μ {x | ‖x‖ ≤ a} < 1
+  · let c := μ {x | ‖x‖ ≤ a}
+    replace hc_lt : c < 1 := ha_lt
+    have hc_lt_top : c < ∞ := measure_lt_top _ _
+    have hc_one_sub_lt_top : 1 - c < ∞ := lt_top_of_lt (b := 2) (tsub_le_self.trans_lt (by simp))
+    have h_one_sub_lt_self : 1 - c < c := by
+      refine ENNReal.sub_lt_of_lt_add hc_lt.le ?_
+      rw [← two_mul]
+      rwa [inv_eq_one_div, ENNReal.div_lt_iff (by simp) (by simp), mul_comm] at ha_gt
+    have h_pos : 0 < logRatio c * a⁻¹ ^ 2 := mul_pos (logRatio_pos ha_gt hc_lt) (by positivity)
+    refine ⟨logRatio c * a⁻¹ ^ 2, h_pos, ⟨by fun_prop, ?_⟩⟩
+    simp only [HasFiniteIntegral, ← ofReal_norm_eq_enorm, Real.norm_eq_abs, Real.abs_exp]
+    -- `⊢ ∫⁻ x, ENNReal.ofReal (rexp (logRatio c * a⁻¹ ^ 2 * ‖x‖ ^ 2)) ∂μ < ∞`
+    refine (lintegral_exp_mul_sq_norm_le_of_map_rotation_eq_self h_rot le_rfl ha_gt).trans_lt ?_
+    refine ENNReal.add_lt_top.mpr ⟨ENNReal.ofReal_lt_top, ?_⟩
+    refine Summable.tsum_ofReal_lt_top <|
+      Real.summable_exp_nat_mul_of_ge ?_ (fun i ↦ mod_cast (Nat.lt_pow_self (by simp)).le)
+    refine mul_neg_of_neg_of_pos (by simp) (Real.log_pos ?_)
+    change 1 < (c / (1 - c)).toReal
+    simp only [ENNReal.toReal_div, one_lt_div_iff, ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt,
+      hc_one_sub_lt_top, and_self, true_and]
+    rw [ENNReal.toReal_lt_toReal hc_one_sub_lt_top.ne hc_lt_top.ne]
+    exact .inl h_one_sub_lt_self
+  · have ha_eq : μ {x | ‖x‖ ≤ a} = 1 := le_antisymm prob_le_one (not_lt.mp ha_lt)
+    have ha' : ∀ᵐ x ∂μ, ‖x‖ ≤ a := by
+      rwa [ae_iff_prob_eq_one]
+      refine measurable_to_prop ?_
+      rw [show (fun x : E ↦ ‖x‖ ≤ a) ⁻¹' {True} = {x : E | ‖x‖ ≤ a} by ext; simp]
+      exact measurableSet_le (by fun_prop) (by fun_prop)
+    refine ⟨1, by positivity, ?_⟩
+    refine integrable_of_le_of_le (g₁ := 0) (g₂ := fun _ ↦ rexp (a ^ 2)) (by fun_prop)
+      ?_ ?_ (integrable_const _) (integrable_const _)
+    · exact ae_of_all _ fun _ ↦ by positivity
+    · filter_upwards [ha'] with x hx
+      simp only [one_mul]
+      gcongr
 
 /-- Auxiliary lemma for `exists_integrable_exp_sq_of_map_rotation_eq_self`, in which we will replace
 the assumption `IsProbabilityMeasure μ` by the weaker `IsFiniteMeasure μ`. -/
@@ -547,48 +561,23 @@ lemma exists_integrable_exp_sq_of_map_rotation_eq_self_of_isProbabilityMeasure
     [IsProbabilityMeasure μ]
     (h_rot : (μ.prod μ).map (ContinuousLinearMap.rotation (-(π / 4))) = μ.prod μ) :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
-  -- If there exists `a > 0` such that `2⁻¹ < μ {x | ‖x‖ ≤ a} < 1`, we can call the previous lemma.
-  by_cases h_meas_Ioo : ∃ a, 0 < a ∧ 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1
-  · obtain ⟨a, ha_pos, ha_gt, ha_lt⟩ : ∃ a, 0 < a ∧ 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 :=
-      h_meas_Ioo
-    exact exists_integrable_exp_sq_of_map_rotation_eq_self' h_rot ha_pos ha_gt ha_lt
-  -- Otherwise, we can find `b > 0` such that the ball of radius `b` has full measure
-  obtain ⟨b, hb⟩ : ∃ b, μ {x | ‖x‖ ≤ b} = 1 := by
-    by_contra h_ne
-    push Not at h_meas_Ioo h_ne
+  have h_univ : (Set.univ : Set E) = ⋃ n : ℕ, {x | ‖x‖ ≤ (n : ℝ) + 1} := by
+    ext x
+    simp only [Set.mem_univ, Set.mem_iUnion, Set.mem_setOf_eq, true_iff]
+    obtain ⟨n, hn⟩ := exists_nat_ge ‖x‖
+    exact ⟨n, hn.trans <| by exact_mod_cast Nat.le_succ n⟩
+  obtain ⟨n, hn_gt⟩ : ∃ n : ℕ, 2⁻¹ < μ {x | ‖x‖ ≤ (n : ℝ) + 1} := by
+    by_contra h
+    have h_le (n : ℕ) : μ {x | ‖x‖ ≤ (n : ℝ) + 1} ≤ 2⁻¹ := by
+      exact not_lt.mp fun hn ↦ h ⟨n, hn⟩
     suffices μ .univ ≤ 2⁻¹ by simp at this
-    have h_le a : μ {x | ‖x‖ ≤ a} ≤ 2⁻¹ := by
-      have h_of_pos a' (ha : 0 < a') : μ {x | ‖x‖ ≤ a'} ≤ 2⁻¹ := by
-        by_contra h_lt
-        refine h_ne a' ?_
-        exact le_antisymm prob_le_one (h_meas_Ioo a' ha (not_le.mp h_lt))
-      rcases le_or_gt a 0 with ha | ha
-      · calc μ {x | ‖x‖ ≤ a}
-        _ ≤ μ {x | ‖x‖ ≤ 1} := measure_mono fun x hx ↦ hx.trans (ha.trans (by positivity))
-        _ ≤ 2⁻¹ := h_of_pos _ (by positivity)
-      · exact h_of_pos a ha
-    have h_univ : (Set.univ : Set E) = ⋃ a : ℕ, {x | ‖x‖ ≤ a} := by
-      ext x
-      simp only [Set.mem_univ, Set.mem_iUnion, Set.mem_setOf_eq, true_iff]
-      exact exists_nat_ge _
     rw [h_univ, Monotone.measure_iUnion]
     · simp [h_le]
-    · intro a b hab x hx
+    · intro m n hmn x hx
       simp only [Set.mem_setOf_eq] at hx ⊢
-      exact hx.trans (mod_cast hab)
-  -- So we can take `C = 1` and show that `x ↦ exp (‖x‖ ^ 2)` is integrable, since it is bounded.
-  have hb' : ∀ᵐ x ∂μ, ‖x‖ ≤ b := by
-    rwa [ae_iff_prob_eq_one]
-    refine measurable_to_prop ?_
-    rw [show (fun x : E ↦ ‖x‖ ≤ b) ⁻¹' {True} = {x : E | ‖x‖ ≤ b} by ext; simp]
-    exact measurableSet_le (by fun_prop) (by fun_prop)
-  refine ⟨1, by positivity, ?_⟩
-  refine integrable_of_le_of_le (g₁ := 0) (g₂ := fun _ ↦ rexp (b ^ 2)) (by fun_prop)
-    ?_ ?_ (integrable_const _) (integrable_const _)
-  · exact ae_of_all _ fun _ ↦ by positivity
-  · filter_upwards [hb'] with x hx
-    simp only [one_mul]
-    gcongr
+      exact hx.trans <| by exact_mod_cast Nat.succ_le_succ hmn
+  have hn_pos : 0 < (n : ℝ) + 1 := by positivity
+  exact exists_integrable_exp_sq_of_map_rotation_eq_self' h_rot hn_pos hn_gt
 
 /-- **Fernique's theorem** for finite measures whose product is invariant by rotation: there exists
 `C > 0` such that the function `x ↦ exp (C * ‖x‖ ^ 2)` is integrable. -/

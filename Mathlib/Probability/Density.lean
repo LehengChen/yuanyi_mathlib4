@@ -165,15 +165,27 @@ theorem setLIntegral_pdf_le_map {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : M
   apply (withDensity_apply_le _ s).trans
   exact withDensity_pdf_le_map _ _ _ s
 
+theorem map_eq_withDensity_pdf_of_absolutelyContinuous {_ : MeasurableSpace Ω} (X : Ω → E)
+    (ℙ : Measure Ω) (μ : Measure E := by volume_tac)
+    [hμ : (map X ℙ).HaveLebesgueDecomposition μ] (hac : map X ℙ ≪ μ) :
+    map X ℙ = μ.withDensity (pdf X ℙ μ) := by
+  rw [pdf_def, withDensity_rnDeriv_eq _ _ hac]
+
 theorem map_eq_withDensity_pdf {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) [hX : HasPDF X ℙ μ] :
-    map X ℙ = μ.withDensity (pdf X ℙ μ) := by
-  rw [pdf_def, withDensity_rnDeriv_eq _ _ hX.absolutelyContinuous]
+    map X ℙ = μ.withDensity (pdf X ℙ μ) :=
+  map_eq_withDensity_pdf_of_absolutelyContinuous X ℙ μ hX.absolutelyContinuous
+
+theorem map_eq_setLIntegral_pdf_of_absolutelyContinuous {m : MeasurableSpace Ω} (X : Ω → E)
+    (ℙ : Measure Ω) (μ : Measure E := by volume_tac)
+    [hμ : (map X ℙ).HaveLebesgueDecomposition μ] (hac : map X ℙ ≪ μ) {s : Set E}
+    (hs : MeasurableSet s) : map X ℙ s = ∫⁻ x in s, pdf X ℙ μ x ∂μ := by
+  rw [← withDensity_apply _ hs, map_eq_withDensity_pdf_of_absolutelyContinuous X ℙ μ hac]
 
 theorem map_eq_setLIntegral_pdf {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) [hX : HasPDF X ℙ μ] {s : Set E}
-    (hs : MeasurableSet s) : map X ℙ s = ∫⁻ x in s, pdf X ℙ μ x ∂μ := by
-  rw [← withDensity_apply _ hs, map_eq_withDensity_pdf X ℙ μ]
+    (hs : MeasurableSet s) : map X ℙ s = ∫⁻ x in s, pdf X ℙ μ x ∂μ :=
+  map_eq_setLIntegral_pdf_of_absolutelyContinuous X ℙ μ hX.absolutelyContinuous hs
 
 namespace pdf
 
@@ -194,10 +206,16 @@ theorem eq_of_map_eq_withDensity [IsFiniteMeasure ℙ] {X : Ω → E} [HasPDF X 
   rw [lintegral_eq_measure_univ]
   exact measure_ne_top _ _
 
+theorem eq_of_map_eq_withDensity'_of_absolutelyContinuous [SigmaFinite μ] {X : Ω → E}
+    [hμ : (map X ℙ).HaveLebesgueDecomposition μ] (hac : map X ℙ ≪ μ) (f : E → ℝ≥0∞)
+    (hmf : AEMeasurable f μ) : map X ℙ = μ.withDensity f ↔ pdf X ℙ μ =ᵐ[μ] f := by
+  rw [map_eq_withDensity_pdf_of_absolutelyContinuous X ℙ μ hac]
+  exact withDensity_eq_iff_of_sigmaFinite (measurable_pdf X ℙ μ).aemeasurable hmf
+
 theorem eq_of_map_eq_withDensity' [SigmaFinite μ] {X : Ω → E} [HasPDF X ℙ μ] (f : E → ℝ≥0∞)
     (hmf : AEMeasurable f μ) : map X ℙ = μ.withDensity f ↔ pdf X ℙ μ =ᵐ[μ] f :=
-  map_eq_withDensity_pdf X ℙ μ ▸
-    withDensity_eq_iff_of_sigmaFinite (measurable_pdf X ℙ μ).aemeasurable hmf
+  eq_of_map_eq_withDensity'_of_absolutelyContinuous
+    (X := X) (ℙ := ℙ) (μ := μ) HasPDF.absolutelyContinuous f hmf
 
 nonrec theorem ae_lt_top [IsFiniteMeasure ℙ] {μ : Measure E} {X : Ω → E} :
     ∀ᵐ x ∂μ, pdf X ℙ μ x < ∞ :=
@@ -300,10 +318,13 @@ section TwoVariables
 variable {F : Type*} [MeasurableSpace F] {ν : Measure F} {X : Ω → E} {Y : Ω → F}
 
 /-- Random variables are independent iff their joint density is a product of marginal densities. -/
-theorem indepFun_iff_pdf_prod_eq_pdf_mul_pdf
-    [IsFiniteMeasure ℙ] [SigmaFinite μ] [SigmaFinite ν] [HasPDF (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν)] :
+theorem indepFun_iff_pdf_prod_eq_pdf_mul_pdf'
+    [SFinite ℙ] [SigmaFinite μ] [SigmaFinite ν]
+    [HasPDF (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν)]
+    (σX : SigmaFinite (ℙ.map X)) (σY : SigmaFinite (ℙ.map Y)) :
     IndepFun X Y ℙ ↔
-      pdf (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν) =ᵐ[μ.prod ν] fun z ↦ pdf X ℙ μ z.1 * pdf Y ℙ ν z.2 := by
+      pdf (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν) =ᵐ[μ.prod ν] fun z ↦
+        pdf X ℙ μ z.1 * pdf Y ℙ ν z.2 := by
   have : HasPDF X ℙ μ := quasiMeasurePreserving_hasPDF' (μ := μ.prod ν) (fun ω ↦ (X ω, Y ω))
     quasiMeasurePreserving_fst
   have : HasPDF Y ℙ ν := quasiMeasurePreserving_hasPDF' (μ := μ.prod ν) (fun ω ↦ (X ω, Y ω))
@@ -313,10 +334,20 @@ theorem indepFun_iff_pdf_prod_eq_pdf_mul_pdf
     prod_eq fun s t hs ht ↦ by rw [withDensity_apply _ (hs.prod ht), ← prod_restrict,
       lintegral_prod_mul (measurable_pdf X ℙ μ).aemeasurable (measurable_pdf Y ℙ ν).aemeasurable,
       map_eq_setLIntegral_pdf X ℙ μ hs, map_eq_setLIntegral_pdf Y ℙ ν ht]
-  rw [indepFun_iff_map_prod_eq_prod_map_map (HasPDF.aemeasurable X ℙ μ) (HasPDF.aemeasurable Y ℙ ν),
-    ← eq_of_map_eq_withDensity, h₀]
+  rw [indepFun_iff_map_prod_eq_prod_map_map' (HasPDF.aemeasurable X ℙ μ)
+      (HasPDF.aemeasurable Y ℙ ν) σX σY,
+    ← eq_of_map_eq_withDensity' (X := fun ω ↦ (X ω, Y ω)) (μ := μ.prod ν), h₀]
   exact (((measurable_pdf X ℙ μ).comp measurable_fst).mul
     ((measurable_pdf Y ℙ ν).comp measurable_snd)).aemeasurable
+
+/-- Random variables are independent iff their joint density is a product of marginal densities. -/
+theorem indepFun_iff_pdf_prod_eq_pdf_mul_pdf
+    [IsFiniteMeasure ℙ] [SigmaFinite μ] [SigmaFinite ν] [HasPDF (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν)] :
+    IndepFun X Y ℙ ↔
+      pdf (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν) =ᵐ[μ.prod ν] fun z ↦ pdf X ℙ μ z.1 * pdf Y ℙ ν z.2 := by
+  exact indepFun_iff_pdf_prod_eq_pdf_mul_pdf'
+    (ℙ := ℙ) (μ := μ) (ν := ν) (X := X) (Y := Y)
+    (σX := by infer_instance) (σY := by infer_instance)
 
 end TwoVariables
 

@@ -118,6 +118,12 @@ lemma IsGaussian.of_subsingleton [Subsingleton E] [IsProbabilityMeasure μ] :
   apply Subsingleton.set_cases (p := fun s ↦ μ s = _)
   all_goals simp
 
+section OpensMeasurable
+
+variable [OpensMeasurableSpace E]
+
+omit [BorelSpace E]
+
 lemma IsGaussian.memLp_dual (μ : Measure E) [IsGaussian μ] (L : StrongDual ℝ E)
     (p : ℝ≥0∞) (hp : p ≠ ∞) :
     MemLp L p μ := by
@@ -138,13 +144,6 @@ instance isGaussian_map (L : E →L[ℝ] F) : IsGaussian (μ.map L) :=
 
 instance isGaussian_map_equiv (L : E ≃L[ℝ] F) : IsGaussian (μ.map L) :=
   isGaussian_map (L : E →L[ℝ] F)
-
-lemma isGaussian_map_equiv_iff {μ : Measure E} (L : E ≃L[ℝ] F) :
-    IsGaussian (μ.map L) ↔ IsGaussian μ := by
-  refine ⟨fun h ↦ ?_, fun _ ↦ inferInstance⟩
-  suffices μ = (μ.map L).map L.symm by rw [this]; infer_instance
-  rw [Measure.map_map (by fun_prop) (by fun_prop)]
-  simp
 
 section charFunDual
 
@@ -175,7 +174,8 @@ theorem isGaussian_iff_charFunDual_eq {μ : Measure E} [IsFiniteMeasure μ] :
   simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul, ofReal_mul,
     Real.coe_toNNReal']
   congr
-  · rw [integral_const_mul, integral_complex_ofReal]
+  · simpa [integral_complex_ofReal] using
+      (integral_const_mul (μ := μ) (u : ℂ) fun x ↦ (L x : ℂ))
   · rw [max_eq_left (variance_nonneg _ _), mul_comm, ← ofReal_pow, ← ofReal_mul,
       ← variance_const_mul]
     congr
@@ -183,6 +183,14 @@ theorem isGaussian_iff_charFunDual_eq {μ : Measure E} [IsFiniteMeasure μ] :
 alias ⟨_, isGaussian_of_charFunDual_eq⟩ := isGaussian_iff_charFunDual_eq
 
 end charFunDual
+end OpensMeasurable
+
+lemma isGaussian_map_equiv_iff {μ : Measure E} (L : E ≃L[ℝ] F) :
+    IsGaussian (μ.map L) ↔ IsGaussian μ := by
+  refine ⟨fun h ↦ ?_, fun _ ↦ inferInstance⟩
+  suffices μ = (μ.map L).map L.symm by rw [this]; infer_instance
+  rw [Measure.map_map (by fun_prop) (by fun_prop)]
+  simp
 
 section charFun
 
@@ -190,7 +198,7 @@ open InnerProductSpace
 open scoped RealInnerProductSpace
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [MeasurableSpace E]
-    [BorelSpace E] {μ : Measure E}
+    [OpensMeasurableSpace E] {μ : Measure E}
 
 lemma IsGaussian.charFun_eq [IsGaussian μ] (t : E) :
     charFun μ t = exp (μ[fun x ↦ ⟪t, x⟫] * I - Var[fun x ↦ ⟪t, x⟫; μ] / 2) := by

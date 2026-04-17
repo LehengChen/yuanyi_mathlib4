@@ -48,12 +48,21 @@ noncomputable def binomialRandom : Measure (SimpleGraph V) :=
 
 @[inherit_doc] scoped notation "G(" V ", " p ")" => binomialRandom V p
 
-section Countable
-variable [Countable V]
+lemma measurableEmbedding_edgeSet_sym2 [Countable (Sym2 V)] :
+    MeasurableEmbedding (edgeSet : SimpleGraph V → Set (Sym2 V)) where
+  injective := edgeSet_injective
+  measurable := measurable_edgeSet
+  measurableSet_image' s hs := by
+    simp only [← measurable_mem, Set.mem_image, edgeSet_eq_iff, ↓existsAndEq, true_and,
+      Set.disjoint_right]
+    refine .and (hs.mem.comp measurable_fromEdgeSet) <| .forall fun e ↦ .imp ?_ ?_ <;> fun_prop
+
+section CountableSym2
+variable [Countable (Sym2 V)]
 
 variable (V p) in
 lemma binomialRandom_eq_map : G(V, p) = map fromEdgeSet setBer(Sym2.diagSetᶜ, p) := by
-  refine (map_eq_comap measurable_fromEdgeSet measurableEmbedding_edgeSet ?_
+  refine (map_eq_comap measurable_fromEdgeSet measurableEmbedding_edgeSet_sym2 ?_
     fromEdgeSet_edgeSet).symm
   filter_upwards [setBernoulli_ae_subset] with S hS
   exact ⟨fromEdgeSet S, by simpa [← Set.compl_setOf, Set.subset_compl_iff_disjoint_right] using hS⟩
@@ -61,7 +70,7 @@ lemma binomialRandom_eq_map : G(V, p) = map fromEdgeSet setBer(Sym2.diagSetᶜ, 
 variable (p) in
 lemma binomialRandom_apply' (S : Set (SimpleGraph V)) :
     G(V, p) S = setBer(Sym2.diagSetᶜ, p) (edgeSet '' S) := by
-  rw [binomialRandom, measurableEmbedding_edgeSet.comap_apply]
+  rw [binomialRandom, measurableEmbedding_edgeSet_sym2.comap_apply]
 
 variable (p) in
 lemma binomialRandom_apply (S : Set (SimpleGraph V)) :
@@ -71,7 +80,7 @@ lemma binomialRandom_apply (S : Set (SimpleGraph V)) :
   simp [binomialRandom_apply', setBernoulli_apply, ← Set.image_comp]
 
 instance : IsProbabilityMeasure G(V, p) := by
-  refine measurableEmbedding_edgeSet.isProbabilityMeasure_comap ?_
+  refine measurableEmbedding_edgeSet_sym2.isProbabilityMeasure_comap ?_
   filter_upwards [setBernoulli_ae_subset] with s hs
   refine ⟨.fromEdgeSet s, ?_⟩
   simpa [← Set.disjoint_compl_right_iff_subset, ← Set.compl_setOf] using hs
@@ -82,7 +91,7 @@ variable (V) in
 variable (V) in
 @[simp] lemma binomialRandom_one : G(V, 1) = dirac ⊤ := by simp [binomialRandom_eq_map]
 
-end Countable
+end CountableSym2
 
 variable (p) in
 @[simp] lemma binomialRandom_singleton [Finite V] (G : SimpleGraph V) :
@@ -90,7 +99,7 @@ variable (p) in
       toNNReal (σ p) ^ ((Nat.card V).choose 2 - G.edgeSet.ncard) := by
   classical
   cases nonempty_fintype V
-  simp only [binomialRandom, measurableEmbedding_edgeSet.comap_apply, Set.image_singleton,
+  simp only [binomialRandom, measurableEmbedding_edgeSet_sym2.comap_apply, Set.image_singleton,
     edgeSet_subset_compl_diagSet, setBernoulli_singleton, Set.toFinite]
   rw [Set.ncard_diff (by simp)]
   congr!
