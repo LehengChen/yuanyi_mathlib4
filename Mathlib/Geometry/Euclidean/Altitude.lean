@@ -298,10 +298,14 @@ lemma inner_vsub_altitudeFoot_vsub_altitudeFoot_eq_zero {i j : Fin (n + 1)} (h :
 
 /-- The inner product of an edge from `j` to `i` and the vector from the foot of `i` to `i`
 is the square of the height. -/
-lemma inner_vsub_vsub_altitudeFoot_eq_height_sq [NeZero n] {i j : Fin (n + 1)} (h : i ≠ j) :
+lemma inner_vsub_vsub_altitudeFoot_eq_height_sq {i j : Fin (n + 1)} (h : i ≠ j) :
+    have : NeZero n := by grind [neZero_iff]
     ⟪s.points i -ᵥ s.points j, s.points i -ᵥ s.altitudeFoot i⟫ = s.height i ^ 2 := by
+  haveI : NeZero n := by grind [neZero_iff]
   suffices ⟪s.points j -ᵥ s.altitudeFoot i, s.points i -ᵥ s.altitudeFoot i⟫ = 0 by
-    rwa [height, inner_vsub_vsub_left_eq_dist_sq_right_iff, inner_vsub_left_eq_zero_symm]
+    exact (by
+      simpa [height, inner_vsub_vsub_left_eq_dist_sq_right_iff, inner_vsub_left_eq_zero_symm]
+        using this)
   exact s.inner_vsub_altitudeFoot_vsub_altitudeFoot_eq_zero h
 
 variable [Nat.AtLeastTwo n]

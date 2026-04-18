@@ -86,17 +86,21 @@ theorem contMDiffOn_chart : ContMDiffOn I I n (chartAt H x) (chartAt H x).source
 theorem contMDiffOn_chart_symm : ContMDiffOn I I n (chartAt H x).symm (chartAt H x).target :=
   contMDiffOn_symm_of_mem_maximalAtlas <| chart_mem_maximalAtlas x
 
-theorem contMDiffAt_extend {x : M} (he : e ∈ maximalAtlas I n M) (hx : x ∈ e.source) :
-    ContMDiffAt I 𝓘(𝕜, E) n (e.extend I) x :=
-  (contMDiff_model _).comp x <| contMDiffAt_of_mem_maximalAtlas he hx
+omit [IsManifold I n M] in
+theorem contMDiffAt_extend {x : M} (he : ContMDiffAt I I n e x) :
+    ContMDiffAt I 𝓘(𝕜, E) n (e.extend I) x := by
+  simpa only [OpenPartialHomeomorph.extend_coe] using
+    (contMDiff_model (I := I) (n := n)).contMDiffAt.comp x he
 
-theorem contMDiffOn_extend (he : e ∈ maximalAtlas I n M) :
+omit [IsManifold I n M] in
+theorem contMDiffOn_extend (he : ContMDiffOn I I n e e.source) :
     ContMDiffOn I 𝓘(𝕜, E) n (e.extend I) e.source :=
-  fun _x' hx' ↦ (contMDiffAt_extend he hx').contMDiffWithinAt
+  fun x hx ↦
+    (contMDiffAt_extend <| (he x hx).contMDiffAt <| e.open_source.mem_nhds hx).contMDiffWithinAt
 
 theorem contMDiffAt_extChartAt' {x' : M} (h : x' ∈ (chartAt H x).source) :
     ContMDiffAt I 𝓘(𝕜, E) n (extChartAt I x) x' :=
-  contMDiffAt_extend (chart_mem_maximalAtlas x) h
+  contMDiffAt_extend <| contMDiffAt_of_mem_maximalAtlas (chart_mem_maximalAtlas x) h
 
 omit [IsManifold I n M] in
 theorem contMDiffAt_extChartAt : ContMDiffAt I 𝓘(𝕜, E) n (extChartAt I x) x := by
@@ -108,18 +112,17 @@ theorem contMDiffAt_extChartAt : ContMDiffAt I 𝓘(𝕜, E) n (extChartAt I x) 
 theorem contMDiffOn_extChartAt : ContMDiffOn I 𝓘(𝕜, E) n (extChartAt I x) (chartAt H x).source :=
   fun _x' hx' => (contMDiffAt_extChartAt' hx').contMDiffWithinAt
 
-theorem contMDiffOn_extend_symm (he : e ∈ maximalAtlas I n M) :
+omit [IsManifold I n M] in
+theorem contMDiffOn_extend_symm (he : ContMDiffOn I I n e.symm e.target) :
     ContMDiffOn 𝓘(𝕜, E) I n (e.extend I).symm (I '' e.target) := by
-  refine (contMDiffOn_symm_of_mem_maximalAtlas he).comp
-    (contMDiffOn_model_symm.mono <| image_subset_range _ _) ?_
+  refine he.comp (contMDiffOn_model_symm.mono <| image_subset_range _ _) ?_
   simp_rw [image_subset_iff, PartialEquiv.restr_coe_symm, I.toPartialEquiv_coe_symm,
     preimage_preimage, I.left_inv, preimage_id']; rfl
 
 theorem contMDiffOn_extChartAt_symm (x : M) :
     ContMDiffOn 𝓘(𝕜, E) I n (extChartAt I x).symm (extChartAt I x).target := by
-  convert contMDiffOn_extend_symm (chart_mem_maximalAtlas (I := I) x)
+  convert contMDiffOn_extend_symm (contMDiffOn_chart_symm (I := I) (x := x))
   · rw [extChartAt_target, I.image_eq]
-  · infer_instance
   · infer_instance
 
 theorem contMDiffWithinAt_extChartAt_symm_target

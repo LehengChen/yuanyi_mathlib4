@@ -316,10 +316,10 @@ lemma IccLeftChart_extend_bot : (IccLeftChart x y).extend (𝓡∂ 1) ⊥ = 0 :=
 lemma iccLeftChart_extend_zero {p : Set.Icc x y} :
     (IccLeftChart x y).extend (𝓡∂ 1) p 0 = p.val - x := rfl
 
-lemma IccLeftChart_extend_interior_pos {p : Set.Icc x y} (hp : x < p.val ∧ p.val < y) :
+lemma IccLeftChart_extend_interior_pos {p : Set.Icc x y} (hp : x < p.val) :
     0 < (IccLeftChart x y).extend (𝓡∂ 1) p 0 := by
-  simp_rw [iccLeftChart_extend_zero]
-  norm_num [hp.1]
+  rw [iccLeftChart_extend_zero]
+  exact sub_pos.mpr hp
 
 lemma IccLeftChart_extend_bot_mem_frontier :
     (IccLeftChart x y).extend (𝓡∂ 1) ⊥ ∈ frontier (range (𝓡∂ 1)) := by
@@ -418,7 +418,7 @@ lemma Icc_isInteriorPoint_interior {p : Set.Icc x y} (hp : x < p.val ∧ p.val <
     (𝓡∂ 1).IsInteriorPoint p := by
   rw [ModelWithCorners.IsInteriorPoint, extChartAt, Icc_chartedSpaceChartAt_of_le_top hp.2,
     interior_range_modelWithCornersEuclideanHalfSpace]
-  exact IccLeftChart_extend_interior_pos hp
+  exact IccLeftChart_extend_interior_pos hp.1
 
 lemma boundary_Icc : (𝓡∂ 1).boundary (Icc x y) = {⊥, ⊤} := by
   ext p

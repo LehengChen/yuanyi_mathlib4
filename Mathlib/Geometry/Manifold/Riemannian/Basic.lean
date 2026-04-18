@@ -141,9 +141,12 @@ lemma enorm_tangentSpace_vectorSpace {x : F} {v : TangentSpace 𝓘(ℝ, F) x} :
 
 open MeasureTheory Measure
 
-lemma lintegral_fderiv_lineMap_eq_edist {x y : E} :
-    ∫⁻ t in Icc 0 1, ‖fderivWithin ℝ (ContinuousAffineMap.lineMap (R := ℝ) x y) (Icc 0 1) t 1‖ₑ
-      = edist x y := by
+lemma lintegral_fderiv_lineMap_eq_edist {G : Type*} [SeminormedAddCommGroup G] [NormedSpace ℝ G]
+    [T2Space G] {x y : G} :
+    ∫⁻ t in Icc 0 1, ‖fderivWithin ℝ (ContinuousAffineMap.lineMap (R := ℝ) x y) (Icc 0 1) t 1‖ₑ =
+      edist x y := by
+  letI : NormedAddCommGroup G := NormedAddCommGroup.ofSeparation fun g hg =>
+    (inseparable_zero_iff_norm.2 hg).eq
   have : edist x y = ∫⁻ t in Icc (0 : ℝ) 1, ‖y - x‖ₑ := by
     simp [edist_comm x y, edist_eq_enorm_sub]
   rw [this]

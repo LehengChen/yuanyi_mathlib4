@@ -296,8 +296,8 @@ theorem surjective_stereographic (hv : ‖v‖ = 1) :
   (stereographic hv).surjective_of_target_eq_univ rfl
 
 @[simp]
-theorem range_stereographic_symm (hv : ‖v‖ = 1) (hv' : v ∈ sphere 0 1 := by simpa) :
-    Set.range (stereographic hv).symm = {⟨v, hv'⟩}ᶜ := by
+theorem range_stereographic_symm (hv : ‖v‖ = 1) :
+    Set.range (stereographic hv).symm = {⟨v, by simpa using hv⟩}ᶜ := by
   refine le_antisymm ?_ (stereographic hv).symm.target_subset_range
   rintro x ⟨y, rfl⟩
   suffices y ∈ (stereographic hv).target from (fun _ ↦ (stereographic hv).map_target) y this

@@ -718,12 +718,11 @@ lemma ContDiffGroupoid.mem_of_source_eq_empty (f : OpenPartialHomeomorph H H)
     have : f.target = ∅ := by simp [← f.image_source_eq_target, hf]
     simp_all
 
-include I in
+omit m n [NontriviallyNormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E] I M in
 /-- Any change of coordinates with empty source belongs to `continuousGroupoid`. -/
 lemma ContinuousGroupoid.mem_of_source_eq_empty (f : OpenPartialHomeomorph H H)
-    (hf : f.source = ∅) : f ∈ continuousGroupoid H := by
-  rw [← contDiffGroupoid_zero_eq (I := I)]
-  exact ContDiffGroupoid.mem_of_source_eq_empty f hf
+    (_hf : f.source = ∅) : f ∈ continuousGroupoid H := by
+  simp [continuousGroupoid, mem_groupoid_of_pregroupoid]
 
 /-- An identity open partial homeomorphism belongs to the `C^n` groupoid. -/
 theorem ofSet_mem_contDiffGroupoid {s : Set H} (hs : IsOpen s) :

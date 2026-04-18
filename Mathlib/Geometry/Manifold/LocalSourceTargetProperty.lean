@@ -211,8 +211,7 @@ lemma _root_.IsOpen.liftSourceTargetPropertyAt :
     hx.domChart_mem_maximalAtlas, hx.codChart_mem_maximalAtlas, hx.source_subset_preimage_source,
     hx.property⟩
 
-lemma prodMap [IsManifold I n M] [IsManifold I' n M'] [IsManifold J n N] [IsManifold J' n N']
-    {Q : (M' → N') → OpenPartialHomeomorph M' H' → OpenPartialHomeomorph N' G' → Prop}
+lemma prodMap {Q : (M' → N') → OpenPartialHomeomorph M' H' → OpenPartialHomeomorph N' G' → Prop}
     {R : ((M × M') → (N × N')) → OpenPartialHomeomorph (M × M') (H × H') →
       OpenPartialHomeomorph (N × N') (G × G') → Prop}
     (hf : LiftSourceTargetPropertyAt I J n f x P) {g : M' → N'} {x' : M'}
@@ -224,10 +223,36 @@ lemma prodMap [IsManifold I n M] [IsManifold I' n M'] [IsManifold J n N] [IsMani
   use hf.domChart.prod hg.domChart, hf.codChart.prod hg.codChart
   · simp [hf.mem_domChart_source, hg.mem_domChart_source]
   · simp [mem_codChart_source hf, mem_codChart_source hg]
-  · exact IsManifold.mem_maximalAtlas_prod
-      (domChart_mem_maximalAtlas hf) (domChart_mem_maximalAtlas hg)
-  · apply IsManifold.mem_maximalAtlas_prod
-      (codChart_mem_maximalAtlas hf) (codChart_mem_maximalAtlas hg)
+  · rw [IsManifold.mem_maximalAtlas_iff]
+    rintro e ⟨φ, hφ, φ', hφ', rfl⟩
+    constructor
+    · change (hf.domChart.prod hg.domChart).symm.trans (φ.prod φ') ∈
+          contDiffGroupoid n (I.prod I')
+      rw [OpenPartialHomeomorph.prod_symm_trans_prod]
+      exact contDiffGroupoid_prod
+        (((IsManifold.mem_maximalAtlas_iff.mp hf.domChart_mem_maximalAtlas) φ hφ).1)
+        (((IsManifold.mem_maximalAtlas_iff.mp hg.domChart_mem_maximalAtlas) φ' hφ').1)
+    · change (φ.prod φ').symm.trans (hf.domChart.prod hg.domChart) ∈
+          contDiffGroupoid n (I.prod I')
+      rw [OpenPartialHomeomorph.prod_symm_trans_prod]
+      exact contDiffGroupoid_prod
+        (((IsManifold.mem_maximalAtlas_iff.mp hf.domChart_mem_maximalAtlas) φ hφ).2)
+        (((IsManifold.mem_maximalAtlas_iff.mp hg.domChart_mem_maximalAtlas) φ' hφ').2)
+  · rw [IsManifold.mem_maximalAtlas_iff]
+    rintro e ⟨φ, hφ, φ', hφ', rfl⟩
+    constructor
+    · change (hf.codChart.prod hg.codChart).symm.trans (φ.prod φ') ∈
+          contDiffGroupoid n (J.prod J')
+      rw [OpenPartialHomeomorph.prod_symm_trans_prod]
+      exact contDiffGroupoid_prod
+        (((IsManifold.mem_maximalAtlas_iff.mp hf.codChart_mem_maximalAtlas) φ hφ).1)
+        (((IsManifold.mem_maximalAtlas_iff.mp hg.codChart_mem_maximalAtlas) φ' hφ').1)
+    · change (φ.prod φ').symm.trans (hf.codChart.prod hg.codChart) ∈
+          contDiffGroupoid n (J.prod J')
+      rw [OpenPartialHomeomorph.prod_symm_trans_prod]
+      exact contDiffGroupoid_prod
+        (((IsManifold.mem_maximalAtlas_iff.mp hf.codChart_mem_maximalAtlas) φ hφ).2)
+        (((IsManifold.mem_maximalAtlas_iff.mp hg.codChart_mem_maximalAtlas) φ' hφ').2)
   · simp only [OpenPartialHomeomorph.prod_toPartialEquiv, PartialEquiv.prod_source,
       preimage_prod_map_prod]
     exact prod_mono hf.source_subset_preimage_source hg.source_subset_preimage_source

@@ -177,21 +177,35 @@ lemma eq_excenter_of_two_zsmul_oangle_eq {p : P}
   exact ⟨signs, hp⟩
 
 variable {t} in
+omit h₂₃ in
 /-- An excenter lying on the internal angle bisector from a vertex is either the incenter or the
 excenter opposite that vertex. -/
 lemma eq_incenter_or_eq_excenter_singleton_of_oangle_eq {signs : Finset (Fin 3)}
     (h : ∡ (t.points i₂) (t.points i₁) (t.excenter signs) =
       ∡ (t.excenter signs) (t.points i₁) (t.points i₃)) :
     t.excenter signs = t.incenter ∨ t.excenter signs = t.excenter {i₁} := by
-  have hs := t.excenter_eq_incenter_or_excenter_singleton_of_ne signs h₁₂ h₁₃ h₂₃
-  rcases hs with hs | hs | hs | hs
-  · exact .inl hs
-  · exact .inr hs
-  · rw [hs, t.oangle_excenter_singleton_eq_add_pi h₁₂.symm h₂₃ h₁₃] at h
-    simp [Real.Angle.pi_ne_zero] at h
-  · rw [hs, oangle_rev (t.points i₃), t.oangle_excenter_singleton_eq_add_pi h₁₃.symm h₂₃.symm h₁₂,
-      oangle_rev] at h
-    simp [Real.Angle.pi_ne_zero] at h
+  by_cases h₂₃ : i₂ ≠ i₃
+  · have hs := t.excenter_eq_incenter_or_excenter_singleton_of_ne signs h₁₂ h₁₃ h₂₃
+    rcases hs with hs | hs | hs | hs
+    · exact .inl hs
+    · exact .inr hs
+    · rw [hs, t.oangle_excenter_singleton_eq_add_pi h₁₂.symm h₂₃ h₁₃] at h
+      simp [Real.Angle.pi_ne_zero] at h
+    · rw [hs, oangle_rev (t.points i₃), t.oangle_excenter_singleton_eq_add_pi h₁₃.symm h₂₃.symm h₁₂,
+        oangle_rev] at h
+      simp [Real.Angle.pi_ne_zero] at h
+  · have hi : i₂ = i₃ := by simpa using h₂₃
+    subst hi
+    exfalso
+    have h0 : (2 : ℤ) • ∡ (t.excenter signs) (t.points i₁) (t.points i₂) = 0 := by
+      rw [oangle_rev] at h
+      have h' := congrArg (fun a ↦ a + ∡ (t.excenter signs) (t.points i₁) (t.points i₂)) h
+      simpa [two_zsmul] using h'.symm
+    have hcol : Collinear ℝ ({t.excenter signs, t.points i₁, t.points i₂} : Set P) :=
+      oangle_eq_zero_or_eq_pi_iff_collinear.1 (Real.Angle.two_zsmul_eq_zero_iff.1 h0)
+    exact (t.excenterExists signs).excenter_notMem_affineSpan_pair i₁ i₂
+      (hcol.mem_affineSpan_of_mem_of_ne (by simp) (by simp) (by simp)
+        (t.independent.injective.ne h₁₂))
 
 variable {t} in
 /-- An excenter lying on the external angle bisector from a vertex is the excenter opposite
@@ -216,8 +230,8 @@ lemma eq_incenter_of_oangle_eq {p : P}
     (h₂ : ∡ (t.points i₃) (t.points i₂) p = ∡ p (t.points i₂) (t.points i₁)) :
     p = t.incenter := by
   obtain ⟨signs, rfl⟩ := t.eq_excenter_of_two_zsmul_oangle_eq h₁₂ h₁₃ h₂₃ (by rw [h₁]) (by rw [h₂])
-  have h₁' := t.eq_incenter_or_eq_excenter_singleton_of_oangle_eq h₁₂ h₁₃ h₂₃ h₁
-  have h₂' := t.eq_incenter_or_eq_excenter_singleton_of_oangle_eq h₂₃ h₁₂.symm h₁₃.symm h₂
+  have h₁' := t.eq_incenter_or_eq_excenter_singleton_of_oangle_eq h₁₂ h₁₃ h₁
+  have h₂' := t.eq_incenter_or_eq_excenter_singleton_of_oangle_eq h₂₃ h₁₂.symm h₂
   rcases h₁' with h₁' | h₁'
   · exact h₁'
   rcases h₂' with h₂' | h₂'
@@ -235,7 +249,7 @@ lemma eq_excenter_singleton_of_oangle_eq_of_oangle_eq_add_pi {p : P}
     p = t.excenter {i₁} := by
   obtain ⟨signs, rfl⟩ := t.eq_excenter_of_two_zsmul_oangle_eq h₁₂ h₁₃ h₂₃ (by rw [h₁])
     (by rw [h₂]; simp)
-  have h₁' := t.eq_incenter_or_eq_excenter_singleton_of_oangle_eq h₁₂ h₁₃ h₂₃ h₁
+  have h₁' := t.eq_incenter_or_eq_excenter_singleton_of_oangle_eq h₁₂ h₁₃ h₁
   have h₂' := t.eq_excenter_singleton_of_oangle_eq_add_pi h₂₃ h₁₂.symm h₁₃.symm h₂
   rcases h₁' with h₁' | h₁'
   · rcases h₂' with h₂' | h₂'

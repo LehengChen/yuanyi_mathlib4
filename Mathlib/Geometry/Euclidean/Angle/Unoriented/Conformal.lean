@@ -31,9 +31,8 @@ theorem IsConformalMap.preserves_angle {f' : E →L[ℝ] F} (h : IsConformalMap 
 
 /-- If a real differentiable map `f` is conformal at a point `x`,
 then it preserves the angles at that point. -/
-theorem ConformalAt.preserves_angle {f : E → F} {x : E} {f' : E →L[ℝ] F} (h : HasFDerivAt f f' x)
-    (H : ConformalAt f x) (u v : E) : angle (f' u) (f' v) = angle u v :=
-  let ⟨_, h₁, c⟩ := H
-  h₁.unique h ▸ IsConformalMap.preserves_angle c u v
+theorem ConformalAt.preserves_angle {f : E → F} {x : E} (h : ConformalAt f x) (u v : E) :
+    angle ((fderiv ℝ f x) u) ((fderiv ℝ f x) v) = angle u v :=
+  IsConformalMap.preserves_angle (conformalAt_iff_isConformalMap_fderiv.mp h) u v
 
 end InnerProductGeometry

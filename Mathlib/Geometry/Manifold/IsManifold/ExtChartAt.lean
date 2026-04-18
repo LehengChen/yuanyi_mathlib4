@@ -33,8 +33,9 @@ in general, but we can still register them as `PartialEquiv`s.
 * `contDiffOn_ext_coord_change`: for `x x' : M`, the coordinate change
   `(extChartAt I x').symm ≫ extChartAt I x` is continuous on its source
 
-* `Manifold.locallyCompact_of_finiteDimensional`: a finite-dimensional manifold
-  modelled on a locally compact field (such as ℝ, ℂ or the `p`-adic numbers) is locally compact
+* `Manifold.locallyCompact_of_finiteDimensional`: a manifold modelled on a locally compact vector
+  space is locally compact; in particular, this applies to finite-dimensional manifolds over
+  locally compact fields (such as ℝ, ℂ or the `p`-adic numbers)
 * `LocallyCompactSpace.of_locallyCompact_manifold`: a locally compact manifold must be modelled
   on a locally compact space.
 * `FiniteDimensional.of_locallyCompact_manifold`: a locally compact manifold must be modelled
@@ -894,12 +895,12 @@ variable
   [NormedAddCommGroup E] [NormedSpace 𝕜 E] {H : Type*} [TopologicalSpace H]
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-/-- A finite-dimensional manifold modelled on a locally compact field
-(such as ℝ, ℂ or the `p`-adic numbers) is locally compact. -/
+/-- A manifold modelled on a locally compact vector space is locally compact.
+In particular, this applies to finite-dimensional manifolds over locally compact fields
+(such as ℝ, ℂ or the `p`-adic numbers). -/
 lemma Manifold.locallyCompact_of_finiteDimensional
-    (I : ModelWithCorners 𝕜 E H) [LocallyCompactSpace 𝕜] [FiniteDimensional 𝕜 E] :
+    (I : ModelWithCorners 𝕜 E H) [LocallyCompactSpace E] :
     LocallyCompactSpace M := by
-  have : ProperSpace E := FiniteDimensional.proper 𝕜 E
   have : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 

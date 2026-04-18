@@ -21,8 +21,8 @@ However, when the cone is also generating, its generators linearly span the modu
 
 ## Results
 
-* `PointedCone.IsSimplicial.span`: The conic hull of a linearly independent finite set is
-  simplicial.
+* `PointedCone.IsSimplicial.hull`: The conic hull of a finite set whose nonzero elements are
+  linearly independent is simplicial.
 
 ## References
 
@@ -45,9 +45,13 @@ def IsSimplicial : Prop :=
 
 namespace IsSimplicial
 
-/-- The conic hull of a finite linearly independent set is simplicial. -/
-protected theorem hull {s : Set M} (hs : s.Finite) (hli : LinearIndepOn R id s) :
-    (PointedCone.hull R s).IsSimplicial := ⟨s, hs, hli, rfl⟩
+/-- The conic hull of a finite set whose nonzero elements are linearly independent is simplicial.
+-/
+protected theorem hull {s : Set M} (hs : s.Finite) (hli : LinearIndepOn R id (s \ {0})) :
+    (PointedCone.hull R s).IsSimplicial := by
+  refine ⟨s \ {0}, hs.subset Set.diff_subset, hli, ?_⟩
+  rw [PointedCone.hull, PointedCone.hull]
+  exact Submodule.span_sdiff_singleton_zero (R := { c : R // 0 ≤ c }) (s := s)
 
 end IsSimplicial
 

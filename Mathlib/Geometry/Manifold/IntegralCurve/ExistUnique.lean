@@ -252,18 +252,23 @@ theorem isMIntegralCurve_Ioo_eq_of_contMDiff_boundaryless [BoundarylessManifold 
     (hγ : IsMIntegralCurve γ v) (hγ' : IsMIntegralCurve γ' v) (h : γ t₀ = γ' t₀) : γ = γ' :=
   isMIntegralCurve_eq_of_contMDiff (fun _ ↦ BoundarylessManifold.isInteriorPoint) hv hγ hγ' h
 
-/-- For a global integral curve `γ`, if it crosses itself at `a b : ℝ`, then it is periodic with
-period `a - b`. -/
-lemma IsMIntegralCurve.periodic_of_eq [BoundarylessManifold I M]
-    (hγ : IsMIntegralCurve γ v)
+/-- For a global integral curve `γ` whose image stays in the manifold interior, if it crosses
+itself at `a b : ℝ`, then it is periodic with period `a - b`. -/
+lemma IsMIntegralCurve.periodic_of_eq
+    (hγt : ∀ t, I.IsInteriorPoint (γ t)) (hγ : IsMIntegralCurve γ v)
     (hv : CMDiff 1 (fun x ↦ (⟨x, v x⟩ : TangentBundle I M)))
     (heq : γ a = γ b) : Periodic γ (a - b) := by
-  apply congrFun <|
-    isMIntegralCurve_Ioo_eq_of_contMDiff_boundaryless (t₀ := b) hv (hγ.comp_add _) hγ _
-  rw [comp_apply, add_sub_cancel, heq]
+  intro t
+  exact congrFun
+    (isMIntegralCurve_eq_of_contMDiff (γ := γ ∘ fun t ↦ t + (a - b)) (γ' := γ) (t₀ := b)
+      (fun t ↦ hγt (t + (a - b))) hv (hγ.comp_add (a - b)) hγ
+      (by simpa [Function.comp_apply, sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using
+        heq)) t
 
-/-- A global integral curve is injective xor periodic with positive period. -/
-lemma IsMIntegralCurve.periodic_xor_injective [BoundarylessManifold I M]
+/-- A global integral curve whose image stays in the manifold interior is injective xor periodic
+with positive period. -/
+lemma IsMIntegralCurve.periodic_xor_injective
+    (hγt : ∀ t, I.IsInteriorPoint (γ t))
     (hγ : IsMIntegralCurve γ v)
     (hv : CMDiff 1 (fun x ↦ (⟨x, v x⟩ : TangentBundle I M))) :
     Xor' (∃ T > 0, Periodic γ T) (Injective γ) := by
@@ -278,6 +283,6 @@ lemma IsMIntegralCurve.periodic_xor_injective [BoundarylessManifold I M]
     exact hne
   · by_cases! hab : a - b < 0
     · rw [abs_of_neg hab, neg_sub]
-      exact hγ.periodic_of_eq hv heq.symm
+      exact hγ.periodic_of_eq hγt hv heq.symm
     · rw [abs_of_nonneg hab]
-      exact hγ.periodic_of_eq hv heq
+      exact hγ.periodic_of_eq hγt hv heq

@@ -157,11 +157,11 @@ theorem MDifferentiable.mdifferentiableOn (h : MDifferentiable I I' f) :
   (mdifferentiableOn_univ.2 h).mono (subset_univ _)
 
 theorem mdifferentiableOn_of_locally_mdifferentiableOn
-    (h : ∀ x ∈ s, ∃ u, IsOpen u ∧ x ∈ u ∧ MDifferentiableOn I I' f (s ∩ u)) :
+    (h : ∀ x ∈ s, ∃ u ∈ 𝓝 x, MDifferentiableOn I I' f (s ∩ u)) :
     MDifferentiableOn I I' f s := by
   intro x xs
-  rcases h x xs with ⟨t, t_open, xt, ht⟩
-  exact (mdifferentiableWithinAt_inter (t_open.mem_nhds xt)).1 (ht x ⟨xs, xt⟩)
+  rcases h x xs with ⟨t, ht, hdiff⟩
+  exact (mdifferentiableWithinAt_inter ht).1 (hdiff x ⟨xs, mem_of_mem_nhds ht⟩)
 
 theorem MDifferentiable.mdifferentiableAt (hf : MDifferentiable I I' f) :
     MDifferentiableAt I I' f x :=

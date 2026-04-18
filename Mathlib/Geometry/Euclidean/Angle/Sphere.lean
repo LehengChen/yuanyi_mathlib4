@@ -156,10 +156,11 @@ theorem IsTangentAt_of_angle_eq_pi_div_two {s : Sphere P} {p q : P} (h : ∠ q p
 
 /-- A line through `p` is tangent to the sphere at `p` if and only if the angle between the line and
 the radius at `p` equals `π / 2`. -/
-theorem IsTangentAt_iff_angle_eq_pi_div_two {s : Sphere P} {p q : P} (hp : p ∈ s) :
-    s.IsTangentAt p line[ℝ, p, q] ↔ ∠ q p s.center = π / 2 := by
-  exact ⟨fun h ↦ IsTangentAt.angle_eq_pi_div_two h (right_mem_affineSpan_pair ℝ p q),
-    fun h ↦ IsTangentAt_of_angle_eq_pi_div_two h hp⟩
+theorem IsTangentAt_iff_angle_eq_pi_div_two {s : Sphere P} {p q : P} :
+    s.IsTangentAt p line[ℝ, p, q] ↔ p ∈ s ∧ ∠ q p s.center = π / 2 := by
+  refine ⟨fun h ↦ ⟨h.mem_sphere,
+    IsTangentAt.angle_eq_pi_div_two h (right_mem_affineSpan_pair ℝ p q)⟩,
+    fun h ↦ IsTangentAt_of_angle_eq_pi_div_two h.2 h.1⟩
 
 end Sphere
 
