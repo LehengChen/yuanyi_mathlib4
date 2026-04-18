@@ -403,7 +403,8 @@ section
 
 open MeasurableSpace
 
-theorem filtrationOfSet_eq_natural [∀ i, MulZeroOneClass (β i)] [∀ i, Nontrivial (β i)]
+theorem filtrationOfSet_eq_natural [∀ i, Zero (β i)] [∀ i, One (β i)]
+    [∀ i, NeZero (1 : β i)]
     {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet[m] (s i)) :
     filtrationOfSet hsm = natural (fun i => (s i).indicator (fun _ => 1 : Ω → β i)) fun i =>
       stronglyMeasurable_one.indicator (hsm i) := by
@@ -415,7 +416,7 @@ theorem filtrationOfSet_eq_natural [∀ i, MulZeroOneClass (β i)] [∀ i, Nontr
     rw [comap_eq_generateFrom]
     refine measurableSet_generateFrom ⟨{1}, measurableSet_singleton 1, ?_⟩
     ext x
-    simp
+    simp [NeZero.ne (1 : β j)]
   · rintro t ⟨n, ht⟩
     suffices MeasurableSpace.generateFrom {t | n ≤ i ∧
       MeasurableSet[MeasurableSpace.comap ((s n).indicator (fun _ => 1 : Ω → β n)) (mβ n)] t} ≤

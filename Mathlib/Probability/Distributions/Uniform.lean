@@ -80,16 +80,18 @@ theorem absolutelyContinuous {X : Ω → E} {s : Set E} (hu : IsUniform X s ℙ 
   rw [hu]; exact ProbabilityTheory.cond_absolutelyContinuous
 
 theorem measure_preimage {X : Ω → E} {s : Set E} (hns : μ s ≠ 0) (hnt : μ s ≠ ∞)
-    (hu : IsUniform X s ℙ μ) {A : Set E} (hA : MeasurableSet A) :
+    (hu : IsUniform X s ℙ μ) {A : Set E} (hA : NullMeasurableSet A μ) :
     ℙ (X ⁻¹' A) = μ (s ∩ A) / μ s := by
-  rwa [← map_apply_of_aemeasurable (hu.aemeasurable hns hnt) hA, hu, ProbabilityTheory.cond_apply',
-    ENNReal.div_eq_inv_mul]
+  rw [← map_apply₀ (hu.aemeasurable hns hnt) (hA.mono_ac hu.absolutelyContinuous), hu,
+    ProbabilityTheory.cond, smul_apply,
+    Measure.restrict_apply₀ (hA.mono_ac Measure.absolutelyContinuous_restrict), Set.inter_comm,
+    smul_eq_mul, ENNReal.div_eq_inv_mul]
 
 theorem isProbabilityMeasure {X : Ω → E} {s : Set E} (hns : μ s ≠ 0) (hnt : μ s ≠ ∞)
     (hu : IsUniform X s ℙ μ) : IsProbabilityMeasure ℙ :=
   ⟨by
     have : X ⁻¹' Set.univ = Set.univ := Set.preimage_univ
-    rw [← this, hu.measure_preimage hns hnt MeasurableSet.univ, Set.inter_univ,
+    rw [← this, hu.measure_preimage hns hnt MeasurableSet.univ.nullMeasurableSet, Set.inter_univ,
       ENNReal.div_self hns hnt]⟩
 
 theorem toMeasurable_iff {X : Ω → E} {s : Set E} :
@@ -119,7 +121,7 @@ theorem pdf_eq_zero_of_measure_eq_zero_or_top {X : Ω → E} {s : Set E}
   · simp only [IsUniform, ProbabilityTheory.cond, H, ENNReal.inv_top, zero_smul] at hu
     simp [pdf, hu]
 
-theorem pdf_eq {X : Ω → E} {s : Set E} (hms : MeasurableSet s)
+theorem pdf_eq {X : Ω → E} {s : Set E} (hms : NullMeasurableSet s μ)
     (hu : IsUniform X s ℙ μ) : pdf X ℙ μ =ᵐ[μ] s.indicator ((μ s)⁻¹ • (1 : E → ℝ≥0∞)) := by
   by_cases hnt : μ s = ∞
   · simp [pdf_eq_zero_of_measure_eq_zero_or_top hu (Or.inr hnt), hnt]
@@ -130,11 +132,17 @@ theorem pdf_eq {X : Ω → E} {s : Set E} (hms : MeasurableSet s)
   have : HasPDF X ℙ μ := hasPDF hns hnt hu
   have : IsProbabilityMeasure ℙ := isProbabilityMeasure hns hnt hu
   apply (eq_of_map_eq_withDensity _ _).mp
-  · rw [hu, withDensity_indicator hms, withDensity_smul _ measurable_one, withDensity_one,
-      ProbabilityTheory.cond]
-  · exact (measurable_one.aemeasurable.const_smul (μ s)⁻¹).indicator hms
+  · have hwd :
+        μ.withDensity ((toMeasurable μ s).indicator ((μ s)⁻¹ • (1 : E → ℝ≥0∞))) =
+          μ.withDensity (s.indicator ((μ s)⁻¹ • (1 : E → ℝ≥0∞))) := by
+        refine withDensity_congr_ae ?_
+        exact indicator_ae_eq_of_ae_eq_set hms.toMeasurable_ae_eq
+    rw [← hwd, withDensity_indicator (measurableSet_toMeasurable μ s),
+      withDensity_smul _ measurable_one, withDensity_one]
+    simpa [ProbabilityTheory.cond, Measure.restrict_toMeasurable hnt] using hu
+  · exact (aemeasurable_const.const_smul (μ s)⁻¹).indicator₀ hms
 
-theorem pdf_toReal_ae_eq {X : Ω → E} {s : Set E} (hms : MeasurableSet s)
+theorem pdf_toReal_ae_eq {X : Ω → E} {s : Set E} (hms : NullMeasurableSet s μ)
     (hX : IsUniform X s ℙ μ) :
     (fun x => (pdf X ℙ μ x).toReal) =ᵐ[μ] fun x =>
       (s.indicator ((μ s)⁻¹ • (1 : E → ℝ≥0∞)) x).toReal :=
@@ -154,7 +162,7 @@ theorem mul_pdf_integrable (hcs : IsCompact s) (huX : IsUniform X s ℙ) :
   constructor
   · exact aestronglyMeasurable_id.mul
       (measurable_pdf X ℙ).aemeasurable.ennreal_toReal.aestronglyMeasurable
-  refine hasFiniteIntegral_mul (pdf_eq hcs.measurableSet huX) ?_
+  refine hasFiniteIntegral_mul (pdf_eq hcs.measurableSet.nullMeasurableSet huX) ?_
   set ind := (volume s)⁻¹ • (1 : ℝ → ℝ≥0∞)
   have : ∀ x, ‖x‖ₑ * s.indicator ind x = s.indicator (fun x => ‖x‖ₑ * ind x) x := fun x =>
     (s.indicator_mul_right (fun x => ↑‖x‖₊) ind).symm
@@ -191,7 +199,7 @@ def uniformPDF (s : Set E) (x : E) (μ : Measure E := by volume_tac) : ℝ≥0�
   s.indicator ((μ s)⁻¹ • (1 : E → ℝ≥0∞)) x
 
 /-- Check that indeed any uniform random variable has the uniformPDF. -/
-lemma uniformPDF_eq_pdf {s : Set E} (hs : MeasurableSet s) (hu : pdf.IsUniform X s ℙ μ) :
+lemma uniformPDF_eq_pdf {s : Set E} (hs : NullMeasurableSet s μ) (hu : pdf.IsUniform X s ℙ μ) :
     (fun x ↦ uniformPDF s x μ) =ᵐ[μ] pdf X ℙ μ := by
   unfold uniformPDF
   exact Filter.EventuallyEq.trans (pdf.IsUniform.pdf_eq hs hu).symm (ae_eq_refl _)

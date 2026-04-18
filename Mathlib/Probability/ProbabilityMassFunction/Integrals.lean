@@ -44,7 +44,9 @@ theorem integral_eq_tsum (p : PMF α) (f : α → E) (hf : Integrable f p.toMeas
         Function.support_smul_subset_left _ _
       _ ⊆ support p := fun x h1 h2 => h1 (by simp [h2])
 
-theorem integral_eq_sum [Fintype α] (p : PMF α) (f : α → E) :
+noncomputable local instance [Finite α] : Fintype α := Fintype.ofFinite α
+
+theorem integral_eq_sum [Finite α] (p : PMF α) (f : α → E) :
     ∫ a, f a ∂(p.toMeasure) = ∑ a, (p a).toReal • f a := by
   rw [integral_fintype .of_finite]
   congr with x
@@ -55,6 +57,8 @@ theorem integral_eq_sum [Fintype α] (p : PMF α) (f : α → E) :
 end General
 
 theorem bernoulli_expectation {p : ℝ≥0} (h : p ≤ 1) :
-    ∫ b, cond b 1 0 ∂((bernoulli p h).toMeasure) = p.toReal := by simp [integral_eq_sum]
+    ∫ b, cond b 1 0 ∂((bernoulli p h).toMeasure) = p.toReal := by
+  rw [integral_eq_tsum _ _ .of_finite, tsum_fintype, Fintype.sum_bool]
+  simp [PMF.bernoulli_apply]
 
 end PMF

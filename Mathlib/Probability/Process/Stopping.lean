@@ -404,8 +404,7 @@ theorem add_const [AddGroup ι] [Preorder ι] [AddRightMono ι]
   rw [h_eq]
   exact f.mono (sub_le_self j hi) _ (hτ (j - i))
 
-theorem add_const' [Add ι] [LinearOrder ι] [CanonicallyOrderedAdd ι] [Countable ι]
-    [TopologicalSpace ι] [OrderTopology ι]
+theorem add_const' [Add ι] [PartialOrder ι] [CanonicallyOrderedAdd ι] [Countable ι]
     {f : Filtration ι m} {τ : Ω → WithTop ι}
     (hτ : IsStoppingTime f τ) (i : ι) :
     IsStoppingTime f fun ω => τ ω + i := by
@@ -416,10 +415,10 @@ theorem add_const' [Add ι] [LinearOrder ι] [CanonicallyOrderedAdd ι] [Countab
     cases τ ω with
     | top => simp
     | coe a => simp; norm_cast
-  exact h ▸ MeasurableSet.iUnion fun k => hτ.measurableSet_eq_le (le_of_add_le_left k.2)
+  exact h ▸ MeasurableSet.iUnion fun k =>
+    f.mono (le_of_add_le_left k.2) _ (hτ.measurableSet_eq_of_countable k)
 
-theorem add [Add ι] [LinearOrder ι] [CanonicallyOrderedAdd ι] [Countable ι]
-    [TopologicalSpace ι] [OrderTopology ι]
+theorem add [Add ι] [PartialOrder ι] [CanonicallyOrderedAdd ι] [Countable ι]
     {f : Filtration ι m} {τ π : Ω → WithTop ι}
     (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
     IsStoppingTime f (τ + π) := by
@@ -433,7 +432,8 @@ theorem add [Add ι] [LinearOrder ι] [CanonicallyOrderedAdd ι] [Countable ι]
       cases π ω with
       | top => simp
       | coe b => norm_cast; simpa using le_of_add_le_right
-  exact h ▸ MeasurableSet.iUnion fun k => (hπ.measurableSet_eq_le k.2).inter (hτ.add_const' k.1 j)
+  exact h ▸ MeasurableSet.iUnion fun k =>
+    (f.mono k.2 _ (hπ.measurableSet_eq_of_countable k)).inter (hτ.add_const' k j)
 
 section Preorder
 
@@ -1325,7 +1325,7 @@ theorem stoppedValue_piecewise_const {ι' α : Type*} [Nonempty ι'] {i j : ι'}
     stoppedValue f (s.piecewise (fun _ => i) fun _ => j) = s.piecewise (f i) (f j) := by
   ext ω; rw [stoppedValue]; by_cases hx : ω ∈ s <;> simp [hx]
 
-theorem stoppedValue_piecewise_const' {ι' α : Type*} [AddCommGroup α]
+theorem stoppedValue_piecewise_const' {ι' α : Type*} [AddMonoid α]
     [Nonempty ι'] {i j : ι'} {f : ι' → Ω → α} :
     stoppedValue f (s.piecewise (fun _ => i) fun _ => j) =
     s.indicator (f i) + sᶜ.indicator (f j) := by

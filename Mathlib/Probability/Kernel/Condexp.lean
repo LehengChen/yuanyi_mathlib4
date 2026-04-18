@@ -46,10 +46,10 @@ section AuxLemmas
 variable {Ω F : Type*} {m mΩ : MeasurableSpace Ω} {μ : Measure Ω} {f : Ω → F}
 
 theorem _root_.MeasureTheory.AEStronglyMeasurable.comp_snd_map_prod_id [TopologicalSpace F]
-    (hm : m ≤ mΩ) (hf : AEStronglyMeasurable f μ) :
+    (hf : AEStronglyMeasurable f μ) :
     AEStronglyMeasurable[m.prod mΩ] (fun x : Ω × Ω => f x.2)
       (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) (fun ω => (id ω, id ω)) μ) := by
-  simpa using (aestronglyMeasurable_comp_snd_map_prodMk_iff hm).mpr hf
+  simpa using hf.comp_snd_map_prodMk (β := Ω) (mβ := m) id
 
 theorem _root_.MeasureTheory.Integrable.comp_snd_map_prod_id [NormedAddCommGroup F]
     (hf : Integrable f μ) : Integrable (fun x : Ω × Ω => f x.2)
@@ -81,8 +81,10 @@ lemma condExpKernel_eq (μ : Measure Ω) [IsFiniteMeasure μ] [h : Nonempty Ω]
       (measurable_id'' (inf_le_left : m ⊓ mΩ ≤ m)) := by
   simp [condExpKernel, h]
 
-lemma condExpKernel_apply_eq_condDistrib [Nonempty Ω] {ω : Ω} :
-    condExpKernel μ m ω = @condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _ (id ω) := by
+lemma condExpKernel_apply_eq_condDistrib {ω : Ω} :
+    condExpKernel μ m ω =
+      @condDistrib Ω Ω Ω mΩ _ (show Nonempty Ω from ⟨ω⟩) mΩ (m ⊓ mΩ) id id μ _ (id ω) := by
+  letI : Nonempty Ω := ⟨ω⟩
   simp [condExpKernel_eq, Kernel.comap_apply]
 
 instance : IsMarkovKernel (condExpKernel μ m) := by
@@ -139,7 +141,7 @@ theorem _root_.MeasureTheory.AEStronglyMeasurable.integral_condExpKernel [Normed
   simp_rw [condExpKernel_apply_eq_condDistrib]
   exact AEStronglyMeasurable.integral_condDistrib
     (aemeasurable_id'' μ (inf_le_right : m ⊓ mΩ ≤ mΩ)) aemeasurable_id
-    (hf.comp_snd_map_prod_id inf_le_right)
+    hf.comp_snd_map_prod_id
 
 theorem aestronglyMeasurable_integral_condExpKernel [NormedSpace ℝ F]
     (hf : AEStronglyMeasurable f μ) :
@@ -148,7 +150,7 @@ theorem aestronglyMeasurable_integral_condExpKernel [NormedSpace ℝ F]
   rw [condExpKernel_eq]
   have h := aestronglyMeasurable_integral_condDistrib
     (aemeasurable_id'' μ (inf_le_right : m ⊓ mΩ ≤ mΩ)) aemeasurable_id
-    (hf.comp_snd_map_prod_id (inf_le_right : m ⊓ mΩ ≤ mΩ))
+    hf.comp_snd_map_prod_id
   rw [MeasurableSpace.comap_id] at h
   exact h.mono inf_le_left
 

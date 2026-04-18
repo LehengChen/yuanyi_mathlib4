@@ -344,17 +344,26 @@ end UniformIntegrable
 /-- If `X` and `Y` are independent and `(X, Y)` and `(X', Y')` are identically distributed,
 then `X'` and `Y'` are independent. -/
 lemma indepFun_of_identDistrib_pair
-    {μ : Measure γ} {μ' : Measure δ} [IsFiniteMeasure μ] [IsFiniteMeasure μ']
+    {μ : Measure γ} {μ' : Measure δ}
     {X : γ → α} {X' : δ → α} {Y : γ → β} {Y' : δ → β} (h_indep : X ⟂ᵢ[μ] Y)
     (h_ident : IdentDistrib (fun ω ↦ (X ω, Y ω)) (fun ω ↦ (X' ω, Y' ω)) μ μ') :
     X' ⟂ᵢ[μ'] Y' := by
-  rw [indepFun_iff_map_prod_eq_prod_map_map _ _, ← h_ident.map_eq,
-    (indepFun_iff_map_prod_eq_prod_map_map _ _).1 h_indep]
-  · exact congr (congrArg Measure.prod <| (h_ident.comp measurable_fst).map_eq)
-      (h_ident.comp measurable_snd).map_eq
-  · exact measurable_fst.aemeasurable.comp_aemeasurable h_ident.aemeasurable_fst
-  · exact measurable_snd.aemeasurable.comp_aemeasurable h_ident.aemeasurable_fst
-  · exact measurable_fst.aemeasurable.comp_aemeasurable h_ident.aemeasurable_snd
-  · exact measurable_snd.aemeasurable.comp_aemeasurable h_ident.aemeasurable_snd
+  rw [indepFun_iff_measure_inter_preimage_eq_mul]
+  intro s t hs ht
+  have hfst : μ (X ⁻¹' s) = μ' (X' ⁻¹' s) := by
+    simpa using (h_ident.comp measurable_fst).measure_mem_eq hs
+  have hsnd : μ (Y ⁻¹' t) = μ' (Y' ⁻¹' t) := by
+    simpa using (h_ident.comp measurable_snd).measure_mem_eq ht
+  have hpair :
+      μ' ((fun ω ↦ (X' ω, Y' ω)) ⁻¹' (s ×ˢ t)) =
+        μ ((fun ω ↦ (X ω, Y ω)) ⁻¹' (s ×ˢ t)) := by
+    simpa using (h_ident.measure_mem_eq (hs.prod ht)).symm
+  have hpre : ((fun ω ↦ (X ω, Y ω)) ⁻¹' (s ×ˢ t)) = X ⁻¹' s ∩ Y ⁻¹' t := by
+    ext ω
+    simp
+  have hpre' : ((fun ω ↦ (X' ω, Y' ω)) ⁻¹' (s ×ˢ t)) = X' ⁻¹' s ∩ Y' ⁻¹' t := by
+    ext ω
+    simp
+  rw [← hpre', hpair, hpre, h_indep.measure_inter_preimage_eq_mul s t hs ht, hfst, hsnd]
 
 end ProbabilityTheory

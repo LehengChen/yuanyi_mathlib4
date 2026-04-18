@@ -93,9 +93,12 @@ lemma iSup_partitionFiltration_eq_generateFrom_range (ht : ∀ n, MeasurableSet 
   rfl
 
 lemma iSup_partitionFiltration (ht : ∀ n, MeasurableSet (t n))
-    (ht_range : generateFrom (Set.range t) = m) :
+    (ht_range : m ≤ generateFrom (Set.range t)) :
     ⨆ n, partitionFiltration ht n = m := by
-  rw [iSup_partitionFiltration_eq_generateFrom_range ht, ht_range]
+  rw [iSup_partitionFiltration_eq_generateFrom_range ht]
+  exact le_antisymm (generateFrom_le fun s hs ↦ by
+    rcases hs with ⟨n, rfl⟩
+    exact ht n) ht_range
 
 end MemPartition
 

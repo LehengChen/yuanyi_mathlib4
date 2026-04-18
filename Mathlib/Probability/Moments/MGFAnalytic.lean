@@ -168,14 +168,16 @@ end AnalyticMGF
 
 section AnalyticCGF
 
-lemma analyticAt_cgf (h : v ∈ interior (integrableExpSet X μ)) : AnalyticAt ℝ (cgf X μ) v := by
+lemma analyticAt_cgf (h : μ = 0 ∨ v ∈ interior (integrableExpSet X μ)) :
+    AnalyticAt ℝ (cgf X μ) v := by
   by_cases hμ : μ = 0
   · simp only [hμ, cgf_zero_measure]
     exact analyticAt_const
-  · exact (analyticAt_mgf h).log <| mgf_pos' hμ (interior_subset (s := integrableExpSet X μ) h)
+  · exact (analyticAt_mgf (h.resolve_left hμ)).log <|
+      mgf_pos' hμ (interior_subset (s := integrableExpSet X μ) (h.resolve_left hμ))
 
 lemma analyticOnNhd_cgf : AnalyticOnNhd ℝ (cgf X μ) (interior (integrableExpSet X μ)) :=
-  fun _ hx ↦ analyticAt_cgf hx
+  fun _ hx ↦ analyticAt_cgf (Or.inr hx)
 
 /-- The cumulant-generating function is analytic on the interior of the interval
   `integrableExpSet X μ`. -/
@@ -198,8 +200,11 @@ lemma deriv_cgf (h : v ∈ interior (integrableExpSet X μ)) :
     rw [deriv.log (differentiableAt_mgf h) ((mgf_pos' hμ hv).ne')]
   _ = μ[fun ω ↦ X ω * exp (v * X ω)] / mgf X μ v := by rw [deriv_mgf h]
 
-lemma deriv_cgf_zero (h : 0 ∈ interior (integrableExpSet X μ)) :
-    deriv (cgf X μ) 0 = μ[X] / μ.real Set.univ := by simp [deriv_cgf h]
+lemma deriv_cgf_zero (h : μ = 0 ∨ 0 ∈ interior (integrableExpSet X μ)) :
+    deriv (cgf X μ) 0 = μ[X] / μ.real Set.univ := by
+  by_cases hμ : μ = 0
+  · simp [hμ]
+  · simp [deriv_cgf (h.resolve_left hμ)]
 
 lemma iteratedDeriv_two_cgf (h : v ∈ interior (integrableExpSet X μ)) :
     iteratedDeriv 2 (cgf X μ) v
@@ -285,8 +290,8 @@ lemma exists_cgf_eq_iteratedDeriv_two_cgf_mul [IsZeroOrProbabilityMeasure μ] (h
   rw [← Set.uIoo_of_lt ht]
   convert taylor_mean_remainder_lagrange_iteratedDeriv ht.ne ?_
   · have hd : derivWithin (cgf X μ) (Set.Icc 0 t) 0 = 0 := by
-      convert (analyticAt_cgf (hs ⟨le_refl 0, le_of_lt ht⟩)).differentiableAt.derivWithin _
-      · simpa [hc] using (deriv_cgf_zero (hs ⟨le_refl 0, le_of_lt ht⟩)).symm
+      convert (analyticAt_cgf (Or.inr (hs ⟨le_refl 0, le_of_lt ht⟩))).differentiableAt.derivWithin _
+      · simpa [hc] using (deriv_cgf_zero (Or.inr (hs ⟨le_refl 0, le_of_lt ht⟩))).symm
       · exact hu 0 ⟨le_refl 0, le_of_lt ht⟩
     simp [hd, Set.uIcc_of_lt ht]
   · rw [Set.uIcc_of_lt ht]

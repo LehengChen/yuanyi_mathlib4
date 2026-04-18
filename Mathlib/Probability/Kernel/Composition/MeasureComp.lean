@@ -100,10 +100,13 @@ lemma copy_comp_map {f : α → β} (hf : AEMeasurable f μ) :
 
 section CompProd
 
-lemma compProd_eq_comp_prod (μ : Measure α) [SFinite μ] (κ : Kernel α β) [IsSFiniteKernel κ] :
+lemma compProd_eq_comp_prod (μ : Measure α) [SFinite μ] (κ : Kernel α β) :
     μ ⊗ₘ κ = (Kernel.id ×ₖ κ) ∘ₘ μ := by
-  rw [compProd, Kernel.compProd_prodMkLeft_eq_comp]
-  rfl
+  by_cases hκ : IsSFiniteKernel κ
+  · letI : IsSFiniteKernel κ := hκ
+    rw [compProd, Kernel.compProd_prodMkLeft_eq_comp]
+    rfl
+  · simp [hκ]
 
 lemma compProd_id_eq_copy_comp [SFinite μ] : μ ⊗ₘ Kernel.id = Kernel.copy α ∘ₘ μ := by
   rw [compProd_id, Kernel.copy, deterministic_comp_eq_map]

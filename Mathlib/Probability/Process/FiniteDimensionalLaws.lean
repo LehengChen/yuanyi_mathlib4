@@ -24,8 +24,8 @@ finite-dimensional distributions.
   their finite-dimensional distributions are equal.
 * `identDistrib_iff_forall_finset_identDistrib`: same statement, but stated in terms of
   `IdentDistrib`.
-* `map_restrict_eq_of_forall_ae_eq`: if two processes are modifications of each other, then
-  their finite-dimensional distributions are equal.
+* `map_restrict_eq_of_forall_ae_eq`: if two processes are a.e. equal on a finite set of times,
+  then their finite-dimensional distributions at those times are equal.
 * `map_eq_of_forall_ae_eq`: if two processes are modifications of each other, then they have the
   same law.
 
@@ -85,13 +85,13 @@ lemma identDistrib_iff_forall_finset_identDistrib [IsFiniteMeasure P]
   · exact (map_eq_iff_forall_finset_map_restrict_eq hX hY).mp h.map_eq I
   · exact (map_eq_iff_forall_finset_map_restrict_eq hX hY).mpr (fun I ↦ (h I).map_eq)
 
-/-- If two processes are modifications of each other, then they have the same finite-dimensional
-distributions. -/
-lemma map_restrict_eq_of_forall_ae_eq (h : ∀ t, X t =ᵐ[P] Y t) (I : Finset T) :
+/-- If two processes are a.e. equal on a finite set of times, then they have the same
+finite-dimensional distributions at those times. -/
+lemma map_restrict_eq_of_forall_ae_eq {I : Finset T} (h : ∀ t : I, X t =ᵐ[P] Y t) :
     P.map (fun ω ↦ I.restrict (X · ω)) = P.map (fun ω ↦ I.restrict (Y · ω)) := by
   have h' : ∀ᵐ ω ∂P, ∀ (i : I), X i ω = Y i ω := by
     rw [MeasureTheory.ae_all_iff]
-    exact fun i ↦ h i
+    exact h
   refine Measure.map_congr ?_
   filter_upwards [h'] with ω h using funext h
 
@@ -101,6 +101,6 @@ lemma map_eq_of_forall_ae_eq [IsFiniteMeasure P]
     (h : ∀ t, X t =ᵐ[P] Y t) :
     P.map (fun ω ↦ (X · ω)) = P.map (fun ω ↦ (Y · ω)) := by
   rw [map_eq_iff_forall_finset_map_restrict_eq hX hY]
-  exact fun I ↦ map_restrict_eq_of_forall_ae_eq h I
+  exact fun I ↦ map_restrict_eq_of_forall_ae_eq (fun t : I ↦ h t)
 
 end ProbabilityTheory

@@ -71,7 +71,7 @@ protected theorem div [∀ i, Div (β i)] [∀ i, MeasurableDiv₂ (β i)]
     Adapted f (u / v) := fun i => (hu i).div (hv i)
 
 @[to_additive]
-protected theorem inv [∀ i, Group (β i)] [∀ i, MeasurableInv (β i)] (hu : Adapted f u) :
+protected theorem inv [∀ i, Inv (β i)] [∀ i, MeasurableInv (β i)] (hu : Adapted f u) :
     Adapted f u⁻¹ := fun i => (hu i).inv
 
 protected theorem smul {𝕂 : Type*} [MeasurableSpace 𝕂]
@@ -116,11 +116,11 @@ protected theorem div' [∀ i, Div (β i)] [∀ i, ContinuousDiv (β i)]
     StronglyAdapted f (u / v) := fun i => (hu i).div' (hv i)
 
 @[to_additive]
-protected theorem inv [∀ i, Group (β i)] [∀ i, ContinuousInv (β i)] (hu : StronglyAdapted f u) :
+protected theorem inv [∀ i, Inv (β i)] [∀ i, ContinuousInv (β i)] (hu : StronglyAdapted f u) :
     StronglyAdapted f u⁻¹ := fun i => (hu i).inv
 
-protected theorem smul [∀ i, SMul ℝ (β i)] [∀ i, ContinuousConstSMul ℝ (β i)]
-    (c : ℝ) (hu : StronglyAdapted f u) :
+protected theorem smul {𝕂 : Type*} [TopologicalSpace 𝕂] [∀ i, SMul 𝕂 (β i)]
+    [∀ i, ContinuousConstSMul 𝕂 (β i)] (c : 𝕂) (hu : StronglyAdapted f u) :
     StronglyAdapted f (c • u) := fun i => (hu i).const_smul c
 
 /-- The norm of a strongly adapted process is strongly adapted. -/
@@ -234,7 +234,7 @@ protected theorem finset_prod {γ} [CommMonoid β] [ContinuousMul β] {U : γ �
   convert ProgMeasurable.finset_prod' h using 1; ext (i a); simp only [Finset.prod_apply]
 
 @[to_additive]
-protected theorem inv [Group β] [ContinuousInv β] (hu : ProgMeasurable f u) :
+protected theorem inv [Inv β] [ContinuousInv β] (hu : ProgMeasurable f u) :
     ProgMeasurable f fun i ω => (u i ω)⁻¹ := fun i => (hu i).inv
 
 @[to_additive sub]

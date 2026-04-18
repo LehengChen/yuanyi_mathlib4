@@ -231,11 +231,12 @@ theorem inter_pos_of_cond_ne_zero (hms : MeasurableSet s) (hcst : μ[t | s] ≠ 
   convert hcst
   simp [hms, Set.inter_comm, cond]
 
-lemma cond_pos_of_inter_ne_zero [IsFiniteMeasure μ] (hms : MeasurableSet s) (hci : μ (s ∩ t) ≠ 0) :
+lemma cond_pos_of_inter_ne_zero (hms : MeasurableSet s) (hcs : μ s ≠ ∞)
+    (hci : μ (s ∩ t) ≠ 0) :
     0 < μ[t | s] := by
   rw [cond_apply hms]
   refine ENNReal.mul_pos ?_ hci
-  exact ENNReal.inv_ne_zero.mpr (measure_ne_top _ _)
+  exact ENNReal.inv_ne_zero.mpr hcs
 
 lemma cond_cond_eq_cond_inter' (hms : MeasurableSet s) (hmt : MeasurableSet t) (hcs : μ s ≠ ∞) :
     μ[|s][|t] = μ[|s ∩ t] := by
@@ -249,9 +250,9 @@ lemma cond_cond_eq_cond_inter' (hms : MeasurableSet s) (hmt : MeasurableSet t) (
 
 /-- Conditioning first on `s` and then on `t` results in the same measure as conditioning
 on `s ∩ t`. -/
-theorem cond_cond_eq_cond_inter (hms : MeasurableSet s) (hmt : MeasurableSet t) (μ : Measure Ω)
-    [IsFiniteMeasure μ] : μ[|s][|t] = μ[|s ∩ t] :=
-  cond_cond_eq_cond_inter' hms hmt (measure_ne_top μ s)
+theorem cond_cond_eq_cond_inter (hms : MeasurableSet s) (hmt : MeasurableSet t)
+    (hcs : μ s ≠ ∞) : μ[|s][|t] = μ[|s ∩ t] :=
+  cond_cond_eq_cond_inter' hms hmt hcs
 
 theorem cond_mul_eq_inter' (hms : MeasurableSet s) (hcs' : μ s ≠ ∞) (t : Set Ω) :
     μ[t | s] * μ s = μ (s ∩ t) := by
@@ -259,20 +260,21 @@ theorem cond_mul_eq_inter' (hms : MeasurableSet s) (hcs' : μ s ≠ ∞) (t : Se
   · simp [hcs, measure_inter_null_of_null_left]
   · rw [cond_apply hms, mul_comm, ← mul_assoc, ENNReal.mul_inv_cancel hcs hcs', one_mul]
 
-theorem cond_mul_eq_inter (hms : MeasurableSet s) (t : Set Ω) (μ : Measure Ω) [IsFiniteMeasure μ] :
-    μ[t | s] * μ s = μ (s ∩ t) := cond_mul_eq_inter' hms (measure_ne_top _ s) t
+theorem cond_mul_eq_inter (hms : MeasurableSet s) (hcs : μ s ≠ ∞) (t : Set Ω) :
+    μ[t | s] * μ s = μ (s ∩ t) := cond_mul_eq_inter' hms hcs t
 
 /-- A version of the law of total probability. -/
 theorem cond_add_cond_compl_eq (hms : MeasurableSet s) (μ : Measure Ω) [IsFiniteMeasure μ] :
     μ[t | s] * μ s + μ[t | sᶜ] * μ sᶜ = μ t := by
-  rw [cond_mul_eq_inter hms, cond_mul_eq_inter hms.compl, Set.inter_comm _ t,
+  rw [cond_mul_eq_inter hms (measure_ne_top μ s), cond_mul_eq_inter hms.compl
+      (measure_ne_top μ sᶜ), Set.inter_comm _ t,
     Set.inter_comm _ t]
   exact measure_inter_add_diff t hms
 
 /-- **Bayes' Theorem** -/
-theorem cond_eq_inv_mul_cond_mul (hms : MeasurableSet s) (hmt : MeasurableSet t) (μ : Measure Ω)
-    [IsFiniteMeasure μ] : μ[t | s] = (μ s)⁻¹ * μ[s | t] * μ t := by
-  rw [mul_assoc, cond_mul_eq_inter hmt s, Set.inter_comm, cond_apply hms]
+theorem cond_eq_inv_mul_cond_mul (hms : MeasurableSet s) (hmt : MeasurableSet t)
+    (hct : μ t ≠ ∞) : μ[t | s] = (μ s)⁻¹ * μ[s | t] * μ t := by
+  rw [mul_assoc, cond_mul_eq_inter hmt hct s, Set.inter_comm, cond_apply hms]
 
 end Bayes
 
@@ -303,7 +305,7 @@ lemma sum_meas_smul_cond_fiber {X : Ω → α} (hX : Measurable X) (μ : Measure
     _ = ∑ x, μ (X ⁻¹' {x} ∩ E) := by
       simp only [Measure.coe_finset_sum, Measure.coe_smul, Finset.sum_apply,
         Pi.smul_apply, smul_eq_mul]
-      simp_rw [mul_comm (μ _), cond_mul_eq_inter (hX (.singleton _))]
+      simp_rw [mul_comm (μ _), cond_mul_eq_inter (hX (.singleton _)) (measure_ne_top _ _)]
     _ = _ := by
       have : ⋃ x ∈ Finset.univ, X ⁻¹' {x} ∩ E = E := by ext; simp
       rw [← measure_biUnion_finset _ fun _ _ ↦ (hX (.singleton _)).inter hE, this]

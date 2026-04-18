@@ -643,14 +643,14 @@ open Set TopologicalSpace
 /-- Preliminary lemma for the strong law of large numbers for vector-valued random variables:
 the composition of the random variables with a simple function satisfies the strong law of large
 numbers. -/
-lemma strong_law_ae_simpleFunc_comp (X : ℕ → Ω → E) (h' : Measurable (X 0))
-    (hindep : Pairwise ((· ⟂ᵢ[μ] ·) on X))
+lemma strong_law_ae_simpleFunc_comp (X : ℕ → Ω → E) (hindep : Pairwise ((· ⟂ᵢ[μ] ·) on X))
     (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (φ : SimpleFunc E E) :
     ∀ᵐ ω ∂μ,
       Tendsto (fun n : ℕ ↦ (n : ℝ)⁻¹ • (∑ i ∈ range n, φ (X i ω))) atTop (𝓝 μ[φ ∘ (X 0)]) := by
   -- this follows from the one-dimensional version when `φ` takes a single value, and is then
   -- extended to the general case by linearity.
   classical
+  have hX0 : AEMeasurable (X 0) μ := (hident 0).aemeasurable_fst
   refine SimpleFunc.induction (motive := fun ψ ↦ ∀ᵐ ω ∂μ,
     Tendsto (fun n : ℕ ↦ (n : ℝ)⁻¹ • (∑ i ∈ range n, ψ (X i ω))) atTop (𝓝 μ[ψ ∘ (X 0)])) ?_ ?_ φ
   · intro c s hs
@@ -663,9 +663,9 @@ lemma strong_law_ae_simpleFunc_comp (X : ℕ → Ω → E) (h' : Measurable (X 0
         atTop (𝓝 μ[Y 0]) := by
       simp only [smul_eq_mul, ← div_eq_inv_mul]
       apply strong_law_ae_real
-      · exact SimpleFunc.integrable_of_isFiniteMeasure
-          ((SimpleFunc.piecewise s hs (SimpleFunc.const _ (1 : ℝ))
-            (SimpleFunc.const _ (0 : ℝ))).comp (X 0) h')
+      · haveI : IsProbabilityMeasure (Measure.map (X 0) μ) := Measure.isProbabilityMeasure_map hX0
+        exact (SimpleFunc.piecewise s hs (SimpleFunc.const _ (1 : ℝ))
+          (SimpleFunc.const _ (0 : ℝ))).integrable_of_isFiniteMeasure.comp_aemeasurable hX0
       · exact fun i j hij ↦ IndepFun.comp (hindep hij) F_meas F_meas
       · exact fun i ↦ (hident i).comp F_meas
     filter_upwards [this] with ω hω
@@ -685,8 +685,10 @@ lemma strong_law_ae_simpleFunc_comp (X : ℕ → Ω → E) (h' : Measurable (X 0
     · congr 1
       rw [← integral_add]
       · rfl
-      · exact (φ.comp (X 0) h').integrable_of_isFiniteMeasure
-      · exact (ψ.comp (X 0) h').integrable_of_isFiniteMeasure
+      · haveI : IsProbabilityMeasure (Measure.map (X 0) μ) := Measure.isProbabilityMeasure_map hX0
+        exact φ.integrable_of_isFiniteMeasure.comp_aemeasurable hX0
+      · haveI : IsProbabilityMeasure (Measure.map (X 0) μ) := Measure.isProbabilityMeasure_map hX0
+        exact ψ.integrable_of_isFiniteMeasure.comp_aemeasurable hX0
 
 variable [BorelSpace E]
 
@@ -715,7 +717,7 @@ lemma strong_law_ae_of_measurable
   -- strong law for `φ (X n)`
   have A : ∀ᵐ ω ∂μ, ∀ k,
       Tendsto (fun n : ℕ ↦ (n : ℝ)⁻¹ • (∑ i ∈ range n, Y k i ω)) atTop (𝓝 μ[Y k 0]) :=
-    ae_all_iff.2 (fun k ↦ strong_law_ae_simpleFunc_comp X h'.measurable hindep hident (φ k))
+    ae_all_iff.2 (fun k ↦ strong_law_ae_simpleFunc_comp X hindep hident (φ k))
   -- strong law for the error `‖X i - φ (X i)‖`
   have B : ∀ᵐ ω ∂μ, ∀ k, Tendsto (fun n : ℕ ↦ (∑ i ∈ range n, ‖(X i - Y k i) ω‖) / n)
         atTop (𝓝 μ[(fun ω ↦ ‖(X 0 - Y k 0) ω‖)]) := by
