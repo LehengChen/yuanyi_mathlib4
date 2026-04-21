@@ -250,9 +250,8 @@ noncomputable def homEquiv {N : ModuleCat.{w} cR.pt} :
         simp only [← hφ, AddEquiv.symm_apply_apply, RingHom.id_apply]
         refine (map_smul_homEquiv'_iff hcR hcM φ).1 (fun U r m ↦ ?_)
         rw [hφ]
-        erw [toPresheaf_map_app_apply]
-        rw [map_smul]
-        rfl}
+        change (ConcreteCategory.hom (ψ.app U)) (r • m) = r • (ConcreteCategory.hom (ψ.app U)) m
+        exact (ψ.app U).hom.map_smul r m}
   left_inv φ := (forget₂ _ AddCommGrpCat).map_injective (by
     ext : 1
     exact (homEquiv' hcR hcM).left_inv ((forget₂ _ AddCommGrpCat).map φ).hom)
@@ -290,12 +289,27 @@ noncomputable def map (f : M ⟶ M') :
   map_smul' r m := by
     obtain ⟨U, r, m, rfl, rfl⟩ := ModuleColimit.jointly_surjective₂ r m
     let c := (Cocone.precompose ((toPresheaf _).map f)).obj cM'
-    have h₁ := ConcreteCategory.congr_hom (hcM.fac c U) (r • m)
-    have h₂ := ConcreteCategory.congr_hom (hcM.fac c U) m
-    dsimp [c] at h₁ h₂ ⊢
-    rw [ModuleColimit.smul_eq]
-    erw [h₁, h₂, ModuleColimit.smul_eq, ← (f.app U).hom.map_smul]
-    rfl
+    have h₁ :
+        (ConcreteCategory.hom (hcM.desc ((Cocone.precompose ((toPresheaf R).map f)).obj cM')))
+            (ιM (hcR := hcR) (hcM := hcM) (r • m)) =
+          ιM (hcR := hcR) (hcM := hcM') (f.app U (r • m)) := by
+      simpa only [ModuleColimit.ιM, c, toPresheaf_map_app_apply] using
+        ConcreteCategory.congr_hom (hcM.fac c U) (r • m)
+    have h₂ :
+        (ConcreteCategory.hom (hcM.desc ((Cocone.precompose ((toPresheaf R).map f)).obj cM')))
+            (ιM (hcR := hcR) (hcM := hcM) m) =
+          ιM (hcR := hcR) (hcM := hcM') (f.app U m) := by
+      simpa only [ModuleColimit.ιM, c, toPresheaf_map_app_apply] using
+        ConcreteCategory.congr_hom (hcM.fac c U) m
+    rw [ModuleColimit.smul_eq, h₁, h₂]
+    calc
+      ιM (hcR := hcR) (hcM := hcM') (f.app U (r • m)) =
+          ιM (hcR := hcR) (hcM := hcM') (r • f.app U m) := by
+            congr 1
+            exact (f.app U).hom.map_smul r m
+      _ =
+          (ιR cR) r • ιM (hcR := hcR) (hcM := hcM') (f.app U m) := by
+            rw [ModuleColimit.smul_eq]
 
 @[simp]
 lemma map_apply (f : M ⟶ M') {U : Cᵒᵖ} (m : M.obj U) :
