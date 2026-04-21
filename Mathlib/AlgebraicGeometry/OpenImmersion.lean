@@ -324,8 +324,18 @@ theorem exists_affine_mem_range_and_range_subset
     Spec.map (CommRingCat.ofHom (algebraMap R (Localization.Away r))) ≫ ⟨e.inv ≫ X.ofRestrict _⟩
   refine ⟨.of (Localization.Away r), f, inferInstance, ?_⟩
   rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp]
-  erw [PrimeSpectrum.localization_away_comap_range (Localization.Away r) r]
-  exact ⟨⟨_, hr, congr(($(e.hom_inv_id).base ⟨x, hxV⟩).1)⟩, Set.image_subset_iff.mpr hr'⟩
+  refine ⟨?_, ?_⟩
+  · have hz_range :
+        e.hom.base ⟨x, hxV⟩ ∈
+          Set.range ⇑(Spec.map (CommRingCat.ofHom (algebraMap R (Localization.Away r)))) := by
+      simpa [Spec.map_apply] using
+        (PrimeSpectrum.localization_away_comap_range (Localization.Away r) r).ge hr
+    exact ⟨_, hz_range, congr(($(e.hom_inv_id).base ⟨x, hxV⟩).1)⟩
+  · rintro _ ⟨z, hz_range, rfl⟩
+    have hz_basic : z ∈ ↑(PrimeSpectrum.basicOpen r) := by
+      simpa [Spec.map_apply] using
+        (PrimeSpectrum.localization_away_comap_range (Localization.Away r) r).le hz_range
+    exact hr' hz_basic
 
 end Scheme
 
@@ -597,7 +607,17 @@ theorem range_pullbackSnd :
     PreservesPullback.iso_hom_snd Scheme.forgetToTop f g, TopCat.coe_comp, Set.range_comp,
     Set.range_eq_univ.mpr, ← @Set.preimage_univ _ _ (pullback.fst f.base g.base)]
   -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): was `rw`
-  · erw [TopCat.pullback_snd_image_fst_preimage]
+  · rw [show
+      ⇑(ConcreteCategory.hom
+          (pullback.snd (Scheme.forgetToTop.map f) (Scheme.forgetToTop.map g))) ''
+          (⇑(ConcreteCategory.hom (pullback.fst f.base g.base)) ⁻¹' Set.univ) =
+        ⇑(ConcreteCategory.hom (Scheme.forgetToTop.map g)) ⁻¹'
+          (⇑(ConcreteCategory.hom (Scheme.forgetToTop.map f)) '' Set.univ) by
+        simpa using
+          TopCat.pullback_snd_image_fst_preimage
+            (Scheme.forgetToTop.map f)
+            (Scheme.forgetToTop.map g)
+            (Set.univ : Set X)]
     rw [Set.image_univ]
     rfl
   rw [← TopCat.epi_iff_surjective]
@@ -619,7 +639,17 @@ theorem range_pullbackFst :
     PreservesPullback.iso_hom_fst Scheme.forgetToTop g f, TopCat.coe_comp, Set.range_comp,
     Set.range_eq_univ.mpr, ← @Set.preimage_univ _ _ (pullback.snd g.base f.base)]
   -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): was `rw`
-  · erw [TopCat.pullback_fst_image_snd_preimage]
+  · rw [show
+      ⇑(ConcreteCategory.hom
+          (pullback.fst (Scheme.forgetToTop.map g) (Scheme.forgetToTop.map f))) ''
+          (⇑(ConcreteCategory.hom (pullback.snd g.base f.base)) ⁻¹' Set.univ) =
+        ⇑(ConcreteCategory.hom (Scheme.forgetToTop.map g)) ⁻¹'
+          (⇑(ConcreteCategory.hom (Scheme.forgetToTop.map f)) '' Set.univ) by
+        simpa using
+          TopCat.pullback_fst_image_snd_preimage
+            (Scheme.forgetToTop.map g)
+            (Scheme.forgetToTop.map f)
+            (Set.univ : Set X)]
     rw [Set.image_univ]
     rfl
   rw [← TopCat.epi_iff_surjective]
