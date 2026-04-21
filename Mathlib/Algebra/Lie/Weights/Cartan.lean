@@ -300,10 +300,12 @@ lemma mem_corootSpace' {x : H} :
     x ∈ Submodule.span R ({⁅y, z⁆ | (y ∈ rootSpace H α) (z ∈ rootSpace H (-α))} : Set H) := by
   set s : Set H := ({⁅y, z⁆ | (y ∈ rootSpace H α) (z ∈ rootSpace H (-α))} : Set H)
   suffices H.subtype '' s = {⁅y, z⁆ | (y ∈ rootSpace H α) (z ∈ rootSpace H (-α))} by
-    erw [← (H : Submodule R L).injective_subtype.mem_set_image (s := Submodule.span R s)]
-    rw [mem_image]
-    simp_rw [SetLike.mem_coe]
-    rw [← Submodule.mem_map, Submodule.coe_subtype, Submodule.map_span, mem_corootSpace, ← this]
+    rw [mem_corootSpace, ← this, ← Submodule.map_span, Submodule.mem_map]
+    constructor
+    · rintro ⟨y, hy, hxy⟩
+      exact (Subtype.ext hxy) ▸ hy
+    · intro hx
+      exact ⟨x, hx, rfl⟩
   ext u
   simp only [Submodule.coe_subtype, mem_image, Subtype.exists, LieSubalgebra.mem_toSubmodule,
     exists_and_right, exists_eq_right, mem_setOf_eq, s]
