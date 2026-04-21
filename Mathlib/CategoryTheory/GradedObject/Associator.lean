@@ -71,7 +71,11 @@ lemma ι_mapBifunctorAssociator_hom (i₁ : I₁) (i₂ : I₂) (i₃ : I₃) (j
   dsimp [mapBifunctorAssociator]
   rw [ι_mapBifunctorComp₁₂MapObjIso_inv_assoc, ιMapTrifunctorMapObj,
     ι_mapMap_assoc, mapTrifunctorMapNatTrans_app_app_app]
-  erw [ι_mapBifunctorComp₂₃MapObjIso_hom]
+  haveI := H₂₃.hasMap
+  simpa [ιMapTrifunctorMapObj, assoc] using
+    congrArg (((associator.hom.app (X₁ i₁)).app (X₂ i₂)).app (X₃ i₃) ≫ ·)
+      (ι_mapBifunctorComp₂₃MapObjIso_hom (F := F) (G₂₃ := G₂₃) (ρ₂₃ := ρ₂₃)
+        (X₁ := X₁) (X₂ := X₂) (X₃ := X₃) i₁ i₂ i₃ j h)
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
