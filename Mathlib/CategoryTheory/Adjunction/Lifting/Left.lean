@@ -165,16 +165,37 @@ set_option backward.isDefEq.respectTransparency false in
 /-- Construct the left adjoint to `R`, with object map `constructLeftAdjointObj`. -/
 noncomputable def constructLeftAdjoint (h : ∀ X : B, RegularEpi (adj₁.counit.app X)) : B ⥤ A := by
   refine Adjunction.leftAdjointOfEquiv (fun X Y => constructLeftAdjointEquiv R _ adj₁ adj₂ h Y X) ?_
-  intro X Y Y' g h
+  intro X Y Y' g f
   rw [constructLeftAdjointEquiv_apply, constructLeftAdjointEquiv_apply,
     Equiv.symm_apply_eq, Subtype.ext_iff]
   dsimp
-  -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-  erw [Cofork.IsColimit.homIso_natural, Cofork.IsColimit.homIso_natural]
-  erw [adj₂.homEquiv_naturality_right]
-  simp_rw [Functor.comp_map]
-  -- This used to be `simp`, but we need `cat_disch` after https://github.com/leanprover/lean4/pull/2644
-  cat_disch
+  let t : X ⟶ R.obj Y := constructLeftAdjointEquiv R _ adj₁ adj₂ h Y X f
+  calc
+    (adj₁.homEquiv (U.obj X) (R.obj Y')).symm
+        ((adj₂.homEquiv (U.obj X) Y')
+          ((Cofork.IsColimit.homIso
+                (colimit.isColimit (parallelPair (F'.map (U.map (adj₁.counit.app X)))
+                  (otherMap R F' adj₁ adj₂ X))) Y')
+              (f ≫ g)).1) =
+      ((Cofork.IsColimit.homIso (counitCoequalises adj₁ h X) (R.obj Y)) t).1 ≫ R.map g := by
+        trans (adj₁.homEquiv (U.obj X) (R.obj Y')).symm
+            ((adj₂.homEquiv (U.obj X) Y')
+              (((Cofork.IsColimit.homIso
+                    (colimit.isColimit (parallelPair (F'.map (U.map (adj₁.counit.app X)))
+                      (otherMap R F' adj₁ adj₂ X))) Y)
+                  f).1 ≫
+                g))
+        · exact congrArg ((adj₁.homEquiv (U.obj X) (R.obj Y')).symm) <|
+            congrArg (adj₂.homEquiv (U.obj X) Y') <|
+              Cofork.IsColimit.homIso_natural g (colimit.isColimit _) f
+        · rw [adj₂.homEquiv_naturality_right]
+          simp_rw [Functor.comp_map]
+          rw [adj₁.homEquiv_naturality_right_symm]
+          simp [t, constructLeftAdjointEquiv_apply]
+          rfl
+    _ = ((Cofork.IsColimit.homIso (counitCoequalises adj₁ h X) (R.obj Y')) (t ≫ R.map g)).1 := by
+        symm
+        exact Cofork.IsColimit.homIso_natural (R.map g) (counitCoequalises adj₁ h X) t
 
 end LiftLeftAdjoint
 
