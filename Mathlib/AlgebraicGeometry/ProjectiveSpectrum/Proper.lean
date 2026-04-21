@@ -109,8 +109,9 @@ instance isSeparated : IsSeparated (toSpecZero 𝒜) := by
   · simp only [Iso.trans_hom, congrHom_hom, Category.assoc, Iso.hom_inv_id, Category.comp_id,
       limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app, e₂, e₁,
       pullbackSpecIso_inv_fst, ← Spec.map_comp]
-    erw [pullbackDiagonalMapIdIso_inv_snd_fst]
-    erw [pullbackAwayιIso_inv_fst]
+    simp only [affineOpenCover_f, pullbackDiagonalMapIdIso_inv_snd_fst,
+      pullbackAwayιIso_inv_fst, Spec.map_comp]
+    rw [← Spec.map_comp]
     congr 1
     ext x : 2
     exact DFunLike.congr_fun (Algebra.TensorProduct.lift_comp_includeLeft
@@ -118,8 +119,9 @@ instance isSeparated : IsSeparated (toSpecZero 𝒜) := by
   · simp only [Iso.trans_hom, congrHom_hom, Category.assoc, Iso.hom_inv_id, Category.comp_id,
       limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app, pullbackSpecIso_inv_snd,
       ← Spec.map_comp, e₂, e₁]
-    erw [pullbackDiagonalMapIdIso_inv_snd_snd]
-    erw [pullbackAwayιIso_inv_snd]
+    simp only [affineOpenCover_f, pullbackDiagonalMapIdIso_inv_snd_snd,
+      pullbackAwayιIso_inv_snd, Spec.map_comp]
+    rw [← Spec.map_comp]
     congr 1
     ext x : 2
     exact DFunLike.congr_fun (Algebra.TensorProduct.lift_comp_includeRight
