@@ -760,9 +760,15 @@ lemma iSup_genWeightSpace_eq_top [IsTriangularizable K L M] :
 
 lemma iSup_genWeightSpace_eq_top' [IsTriangularizable K L M] :
     ⨆ χ : Weight K L M, genWeightSpace M χ = ⊤ := by
-  have := iSup_genWeightSpace_eq_top K L M
-  erw [← iSup_ne_bot_subtype, ← (Weight.equivSetOf K L M).iSup_comp] at this
-  exact this
+  calc
+    ⨆ χ : Weight K L M, genWeightSpace M χ
+        = ⨆ χ : {χ : L → K // genWeightSpace M χ ≠ ⊥}, genWeightSpace M (χ : L → K) := by
+          simpa using
+            ((Weight.equivSetOf K L M).iSup_comp
+              (g := fun χ : {χ : L → K // genWeightSpace M χ ≠ ⊥} =>
+                genWeightSpace M (χ : L → K)))
+    _ = ⨆ χ : L → K, genWeightSpace M χ := iSup_ne_bot_subtype (f := genWeightSpace M)
+    _ = ⊤ := iSup_genWeightSpace_eq_top K L M
 
 lemma eq_iSup_inf_genWeightSpace [IsTriangularizable K L M] (N : LieSubmodule K L M) :
     N = ⨆ χ : Weight K L M, N ⊓ genWeightSpace M χ := by
