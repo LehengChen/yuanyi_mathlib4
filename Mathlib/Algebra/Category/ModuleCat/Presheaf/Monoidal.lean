@@ -49,12 +49,27 @@ noncomputable def tensorObjMap {X Y : Cᵒᵖ} (f : X ⟶ Y) : M₁.obj X ⊗ M�
       intro m₁ m₁' m₂
       dsimp +instances
       rw [map_add, TensorProduct.add_tmul])
-    (by intro a m₁ m₂; dsimp; erw [M₁.map_smul]; rfl)
+    (by
+      intro a m₁ m₂
+      dsimp
+      change M₁.map f (a • m₁) ⊗ₜ[↑(R.obj Y)] M₂.map f m₂ =
+        (((R.map f).hom a) • M₁.map f m₁) ⊗ₜ[↑(R.obj Y)] M₂.map f m₂
+      rw [M₁.map_smul]
+      rfl)
     (by
       intro m₁ m₂ m₂'
       dsimp +instances
       rw [map_add, TensorProduct.tmul_add])
-    (by intro a m₁ m₂; dsimp; erw [M₂.map_smul, TensorProduct.tmul_smul (r := R.map f a)]; rfl)
+    (by
+      intro a m₁ m₂
+      dsimp
+      change M₁.map f m₁ ⊗ₜ[↑(R.obj Y)] M₂.map f (a • m₂) =
+        (((R.map f).hom a) • M₁.map f m₁) ⊗ₜ[↑(R.obj Y)] M₂.map f m₂
+      rw [M₂.map_smul]
+      change M₁.map f m₁ ⊗ₜ[↑(R.obj Y)] (((R.map f).hom a) • M₂.map f m₂) =
+        (((R.map f).hom a) • M₁.map f m₁) ⊗ₜ[↑(R.obj Y)] M₂.map f m₂
+      rw [TensorProduct.tmul_smul (r := (R.map f).hom a)]
+      rw [TensorProduct.smul_tmul'])
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor product of two presheaves of modules. -/
@@ -85,15 +100,13 @@ lemma tensorObj_map_tmul {X Y : Cᵒᵖ} (f : X ⟶ Y) (m₁ : M₁.obj X) (m₂
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor product of two morphisms of presheaves of modules. -/
 @[simps]
-noncomputable def tensorHom (f : M₁ ⟶ M₂) (g : M₃ ⟶ M₄) : tensorObj M₁ M₃ ⟶ tensorObj M₂ M₄ where
+  noncomputable def tensorHom (f : M₁ ⟶ M₂) (g : M₃ ⟶ M₄) : tensorObj M₁ M₃ ⟶ tensorObj M₂ M₄ where
   app X := f.app X ⊗ₘ g.app X
   naturality {X Y} φ := ModuleCat.MonoidalCategory.tensor_ext (fun m₁ m₃ ↦ by
     dsimp
-    rw [tensorObj_map_tmul]
-    -- Need `erw` because of the type mismatch in `map` and the tensor product.
-    erw [ModuleCat.MonoidalCategory.tensorHom_tmul, tensorObj_map_tmul]
-    rw [naturality_apply, naturality_apply]
-    simp)
+    simpa [tensorObj_map_tmul, ModuleCat.MonoidalCategory.tensorHom_tmul] using
+      congrArg₂ (fun x y ↦ x ⊗ₜ[↑(R.obj Y)] y) (naturality_apply f φ m₁)
+        (naturality_apply g φ m₃))
 
 end Monoidal
 
@@ -113,12 +126,24 @@ noncomputable instance monoidalCategoryStruct :
   leftUnitor M := Iso.symm (isoMk (fun _ ↦ (λ_ _).symm) (fun X Y f ↦ by
     ext m
     dsimp [CommRingCat.forgetToRingCat_obj]
-    erw [leftUnitor_inv_apply, leftUnitor_inv_apply, tensorObj_map_tmul, (R.map f).hom.map_one]
+    show (ConcreteCategory.hom (λ_ (M.obj Y)).inv) ((ModuleCat.Hom.hom (M.map f)) m) =
+      (ModuleCat.Hom.hom ((Monoidal.tensorObj (unit (R ⋙ forget₂ CommRingCat RingCat)) M).map f))
+        ((ModuleCat.Hom.hom (λ_ (M.obj X)).inv) m)
+    change (ConcreteCategory.hom (λ_ (M.obj Y)).inv) ((ModuleCat.Hom.hom (M.map f)) m) =
+      ((PresheafOfModules.unit (R ⋙ forget₂ CommRingCat RingCat)).map f (1 : R.obj X)) ⊗ₜ[↑(R.obj Y)]
+        ((ModuleCat.Hom.hom (M.map f)) m)
+    rw [leftUnitor_inv_apply, PresheafOfModules.unit_map_one]
     rfl))
   rightUnitor M := Iso.symm (isoMk (fun _ ↦ (ρ_ _).symm) (fun X Y f ↦ by
     ext m
     dsimp [CommRingCat.forgetToRingCat_obj]
-    erw [rightUnitor_inv_apply, rightUnitor_inv_apply, tensorObj_map_tmul, (R.map f).hom.map_one]
+    show (ConcreteCategory.hom (ρ_ (M.obj Y)).inv) ((ModuleCat.Hom.hom (M.map f)) m) =
+      (ModuleCat.Hom.hom ((Monoidal.tensorObj M (unit (R ⋙ forget₂ CommRingCat RingCat))).map f))
+        ((ModuleCat.Hom.hom (ρ_ (M.obj X)).inv) m)
+    change (ConcreteCategory.hom (ρ_ (M.obj Y)).inv) ((ModuleCat.Hom.hom (M.map f)) m) =
+      ((ModuleCat.Hom.hom (M.map f)) m) ⊗ₜ[↑(R.obj Y)]
+        ((PresheafOfModules.unit (R ⋙ forget₂ CommRingCat RingCat)).map f (1 : R.obj X))
+    rw [rightUnitor_inv_apply, PresheafOfModules.unit_map_one]
     rfl))
 
 set_option backward.isDefEq.respectTransparency false in
