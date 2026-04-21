@@ -258,8 +258,12 @@ lemma le_of_iSup_eq_top {I J : X.IdealSheafData} {ι : Type*}
   dsimp
   simp +instances only [← Submodule.restrictScalars_localized' Γ(X, X.basicOpen (r j)),
     Ideal.localized'_eq_map, RingHom.algebraMap_toAlgebra]
-  erw [I.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j)),
-    J.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))]
+  convert (show
+      Submodule.restrictScalars Γ(X, V.1) (I.ideal ⟨X.basicOpen (r j), V.2.basicOpen (r j)⟩) ≤
+        Submodule.restrictScalars Γ(X, V.1) (J.ideal ⟨X.basicOpen (r j), V.2.basicOpen (r j)⟩)
+      from ?_) using 1
+  · simpa using I.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))
+  · simpa using J.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))
   delta algebra_section_section_basicOpen
   rw! [e]
   rw [← I.map_ideal (V := (U _)) (X.basicOpen_le _), ← J.map_ideal (V := (U _)) (X.basicOpen_le _)]
@@ -593,10 +597,17 @@ noncomputable nonrec def vanishingIdeal (Z : Closeds X) : IdealSheafData X :=
         rw [← vanishingIdeal_closure,
           ← this.isOpenMap.preimage_closure_eq_closure_preimage this.continuous, e] at hx
         rw [← vanishingIdeal_closure, e]
-        erw [preimage_comap_zeroLocus] at hx
+        have hx0 : x ∈ vanishingIdeal
+            ((PrimeSpectrum.comap (CommRingCat.Hom.hom F)) ⁻¹' PrimeSpectrum.zeroLocus ↑I) := by
+          rw [PrimeSpectrum.mem_vanishingIdeal] at hx ⊢
+          simpa [Spec.map_apply] using hx
+        have hx' : x ∈
+            vanishingIdeal (PrimeSpectrum.zeroLocus (⇑(CommRingCat.Hom.hom F) '' ↑I)) := by
+          rw [PrimeSpectrum.mem_vanishingIdeal] at hx0 ⊢
+          simpa [preimage_comap_zeroLocus] using hx0
         rwa [← PrimeSpectrum.zeroLocus_span, ← Ideal.map, vanishingIdeal_zeroLocus_eq_radical,
           ← RingHom.algebraMap_toAlgebra (X.presheaf.map _).hom,
-          ← IsLocalization.map_radical (.powers f), ← vanishingIdeal_zeroLocus_eq_radical] at hx)
+          ← IsLocalization.map_radical (.powers f), ← vanishingIdeal_zeroLocus_eq_radical] at hx')
     Z
     (fun U x hxU ↦ by
       trans x ∈ X.zeroLocus (U := U.1) (vanishingIdeal (U.2.fromSpec ⁻¹' Z)) ∩ U.1
