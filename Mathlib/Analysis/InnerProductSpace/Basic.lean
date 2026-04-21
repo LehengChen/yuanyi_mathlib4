@@ -714,9 +714,12 @@ theorem norm_inner_eq_norm_tfae (x y : E) :
       try positivity
     simp only [@norm_sq_eq_re_inner 𝕜] at h
     letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
-    erw [← InnerProductSpace.Core.cauchy_schwarz_aux (𝕜 := 𝕜) (F := E)] at h
-    rw [InnerProductSpace.Core.normSq_eq_zero, sub_eq_zero] at h
-    rw [div_eq_inv_mul, mul_smul, h, inv_smul_smul₀]
+    have h' : InnerProductSpace.Core.normSq (𝕜 := 𝕜) (F := E)
+        (⟪x, y⟫ • x - ⟪x, x⟫ • y) = 0 := by
+      rw [InnerProductSpace.Core.cauchy_schwarz_aux (𝕜 := 𝕜) (F := E)]
+      exact h
+    rw [InnerProductSpace.Core.normSq_eq_zero, sub_eq_zero] at h'
+    rw [div_eq_inv_mul, mul_smul, h', inv_smul_smul₀]
     rwa [inner_self_ne_zero]
   tfae_have 2 → 3 := fun h => h.imp_right fun h' => ⟨_, h'⟩
   tfae_have 3 → 1 := by
