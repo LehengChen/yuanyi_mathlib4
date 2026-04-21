@@ -82,9 +82,11 @@ lemma range_glueDataObjι (U : X.affineOpens) :
     Set.range (I.glueDataObjι U) =
       U.2.isoSpec.inv '' PrimeSpectrum.zeroLocus (I.ideal U) := by
   simp only [glueDataObjι, Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp]
-  erw [range_comap_of_surjective]
-  swap; · exact Ideal.Quotient.mk_surjective
-  simp only [Ideal.mk_ker, CommRingCat.hom_ofHom]
+  simpa only [Ideal.mk_ker, CommRingCat.hom_ofHom] using
+    congrArg (fun s => U.2.isoSpec.inv '' s)
+      (range_comap_of_surjective
+        (S := Γ(X, U.1) ⧸ I.ideal U) (f := Ideal.Quotient.mk (I.ideal U))
+        Ideal.Quotient.mk_surjective)
 
 lemma range_glueDataObjι_ι (U : X.affineOpens) :
     Set.range (I.glueDataObjι U ≫ U.1.ι) = X.zeroLocus (U := U) (I.ideal U) ∩ U := by
@@ -145,8 +147,9 @@ lemma glueDataObjMap_glueDataObjι {U V : X.affineOpens} (h : U ≤ V) :
     Category.assoc]
   congr 1
   rw [Iso.eq_inv_comp, IsAffineOpen.isoSpec_hom, CommRingCat.ofHom_hom]
-  erw [Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_assoc U.1 V.1 h]
-  rw [← IsAffineOpen.isoSpec_hom V.2, Iso.hom_inv_id, Category.comp_id]
+  simpa only [Category.assoc, ← IsAffineOpen.isoSpec_hom V.2, Iso.hom_inv_id,
+    Category.comp_id] using
+    Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_assoc U.1 V.1 h V.2.isoSpec.inv
 
 set_option backward.isDefEq.respectTransparency false in
 lemma ideal_le_ker_glueDataObjι (U V : X.affineOpens) :
