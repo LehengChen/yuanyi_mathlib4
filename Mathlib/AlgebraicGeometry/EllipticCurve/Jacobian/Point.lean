@@ -117,14 +117,39 @@ lemma neg_of_Z_eq_zero' {P : Fin 3 → R} (hPz : P z = 0) : W'.neg P = ![P x, -P
 lemma neg_of_Z_eq_zero {P : Fin 3 → F} (hP : W.Nonsingular P) (hPz : P z = 0) :
     W.neg P = -(P y / P x) • ![1, 1, 0] := by
   have hX {n : ℕ} : IsUnit <| P x ^ n := (isUnit_X_of_Z_eq_zero hP hPz).pow n
-  erw [neg_of_Z_eq_zero' hPz, smul_fin3, neg_sq, div_pow, (equation_of_Z_eq_zero hPz).mp hP.left,
-    pow_succ, hX.mul_div_cancel_left, mul_one, Odd.neg_pow <| by decide, div_pow, pow_succ,
-    (equation_of_Z_eq_zero hPz).mp hP.left, hX.mul_div_cancel_left, mul_one, mul_zero]
+  have hEq : P y ^ 2 = P x ^ 3 := (equation_of_Z_eq_zero hPz).mp hP.left
+  ext i
+  fin_cases i
+  · simpa [neg_of_Z_eq_zero' hPz, smul_fin3] using
+      (show P x = (P y / P x) ^ 2 by
+        calc
+          P x = P x ^ 3 / P x ^ 2 := by
+            rw [pow_succ, hX.mul_div_cancel_left]
+          _ = (P y / P x) ^ 2 := by
+            rw [← hEq, div_pow])
+  · simpa [neg_of_Z_eq_zero' hPz, smul_fin3, Odd.neg_pow (by decide : Odd 3)] using
+      (show P y = (P y / P x) ^ 3 by
+        calc
+          P y = P y ^ 3 / P x ^ 3 := by
+            rw [pow_succ, hEq, hX.mul_div_cancel_left]
+          _ = (P y / P x) ^ 3 := by
+            rw [div_pow])
+  · simp [neg_of_Z_eq_zero' hPz, smul_fin3]
 
 lemma neg_of_Z_ne_zero {P : Fin 3 → F} (hPz : P z ≠ 0) :
     W.neg P = P z • ![P x / P z ^ 2, W.toAffine.negY (P x / P z ^ 2) (P y / P z ^ 3), 1] := by
-  erw [neg, smul_fin3, mul_div_cancel₀ _ <| pow_ne_zero 2 hPz, ← negY_of_Z_ne_zero hPz,
-    mul_div_cancel₀ _ <| pow_ne_zero 3 hPz, mul_one]
+  ext i
+  fin_cases i
+  · simp [neg, smul_fin3, mul_div_cancel₀ _ (pow_ne_zero 2 hPz)]
+  · calc
+      W.negY P = (W.negY P / P z ^ 3) * P z ^ 3 := by
+        rw [div_mul_cancel₀ _ (pow_ne_zero 3 hPz)]
+      _ = W.toAffine.negY (P x / P z ^ 2) (P y / P z ^ 3) * P z ^ 3 := by
+        rw [negY_of_Z_ne_zero hPz]
+      _ = P z ^ 3 * (-(P y / P z ^ 3) - W.toAffine.a₁ * (P x / P z ^ 2) - W.toAffine.a₃) := by
+        rw [Affine.negY]
+        ring
+  · simp [neg, smul_fin3]
 
 private lemma nonsingular_neg_of_Z_ne_zero {P : Fin 3 → F} (hP : W.Nonsingular P) (hPz : P z ≠ 0) :
     W.Nonsingular ![P x / P z ^ 2, W.toAffine.negY (P x / P z ^ 2) (P y / P z ^ 3), 1] :=
@@ -156,8 +181,11 @@ lemma addY_neg {P : Fin 3 → R} (hP : W'.Equation P) : W'.addY P (W'.neg P) = -
 
 lemma addXYZ_neg {P : Fin 3 → R} (hP : W'.Equation P) :
     W'.addXYZ P (W'.neg P) = -W'.dblZ P • ![1, 1, 0] := by
-  erw [addXYZ, addX_neg hP, addY_neg hP, addZ_neg, smul_fin3, neg_sq, mul_one,
-    Odd.neg_pow <| by decide, mul_one, mul_zero]
+  ext i
+  fin_cases i
+  · simp [addXYZ, addX_neg hP, smul_fin3]
+  · simp [addXYZ, addY_neg hP, smul_fin3, Odd.neg_pow (by decide : Odd 3)]
+  · simp [addXYZ, addZ_neg, smul_fin3]
 
 variable (W') in
 /-- The negation of a Jacobian point class on a Weierstrass curve `W`.
