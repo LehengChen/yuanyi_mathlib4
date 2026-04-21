@@ -135,7 +135,10 @@ noncomputable def tensorQuotientEquiv (n : Submodule R N) :
   quotientTensorQuotientEquiv (⊥ : Submodule R M) n ≪≫ₗ
   Submodule.Quotient.equiv _ _ (LinearEquiv.refl _ _) (by
     simp only [Submodule.map_sup]
-    erw [Submodule.map_id, Submodule.map_id]
+    rw [show (↑(LinearEquiv.refl R (M ⊗[R] N)) :
+        M ⊗[R] N →ₗ[R] M ⊗[R] N) = LinearMap.id by
+      rfl]
+    rw [Submodule.map_id, Submodule.map_id]
     simp only [sup_eq_right]
     rw [range_map_eq_span_tmul, range_map_eq_span_tmul]
     simp)
