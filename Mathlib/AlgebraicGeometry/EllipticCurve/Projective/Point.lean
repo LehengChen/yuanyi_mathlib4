@@ -116,8 +116,9 @@ lemma neg_of_Z_eq_zero [NoZeroDivisors R] {P : Fin 3 → R} (hP : W'.Equation P)
 
 lemma neg_of_Z_ne_zero {P : Fin 3 → F} (hPz : P z ≠ 0) :
     W.neg P = P z • ![P x / P z, W.toAffine.negY (P x / P z) (P y / P z), 1] := by
-  erw [neg, smul_fin3, mul_div_cancel₀ _ hPz, ← negY_of_Z_ne_zero hPz, mul_div_cancel₀ _ hPz,
-    mul_one]
+  rw [← fin3_def (W.neg P), neg, smul_fin3]
+  simp only [fin3_def_ext]
+  rw [← negY_of_Z_ne_zero hPz, mul_div_cancel₀ _ hPz, mul_div_cancel₀ _ hPz, mul_one]
 
 private lemma nonsingular_neg_of_Z_ne_zero {P : Fin 3 → F} (hP : W.Nonsingular P) (hPz : P z ≠ 0) :
     W.Nonsingular ![P x / P z, W.toAffine.negY (P x / P z) (P y / P z), 1] :=
@@ -148,7 +149,7 @@ lemma addY_neg {P : Fin 3 → R} (hP : W'.Equation P) : W'.addY P (W'.neg P) = -
 
 lemma addXYZ_neg {P : Fin 3 → R} (hP : W'.Equation P) :
     W'.addXYZ P (W'.neg P) = -W'.dblZ P • ![0, 1, 0] := by
-  erw [addXYZ, addX_neg, addY_neg hP, addZ_neg, smul_fin3, mul_zero, mul_one]
+  simp [addXYZ, addX_neg, addY_neg hP, addZ_neg]
 
 variable (W') in
 /-- The negation of a projective point class on a Weierstrass curve `W`.
