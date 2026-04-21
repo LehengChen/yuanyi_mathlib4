@@ -263,14 +263,33 @@ def shiftFunctor (n : S) : DifferentialObject S C ⥤ DifferentialObject S C whe
       d_squared := by
         rw [Functor.map_comp, Category.assoc, shiftComm_hom_comp_assoc, ← Functor.map_comp_assoc,
           X.d_squared, Functor.map_zero, zero_comp] }
-  map f :=
+  map {X Y} f :=
     { f := f.f⟦n⟧'
       comm := by
         dsimp
-        rw [Category.assoc]
-        erw [shiftComm_hom_comp]
-        rw [← Functor.map_comp_assoc, f.comm, Functor.map_comp_assoc]
-        rfl }
+        have hshift :
+            (shiftFunctorComm C (1 : S) n).hom.app X.obj ≫
+                (CategoryTheory.shiftFunctor C (1 : S)).map
+                  ((CategoryTheory.shiftFunctor C n).map f.f) =
+              (CategoryTheory.shiftFunctor C n).map
+                  ((CategoryTheory.shiftFunctor C (1 : S)).map f.f) ≫
+                (shiftFunctorComm C (1 : S) n).hom.app Y.obj := by
+          simpa using (shiftComm_hom_comp (C := C) (f := f.f) (i := (1 : S)) (j := n))
+        calc
+          ((CategoryTheory.shiftFunctor C n).map X.d ≫
+                (shiftFunctorComm C (1 : S) n).hom.app X.obj) ≫
+              (CategoryTheory.shiftFunctor C (1 : S)).map
+                ((CategoryTheory.shiftFunctor C n).map f.f) =
+            (CategoryTheory.shiftFunctor C n).map X.d ≫
+              (CategoryTheory.shiftFunctor C n).map
+                ((CategoryTheory.shiftFunctor C (1 : S)).map f.f) ≫
+                  (shiftFunctorComm C (1 : S) n).hom.app Y.obj := by
+              simpa [Category.assoc] using
+                congrArg (fun k => (CategoryTheory.shiftFunctor C n).map X.d ≫ k) hshift
+          _ = (CategoryTheory.shiftFunctor C n).map f.f ≫
+                (CategoryTheory.shiftFunctor C n).map Y.d ≫
+                  (shiftFunctorComm C (1 : S) n).hom.app Y.obj := by
+              rw [← Functor.map_comp_assoc, f.comm, Functor.map_comp_assoc] }
   map_id X := by ext1; dsimp; rw [Functor.map_id]
   map_comp f g := by ext1; dsimp; rw [Functor.map_comp]
 
@@ -297,9 +316,9 @@ set_option backward.isDefEq.respectTransparency false in
 @[simps!]
 def shiftZero : shiftFunctor C (0 : S) ≅ 𝟭 (DifferentialObject S C) := by
   refine NatIso.ofComponents (fun X => mkIso ((shiftFunctorZero C S).app X.obj) ?_) (fun f => ?_)
-  · erw [← NatTrans.naturality]
-    dsimp
-    simp only [shiftFunctorZero_hom_app_shift, Category.assoc]
+  · dsimp
+    simpa only [shiftFunctorZero_hom_app_shift, Category.assoc] using
+      (NatTrans.naturality (shiftFunctorZero C S).hom X.d)
   · cat_disch
 
 end
