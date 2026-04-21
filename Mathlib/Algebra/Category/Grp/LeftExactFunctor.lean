@@ -84,17 +84,75 @@ noncomputable def unitIsoAux (F : C ⥤ AddCommGrpCat.{v}) [PreservesFiniteLimit
       (F ⋙ forget AddCommGrpCat).mapCommGrp.obj (Preadditive.commGrpEquivalence.functor.obj X) := by
   letI : (F ⋙ forget AddCommGrpCat).Braided := .ofChosenFiniteProducts _
   letI : F.Monoidal := .ofChosenFiniteProducts _
-  refine CommGrp.mkIso Multiplicative.toAdd.toIso (by
-    erw [Functor.mapCommGrp_obj_grp_one]
-    cat_disch) ?_
+  refine CommGrp.mkIso Multiplicative.toAdd.toIso ?_ ?_
+  · rw [Functor.mapCommGrp_obj_grp_one (F := F ⋙ forget AddCommGrpCat)
+      (A := Preadditive.commGrpEquivalence.functor.obj X)]
+    simp [Functor.map_zero]
+    cat_disch
   dsimp [-Functor.comp_map, -ConcreteCategory.forget_map_eq_coe, -forget_map]
   have : F.Additive := Functor.additive_of_preserves_binary_products _
   simp only [Category.id_comp]
-  erw [Functor.mapCommGrp_obj_grp_mul]
-  erw [Functor.comp_map, F.map_add, Functor.Monoidal.μ_comp F (forget AddCommGrpCat) X X,
-    Category.assoc, ← Functor.map_comp, Preadditive.comp_add, Functor.Monoidal.μ_fst,
-    Functor.Monoidal.μ_snd]
-  cat_disch
+  rw [Functor.mapCommGrp_obj_grp_mul (F := F ⋙ forget AddCommGrpCat)
+    (A := Preadditive.commGrpEquivalence.functor.obj X)]
+  simp [Functor.comp_map, F.map_add, Functor.Monoidal.μ_comp F (forget AddCommGrpCat) X X,
+    Category.assoc]
+  apply types_ext
+  rintro ⟨a, b⟩
+  change Multiplicative.toAdd (a * b) = _
+  have hfst := CategoryTheory.ConcreteCategory.congr_hom
+    (CategoryTheory.Functor.Monoidal.μ_fst F X X) (Multiplicative.toAdd a, Multiplicative.toAdd b)
+  have hsnd := CategoryTheory.ConcreteCategory.congr_hom
+    (CategoryTheory.Functor.Monoidal.μ_snd F X X) (Multiplicative.toAdd a, Multiplicative.toAdd b)
+  have hfst' :
+      (Hom.hom (F.map (SemiCartesianMonoidalCategory.fst X X)))
+          ((CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X))
+            (Multiplicative.toAdd a, Multiplicative.toAdd b)) =
+        Multiplicative.toAdd a := by
+    change (CategoryTheory.ConcreteCategory.hom
+      (Functor.LaxMonoidal.μ F X X ≫ F.map (SemiCartesianMonoidalCategory.fst X X)))
+        (Multiplicative.toAdd a, Multiplicative.toAdd b) =
+      (CategoryTheory.ConcreteCategory.hom
+        (SemiCartesianMonoidalCategory.fst (F.obj X) (F.obj X)))
+        (Multiplicative.toAdd a, Multiplicative.toAdd b)
+    exact hfst
+  have hsnd' :
+      (Hom.hom (F.map (SemiCartesianMonoidalCategory.snd X X)))
+          ((CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X))
+            (Multiplicative.toAdd a, Multiplicative.toAdd b)) =
+        Multiplicative.toAdd b := by
+    change (CategoryTheory.ConcreteCategory.hom
+      (Functor.LaxMonoidal.μ F X X ≫ F.map (SemiCartesianMonoidalCategory.snd X X)))
+        (Multiplicative.toAdd a, Multiplicative.toAdd b) =
+      (CategoryTheory.ConcreteCategory.hom
+        (SemiCartesianMonoidalCategory.snd (F.obj X) (F.obj X)))
+        (Multiplicative.toAdd a, Multiplicative.toAdd b)
+    exact hsnd
+  have hmid :
+      Multiplicative.toAdd (a * b) =
+        (Hom.hom (F.map (SemiCartesianMonoidalCategory.fst X X)))
+            ((CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X))
+              (Multiplicative.toAdd a, Multiplicative.toAdd b)) +
+          (Hom.hom (F.map (SemiCartesianMonoidalCategory.snd X X)))
+            ((CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X))
+              (Multiplicative.toAdd a, Multiplicative.toAdd b)) := by
+    rw [hfst', hsnd']
+    rfl
+  have hlast :
+      (Hom.hom (F.map (SemiCartesianMonoidalCategory.fst X X)))
+          ((CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X))
+            (Multiplicative.toAdd a, Multiplicative.toAdd b)) +
+        (Hom.hom (F.map (SemiCartesianMonoidalCategory.snd X X)))
+          ((CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X))
+            (Multiplicative.toAdd a, Multiplicative.toAdd b)) =
+      ((⇑Multiplicative.toAdd ⊗ₘ ⇑Multiplicative.toAdd) ≫
+          Functor.LaxMonoidal.μ (forget AddCommGrpCat) (F.obj X) (F.obj X) ≫
+            ⇑(CategoryTheory.ConcreteCategory.hom (Functor.LaxMonoidal.μ F X X)) ≫
+              ⇑(Hom.hom (F.map (SemiCartesianMonoidalCategory.fst X X)) +
+                  Hom.hom (F.map (SemiCartesianMonoidalCategory.snd X X))))
+        (a, b) := by
+    simp [AddCommGrpCat.μ_forget_apply]
+    rfl
+  exact hmid.trans hlast
 
 /-- Implementation, see `leftExactFunctorForgetEquivalence`. -/
 noncomputable def unitIso : 𝟭 (C ⥤ₗ AddCommGrpCat) ≅
