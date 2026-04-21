@@ -431,8 +431,7 @@ def toArrow : Augmented C ⥤ Arrow C where
       w := by
         dsimp
         rw [← NatTrans.comp_app]
-        erw [η.w]
-        rfl }
+        exact congr_app η.w (op ⦋0⦌) }
 
 /-- The compatibility of a morphism with the augmentation, on 0-simplices -/
 @[reassoc]
@@ -458,8 +457,7 @@ def whiskeringObj (D : Type*) [Category* D] (F : C ⥤ D) : Augmented C ⥤ Augm
         ext
         dsimp [whiskerRight]
         simp only [Category.comp_id, ← F.map_comp, ← NatTrans.comp_app]
-        erw [η.w]
-        rfl }
+        exact congr_arg F.map (congr_app η.w _) }
 
 /-- Functor composition induces a functor on augmented simplicial objects. -/
 @[simps]
@@ -804,8 +802,7 @@ def toArrow : Augmented C ⥤ Arrow C where
       w := by
         dsimp
         rw [← NatTrans.comp_app]
-        erw [← η.w]
-        rfl }
+        exact congr_app η.w ⦋0⦌ }
 
 variable (C)
 
@@ -824,8 +821,7 @@ def whiskeringObj (D : Type*) [Category* D] (F : C ⥤ D) : Augmented C ⥤ Augm
         ext
         dsimp
         rw [Category.id_comp, Category.id_comp, ← F.map_comp, ← F.map_comp, ← NatTrans.comp_app]
-        erw [← η.w]
-        rfl }
+        exact congr_arg F.map (congr_app η.w _) }
 
 /-- Functor composition induces a functor on augmented cosimplicial objects. -/
 @[simps]
