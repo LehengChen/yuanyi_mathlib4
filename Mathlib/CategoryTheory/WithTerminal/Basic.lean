@@ -694,9 +694,11 @@ def liftUnique {D : Type*} [Category* D] {Z : D} (F : C ⥤ D) (M : ∀ x : C, Z
       · apply h.hom.naturality
       · cases f
       · cases f
+        have hhY : hG.inv ≫ G.map (PUnit.unit : star ⟶ incl.obj Y) = M Y ≫ h.inv.app Y := by
+          simpa using hh Y
         change G.map _ ≫ h.hom.app _ = hG.hom ≫ _
         symm
-        erw [← Iso.eq_inv_comp, ← Category.assoc, hh]
+        rw [← Iso.eq_inv_comp, ← Category.assoc, hhY]
         simp
       · cases f
         change G.map (𝟙 _) ≫ hG.hom = hG.hom ≫ 𝟙 _
