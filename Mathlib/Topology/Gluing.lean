@@ -190,12 +190,34 @@ theorem ι_eq_iff_rel (i j : D.J) (x : D.U i) (y : D.U j) :
       (ConcreteCategory.bijective_of_isIso (sigmaIsoSigma.{u, u} _).inv).2 x
     unfold InvImage MultispanIndex.fstSigmaMap MultispanIndex.sndSigmaMap
     rw [sigmaIsoSigma_inv_apply]
-    -- `rw [← ConcreteCategory.comp_apply]` succeeds but rewrites the wrong expression
-    erw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, colimit.ι_desc_assoc,
-      ← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, colimit.ι_desc_assoc]
-      -- previous line now `erw` after https://github.com/leanprover-community/mathlib4/pull/13170
-    erw [sigmaIsoSigma_hom_ι_apply, sigmaIsoSigma_hom_ι_apply]
-    exact ⟨y, ⟨rfl, rfl⟩⟩
+    have hfst :
+        ((ConcreteCategory.hom (sigmaIsoSigma D.U).hom)
+          ((ConcreteCategory.hom
+              (D.diagram.fstSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.diagram.right))
+                (colimit.isColimit (Discrete.functor D.diagram.left))))
+            ((ConcreteCategory.hom (Sigma.ι D.diagram.left (i, j))) y))) =
+          ⟨i, D.f i j y⟩ := by
+      rw [← sigmaIsoSigma_hom_ι_apply]
+      congr 1
+      simpa [ConcreteCategory.comp_apply] using
+        (ConcreteCategory.congr_hom
+          (D.diagram.inj_fstSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.diagram.right))
+            (colimit.isColimit (Discrete.functor D.diagram.left)) (i, j)) y)
+    have hsnd :
+        ((ConcreteCategory.hom (sigmaIsoSigma D.U).hom)
+          ((ConcreteCategory.hom
+              (D.diagram.sndSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.diagram.right))
+                (colimit.isColimit (Discrete.functor D.diagram.left))))
+            ((ConcreteCategory.hom (Sigma.ι D.diagram.left (i, j))) y))) =
+          ⟨j, D.f j i (D.t i j y)⟩ := by
+      rw [← sigmaIsoSigma_hom_ι_apply]
+      congr 1
+      simpa [ConcreteCategory.comp_apply] using
+        (ConcreteCategory.congr_hom
+          (D.diagram.inj_sndSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.diagram.right))
+            (colimit.isColimit (Discrete.functor D.diagram.left)) (i, j)) y)
+    exact hsnd.symm ▸ hfst.symm ▸
+      (⟨y, ⟨rfl, rfl⟩⟩ : D.Rel ⟨i, D.f i j y⟩ ⟨j, D.f j i (D.t i j y)⟩)
   · rintro ⟨z, e₁, e₂⟩
     dsimp only at *
     -- Porting note: there were `subst e₁` and `subst e₂`, instead of the `rw`
