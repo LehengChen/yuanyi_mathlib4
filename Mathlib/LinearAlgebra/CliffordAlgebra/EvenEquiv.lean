@@ -114,15 +114,16 @@ def toEven : CliffordAlgebra Q →ₐ[R] CliffordAlgebra.even (Q' Q) := by
     exact Submodule.mul_mem_mul (LinearMap.mem_range_self _ _) (LinearMap.mem_range_self _ _)
   · ext1
     rw [Subalgebra.coe_mul] -- Porting note: was part of the `dsimp only` below
-    erw [LinearMap.codRestrict_apply] -- Porting note: was part of the `dsimp only` below
-    dsimp only [LinearMap.comp_apply, LinearMap.mulLeft_apply, Subalgebra.coe_algebraMap]
-    rw [← mul_assoc, e0_mul_v_mul_e0, v_sq_scalar]
+    simpa [LinearMap.codRestrict, LinearMap.comp_apply, LinearMap.mulLeft_apply,
+      Subalgebra.coe_algebraMap] using
+      (show e0 Q * v Q m * (e0 Q * v Q m) = algebraMap R (CliffordAlgebra (Q' Q)) (Q m) by
+        rw [← mul_assoc, e0_mul_v_mul_e0, v_sq_scalar])
 
 theorem toEven_ι (m : M) : (toEven Q (ι Q m) : CliffordAlgebra (Q' Q)) = e0 Q * v Q m := by
   rw [toEven, CliffordAlgebra.lift_ι_apply]
-  -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): was `rw`
-  erw [LinearMap.codRestrict_apply]
-  rw [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulLeft_apply]
+  simpa using
+    (LinearMap.codRestrict_apply (p := evenOdd (Q' Q) 0)
+      (f := (LinearMap.mulLeft R (e0 Q)).comp (v Q)) (x := m))
 
 /-- The embedding from the even subalgebra with an extra dimension into the original algebra. -/
 def ofEven : CliffordAlgebra.even (Q' Q) →ₐ[R] CliffordAlgebra Q := by
