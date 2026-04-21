@@ -123,20 +123,12 @@ instance instMonoidalCategory : MonoidalCategory (QuadraticModuleCat.{u} R) :=
     (forget₂ (QuadraticModuleCat R) (ModuleCat R))
     { μIso := fun _ _ => Iso.refl _
       εIso := Iso.refl _
-      leftUnitor_eq := fun X => by
-        simp only [forget₂_obj, forget₂_map, Iso.refl_symm, Iso.trans_assoc, Iso.trans_hom,
-          Iso.refl_hom, MonoidalCategory.tensorIso_hom, MonoidalCategory.tensorHom_id]
-        dsimp only [toModuleCat_tensor, ModuleCat.of_coe]
-        erw [MonoidalCategory.id_whiskerRight]
-        simp
-        rfl
-      rightUnitor_eq := fun X => by
-        simp only [forget₂_obj, forget₂_map, Iso.refl_symm, Iso.trans_assoc, Iso.trans_hom,
-          Iso.refl_hom, MonoidalCategory.tensorIso_hom, MonoidalCategory.id_tensorHom]
-        dsimp only [toModuleCat_tensor, ModuleCat.of_coe]
-        erw [MonoidalCategory.whiskerLeft_id]
-        simp
-        rfl
+      leftUnitor_eq := fun _ => by
+        refine ModuleCat.hom_ext ?_
+        exact TensorProduct.ext' fun _ _ => rfl
+      rightUnitor_eq := fun _ => by
+        refine ModuleCat.hom_ext ?_
+        exact TensorProduct.ext' fun _ _ => rfl
       associator_eq := fun X Y Z => by
         dsimp only [forget₂_obj, forget₂_map_associator_hom]
         simp only [Iso.refl_symm, Iso.trans_hom,
