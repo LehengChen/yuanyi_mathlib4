@@ -99,7 +99,12 @@ lemma compatibilityCounit_of_compatibilityUnit (h : CompatibilityUnit adj e₁ e
   dsimp
   rw [adj.homEquiv_unit, adj.homEquiv_unit, G.map_comp, adj.unit_naturality_assoc, ← eq]
   simp only [assoc, ← Functor.map_comp, Iso.inv_hom_id_app_assoc]
-  erw [← e₂.inv.naturality]
+  have hnat :
+      e₂.inv.app (F.obj (G.obj Y)) ≫ G.map ((shiftFunctor D a).map (adj.counit.app Y)) =
+        (shiftFunctor C a).map (G.map (adj.counit.app Y)) ≫ e₂.inv.app Y := by
+    simpa only [Functor.comp_obj, Functor.comp_map, comp_id] using
+      (e₂.inv.naturality_assoc (adj.counit.app Y) (𝟙 _)).symm
+  rw [hnat]
   dsimp
   simp only [right_triangle_components, ← Functor.map_comp_assoc, Functor.map_id, id_comp,
     Iso.hom_inv_id_app, Functor.comp_obj]
@@ -114,10 +119,18 @@ lemma compatibilityUnit_right (h : CompatibilityUnit adj e₁ e₂) (Y : D) :
     e₂.inv.app Y = adj.unit.app _ ≫ G.map (e₁.hom.app _) ≫ G.map ((adj.counit.app _)⟦a⟧') := by
   have := h (G.obj Y)
   rw [← cancel_mono (e₂.inv.app _), assoc, assoc, Iso.hom_inv_id_app] at this
-  erw [comp_id] at this
-  rw [← assoc, ← this, assoc]; erw [← e₂.inv.naturality]
+  have this' :
+      (shiftFunctor C a).map (adj.unit.app (G.obj Y)) ≫ e₂.inv.app (F.obj (G.obj Y)) =
+        adj.unit.app ((shiftFunctor C a).obj (G.obj Y)) ≫ G.map (e₁.hom.app (G.obj Y)) := by
+    simpa only [Functor.comp_obj, comp_id] using this
+  have hnat :
+      e₂.inv.app (F.obj (G.obj Y)) ≫ G.map ((shiftFunctor D a).map (adj.counit.app Y)) =
+        (shiftFunctor C a).map (G.map (adj.counit.app Y)) ≫ e₂.inv.app Y := by
+    simpa only [Functor.comp_obj, Functor.comp_map, comp_id] using
+      (e₂.inv.naturality_assoc (adj.counit.app Y) (𝟙 _)).symm
+  rw [← assoc, ← this', assoc, hnat]
   rw [← cancel_mono (e₂.hom.app _)]
-  simp only [Functor.comp_obj, Iso.inv_hom_id_app, Functor.id_obj, Functor.comp_map, assoc, comp_id,
+  simp only [Functor.comp_obj, Iso.inv_hom_id_app, Functor.id_obj, assoc, comp_id,
     ← (shiftFunctor C a).map_comp, right_triangle_components, Functor.map_id]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -188,7 +201,20 @@ lemma compatibilityUnit_isoAdd (h : CompatibilityUnit adj e₁ e₂)
     Functor.map_comp, assoc, unit_naturality_assoc]
   slice_rhs 5 6 => rw [← G.map_comp, Iso.inv_hom_id_app]
   simp only [Functor.comp_obj, Functor.map_id, id_comp, assoc]
-  erw [f₂.hom.naturality_assoc]
+  have hnat :
+      G.map ((shiftFunctor D b).map (e₁.hom.app X)) ≫
+          f₂.hom.app ((shiftFunctor D a).obj (F.obj X)) ≫
+            (shiftFunctor C b).map (e₂.hom.app (F.obj X)) ≫
+              (shiftFunctorAdd C a b).inv.app (G.obj (F.obj X)) =
+        f₂.hom.app (F.obj ((shiftFunctor C a).obj X)) ≫
+          (shiftFunctor C b).map (G.map (e₁.hom.app X)) ≫
+            (shiftFunctor C b).map (e₂.hom.app (F.obj X)) ≫
+              (shiftFunctorAdd C a b).inv.app (G.obj (F.obj X)) := by
+    simpa only [Functor.comp_obj, Functor.comp_map, assoc] using
+      f₂.hom.naturality_assoc (e₁.hom.app X)
+        ((shiftFunctor C b).map (e₂.hom.app (F.obj X)) ≫
+          (shiftFunctorAdd C a b).inv.app (G.obj (F.obj X)))
+  rw [hnat]
   rw [← reassoc_of% this, ← cancel_mono ((shiftFunctorAdd C a b).hom.app _),
     assoc, assoc, assoc, assoc, assoc, assoc, Iso.inv_hom_id_app_assoc, Iso.inv_hom_id_app]
   dsimp
@@ -360,14 +386,37 @@ the unit of the adjunction.
 -/
 lemma compatibilityUnit_iso (a : A) :
     CommShift.CompatibilityUnit adj (F.commShiftIso a) (iso adj a) := by
-  intro
+  intro X
   rw [← cancel_mono ((RightAdjointCommShift.iso adj a).inv.app _), assoc, assoc,
     Iso.hom_inv_id_app, RightAdjointCommShift.iso_inv_app adj _ _ (neg_add_cancel a)]
   apply (adj.homEquiv _ _).symm.injective
   dsimp
   simp only [comp_id, homEquiv_counit, Functor.map_comp, assoc, counit_naturality,
     counit_naturality_assoc, left_triangle_components_assoc]
-  erw [← NatTrans.naturality_assoc]
+  have hnat :
+      (shiftFunctorCompIsoId D (-a) a (neg_add_cancel a)).inv.app
+            (F.obj ((shiftFunctor C a).obj (G.obj (F.obj X)))) ≫
+          (shiftFunctor D a).map
+            ((shiftFunctor D (-a)).map ((Functor.commShiftIso F a).hom.app (G.obj (F.obj X)))) ≫
+            (shiftFunctor D a).map
+              ((shiftFunctorCompIsoId D a (-a) (add_neg_cancel a)).hom.app
+                (F.obj (G.obj (F.obj X)))) ≫
+              (shiftFunctor D a).map (adj.counit.app (F.obj X)) =
+        (𝟭 D).map ((Functor.commShiftIso F a).hom.app (G.obj (F.obj X))) ≫
+          (shiftFunctorCompIsoId D (-a) a (neg_add_cancel a)).inv.app
+            ((shiftFunctor D a).obj (F.obj (G.obj (F.obj X)))) ≫
+            (shiftFunctor D a).map
+              ((shiftFunctorCompIsoId D a (-a) (add_neg_cancel a)).hom.app
+                (F.obj (G.obj (F.obj X)))) ≫
+              (shiftFunctor D a).map (adj.counit.app (F.obj X)) := by
+    simpa only [Functor.comp_obj, Functor.comp_map, assoc] using
+      ((shiftFunctorCompIsoId D (-a) a (neg_add_cancel a)).inv.naturality_assoc
+        ((Functor.commShiftIso F a).hom.app (G.obj (F.obj X)))
+        ((shiftFunctor D a).map
+          ((shiftFunctorCompIsoId D a (-a) (add_neg_cancel a)).hom.app
+            (F.obj (G.obj (F.obj X)))) ≫
+          (shiftFunctor D a).map (adj.counit.app (F.obj X)))).symm
+  rw [hnat]
   dsimp
   rw [shift_shiftFunctorCompIsoId_hom_app, Iso.inv_hom_id_app_assoc,
     Functor.commShiftIso_hom_naturality_assoc, ← Functor.map_comp,
