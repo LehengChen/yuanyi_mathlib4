@@ -105,13 +105,9 @@ variable (R) in
 noncomputable def associatesMulEquivIsPrincipal :
     Associates R ≃* isPrincipalSubmonoid R where
   __ := associatesEquivIsPrincipal R
-  map_mul' _ _ := by
+  map_mul' x y := by
     rw [Subtype.ext_iff]
-    -- This `erw` is needed to see through `{I // IsPrincipal I} = ↑(isPrincipalSubmonoid R)`:
-    -- we can redefine `associatesEquivIsPrincipal` to get rid of this `erw` but then we'd need
-    -- to add one in `associatesNonZeroDivisorsEquivIsPrincipal`.
-    erw [associatesEquivIsPrincipal_mul]
-    rfl
+    simpa using (associatesEquivIsPrincipal_mul (R := R) x y)
 
 variable (R) in
 /-- A version of `Ideal.associatesEquivIsPrincipal` for non-zero-divisors generators. -/
