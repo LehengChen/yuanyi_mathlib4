@@ -25,7 +25,8 @@ In the entire file, we are careful about details like functor associativity to e
 not end up in situations where we have morphisms like `colimit.ι F i ≫ f`, where the domain of `f`
 is `colimit G` where `F` and `G` are definitionally equal but not syntactically equal. In these
 situations, lemmas about `colimit.ι G i ≫ f` cannot be applied using `rw` and `simp`, forcing the
-use of `erw`. In particular, for us this means that `HasColimit.isoOfNatIso (Iso.refl _)` is better
+use of a more permissive rewriting tactic. In particular, for us this means that
+`HasColimit.isoOfNatIso (Iso.refl _)` is better
 than `Iso.refl _` and that we should be very particular about functor associativity.
 
 The theorem is also true for large categories and the proof given here generalizes to this case on
