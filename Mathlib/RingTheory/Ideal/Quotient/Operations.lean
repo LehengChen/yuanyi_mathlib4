@@ -564,10 +564,12 @@ def _root_.AlgHom.liftOfSurjective (f : A →ₐ[R] B) (hf : Function.Surjective
 lemma _root_.AlgHom.liftOfSurjective_apply (f : A →ₐ[R] B) (hf : Function.Surjective f)
     (g : A →ₐ[R] C) (H : RingHom.ker f.toRingHom ≤ RingHom.ker g.toRingHom) (x) :
     AlgHom.liftOfSurjective f hf g H (f x) = g x := by
+  have hx : (Ideal.Quotient.liftₐ (RingHom.ker f.toRingHom) g H)
+      ((Ideal.quotientKerAlgEquivOfSurjective hf).symm (f x)) = g x := by
+    rw [Ideal.quotientKerAlgEquivOfSurjective_symm_apply]
+    rfl
   dsimp [AlgHom.liftOfSurjective]
-  erw [AlgEquiv.coe_algHom] -- fixed after #21031
-  rw [Ideal.quotientKerAlgEquivOfSurjective_symm_apply]
-  rfl
+  convert hx using 1
 
 lemma _root_.AlgHom.liftOfSurjective_comp (f : A →ₐ[R] B) (hf : Function.Surjective f)
     (g : A →ₐ[R] C) (H : RingHom.ker f.toRingHom ≤ RingHom.ker g.toRingHom) :
