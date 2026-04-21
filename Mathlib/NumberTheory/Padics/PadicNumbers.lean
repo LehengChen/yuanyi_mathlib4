@@ -601,8 +601,12 @@ def padicNormE {p : ℕ} [hp : Fact p.Prime] : AbsoluteValue ℚ_[p] ℚ where
   map_mul' q r := Quotient.inductionOn₂ q r <| PadicSeq.norm_mul
   nonneg' q := Quotient.inductionOn q <| PadicSeq.norm_nonneg
   eq_zero' q := Quotient.inductionOn q fun r ↦ by
-    erw [Padic.zero_def, Quotient.eq]
-    exact PadicSeq.norm_zero_iff r
+    constructor
+    · intro h
+      exact Quotient.sound <| (PadicSeq.norm_zero_iff r).1 <| by simpa using h
+    · intro h
+      exact (PadicSeq.norm_zero_iff r).2 <| Quotient.exact <| by
+        simpa [Padic.zero_def] using h
   add_le' q r := by
     trans
       max ((Quotient.lift PadicSeq.norm <| @PadicSeq.norm_equiv _ _) q)
