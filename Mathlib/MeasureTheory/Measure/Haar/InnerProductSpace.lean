@@ -179,6 +179,7 @@ theorem measurePreserving (f : E ≃ₗᵢ[ℝ] F) :
   rcases exists_orthonormalBasis ℝ E with ⟨w, b, _hw⟩
   rw [← OrthonormalBasis.addHaar_eq_volume b, ← OrthonormalBasis.addHaar_eq_volume (b.map f)]
   simpa using (Basis.map_addHaar b.toBasis f.toContinuousLinearEquiv)
+  congr
 
 end LinearIsometryEquiv
 

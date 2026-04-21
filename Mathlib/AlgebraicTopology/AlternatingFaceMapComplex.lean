@@ -244,6 +244,11 @@ def ε [Limits.HasZeroObject C] :
   app X := by
     refine (ChainComplex.toSingle₀Equiv _ _).symm ?_
     exact ⟨X.hom.app (op ⦋0⦌), d_comp_augmentation_zero X⟩
+    dsimp
+    rw [alternatingFaceMapComplex_obj_d, objD, Fin.sum_univ_two, Fin.val_zero,
+      pow_zero, one_smul, Fin.val_one, pow_one, neg_smul, one_smul, add_comp,
+      neg_comp, SimplicialObject.δ_naturality, SimplicialObject.δ_naturality]
+    apply add_neg_cancel
   naturality X Y f := by
     apply HomologicalComplex.to_single_hom_ext
     dsimp

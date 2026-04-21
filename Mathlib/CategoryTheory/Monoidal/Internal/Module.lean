@@ -124,6 +124,7 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     --    LinearMap.compr₂_apply, Function.comp_apply, RingHom.map_one,
     --    ModuleCat.MonoidalCategory.tensorHom_tmul, AlgCat.hom_comp,
     --    ModuleCat.MonoidalCategory.leftUnitor_hom_apply]
+    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
     dsimp
     have h :
         (Hom.hom (MonoidalCategoryStruct.whiskerRight (↟(Algebra.linearMap R ↑A)) (of R ↑A)))

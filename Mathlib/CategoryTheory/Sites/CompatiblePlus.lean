@@ -116,6 +116,14 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
       dsimp
       simp only [Multiequalizer.lift_ι, diagramCompIso_hom_ι, Category.assoc]
       rw [diagramCompIso_hom_ι, ← F.map_comp, Multiequalizer.lift_ι])
+      simp only [← Category.assoc]
+      dsimp
+      congr 1
+      ext
+      dsimp
+      simp only [Category.assoc]
+      rw [Multiequalizer.lift_ι, diagramCompIso_hom_ι, diagramCompIso_hom_ι, ← F.map_comp,
+        Multiequalizer.lift_ι])
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]

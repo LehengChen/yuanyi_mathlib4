@@ -386,6 +386,10 @@ theorem fromGlued_injective : Function.Injective 𝒰.fromGlued := by
   constructor
   · simpa [e, z, ConcreteCategory.comp_apply] using hleft
   · simpa [e, z, pullbackSymmetry_hom_comp_fst, ConcreteCategory.comp_apply] using hright
+    rfl
+  · erw [← ConcreteCategory.comp_apply e.hom, pullbackSymmetry_hom_comp_fst,
+      IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.right]
+    rfl
 
 set_option backward.isDefEq.respectTransparency false in
 instance (x : 𝒰.gluedCover.glued.carrier) :
