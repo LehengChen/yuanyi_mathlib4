@@ -63,8 +63,7 @@ noncomputable def restrictHomEquivOfIsLocallySurjective
     change M₂.map p.op (g.app X (r' • m)) = M₂.map p.op (r' • show M₂.obj X from g.app X m)
     dsimp at hg ⊢
     rw [← hg, M₂.map_smul, ← hg, ← hr]
-    erw [← (g.app _).hom.map_smul]
     rw [M₁.map_smul, ← hr]
-    rfl)
+    simpa using (g.app _).hom.map_smul r (M₁.map p.op m))
 
 end PresheafOfModules
