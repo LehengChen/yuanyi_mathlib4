@@ -123,14 +123,14 @@ lemma residueFieldMap_comp {Z : LocallyRingedSpace.{u}} (g : Y ⟶ Z) (x : X) :
 lemma evaluation_naturality {V : Opens Y} (x : (Opens.map f.base).obj V) :
     Y.evaluation ⟨f.base x, x.property⟩ ≫ residueFieldMap f x.val =
       f.c.app (op V) ≫ X.evaluation x := by
-  dsimp only [LocallyRingedSpace.evaluation,
-    LocallyRingedSpace.residueFieldMap]
-  rw [Category.assoc]
-  ext a
-  simp only [CommRingCat.comp_apply]
-  erw [IsLocalRing.ResidueField.map_residue]
-  rw [LocallyRingedSpace.stalkMap_germ_apply]
-  rfl
+  dsimp only [LocallyRingedSpace.evaluation]
+  have h₁ :=
+    congrArg (Y.presheaf.germ V (f.base x.val) x.property ≫ ·)
+      (residue_comp_residueFieldMap_eq_stalkMap_comp_residue (f := f) (x := x.val))
+  have h₂ :=
+    congrArg (· ≫ CommRingCat.ofHom (IsLocalRing.residue (X.presheaf.stalk x.val)))
+      (LocallyRingedSpace.stalkMap_germ (f := f) V x.val x.property)
+  simpa [Category.assoc] using h₁.trans h₂
 
 lemma evaluation_naturality_apply {V : Opens Y} (x : (Opens.map f.base).obj V)
     (a : Y.presheaf.obj (op V)) :
