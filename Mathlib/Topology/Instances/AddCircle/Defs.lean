@@ -764,13 +764,18 @@ def homeoIccQuot [TopologicalSpace 𝕜] [OrderTopology 𝕜] : 𝕋 ≃ₜ Quot
     simp_rw [isQuotientMap_quotient_mk'.continuous_iff, continuous_iff_continuousAt,
       continuousAt_iff_continuous_left_right]
     intro x; constructor
-    on_goal 1 => erw [equivIccQuot_comp_mk_eq_toIocMod]
-    on_goal 2 => erw [equivIccQuot_comp_mk_eq_toIcoMod]
-    all_goals
-      apply continuous_quot_mk.continuousAt.comp_continuousWithinAt
-      rw [IsInducing.subtypeVal.continuousWithinAt_iff]
-    · apply continuousWithinAt_toIocMod_Iic
-    · apply continuousWithinAt_toIcoMod_Ici
+    · have h : ContinuousWithinAt (equivIccQuot p a ∘ Quotient.mk'') (Iic x) x := by
+        rw [equivIccQuot_comp_mk_eq_toIocMod]
+        exact continuous_quot_mk.continuousAt.comp_continuousWithinAt (by
+          rw [IsInducing.subtypeVal.continuousWithinAt_iff]
+          exact continuousWithinAt_toIocMod_Iic (hp := hp.out) (a := a) (x := x))
+      simpa [Quotient.mk'] using h
+    · have h : ContinuousWithinAt (equivIccQuot p a ∘ Quotient.mk'') (Ici x) x := by
+        rw [equivIccQuot_comp_mk_eq_toIcoMod]
+        exact continuous_quot_mk.continuousAt.comp_continuousWithinAt (by
+          rw [IsInducing.subtypeVal.continuousWithinAt_iff]
+          exact continuousWithinAt_toIcoMod_Ici (hp := hp.out) (a := a) (x := x))
+      simpa [Quotient.mk'] using h
   continuous_invFun :=
     continuous_quot_lift _ ((AddCircle.continuous_mk' p).comp continuous_subtype_val)
 
