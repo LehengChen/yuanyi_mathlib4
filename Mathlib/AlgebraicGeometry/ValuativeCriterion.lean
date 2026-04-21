@@ -163,11 +163,17 @@ lemma of_specializingMap (H : (topologically @SpecializingMap).universally f) :
       Category.assoc, α, e, β, stalkClosedPointIso_inv, StructureSheaf.toStalk]
     change (Scheme.ΓSpecIso (.of R)).inv ≫ (Spec <| .of R).presheaf.germ _ _ _ ≫ _ = _
     simp only [TopCat.Presheaf.germ_stalkSpecializes_assoc, Scheme.Hom.germ_stalkMap_assoc]
-    -- `map_top` introduces defeq problems, according to `check_compositions`.
-    -- This is probably the cause of the `erw` needed below.
     simp only [TopologicalSpace.Opens.map_top]
     rw [Scheme.germ_stalkClosedPointTo lft ⊤ trivial]
-    erw [← Scheme.Hom.comp_app_assoc lft (pullback.fst i₂ f)]
+    have hcomp :
+        (Scheme.ΓSpecIso (.of R)).inv ≫ Scheme.Hom.app (pullback.fst i₂ f) ⊤ ≫
+          Scheme.Hom.app lft ⊤ ≫
+            (Functor.mapIso (Spec (.of K)).presheaf (eqToIso (by simp)).op ≪≫
+              Scheme.ΓSpecIso (.of K)).hom =
+        (Scheme.ΓSpecIso (.of R)).inv ≫ Scheme.Hom.app (lft ≫ pullback.fst i₂ f) ⊤ ≫
+          (Scheme.ΓSpecIso (.of K)).hom := by
+      simp [Category.assoc, TopologicalSpace.Opens.map_top]
+    rw [hcomp]
     rw [pullback.lift_fst]
     simp
   have hbij := (bijective_rangeRestrict_comp_of_valuationRing (R := R) (K := K) α.hom β.hom
