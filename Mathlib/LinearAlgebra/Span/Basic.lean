@@ -115,13 +115,21 @@ lemma linearMap_eq_iff_of_eq_span {V : Submodule R M} (f g : V →ₗ[R] N)
     intro x hx
     induction hx using span_induction with
     | mem x hx => exact h ⟨x, hx⟩
-    | zero => erw [map_zero, map_zero]
+    | zero => simpa only using f.map_zero.trans g.map_zero.symm
     | add x y hx hy hx' hy' =>
-        erw [f.map_add ⟨x, hx⟩ ⟨y, hy⟩, g.map_add ⟨x, hx⟩ ⟨y, hy⟩]
-        rw [hx', hy']
+        calc
+          f ⟨x + y, Submodule.add_mem _ hx hy⟩ = f ⟨x, hx⟩ + f ⟨y, hy⟩ := by
+            simpa using f.map_add ⟨x, hx⟩ ⟨y, hy⟩
+          _ = g ⟨x, hx⟩ + g ⟨y, hy⟩ := by rw [hx', hy']
+          _ = g ⟨x + y, Submodule.add_mem _ hx hy⟩ := by
+            simpa using (g.map_add ⟨x, hx⟩ ⟨y, hy⟩).symm
     | smul a x hx hx' =>
-        erw [f.map_smul a ⟨x, hx⟩, g.map_smul a ⟨x, hx⟩]
-        rw [hx']
+        calc
+          f ⟨a • x, Submodule.smul_mem _ a hx⟩ = a • f ⟨x, hx⟩ := by
+            simpa using f.map_smul a ⟨x, hx⟩
+          _ = a • g ⟨x, hx⟩ := by rw [hx']
+          _ = g ⟨a • x, Submodule.smul_mem _ a hx⟩ := by
+            simpa using (g.map_smul a ⟨x, hx⟩).symm
 
 lemma linearMap_eq_iff_of_span_eq_top (f g : M →ₗ[R] N)
     {S : Set M} (hM : span R S = ⊤) :
