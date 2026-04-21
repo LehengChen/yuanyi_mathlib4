@@ -136,7 +136,12 @@ theorem conjAct_smul_range_ι {x : (CliffordAlgebra Q)ˣ} (hx : x ∈ lipschitzG
       refine Eq.trans_le ?_ this
       simp only [map_inv, smul_inv_smul]
   intro x hx
-  erw [Submodule.map_le_iff_le_comap]
+  rw [show ConjAct.toConjAct x • LinearMap.range (ι Q) =
+      Submodule.map
+        (DistribSMul.toLinearMap R (CliffordAlgebra Q) (ConjAct.toConjAct x))
+        (LinearMap.range (ι Q)) by
+      rfl]
+  rw [Submodule.map_le_iff_le_comap]
   rintro _ ⟨m, rfl⟩
   exact conjAct_smul_ι_mem_range_ι hx _
 
