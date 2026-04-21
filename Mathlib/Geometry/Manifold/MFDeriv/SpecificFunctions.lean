@@ -580,7 +580,10 @@ theorem mfderiv_prod_eq_add {f : M × M' → M''} {p : M × M'}
     mfderiv% f p =
         mfderiv% (fun z : M × M' ↦ f (z.1, p.2)) p +
         mfderiv% (fun z : M × M' ↦ f (p.1, z.2)) p := by
-  erw [mfderiv_comp_of_eq hf (mdifferentiableAt_fst.prodMk mdifferentiableAt_const) rfl,
+  have hfst : (fun z : M × M' ↦ f (z.1, p.2)) = f ∘ fun z : M × M' ↦ (z.1, p.2) := rfl
+  have hsnd : (fun z : M × M' ↦ f (p.1, z.2)) = f ∘ fun z : M × M' ↦ (p.1, z.2) := rfl
+  rw [hfst, hsnd,
+    mfderiv_comp_of_eq hf (mdifferentiableAt_fst.prodMk mdifferentiableAt_const) rfl,
     mfderiv_comp_of_eq hf (mdifferentiableAt_const.prodMk mdifferentiableAt_snd) rfl,
     ← ContinuousLinearMap.comp_add,
     mdifferentiableAt_fst.mfderiv_prod mdifferentiableAt_const,
