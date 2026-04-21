@@ -122,10 +122,14 @@ theorem Spec.sheafedSpaceMap_comp {R S T : CommRingCat.{u}} (f : R ⟶ S) (g : S
   · exact Spec.topMap_comp f g
   · ext
     -- Porting note: was one liner
-    -- `dsimp, rw category_theory.functor.map_id, rw category.comp_id, erw comap_comp f g, refl`
+    -- `dsimp`, then functoriality and `comap_comp`
     rw [NatTrans.comp_app, sheafedSpaceMap_hom_c_app, Functor.whiskerRight_app, eqToHom_refl]
-    erw [(sheafedSpaceObj T).presheaf.map_id]
-    dsimp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply]
+    simp only [sheafedSpaceObj_carrier, topObj_forget, SheafedSpace.comp_hom_base,
+      sheafedSpaceMap_hom_base, sheafedSpaceObj_presheaf, Functor.comp_obj, Functor.op_obj,
+      TopologicalSpace.Opens.map_comp_obj, topMap_comp, TopCat.Presheaf.pushforward_obj_obj,
+      CommRingCat.hom_comp, NatTrans.id_app, CategoryTheory.Functor.map_id, Category.comp_id,
+      CommRingCat.hom_ofHom, SheafedSpace.comp_hom_c_app, sheafedSpaceMap_hom_c_app,
+      RingHom.coe_comp, Function.comp_apply]
     rw [comap_comp]
     rfl
 
@@ -208,10 +212,35 @@ theorem stalkMap_toStalk {R S : CommRingCat.{u}} (f : R ⟶ S) (p : PrimeSpectru
       f ≫ toStalk S p := by
   rw [← algebraMap_germ ⊤ p trivial, ← algebraMap_germ ⊤ (PrimeSpectrum.comap f.hom p) trivial,
     Category.assoc]
-  erw [PresheafedSpace.stalkMap_germ (Spec.sheafedSpaceMap f).hom ⊤ p trivial]
-  rw [Spec.sheafedSpaceMap_hom_c_app]
-  erw [toOpen_comp_comap_assoc]
-  rfl
+  have hstalk :
+      (structurePresheafInCommRingCat R).germ ⊤ (PrimeSpectrum.comap f.hom p) trivial ≫
+        (Spec.sheafedSpaceMap f).hom.stalkMap p =
+      (Spec.sheafedSpaceMap f).hom.c.app (op ⊤) ≫
+        (Spec.sheafedSpaceObj S).presheaf.germ
+          ((TopologicalSpace.Opens.map (Spec.sheafedSpaceMap f).hom.base).obj ⊤) p trivial := by
+    simpa using PresheafedSpace.stalkMap_germ (Spec.sheafedSpaceMap f).hom ⊤ p trivial
+  calc
+    CommRingCat.ofHom (algebraMap (↑R) ((structureSheafInType ↑R ↑R).obj.obj (op ⊤))) ≫
+        (structurePresheafInCommRingCat R).germ ⊤ (PrimeSpectrum.comap f.hom p) trivial ≫
+          (Spec.sheafedSpaceMap f).hom.stalkMap p =
+      CommRingCat.ofHom (algebraMap (↑R) ((structureSheafInType ↑R ↑R).obj.obj (op ⊤))) ≫
+        ((Spec.sheafedSpaceMap f).hom.c.app (op ⊤) ≫
+          (Spec.sheafedSpaceObj S).presheaf.germ
+            ((TopologicalSpace.Opens.map (Spec.sheafedSpaceMap f).hom.base).obj ⊤) p trivial) := by
+        simpa [Category.assoc] using
+          congrArg
+            (fun k =>
+              CommRingCat.ofHom (algebraMap (↑R) ((structureSheafInType ↑R ↑R).obj.obj (op ⊤))) ≫
+                k)
+            hstalk
+    _ = f ≫ CommRingCat.ofHom (algebraMap (↑S) ((structureSheafInType ↑S ↑S).obj.obj (op ⊤))) ≫
+        (structurePresheafInCommRingCat S).germ ⊤ p trivial := by
+        rw [Spec.sheafedSpaceMap_hom_c_app]
+        simpa using
+          (toOpen_comp_comap_assoc (f := f.hom) (U := ⊤)
+            (h := (Spec.sheafedSpaceObj S).presheaf.germ
+              ((TopologicalSpace.Opens.map (Spec.sheafedSpaceMap f).hom.base).obj ⊤) p
+                trivial))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Under the isomorphisms `stalkIso`, the map `stalkMap (Spec.sheafedSpaceMap f) p` corresponds
@@ -282,10 +311,22 @@ instance isIso_toSpecΓ (R : CommRingCat.{u}) : IsIso (toSpecΓ R) :=
 theorem Spec_Γ_naturality {R S : CommRingCat.{u}} (f : R ⟶ S) :
     f ≫ toSpecΓ S = toSpecΓ R ≫ Γ.map (Spec.toLocallyRingedSpace.map f.op).op := by
   -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` failed to pick up one of the three lemmas
-  ext : 2
-  refine Subtype.ext <| funext fun x' => ?_; symm
-  erw [comap_apply]
-  apply Localization.localRingHom_to_map
+  ext x : 2
+  rw [LocallyRingedSpace.Γ_map_op, Spec.toLocallyRingedSpace_map, Spec.locallyRingedSpaceMap_toHom,
+    Spec.sheafedSpaceMap_hom_c_app]
+  refine Subtype.ext <| funext fun x' => ?_
+  symm
+  rw [CommRingCat.comp_apply, CommRingCat.comp_apply]
+  let sx := (ConcreteCategory.hom (toSpecΓ R)) x
+  let sy := (ConcreteCategory.hom (toSpecΓ S)) ((ConcreteCategory.hom f) x)
+  have hcomap :=
+    (comap_apply (f := f.hom) (U := ⊤)
+      (V := (TopologicalSpace.Opens.map (Spec.topMap f)).obj ⊤) (hUV := fun _ ↦ id)
+      (s := sx) (p := x'))
+  exact hcomap.trans <| by
+    simpa [sx, sy, toSpecΓ] using
+      Localization.localRingHom_to_map (PrimeSpectrum.comap f.hom x'.1).asIdeal x'.1.asIdeal
+        f.hom rfl x
 
 /-- The counit (`SpecΓIdentity.inv.op`) of the adjunction `Γ ⊣ Spec` is an isomorphism. -/
 @[simps! hom_app inv_app]
@@ -379,16 +420,82 @@ theorem isLocalizedModule_toPushforwardStalkAlgHom_aux (y) :
   refine ⟨⟨s, ⟨r, hpr⟩ ^ n⟩, ?_⟩
   rw [Submonoid.smul_def, Algebra.smul_def, algebraMap_pushforward_stalk, toPushforwardStalk,
     CommRingCat.comp_apply, CommRingCat.comp_apply]
-  iterate 2
-    erw [← (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).1).germ_res_apply
-      (homOfLE le_top) p hpr]
-  rw [← e]
-  let f := TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
-      (structureSheaf S).obj) _ p hpr
-  rw [← map_mul, mul_comm]
-  dsimp only [Subtype.coe_mk] at hsn
-  rw [← map_pow (algebraMap R S)] at hsn
-  congr 1
+  set zpow :=
+    ((ConcreteCategory.hom
+        (CommRingCat.ofHom
+          (algebraMap (↑(CommRingCat.of ↑S))
+            ((structureSheafInType ↑(CommRingCat.of ↑S) ↑(CommRingCat.of ↑S)).obj.obj
+              ((TopologicalSpace.Opens.map
+                  (Spec.topMap (CommRingCat.ofHom (algebraMap R S)))).op.obj
+                (op ⊤)))))))
+      ((ConcreteCategory.hom (CommRingCat.ofHom (algebraMap R S)))
+        (((((⟨r, hpr⟩ : p.asIdeal.primeCompl) ^ n) : p.asIdeal.primeCompl) : R)))
+  set zs :=
+    ((ConcreteCategory.hom
+        (CommRingCat.ofHom
+          (algebraMap (↑(CommRingCat.of ↑S))
+            ((structureSheafInType ↑(CommRingCat.of ↑S) ↑(CommRingCat.of ↑S)).obj.obj
+              ((TopologicalSpace.Opens.map
+                  (Spec.topMap (CommRingCat.ofHom (algebraMap R S)))).op.obj
+                (op ⊤)))))))
+      s
+  have hgerm_res_pow :
+      ((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj).germ ⊤ p trivial)
+          zpow =
+        ((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).obj).germ
+          (PrimeSpectrum.basicOpen r) p hpr)
+          (((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).obj).map
+              (homOfLE le_top).op) zpow) := by
+    simpa using
+      (TopCat.Presheaf.germ_res_apply
+        (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).1)
+        (homOfLE le_top) p hpr zpow).symm
+  have hgerm_res_s :
+      ((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj).germ ⊤ p trivial)
+          zs =
+        ((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).obj).germ
+          (PrimeSpectrum.basicOpen r) p hpr)
+          (((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).obj).map
+              (homOfLE le_top).op) zs) := by
+    simpa using
+      (TopCat.Presheaf.germ_res_apply
+        (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _* (structureSheaf S).1)
+        (homOfLE le_top) p hpr zs).symm
+  dsimp [toPushforwardStalkAlgHom, toPushforwardStalk]
+  calc
+    (TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj) ⊤ p trivial) zpow * y =
+      (TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj) (PrimeSpectrum.basicOpen r) p hpr)
+        (((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+            (structureSheaf S).obj).map (homOfLE le_top).op) zpow) * y := by
+        rw [hgerm_res_pow]
+    _ =
+      (TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj) (PrimeSpectrum.basicOpen r) p hpr)
+        (((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+            (structureSheaf S).obj).map (homOfLE le_top).op) zpow) *
+        (TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj) (PrimeSpectrum.basicOpen r) p hpr) s' := by
+        rw [← e]
+    _ =
+      (TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj) (PrimeSpectrum.basicOpen r) p hpr)
+        (((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+            (structureSheaf S).obj).map (homOfLE le_top).op) zs) := by
+        let f := TopCat.Presheaf.germ (Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+          (structureSheaf S).obj) _ p hpr
+        rw [mul_comm, ← map_mul]
+        dsimp only [Subtype.coe_mk] at hsn
+        rw [← map_pow (algebraMap R S)] at hsn
+        congr 1
+    _ =
+      (CommRingCat.Hom.hom
+          (((Spec.topMap (CommRingCat.ofHom (algebraMap R S)) _*
+                (structureSheaf S).obj).germ ⊤ p trivial))) zs := by
+        simpa [zs] using hgerm_res_s.symm
 
 instance isLocalizedModule_toPushforwardStalkAlgHom :
     IsLocalizedModule p.asIdeal.primeCompl (toPushforwardStalkAlgHom R S p).toLinearMap := by
