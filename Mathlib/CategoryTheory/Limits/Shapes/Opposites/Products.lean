@@ -175,11 +175,18 @@ set_option backward.isDefEq.respectTransparency false in
 theorem desc_op_comp_opCoproductIsoProduct'_hom {c : Cofan Z} {f : Fan (op <| Z ·)}
     (hc : IsColimit c) (hf : IsLimit f) (c' : Cofan Z) :
     (hc.desc c').op ≫ (opCoproductIsoProduct' hc hf).hom = hf.lift c'.op := by
-  refine (Iso.eq_comp_inv _).mp (Quiver.Hom.unop_inj (hc.hom_ext (fun ⟨j⟩ ↦ Quiver.Hom.op_inj ?_)))
-  simp only [unop_op, Discrete.functor_obj, const_obj_obj, Quiver.Hom.unop_op, IsColimit.fac,
-    Cofan.op, unop_comp, op_comp, op_unop, Quiver.Hom.op_unop, Category.assoc]
-  erw [opCoproductIsoProduct'_inv_comp_inj, IsLimit.fac]
-  rfl
+  apply hf.hom_ext
+  intro ⟨j⟩
+  calc
+    ((hc.desc c').op ≫ (opCoproductIsoProduct' hc hf).hom) ≫ f.π.app { as := j } =
+        (hc.desc c').op ≫ (c.inj j).op := by
+          simpa [Category.assoc, Fan.proj] using
+            congrArg (fun k => (hc.desc c').op ≫ k) (opCoproductIsoProduct'_hom_comp_proj hc hf j)
+    _ = (c'.inj j).op := by
+      rw [← op_comp]
+      simp [Cofan.inj]
+    _ = hf.lift c'.op ≫ f.π.app { as := j } := by
+      simp [Cofan.op]
 
 theorem desc_op_comp_opCoproductIsoProduct_hom [HasCoproduct Z] {X : C} (π : (a : α) → Z a ⟶ X) :
     (Sigma.desc π).op ≫ (opCoproductIsoProduct Z).hom = Pi.lift (fun a ↦ (π a).op) := by
@@ -271,11 +278,19 @@ set_option backward.isDefEq.respectTransparency false in
 theorem opProductIsoCoproduct'_inv_comp_lift {f : Fan Z} {c : Cofan (op <| Z ·)}
     (hf : IsLimit f) (hc : IsColimit c) (f' : Fan Z) :
     (opProductIsoCoproduct' hf hc).inv ≫ (hf.lift f').op = hc.desc f'.op := by
-  refine (Iso.inv_comp_eq _).mpr (Quiver.Hom.unop_inj (hf.hom_ext (fun ⟨j⟩ ↦ Quiver.Hom.op_inj ?_)))
-  simp only [Discrete.functor_obj, unop_op, Quiver.Hom.unop_op, IsLimit.fac, Fan.op, unop_comp,
-    Category.assoc, op_comp, op_unop, Quiver.Hom.op_unop]
-  erw [← Category.assoc, proj_comp_opProductIsoCoproduct'_hom, IsColimit.fac]
-  rfl
+  apply hc.hom_ext
+  intro ⟨j⟩
+  calc
+    c.ι.app { as := j } ≫ (opProductIsoCoproduct' hf hc).inv ≫ (hf.lift f').op =
+        (f.proj j).op ≫ (hf.lift f').op := by
+          simpa [Category.assoc] using congrArg
+            (fun k => k ≫ (opProductIsoCoproduct' hf hc).inv ≫ (hf.lift f').op)
+            (proj_comp_opProductIsoCoproduct'_hom hf hc j).symm
+    _ = (f'.proj j).op := by
+      rw [← op_comp]
+      simp [Fan.proj]
+    _ = c.ι.app { as := j } ≫ hc.desc f'.op := by
+      simp [Fan.op]
 
 theorem opProductIsoCoproduct_inv_comp_lift [HasProduct Z] {X : C} (π : (a : α) → X ⟶ Z a) :
     (opProductIsoCoproduct Z).inv ≫ (Pi.lift π).op = Sigma.desc (fun a ↦ (π a).op) := by
