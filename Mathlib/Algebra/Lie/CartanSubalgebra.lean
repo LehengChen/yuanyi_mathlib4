@@ -81,13 +81,21 @@ theorem isCartanSubalgebra_iff_isUcsLimit : H.IsCartanSubalgebra ↔ H.toLieSubm
   · rintro ⟨k, hk⟩
     exact
       { nilpotent := by
-          dsimp only [LieRing.IsNilpotent]
-          -- The instance for the second `H` in the goal is `lieRingSelfModule`
-          -- but `rw` expects it to be `H.toLieSubmodule.instLieRingModuleSubtypeMem`,
-          -- and these are not reducibly defeq.
-          erw [H.toLieSubmodule.isNilpotent_iff_exists_lcs_eq_bot]
-          use k
-          rw [_root_.eq_bot_iff, LieSubmodule.lcs_le_iff, hk k (le_refl k)]
+          letI : LieRingModule H ↥H.toLieSubmodule := inferInstance
+          letI : LieModule R H ↥H.toLieSubmodule := inferInstance
+          letI : LieModule.IsNilpotent H ↥H.toLieSubmodule := by
+            rw [H.toLieSubmodule.isNilpotent_iff_exists_lcs_eq_bot]
+            use k
+            rw [_root_.eq_bot_iff, LieSubmodule.lcs_le_iff, hk k (le_refl k)]
+          let f : H →ₗ⁅R⁆ H := LieHom.id
+          let g : H →ₗ[R] ↥H.toLieSubmodule := LinearMap.id
+          have hg_inj : Function.Injective g := fun _ _ h => h
+          have hfg : ∀ x m, ⁅f x, g m⁆ = g ⁅x, m⁆ := by
+            intro x m
+            rfl
+          simpa [LieRing.IsNilpotent] using
+            (hg_inj.lieModuleIsNilpotent (R := R) (L := H) (M := H) (L₂ := H)
+              (M₂ := ↥H.toLieSubmodule) (f := f) (g := g) hfg)
         self_normalizing := by
           have hk' := hk (k + 1) k.le_succ
           rw [LieSubmodule.ucs_succ, hk k (le_refl k)] at hk'
