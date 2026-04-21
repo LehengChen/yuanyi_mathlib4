@@ -308,13 +308,13 @@ lemma L₀X₂ToP_comp_φ₁ : S.L₀X₂ToP ≫ S.φ₁ = 0 := by
 set_option backward.isDefEq.respectTransparency false in
 lemma L₀_g_δ : S.L₀.g ≫ S.δ = 0 := by
   rw [← L₀X₂ToP_comp_pullback_snd, assoc]
-  erw [S.L₀'_exact.g_desc]
+  rw [S.snd_δ]
   rw [L₀X₂ToP_comp_φ₁_assoc, zero_comp]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma δ_L₃_f : S.δ ≫ S.L₃.f = 0 := by
   rw [← cancel_epi S.L₀'.g]
-  erw [S.L₀'_exact.g_desc_assoc]
+  rw [δ, S.L₀'_exact.g_desc_assoc]
   simp [S.v₂₃.comm₁₂, φ₂]
 
 /-- The short complex `L₀.X₂ ⟶ L₀.X₃ ⟶ L₃.X₁`. -/
