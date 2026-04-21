@@ -146,8 +146,12 @@ lemma exists_app (hx : x.Compatible) (g : Y ⟶ X) :
             let φ : Over.mk f.left ⟶ Over.mk (𝟙 Z₁.left) := Over.homMk f.left
             have H' := (x (Z₁.hom ≫ g) hZ₁).naturality φ.op
             dsimp at H H' ⊢
-            erw [← H, ← H', presheafHom_map_app_op_mk_id, ← F.map_comp_assoc,
-              ← op_comp, Over.w f] } }
+            rw [← H, presheafHom_map_app_op_mk_id]
+            simpa [Category.assoc, ← F.map_comp_assoc, ← op_comp, Over.w f] using
+              congrArg (fun k => F.map Z₁.hom.op ≫ k)
+                (show F.map f.left.op ≫ (x (Z₁.hom ≫ g) hZ₁).app (op (Over.mk f.left)) =
+                    (x (Z₁.hom ≫ g) hZ₁).app (op (Over.mk (𝟙 Z₁.left))) ≫ G.map f.left.op from
+                  H') } }
   use (hG g).lift c
   intro Z p hp
   exact ((hG g).fac c ⟨Over.mk p, hp⟩)
