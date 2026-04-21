@@ -656,8 +656,8 @@ theorem mk_equiv_eq_arrow_of_eq (eq : #α = #β) : #(α ≃ β) = #(α → β) :
   mk_equiv_eq_arrow_of_lift_eq congr(lift $eq)
 
 theorem mk_equiv_of_lift_eq (leq : lift.{v} #α = lift.{u} #β') : #(α ≃ β') = 2 ^ lift.{v} #α := by
-  erw [← (lift_mk_eq'.2 ⟨.equivCongr (.refl α) (lift_mk_eq'.1 leq).some⟩).trans (lift_id'.{u, v} _),
-    lift_umax.{u, v}, mk_perm_eq_two_power, lift_power, lift_natCast]; rfl
+  have hα : ℵ₀ ≤ lift.{v} #α := aleph0_le_lift.mpr (aleph0_le_mk α)
+  rw [mk_equiv_eq_arrow_of_lift_eq leq, mk_arrow, ← leq, power_self_eq hα]
 
 theorem mk_equiv_of_eq (eq : #α = #β) : #(α ≃ β) = 2 ^ #α := by
   rw [mk_equiv_of_lift_eq (lift_inj.mpr eq), lift_id]
