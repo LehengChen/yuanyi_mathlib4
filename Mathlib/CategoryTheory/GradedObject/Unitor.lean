@@ -111,8 +111,12 @@ lemma ι_mapBifunctorLeftUnitor_hom_apply (j : J) :
       (mapBifunctorLeftUnitor F X e p hp Y).hom j =
       (F.map (singleObjApplyIso (0 : I) X).hom).app _ ≫ e.hom.app (Y j) := by
   dsimp [mapBifunctorLeftUnitor]
-  erw [CofanMapObjFun.ιMapObj_iso_inv]
-  rw [mapBifunctorLeftUnitorCofan_inj]
+  simpa using
+    (show ιMapBifunctorMapObj F p ((single₀ I).obj X) Y 0 j j (hp j) ≫
+        (CofanMapObjFun.iso (mapBifunctorLeftUnitorCofanIsColimit F X e p hp Y j)).inv =
+          (mapBifunctorLeftUnitorCofan F X e p hp Y j).inj ⟨(0, j), hp j⟩ from
+      CofanMapObjFun.ιMapObj_iso_inv
+        (hc := mapBifunctorLeftUnitorCofanIsColimit F X e p hp Y j) (i := (0, j)) (hi := hp j))
 
 lemma mapBifunctorLeftUnitor_inv_apply (j : J) :
     (mapBifunctorLeftUnitor F X e p hp Y).inv j =
@@ -231,8 +235,13 @@ lemma ι_mapBifunctorRightUnitor_hom_apply (j : J) :
         (mapBifunctorRightUnitor F Y e p hp X).hom j =
       (F.obj (X j)).map (singleObjApplyIso (0 : I) Y).hom ≫ e.hom.app (X j) := by
   dsimp [mapBifunctorRightUnitor]
-  erw [CofanMapObjFun.ιMapObj_iso_inv]
-  rw [mapBifunctorRightUnitorCofan_inj]
+  simpa using
+    (show ιMapBifunctorMapObj F p X ((single₀ I).obj Y) j 0 j (hp j) ≫
+        (CofanMapObjFun.iso (mapBifunctorRightUnitorCofanIsColimit F Y e p hp X j)).inv =
+          (mapBifunctorRightUnitorCofan F Y e p hp X j).inj ⟨(j, 0), hp j⟩ from
+      CofanMapObjFun.ιMapObj_iso_inv
+        (hc := mapBifunctorRightUnitorCofanIsColimit F Y e p hp X j) (i := (j, 0))
+        (hi := hp j))
 
 lemma mapBifunctorRightUnitor_inv_apply (j : J) :
     (mapBifunctorRightUnitor F Y e p hp X).inv j =
@@ -252,8 +261,10 @@ lemma mapBifunctorRightUnitor_inv_naturality :
     ι_mapBifunctorMapMap]
   dsimp
   rw [Functor.map_id, id_comp, NatTrans.naturality_assoc]
-  erw [← NatTrans.naturality_assoc e.inv]
-  rfl
+  simpa using
+    (NatTrans.naturality_assoc e.inv (φ j)
+      ((F.obj (X' j)).map (singleObjApplyIso (0 : I) Y).inv ≫
+        ιMapBifunctorMapObj F p X' ((single₀ I).obj Y) j 0 j (hp j)))
 
 @[reassoc]
 lemma mapBifunctorRightUnitor_naturality :
