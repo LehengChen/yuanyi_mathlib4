@@ -87,8 +87,9 @@ lemma ProjectiveResolution.isoLeftDerivedToHomotopyCategoryObj_inv_naturality
         (Q.isoLeftDerivedToHomotopyCategoryObj F).inv := by
   dsimp [Functor.leftDerivedToHomotopyCategory, isoLeftDerivedToHomotopyCategoryObj]
   rw [assoc, ← Functor.map_comp, iso_inv_naturality f P Q φ comm, Functor.map_comp]
-  erw [(F.mapHomotopyCategoryFactors (ComplexShape.down ℕ)).inv.naturality_assoc]
-  rfl
+  simpa only [Functor.comp_map, assoc] using
+    (congrArg (fun k => k ≫ (F.mapHomotopyCategory (ComplexShape.down ℕ)).map Q.iso.inv)
+      ((F.mapHomotopyCategoryFactors (ComplexShape.down ℕ)).inv.naturality φ)).symm
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -131,8 +132,38 @@ lemma ProjectiveResolution.isoLeftDerivedObj_hom_naturality
   rw [assoc, ← Functor.map_comp_assoc,
     ProjectiveResolution.isoLeftDerivedToHomotopyCategoryObj_hom_naturality f P Q φ comm F,
     Functor.map_comp, assoc]
-  erw [(HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality]
-  rfl
+  calc
+    (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+        (P.isoLeftDerivedToHomotopyCategoryObj F).hom ≫
+      (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ) ⋙
+              HomotopyCategory.quotient D (ComplexShape.down ℕ)).map φ) ≫
+        (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.app
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj Q.complex) =
+      (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+          (P.isoLeftDerivedToHomotopyCategoryObj F).hom ≫
+        ((HomotopyCategory.quotient D (ComplexShape.down ℕ) ⋙
+            HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map φ) ≫
+          (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.app
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj Q.complex)) := by
+        rfl
+    _ =
+      (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+          (P.isoLeftDerivedToHomotopyCategoryObj F).hom ≫
+        ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.app
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+          (HomologicalComplex.homologyFunctor D (ComplexShape.down ℕ) n).map
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map φ)) := by
+        rw [(HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality]
+    _ =
+      (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+          (P.isoLeftDerivedToHomotopyCategoryObj F).hom ≫
+        (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.app
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+          HomologicalComplex.homologyMap ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map φ)
+            n := by
+        rfl
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -152,8 +183,11 @@ lemma Functor.isZero_leftDerived_obj_projective_succ
     (F : C ⥤ D) [F.Additive] (n : ℕ) (X : C) [Projective X] :
     IsZero ((F.leftDerived (n + 1)).obj X) := by
   refine IsZero.of_iso ?_ ((ProjectiveResolution.self X).isoLeftDerivedObj F (n + 1))
-  erw [← HomologicalComplex.exactAt_iff_isZero_homology]
-  exact ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero))
+  simpa only [HomologicalComplex.homologyFunctor_obj] using
+    (HomologicalComplex.exactAt_iff_isZero_homology
+      ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+        (ProjectiveResolution.self X).complex) (n + 1)).1
+      (ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero)))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- We can compute a left derived functor on a morphism using a descent of that morphism
@@ -193,12 +227,70 @@ lemma ProjectiveResolution.leftDerivedToHomotopyCategory_app_eq
   dsimp [isoLeftDerivedToHomotopyCategoryObj, Functor.mapHomotopyCategoryFactors,
     NatTrans.leftDerivedToHomotopyCategory]
   rw [assoc]
-  erw [id_comp, comp_id]
-  obtain ⟨β, hβ⟩ := (HomotopyCategory.quotient _ _).map_surjective (iso P).hom
-  rw [← hβ]
-  dsimp
-  simp only [← Functor.map_comp, NatTrans.mapHomologicalComplex_naturality]
-  rfl
+  calc
+    (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+        ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app
+          ((projectiveResolutions C).obj X).as) ≫
+      (G.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom ≫
+        𝟙
+          ((HomotopyCategory.quotient D (ComplexShape.down ℕ)).obj
+            ((G.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex)) =
+      (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app
+            ((projectiveResolutions C).obj X).as) ≫
+        (G.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom := by
+        have h :
+            (G.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom ≫
+              𝟙
+                ((HomotopyCategory.quotient D (ComplexShape.down ℕ)).obj
+                  ((G.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex)) =
+            (G.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom := by
+          exact comp_id _
+        exact congrArg
+          (fun k =>
+            (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+                ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app
+                  ((projectiveResolutions C).obj X).as) ≫
+              k) h
+    _ =
+      (F.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom ≫
+        (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app
+            ((HomotopyCategory.quotient C (ComplexShape.down ℕ)).obj P.complex).as) := by
+        simpa [NatTrans.mapHomotopyCategory] using
+          ((NatTrans.mapHomotopyCategory α (ComplexShape.down ℕ)).naturality P.iso.hom).symm
+    _ =
+      (F.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom ≫
+        𝟙
+          ((HomotopyCategory.quotient D (ComplexShape.down ℕ)).obj
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex)) ≫
+        (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex) := by
+        have h :
+            (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+                ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app
+                  ((HomotopyCategory.quotient C (ComplexShape.down ℕ)).obj P.complex).as) =
+              𝟙
+                  ((HomotopyCategory.quotient D (ComplexShape.down ℕ)).obj
+                    ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex)) ≫
+                (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+                  ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex) := by
+          calc
+            (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+                ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app
+                  ((HomotopyCategory.quotient C (ComplexShape.down ℕ)).obj P.complex).as) =
+              (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+                ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex) := by
+                rfl
+            _ =
+              𝟙
+                  ((HomotopyCategory.quotient D (ComplexShape.down ℕ)).obj
+                    ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex)) ≫
+                (HomotopyCategory.quotient D (ComplexShape.down ℕ)).map
+                  ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex) := by
+                simp
+        exact congrArg
+          (fun k => (F.mapHomotopyCategory (ComplexShape.down ℕ)).map P.iso.hom ≫ k) h
 
 @[simp]
 lemma NatTrans.leftDerivedToHomotopyCategory_id (F : C ⥤ D) [F.Additive] :
@@ -246,8 +338,30 @@ lemma leftDerived_app_eq
   dsimp [NatTrans.leftDerived, isoLeftDerivedObj]
   rw [ProjectiveResolution.leftDerivedToHomotopyCategory_app_eq α P,
     Functor.map_comp, Functor.map_comp, assoc]
-  erw [← (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality_assoc
-    ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex)]
+  rw [show
+    (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.app
+        ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+      HomologicalComplex.homologyMap
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex) n ≫
+        (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).inv.app
+            ((G.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+          (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+            (P.isoLeftDerivedToHomotopyCategoryObj G).inv =
+      (HomotopyCategory.quotient D (ComplexShape.down ℕ) ⋙
+          HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex) ≫
+        (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.app
+            ((G.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+          (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).inv.app
+              ((G.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+            (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+              (P.isoLeftDerivedToHomotopyCategoryObj G).inv from
+    ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality_assoc
+      ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex)
+      ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).inv.app
+          ((G.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+        (HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) n).map
+          (P.isoLeftDerivedToHomotopyCategoryObj G).inv)).symm]
   simp only [Functor.comp_map, Iso.hom_inv_id_app_assoc]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -305,7 +419,31 @@ noncomputable def Functor.fromLeftDerivedZero (F : C ⥤ D) [F.Additive] :
       (projectiveResolution X) (projectiveResolution Y)
       (ProjectiveResolution.lift f _ _) (by simp),
       ← HomologicalComplex.homologyι_naturality_assoc]
-    erw [← NatTrans.naturality_assoc]
+    rw [show
+      (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) 0).hom.app
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+            ((projectiveResolutions C).obj X).as) ≫
+        HomologicalComplex.homologyMap
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map
+              (ProjectiveResolution.lift f (projectiveResolution X) (projectiveResolution Y))) 0 ≫
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+              (projectiveResolution Y).complex).homologyι 0 ≫
+            (projectiveResolution Y).fromLeftDerivedZero' F =
+      (HomotopyCategory.quotient D (ComplexShape.down ℕ) ⋙
+          HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) 0).map
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map
+            (ProjectiveResolution.lift f (projectiveResolution X) (projectiveResolution Y))) ≫
+        (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) 0).hom.app
+            ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj (projectiveResolution Y).complex) ≫
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+              (projectiveResolution Y).complex).homologyι 0 ≫
+            (projectiveResolution Y).fromLeftDerivedZero' F from
+      ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) 0).hom.naturality_assoc
+        ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map
+          (ProjectiveResolution.lift f (projectiveResolution X) (projectiveResolution Y)))
+        (((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+            (projectiveResolution Y).complex).homologyι 0 ≫
+          (projectiveResolution Y).fromLeftDerivedZero' F)).symm]
     rfl
 
 set_option backward.isDefEq.respectTransparency false in
@@ -325,7 +463,30 @@ lemma ProjectiveResolution.fromLeftDerivedZero_eq
       (P.isoLeftDerivedToHomotopyCategoryObj F).inv), ← Functor.map_comp_assoc,
       Iso.inv_hom_id, Functor.map_id, id_comp, ← h₁, h₂,
       ← HomologicalComplex.homologyι_naturality_assoc]
-  erw [← NatTrans.naturality_assoc]
+  rw [show
+    (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) 0).hom.app
+        ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj P.complex) ≫
+      HomologicalComplex.homologyMap
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map
+            (lift (𝟙 X) P (projectiveResolution X))) 0 ≫
+        ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+            (projectiveResolution X).complex).homologyι 0 ≫
+          (projectiveResolution X).fromLeftDerivedZero' F =
+    (HomotopyCategory.quotient D (ComplexShape.down ℕ) ⋙
+        HomotopyCategory.homologyFunctor D (ComplexShape.down ℕ) 0).map
+        ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map
+          (lift (𝟙 X) P (projectiveResolution X))) ≫
+      (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) 0).hom.app
+          ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj (projectiveResolution X).complex) ≫
+        ((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+            (projectiveResolution X).complex).homologyι 0 ≫
+          (projectiveResolution X).fromLeftDerivedZero' F from
+    ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) 0).hom.naturality_assoc
+      ((F.mapHomologicalComplex (ComplexShape.down ℕ)).map
+        (lift (𝟙 X) P (projectiveResolution X)))
+      (((F.mapHomologicalComplex (ComplexShape.down ℕ)).obj
+          (projectiveResolution X).complex).homologyι 0 ≫
+        (projectiveResolution X).fromLeftDerivedZero' F)).symm]
   rfl
 
 instance (F : C ⥤ D) [F.Additive] (X : C) [Projective X] :
