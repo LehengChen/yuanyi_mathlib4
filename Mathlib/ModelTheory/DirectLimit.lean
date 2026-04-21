@@ -65,6 +65,7 @@ theorem coe_natLERec (m n : ℕ) (h : m ≤ n) :
   | zero => simp [natLERec, Nat.leRecOn_self]
   | succ k ih =>
     rw [Nat.leRecOn_succ le_self_add, natLERec, Nat.leRecOn_succ le_self_add, ← natLERec,
+    erw [Nat.leRecOn_succ le_self_add, natLERec, Nat.leRecOn_succ le_self_add, ← natLERec,
       Embedding.comp_apply, ih]
 
 instance natLERec.directedSystem : DirectedSystem G' fun i j h => natLERec f' i j h :=

@@ -117,6 +117,7 @@ lemma additive_of_full_essSurj_comp [Full F] [EssSurj F] (G : D ⥤ E)
       Preadditive.add_comp, Preadditive.comp_add, ← Functor.map_comp]
     rw [← hf', ← hg', ← F.map_add]
     simpa using ((F ⋙ G).map_add (f := f') (g := g'))
+    rw [F.map_add]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma additive_of_comp_faithful
