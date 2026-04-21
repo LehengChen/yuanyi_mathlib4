@@ -83,11 +83,19 @@ theorem effectiveEpiFamily_tfae
   | _ => by
     simpa [← effectiveEpi_desc_iff_effectiveEpiFamily, (effectiveEpi_tfae (Sigma.desc π)).out 0 1]
   tfae_have 1 → 2 := fun _ ↦ inferInstance
-  tfae_have 3 ↔ 1 := by
-    erw [((CompHaus.effectiveEpiFamily_tfae
-      (fun a ↦ profiniteToCompHaus.obj (X a)) (fun a ↦ profiniteToCompHaus.map (π a))).out 2 0 :)]
-    exact ⟨fun h ↦ profiniteToCompHaus.finite_effectiveEpiFamily_of_map _ _ h,
-      fun _ ↦ inferInstance⟩
+  tfae_have 3 → 1
+  | h => by
+    refine profiniteToCompHaus.finite_effectiveEpiFamily_of_map _ _ ?_
+    exact ((CompHaus.effectiveEpiFamily_tfae
+      (fun a ↦ profiniteToCompHaus.obj (X a)) (fun a ↦ profiniteToCompHaus.map (π a))).out 2 0).mp
+      (by simpa using h)
+  tfae_have 1 → 3
+  | h => by
+    let _ : EffectiveEpiFamily X π := h
+    exact ((CompHaus.effectiveEpiFamily_tfae
+      (fun a ↦ profiniteToCompHaus.obj (X a)) (fun a ↦ profiniteToCompHaus.map (π a))).out 2 0).mpr
+      (inferInstance : EffectiveEpiFamily
+        (fun a ↦ profiniteToCompHaus.obj (X a)) (fun a ↦ profiniteToCompHaus.map (π a)))
   tfae_finish
 
 theorem effectiveEpiFamily_of_jointly_surjective
