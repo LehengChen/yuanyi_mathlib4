@@ -64,9 +64,8 @@ noncomputable def freeDesc {X : Type u} {M : ModuleCat.{u} R} (f : X ⟶ M) :
 @[simp]
 lemma freeDesc_apply {X : Type u} {M : ModuleCat.{u} R} (f : X ⟶ M) (x : X) :
     freeDesc f (freeMk x) = f x := by
-  dsimp [freeDesc]
-  erw [Finsupp.lift_apply, Finsupp.sum_single_index]
-  all_goals simp
+  change (Finsupp.lift M R X f) (Finsupp.single x 1) = f x
+  simp
 
 @[simp]
 lemma free_map_apply {X Y : Type u} (f : X → Y) (x : X) :
@@ -121,18 +120,18 @@ def εIso : 𝟙_ (ModuleCat R) ≅ (free R).obj (𝟙_ (Type u)) where
     simp [free]
   inv_hom_id := by
     ext ⟨⟩
-    dsimp [freeMk]
-    erw [Finsupp.lapply_apply, Finsupp.lsingle_apply]
-    rw [Finsupp.single_eq_same]
+    change (Finsupp.lsingle PUnit.unit : R →ₗ[R] PUnit →₀ R)
+        ((Finsupp.lapply PUnit.unit : (PUnit →₀ R) →ₗ[R] R) (Finsupp.single PUnit.unit 1)) =
+      Finsupp.single PUnit.unit 1
+    simp
 
 @[simp]
 lemma εIso_hom_one : (εIso R).hom 1 = freeMk PUnit.unit := rfl
 
 @[simp]
 lemma εIso_inv_freeMk (x : PUnit) : (εIso R).inv (freeMk x) = 1 := by
-  dsimp [εIso, freeMk]
-  erw [Finsupp.lapply_apply]
-  rw [Finsupp.single_eq_same]
+  change (Finsupp.lapply PUnit.unit : (PUnit →₀ R) →ₗ[R] R) (Finsupp.single x 1) = 1
+  simp
 
 /-- The canonical isomorphism `(free R).obj X ⊗ (free R).obj Y ≅ (free R).obj (X ⊗ Y)`
 for two types `X` and `Y`.
@@ -145,16 +144,18 @@ def μIso (X Y : Type u) :
 @[simp]
 lemma μIso_hom_freeMk_tmul_freeMk {X Y : Type u} (x : X) (y : Y) :
     (μIso R X Y).hom (freeMk x ⊗ₜ freeMk y) = freeMk ⟨x, y⟩ := by
-  dsimp [μIso, freeMk]
-  erw [finsuppTensorFinsupp'_single_tmul_single]
-  rw [mul_one]
+  change (finsuppTensorFinsupp' R X Y) (Finsupp.single x 1 ⊗ₜ[R] Finsupp.single y 1) =
+      Finsupp.single (x, y) 1
+  simp
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma μIso_inv_freeMk {X Y : Type u} (z : X ⊗ Y) :
     (μIso R X Y).inv (freeMk z) = freeMk z.1 ⊗ₜ freeMk z.2 := by
-  dsimp [μIso, freeMk]
-  erw [finsuppTensorFinsupp'_symm_single_eq_single_one_tmul]
+  change (finsuppTensorFinsupp' R X Y).symm (Finsupp.single z 1) =
+      Finsupp.single z.1 1 ⊗ₜ[R] Finsupp.single z.2 1
+  simpa using
+    finsuppTensorFinsupp'_symm_single_eq_single_one_tmul (R := R) (ι := X) (κ := Y) z 1
 
 end FreeMonoidal
 open FreeMonoidal in
