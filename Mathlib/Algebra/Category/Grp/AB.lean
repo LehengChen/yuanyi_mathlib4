@@ -45,9 +45,26 @@ noncomputable instance :
     rw [map_zero, ← ConcreteCategory.comp_apply, ← NatTrans.naturality, ConcreteCategory.comp_apply]
       at hk
     rcases hS k hk with ⟨t, ht⟩
-    use colimit.ι S.X₁ k t
-    erw [← ConcreteCategory.comp_apply, colimit.ι_map, ConcreteCategory.comp_apply, ht]
-    exact colimit.w_apply S.X₂ e₁ y)
+    let t' : S.X₁.obj k := by
+      simpa only [ShortComplex.map_X₁] using t
+    have ht' : AddCommGrpCat.Hom.hom (S.f.app k) t' = (ConcreteCategory.hom (S.X₂.map e₁)) y := by
+      simpa only [ShortComplex.map_X₁, ShortComplex.map_f] using ht
+    use colimit.ι S.X₁ k t'
+    rw [ShortComplex.map_f]
+    have hι := congrArg (fun f => f t') (colimit.ι_map S.f k)
+    dsimp at hι
+    rw [colimMap_eq] at hι
+    have hι' :
+        (AddCommGrpCat.Hom.hom (colim.map S.f))
+            ((ConcreteCategory.hom (colimit.ι S.X₁ k)) t') =
+          (ConcreteCategory.hom (colimit.ι S.X₂ k)) ((AddCommGrpCat.Hom.hom (S.f.app k)) t') := hι
+    calc
+      (AddCommGrpCat.Hom.hom (colim.map S.f))
+          ((ConcreteCategory.hom (colimit.ι S.X₁ k)) t') =
+        (ConcreteCategory.hom (colimit.ι S.X₂ k)) ((AddCommGrpCat.Hom.hom (S.f.app k)) t') := hι'
+      _ = (ConcreteCategory.hom (colimit.ι S.X₂ k)) ((ConcreteCategory.hom (S.X₂.map e₁)) y) := by
+        rw [ht']
+      _ = (ConcreteCategory.hom (colimit.ι S.X₂ j)) y := colimit.w_apply S.X₂ e₁ y)
 
 noncomputable instance :
     PreservesFiniteLimits <| colim (J := J) (C := AddCommGrpCat.{u}) := by
