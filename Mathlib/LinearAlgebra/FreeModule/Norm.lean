@@ -46,8 +46,8 @@ theorem associated_norm_prod_smith [Fintype ι] (b : Basis ι R S) {f : S} (hf :
     zero_smul, Finset.sum_ite_eq', mul_one, if_pos (Finset.mem_univ _), b'.equiv_apply]
   change _ = f * _
   rw [mul_comm, ← smul_eq_mul, LinearEquiv.restrictScalars_apply]
-  erw [LinearEquiv.coord_apply_smul]
-  grind [Ideal.selfBasis_def]
+  simpa using
+    (LinearEquiv.coord_apply_smul S S f hf ((span {f}).selfBasis b hI ((Equiv.refl ι) i))).symm
 
 end CommRing
 
