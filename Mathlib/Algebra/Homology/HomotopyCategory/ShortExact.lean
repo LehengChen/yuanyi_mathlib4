@@ -95,10 +95,48 @@ lemma homologySequenceδ_triangleh (n₀ : ℤ) (n₁ : ℤ) (h : n₀ + 1 = n�
   ext ⟨A⟩ (x : A ⟶ _)
   obtain ⟨A', π, _, x', w, hx'⟩ :=
     (mappingCone S.f).eq_liftCycles_homologyπ_up_to_refinements x n₁ (by simpa using h)
-  erw [homologySequenceδ_quotient_mapTriangle_obj_assoc _ _ _ h]
+  have hrewrite :
+      (yoneda.map
+            ((homologyFunctorFactors C (up ℤ) n₀).inv.app (mappingCone S.f) ≫
+              (homologyFunctor C (up ℤ) 0).homologySequenceδ
+                  (Triangle.mk ((quotient C (up ℤ)).map S.f) ((quotient C (up ℤ)).map (inr S.f))
+                    ((quotient C (up ℤ)).map (triangle S.f).mor₃ ≫
+                      (Functor.commShiftIso (quotient C (up ℤ)) 1).hom.app S.X₁))
+                  n₀ n₁ h ≫
+                (homologyFunctorFactors C (up ℤ) n₁).hom.app S.X₁)).app
+          (Opposite.op A) x =
+        (yoneda.map
+            ((homologyFunctorFactors C (up ℤ) n₀).inv.app (mappingCone S.f) ≫
+              (homologyFunctorFactors C (up ℤ) n₀).hom.app (triangle S.f).obj₃ ≫
+                (HomologicalComplex.homologyFunctor C (up ℤ) 0).shiftMap (triangle S.f).mor₃
+                  n₀ n₁ (by lia) ≫
+                  (homologyFunctorFactors C (up ℤ) n₁).inv.app (triangle S.f).obj₁ ≫
+                    (homologyFunctorFactors C (up ℤ) n₁).hom.app S.X₁)).app
+          (Opposite.op A) x := by
+    simpa using
+      congrArg
+        (fun k =>
+          (yoneda.map ((homologyFunctorFactors C (up ℤ) n₀).inv.app (mappingCone S.f) ≫ k)).app
+            (Opposite.op A) x)
+        (homologySequenceδ_quotient_mapTriangle_obj_assoc (C := C) (T := triangle S.f) n₀ n₁ h
+          ((homologyFunctorFactors C (up ℤ) n₁).hom.app S.X₁))
+  rw [hrewrite]
   dsimp
   rw [comp_id, Iso.inv_hom_id_app_assoc, Iso.inv_hom_id_app]
-  erw [comp_id]
+  have hcomp :
+      x ≫
+          (HomologicalComplex.homologyFunctor C (up ℤ) 0).shiftMap (triangle S.f).mor₃ n₀ n₁
+              (by lia) ≫
+            𝟙 ((HomologicalComplex.homologyFunctor C (up ℤ) n₁).obj S.X₁) =
+        x ≫
+          (HomologicalComplex.homologyFunctor C (up ℤ) 0).shiftMap (triangle S.f).mor₃ n₀ n₁
+            (by lia) := by
+    simpa only [Category.assoc] using
+      (comp_id
+        (x ≫
+          (HomologicalComplex.homologyFunctor C (up ℤ) 0).shiftMap (triangle S.f).mor₃ n₀ n₁
+            (by lia)))
+  rw [hcomp]
   rw [← cancel_epi π, reassoc_of% hx', reassoc_of% hx',
     HomologicalComplex.homologyπ_naturality_assoc,
     HomologicalComplex.liftCycles_comp_cyclesMap_assoc]
@@ -143,14 +181,41 @@ lemma quasiIso_descShortComplex : QuasiIso (descShortComplex S) where
         ((homologyFunctorFactors C (up ℤ) _).hom.app _)
         ((homologyFunctorFactors C (up ℤ) _).hom.naturality S.f)
         (by
-          erw [(homologyFunctorFactors C (up ℤ) n).hom.naturality_assoc]
+          have hrewrite :
+              ((homologyFunctor C (up ℤ) 0).homologySequenceComposableArrows₅
+                    (triangleh S.f) n (n + 1) rfl).δlast.map' 1 2 (by decide) (by decide) ≫
+                (homologyFunctorFactors C (up ℤ) n).hom.app (triangle S.f).obj₃ ≫
+                  HomologicalComplex.homologyMap (descShortComplex S) n =
+                (homologyFunctorFactors C (up ℤ) n).hom.app (triangle S.f).obj₂ ≫
+                  (HomologicalComplex.homologyFunctor C (up ℤ) n).map (triangle S.f).mor₂ ≫
+                    HomologicalComplex.homologyMap (descShortComplex S) n := by
+            simpa using
+              (homologyFunctorFactors C (up ℤ) n).hom.naturality_assoc
+                (triangle S.f).mor₂ (HomologicalComplex.homologyMap (descShortComplex S) n)
+          rw [hrewrite]
           -- Disable `Fin.reduceFinMk`, otherwise `Precomp.obj_succ` does not fire. (https://github.com/leanprover-community/mathlib4/issues/27382)
           dsimp [-Fin.reduceFinMk]
           rw [← HomologicalComplex.homologyMap_comp, inr_descShortComplex])
         (by
           -- Disable `Fin.reduceFinMk`, otherwise `Precomp.obj_succ` does not fire. (https://github.com/leanprover-community/mathlib4/issues/27382)
           dsimp [-Fin.reduceFinMk]
-          erw [homologySequenceδ_triangleh hS]
+          have hrewrite :
+              (homologyFunctor C (up ℤ) 0).homologySequenceδ
+                    (Triangle.mk ((quotient C (up ℤ)).map S.f) ((quotient C (up ℤ)).map (inr S.f))
+                      ((quotient C (up ℤ)).map (triangle S.f).mor₃ ≫
+                        (Functor.commShiftIso (quotient C (up ℤ)) 1).hom.app S.X₁))
+                    n (n + 1) rfl ≫
+                  (homologyFunctorFactors C (up ℤ) (n + 1)).hom.app S.X₁ =
+                ((homologyFunctorFactors C (up ℤ) n).hom.app (mappingCone S.f) ≫
+                    HomologicalComplex.homologyMap (descShortComplex S) n ≫
+                      hS.δ n (n + 1) rfl ≫
+                        (homologyFunctorFactors C (up ℤ) (n + 1)).inv.app S.X₁) ≫
+                  (homologyFunctorFactors C (up ℤ) (n + 1)).hom.app S.X₁ := by
+            simpa [Functor.comp_obj, HomologicalComplex.homologyFunctor_obj, assoc] using
+              congrArg
+                (fun k => k ≫ (homologyFunctorFactors C (up ℤ) (n + 1)).hom.app S.X₁)
+                (homologySequenceδ_triangleh (S := S) hS n (n + 1) rfl)
+          rw [hrewrite]
           simp only [Functor.comp_obj, HomologicalComplex.homologyFunctor_obj, assoc,
             Iso.inv_hom_id_app, comp_id])
         ((homologyFunctorFactors C (up ℤ) _).hom.naturality S.f)
