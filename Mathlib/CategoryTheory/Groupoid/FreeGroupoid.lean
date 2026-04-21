@@ -146,11 +146,7 @@ variable {V' : Type u'} [Groupoid V']
 def lift (φ : V ⥤q V') : Quiver.FreeGroupoid V ⥤ V' :=
   CategoryTheory.Quotient.lift _ (Paths.lift <| Quiver.Symmetrify.lift φ) <| by
     rintro _ _ _ _ ⟨X, Y, f⟩
-    -- Porting note: `simp` does not work, so manually `rewrite`
-    erw [Paths.lift_nil, Paths.lift_cons, Quiver.Path.comp_nil, Paths.lift_toPath,
-      Quiver.Symmetrify.lift_reverse]
-    symm
-    apply Groupoid.comp_inv
+    cases f <;> simp [CategoryTheory.Paths.lift, Quiver.Hom.toPath, Quiver.Symmetrify.lift]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem lift_spec (φ : V ⥤q V') : of V ⋙q (lift φ).toPrefunctor = φ := by
