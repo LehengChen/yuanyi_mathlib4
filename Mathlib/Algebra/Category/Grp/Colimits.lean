@@ -87,7 +87,7 @@ set_option backward.isDefEq.respectTransparency false in
 lemma Quot.ι_desc [DecidableEq J] (j : J) (x : F.obj j) :
     Quot.desc F c (Quot.ι F j x) = c.ι.app j x := by
   dsimp [desc, ι]
-  erw [QuotientAddGroup.lift_mk']
+  rw [← AddMonoidHom.comp_apply, ← AddMonoidHom.comp_assoc, QuotientAddGroup.lift_comp_mk']
   simp
 
 set_option backward.isDefEq.respectTransparency false in
@@ -96,10 +96,14 @@ lemma Quot.map_ι [DecidableEq J] {j j' : J} {f : j ⟶ j'} (x : F.obj j) :
     Quot.ι F j' (F.map f x) = Quot.ι F j x := by
   dsimp [ι]
   refine eq_of_sub_eq_zero ?_
-  erw [← (QuotientAddGroup.mk' (Relations F)).map_sub, ← AddMonoidHom.mem_ker]
-  rw [QuotientAddGroup.ker_mk']
-  simp only [DFinsupp.singleAddHom_apply]
-  exact AddSubgroup.subset_closure ⟨j, j', f, x, rfl⟩
+  have hmem : DFinsupp.single j' (F.map f x) - DFinsupp.single j x ∈ Relations F :=
+    AddSubgroup.subset_closure ⟨j, j', f, x, rfl⟩
+  have hzero :
+      (QuotientAddGroup.mk' (Relations F)) (DFinsupp.single j' (F.map f x) - DFinsupp.single j x)
+        = 0 := by
+    rw [← AddMonoidHom.mem_ker, QuotientAddGroup.ker_mk']
+    exact hmem
+  simpa [map_sub, AddMonoidHom.comp_apply, DFinsupp.singleAddHom_apply] using hzero
 
 set_option backward.isDefEq.respectTransparency false in
 /--
@@ -119,13 +123,27 @@ def quotToQuotUlift [DecidableEq J] : Quot F →+ Quot (F ⋙ uliftFunctor.{u'})
   rw [sub_self]
 
 lemma quotToQuotUlift_ι [DecidableEq J] (j : J) (x : F.obj j) :
-    quotToQuotUlift F (Quot.ι F j x) = Quot.ι _ j (ULift.up x) := by
-  dsimp [quotToQuotUlift, Quot.ι]
-  conv_lhs => erw [AddMonoidHom.comp_apply (QuotientAddGroup.mk' (Relations F))
-    (DFinsupp.singleAddHom _ j), QuotientAddGroup.lift_mk']
-  simp only [DFinsupp.singleAddHom_apply, DFinsupp.sumAddHom_single, AddMonoidHom.coe_comp,
-    AddMonoidHom.coe_coe, Function.comp_apply]
-  rfl
+    quotToQuotUlift F (Quot.ι F j x) = Quot.ι (F ⋙ uliftFunctor.{u'}) j (ULift.up x) := by
+  let φ : DFinsupp (fun j ↦ F.obj j) →+ Quot (F ⋙ uliftFunctor.{u'}) :=
+    DFinsupp.sumAddHom
+      (fun j ↦ (Quot.ι (F ⋙ uliftFunctor.{u'}) j).comp AddEquiv.ulift.symm.toAddMonoidHom)
+  have hφ : Relations F ≤ φ.ker := by
+    rw [AddSubgroup.closure_le]
+    intro _ hx
+    obtain ⟨j, j', u, a, rfl⟩ := hx
+    rw [SetLike.mem_coe, AddMonoidHom.mem_ker, map_sub, DFinsupp.sumAddHom_single,
+      DFinsupp.sumAddHom_single]
+    change
+      Quot.ι (F ⋙ uliftFunctor.{u'}) j'
+          ((F ⋙ uliftFunctor.{u'}).map u (AddEquiv.ulift.symm a)) -
+        Quot.ι (F ⋙ uliftFunctor.{u'}) j (AddEquiv.ulift.symm a) = 0
+    rw [Quot.map_ι (F := F ⋙ uliftFunctor.{u'})]
+    dsimp
+    exact sub_self _
+  simpa only [quotToQuotUlift, Quot.ι, φ, AddMonoidHom.comp_apply, DFinsupp.singleAddHom_apply,
+    DFinsupp.sumAddHom_single, AddMonoidHom.coe_comp, AddMonoidHom.coe_coe, Function.comp_apply]
+    using (QuotientAddGroup.lift_mk' (N := Relations F) (φ := φ) (HN := hφ)
+      (g := (DFinsupp.singleAddHom (fun j ↦ F.obj j) j) x))
 
 set_option backward.isDefEq.respectTransparency false in
 /--
@@ -143,10 +161,9 @@ set_option backward.isDefEq.respectTransparency false in
 lemma quotUliftToQuot_ι [DecidableEq J] (j : J) (x : (F ⋙ uliftFunctor.{u'}).obj j) :
     quotUliftToQuot F (Quot.ι _ j x) = Quot.ι F j x.down := by
   dsimp [quotUliftToQuot, Quot.ι]
-  conv_lhs => erw [AddMonoidHom.comp_apply (QuotientAddGroup.mk' (Relations (F ⋙ uliftFunctor)))
-    (DFinsupp.singleAddHom _ j), QuotientAddGroup.lift_mk']
-  simp only [Functor.comp_obj, uliftFunctor_obj, DFinsupp.singleAddHom_apply,
-    DFinsupp.sumAddHom_single, AddMonoidHom.coe_comp, AddMonoidHom.coe_coe, Function.comp_apply]
+  rw [← AddMonoidHom.comp_apply, ← AddMonoidHom.comp_assoc, QuotientAddGroup.lift_comp_mk']
+  simp only [DFinsupp.singleAddHom_apply, DFinsupp.sumAddHom_single, AddMonoidHom.coe_comp,
+    AddMonoidHom.coe_coe, Function.comp_apply]
   rfl
 
 /--
@@ -178,8 +195,8 @@ lemma Quot.desc_quotQuotUliftAddEquiv [DecidableEq J] (c : Cocone F) :
   dsimp
   simp only [quotToQuotUlift_ι, Functor.comp_obj, uliftFunctor_obj, ι_desc, Functor.const_obj_obj,
     ι_desc]
-  erw [Quot.ι_desc]
-  rfl
+  simpa using Quot.ι_desc (F := F ⋙ uliftFunctor.{u'}) (c := uliftFunctor.{u'}.mapCocone c)
+    j (ULift.up a)
 
 /-- (implementation detail) A morphism of commutative additive groups `Quot F →+ A`
 induces a cocone on `F` as long as the universes work out.
@@ -216,9 +233,9 @@ noncomputable def isColimit_of_bijective_desc [DecidableEq J]
   fac s j := by
     ext x
     dsimp
-    conv_lhs => erw [← Quot.ι_desc F c j x]
-    rw [← AddEquiv.ofBijective_apply _ h, AddEquiv.symm_apply_apply]
-    simp only [Quot.ι_desc, Functor.const_obj_obj]
+    have hx : (AddEquiv.ofBijective (Quot.desc F c) h).symm ((c.ι.app j) x) = Quot.ι F j x := by
+      rw [← Quot.ι_desc F c j x, ← AddEquiv.ofBijective_apply _ h, AddEquiv.symm_apply_apply]
+    exact (congrArg (Quot.desc F s) hx).trans (Quot.ι_desc F s j x)
   uniq s m hm := by
     ext x
     obtain ⟨x, rfl⟩ := h.2 x
