@@ -84,13 +84,20 @@ noncomputable def adjunction :
             (((PresheafOfModules.pullbackPushforwardAdjunction φ.hom).homEquiv F.val G.val).trans
               ((fullyFaithfulForget S).homEquiv (Y := (pushforward φ).obj G)).symm)
       homEquiv_naturality_left_symm := by
-        intros
+        intro X' X Y f g
         dsimp [Functor.FullyFaithful.homEquiv]
-        -- these erw seem difficult to remove
-        erw [Adjunction.homEquiv_naturality_left_symm,
-          Adjunction.homEquiv_naturality_left_symm]
-        dsimp [pushforward_obj_val]
-        simp only [Functor.map_comp, Category.assoc]
+        change
+          ((PresheafOfModules.sheafificationAdjunction (𝟙 R.obj)).homEquiv
+              ((PresheafOfModules.pullback φ.hom).obj X'.val) Y).symm
+            (((PresheafOfModules.pullbackPushforwardAdjunction φ.hom).homEquiv X'.val Y.val).symm
+              (f.val ≫ g.val)) =
+          (PresheafOfModules.sheafification (𝟙 R.obj)).map
+              ((PresheafOfModules.pullback φ.hom).map f.val) ≫
+            ((PresheafOfModules.sheafificationAdjunction (𝟙 R.obj)).homEquiv
+                ((PresheafOfModules.pullback φ.hom).obj X.val) Y).symm
+              (((PresheafOfModules.pullbackPushforwardAdjunction φ.hom).homEquiv X.val Y.val).symm
+                g.val)
+        rw [Adjunction.homEquiv_naturality_left_symm, Adjunction.homEquiv_naturality_left_symm]
       homEquiv_naturality_right := by
         tauto }
 
