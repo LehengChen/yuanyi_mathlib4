@@ -122,7 +122,7 @@ theorem Spec.sheafedSpaceMap_comp {R S T : CommRingCat.{u}} (f : R ⟶ S) (g : S
   · exact Spec.topMap_comp f g
   · ext
     -- Porting note: was one liner
-    -- `dsimp`, then functoriality and `comap_comp`
+    -- `dsimp, rw category_theory.functor.map_id, rw category.comp_id, erw comap_comp f g, refl`
     rw [NatTrans.comp_app, sheafedSpaceMap_hom_c_app, Functor.whiskerRight_app, eqToHom_refl]
     simp only [sheafedSpaceObj_carrier, topObj_forget, SheafedSpace.comp_hom_base,
       sheafedSpaceMap_hom_base, sheafedSpaceObj_presheaf, Functor.comp_obj, Functor.op_obj,

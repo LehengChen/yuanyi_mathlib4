@@ -85,8 +85,8 @@ example (j : J) :
   fail_if_success rw [ι_preservesColimitIso_inv (G ⋙ H)]
   fail_if_success simp only [ι_preservesColimitIso_inv]
 
-  -- A more permissive rewrite tactic would work here, but the point is to
-  -- understand the mismatch and fix it locally instead.
+  -- This would work:
+  -- erw [ι_preservesColimitIso_inv (G ⋙ H)]
 
   -- `check_compositions` checks if the two morphisms we're composing are
   -- composed by abusing defeq, and indeed it tells us that we are abusing

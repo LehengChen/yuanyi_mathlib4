@@ -169,7 +169,7 @@ variable [F.CommShift A]
 -- Note: The following two lemmas are introduced in order to have more proofs work `by simp`.
 -- Indeed, `simp only [(F.commShiftIso a).hom.naturality f]` would almost never work because
 -- of the compositions of functors which appear in both the source and target of
--- `F.commShiftIso a`. Otherwise, we would be forced to appeal to naturality lemmas manually.
+-- `F.commShiftIso a`. Otherwise, we would be forced to use `erw [NatTrans.naturality]`.
 
 @[reassoc (attr := simp)]
 lemma commShiftIso_hom_naturality {X Y : C} (f : X ⟶ Y) (a : A) :
