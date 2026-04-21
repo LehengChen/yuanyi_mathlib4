@@ -79,7 +79,7 @@ theorem max_aleph0_card_le_rank_fun_nat : max ℵ₀ #K ≤ Module.rank K (ℕ �
   rw [Finset.sum_apply, map_sum] at eq0
   have : SMulCommClass Lᵐᵒᵖ K K := ⟨fun _ _ _ ↦ mul_assoc _ _ _⟩
   simp_rw [smul_comm _ (c i), ← Finset.smul_sum]
-  erw [eq0, smul_zero]
+  simpa using congrArg (c i • ·) eq0
 
 variable {K}
 
@@ -125,8 +125,7 @@ theorem lift_rank_lt_rank_dual' {V : Type v} [AddCommGroup V] [Module K V]
   rw [← b.mk_eq_rank'', rank_dual_eq_card_dual_of_aleph0_le_rank' h,
       ← (b.constr ℕ (M' := K)).toEquiv.cardinal_eq, mk_arrow]
   apply cantor'
-  erw [nat_lt_lift_iff, one_lt_iff_nontrivial]
-  infer_instance
+  exact one_lt_iff_nontrivial.2 inferInstance
 
 theorem lift_rank_lt_rank_dual {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
     (h : ℵ₀ ≤ Module.rank K V) :
