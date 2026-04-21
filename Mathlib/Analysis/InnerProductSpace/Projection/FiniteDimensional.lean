@@ -315,12 +315,20 @@ noncomputable abbrev OrthogonalFamily.decomposition
     dsimp only
     letI := fun i => Classical.decEq (V i)
     rw [DirectSum.coeAddMonoidHom, DirectSum.toAddMonoid, DFinsupp.liftAddHom_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [DFinsupp.sumAddHom_apply]; rw [DFinsupp.sum_eq_sum_fintype]
-    · simp_rw [Equiv.apply_symm_apply, AddSubmonoidClass.coe_subtype]
+    have hsum :
+        (DFinsupp.sumAddHom fun i => AddSubmonoidClass.subtype (V i))
+            (DFinsupp.equivFunOnFintype.symm fun i => (V i).orthogonalProjection x) =
+          ∑ i,
+            (AddSubmonoidClass.subtype (V i))
+              (DFinsupp.equivFunOnFintype
+                (DFinsupp.equivFunOnFintype.symm fun i => (V i).orthogonalProjection x) i) := by
+      simpa using
+        (DFinsupp.sumAddHom_apply
+          (φ := fun i => AddSubmonoidClass.subtype (V i))
+          (f := DFinsupp.equivFunOnFintype.symm fun i => (V i).orthogonalProjection x))
+    exact hsum.trans <| by
+      simp_rw [Equiv.apply_symm_apply, AddSubmonoidClass.coe_subtype]
       exact hV.sum_projection_of_mem_iSup _ ((h.ge :) Submodule.mem_top)
-    · intro i
-      exact map_zero _
   right_inv x := by
     dsimp only
     simp_rw [hV.projection_directSum_coeAddHom, DFinsupp.equivFunOnFintype_symm_coe]
