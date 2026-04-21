@@ -106,8 +106,12 @@ theorem OrthonormalBasis.measurePreserving_measurableEquiv (b : OrthonormalBasis
     MeasurePreserving b.measurableEquiv volume volume := by
   convert (b.measurableEquiv.symm.measurable.measurePreserving _).symm
   rw [← (EuclideanSpace.basisFun ι ℝ).addHaar_eq_volume]
-  erw [MeasurableEquiv.coe_toEquiv_symm, Basis.map_addHaar _ b.repr.symm.toContinuousLinearEquiv]
-  exact b.addHaar_eq_volume.symm
+  have hmap :
+      map (⇑b.repr.symm) (EuclideanSpace.basisFun ι ℝ).toBasis.addHaar = b.toBasis.addHaar := by
+    simpa using
+      (Basis.map_addHaar (EuclideanSpace.basisFun ι ℝ).toBasis
+        b.repr.symm.toContinuousLinearEquiv)
+  simpa [OrthonormalBasis.measurableEquiv] using b.addHaar_eq_volume.symm.trans hmap.symm
 
 theorem OrthonormalBasis.measurePreserving_repr (b : OrthonormalBasis ι ℝ F) :
     MeasurePreserving b.repr volume volume := b.measurePreserving_measurableEquiv
@@ -173,9 +177,8 @@ theorem measurePreserving (f : E ≃ₗᵢ[ℝ] F) :
     MeasurePreserving f := by
   refine ⟨f.continuous.measurable, ?_⟩
   rcases exists_orthonormalBasis ℝ E with ⟨w, b, _hw⟩
-  erw [← OrthonormalBasis.addHaar_eq_volume b, ← OrthonormalBasis.addHaar_eq_volume (b.map f),
-    Basis.map_addHaar _ f.toContinuousLinearEquiv]
-  congr
+  rw [← OrthonormalBasis.addHaar_eq_volume b, ← OrthonormalBasis.addHaar_eq_volume (b.map f)]
+  simpa using (Basis.map_addHaar b.toBasis f.toContinuousLinearEquiv)
 
 end LinearIsometryEquiv
 
