@@ -124,10 +124,25 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     --    LinearMap.compr₂_apply, Function.comp_apply, RingHom.map_one,
     --    ModuleCat.MonoidalCategory.tensorHom_tmul, AlgCat.hom_comp,
     --    ModuleCat.MonoidalCategory.leftUnitor_hom_apply]
-    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
     dsimp
-    erw [LinearMap.mul'_apply, MonoidalCategory.leftUnitor_hom_apply, ← Algebra.smul_def]
-    dsimp
+    have h :
+        (Hom.hom (MonoidalCategoryStruct.whiskerRight (↟(Algebra.linearMap R ↑A)) (of R ↑A)))
+            (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R)) ↑A) 1) x) =
+          (_root_.algebraMap R ↑A 1) ⊗ₜ[R] x := by
+      rfl
+    have h' :
+        (mul' R ↑A)
+            ((Hom.hom (MonoidalCategoryStruct.whiskerRight (↟(Algebra.linearMap R ↑A)) (of R ↑A)))
+              (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R)) ↑A) 1) x)) =
+          x := by
+      simpa [LinearMap.mul'_apply, ← Algebra.smul_def] using
+        congrArg (fun t => (mul' R ↑A) t) h
+    have h'' :
+        (Hom.hom (MonoidalCategoryStruct.leftUnitor (of R ↑A)).hom)
+            (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R)) ↑A) 1) x) =
+          x := by
+      simpa using (MonoidalCategory.leftUnitor_hom_apply (R := R) (M := of R ↑A) 1 x)
+    exact h'.trans h''.symm
   mul_one := by
     ext : 1
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
@@ -136,12 +151,25 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     -- dsimp only [AlgCat.id_apply, TensorProduct.mk_apply, Algebra.linearMap_apply,
     --   LinearMap.compr₂_apply, Function.comp_apply, ModuleCat.MonoidalCategory.hom_apply,
     --   AlgCat.coe_comp]
-    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
-    erw [compr₂_apply, compr₂ₛₗ_apply]
-    simp only [hom_comp, hom_ofHom, id_coe, id_eq, LinearMap.comp_apply]
-    erw [LinearMap.mul'_apply, ModuleCat.MonoidalCategory.rightUnitor_hom_apply, ← Algebra.commutes,
-      ← Algebra.smul_def]
-    dsimp
+    simp only [hom_comp, hom_ofHom, compr₂ₛₗ_apply, coe_comp, Function.comp_apply]
+    have h :
+        (mul' R ↑A)
+            ((Hom.hom (MonoidalCategoryStruct.whiskerLeft (of R ↑A) (↟(Algebra.linearMap R ↑A))))
+              (((TensorProduct.mk R ↑A ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R))) x) 1)) =
+          x * (_root_.algebraMap R ↑A 1) := by
+      rfl
+    have h' : x * (_root_.algebraMap R ↑A 1) = x := by
+      calc
+        x * (_root_.algebraMap R ↑A 1) = (_root_.algebraMap R ↑A 1) * x := by
+          rw [Algebra.commutes]
+        _ = x := by
+          rw [← Algebra.smul_def, one_smul]
+    have h'' :
+        (Hom.hom (MonoidalCategoryStruct.rightUnitor (of R ↑A)).hom)
+            (((TensorProduct.mk R ↑A ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R))) x) 1) =
+          x := by
+      simpa using (ModuleCat.MonoidalCategory.rightUnitor_hom_apply (M := of R ↑A) x 1)
+    exact h.trans (h'.trans h''.symm)
   mul_assoc := by
     ext : 1
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
@@ -150,10 +178,22 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     dsimp only [compr₂ₛₗ_apply, TensorProduct.mk_apply]
     rw [hom_comp, LinearMap.comp_apply, hom_comp, LinearMap.comp_apply, hom_comp,
         LinearMap.comp_apply]
-    erw [LinearMap.mul'_apply, LinearMap.mul'_apply]
-    dsimp only [id_coe, id_eq]
-    erw [TensorProduct.mk_apply, TensorProduct.mk_apply, mul'_apply, LinearMap.id_apply, mul'_apply]
-    simp only [_root_.mul_assoc]
+    have h1 :
+        (Hom.hom (↟(mul' R ↑A)))
+            ((Hom.hom (MonoidalCategoryStruct.whiskerRight (↟(mul' R ↑A)) (of R ↑A)))
+              (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorObj (of R ↑A) (of R ↑A)) ↑A)
+                (x ⊗ₜ[R] y)) z)) =
+          (x * y) * z := by
+      rfl
+    have h2 :
+        (Hom.hom (↟(mul' R ↑A)))
+            ((Hom.hom (MonoidalCategoryStruct.whiskerLeft (of R ↑A) (↟(mul' R ↑A))))
+              ((Hom.hom (MonoidalCategoryStruct.associator (of R ↑A) (of R ↑A) (of R ↑A)).hom)
+                (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorObj (of R ↑A) (of R ↑A)) ↑A)
+                  (x ⊗ₜ[R] y)) z))) =
+          x * (y * z) := by
+      rfl
+    simpa [h1, h2] using (_root_.mul_assoc x y z)
 
 attribute [local instance] inverseObj
 
