@@ -175,14 +175,22 @@ def sup {A : C} : MonoOver A ⥤ MonoOver A ⥤ MonoOver A :=
 /-- A morphism version of `le_sup_left`. -/
 def leSupLeft {A : C} (f g : MonoOver A) : f ⟶ (sup.obj f).obj g := by
   refine homMk (coprod.inl ≫ factorThruImage _) ?_
-  erw [Category.assoc, image.fac, coprod.inl_desc]
-  rfl
+  dsimp [sup] at *
+  exact
+    (by
+      rw [Category.assoc, image.fac, coprod.inl_desc] :
+        (coprod.inl ≫ factorThruImage (coprod.desc f.arrow g.arrow)) ≫
+          image.ι (coprod.desc f.arrow g.arrow) = f.arrow)
 
 /-- A morphism version of `le_sup_right`. -/
 def leSupRight {A : C} (f g : MonoOver A) : g ⟶ (sup.obj f).obj g := by
   refine homMk (coprod.inr ≫ factorThruImage _) ?_
-  erw [Category.assoc, image.fac, coprod.inr_desc]
-  rfl
+  dsimp [sup] at *
+  exact
+    (by
+      rw [Category.assoc, image.fac, coprod.inr_desc] :
+        (coprod.inr ≫ factorThruImage (coprod.desc f.arrow g.arrow)) ≫
+          image.ι (coprod.desc f.arrow g.arrow) = g.arrow)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- A morphism version of `sup_le`. -/
@@ -466,10 +474,17 @@ theorem inf_pullback {X Y : C} (g : X ⟶ Y) (f₁ f₂) :
   revert f₁
   apply Quotient.ind'
   intro f₁
-  erw [inf_def, inf_def, inf_eq_map_pullback', inf_eq_map_pullback', ← pullback_comp, ←
-    map_pullback pullback.condition (pullbackIsPullback f₁.arrow g), ← pullback_comp,
-    pullback.condition]
-  rfl
+  rw [inf_def, inf_eq_map_pullback' f₁ f₂]
+  rw [inf_def]
+  have h_inf :
+      (inf.obj ((pullback g).obj (Quotient.mk'' f₁))).obj ((pullback g).obj f₂) =
+        (map ((MonoOver.pullback g).obj f₁).arrow).obj
+          ((pullback ((MonoOver.pullback g).obj f₁).arrow).obj ((pullback g).obj f₂)) := by
+    simpa using inf_eq_map_pullback' ((MonoOver.pullback g).obj f₁) ((pullback g).obj f₂)
+  rw [h_inf]
+  simpa [MonoOver.pullback_obj_arrow, ← pullback_comp, pullback.condition] using
+    (map_pullback pullback.condition (pullbackIsPullback f₁.arrow g)
+      ((pullback f₁.arrow).obj f₂)).symm
 
 /-- `⊓` commutes with map. -/
 theorem inf_map {X Y : C} (g : Y ⟶ X) [Mono g] (f₁ f₂) :
@@ -477,7 +492,16 @@ theorem inf_map {X Y : C} (g : Y ⟶ X) [Mono g] (f₁ f₂) :
   revert f₁
   apply Quotient.ind'
   intro f₁
-  erw [inf_def, inf_def, inf_eq_map_pullback', inf_eq_map_pullback', ← map_comp]
+  rw [inf_def, inf_eq_map_pullback' f₁ f₂]
+  rw [inf_def]
+  have h_inf :
+      (inf.obj ((map g).obj (Quotient.mk'' f₁))).obj ((map g).obj f₂) =
+        (map ((MonoOver.map g).obj f₁).arrow).obj
+          ((pullback ((MonoOver.map g).obj f₁).arrow).obj ((map g).obj f₂)) := by
+    simpa using inf_eq_map_pullback' ((MonoOver.map g).obj f₁) ((map g).obj f₂)
+  rw [h_inf]
+  simp only [MonoOver.map_obj_arrow]
+  rw [← map_comp]
   dsimp
   rw [pullback_comp, pullback_map_self]
 
@@ -594,7 +618,7 @@ instance widePullbackι_mono {A : C} (s : Set (Subobject A)) : Mono (widePullbac
       · exact h
       · apply (cancel_mono ((equivShrink (Subobject A)).symm _).arrow).1
         rw [assoc, assoc]
-        erw [limit.w (wideCospan s) (WidePullbackShape.Hom.term _)]
+        rw [← wideCospan_map_term s _, limit.w (wideCospan s) (WidePullbackShape.Hom.term _)]
         exact h⟩
 
 /-- When `[WellPowered C]` and `[HasWidePullbacks C]`, `Subobject A` has arbitrary infimums.
