@@ -160,14 +160,15 @@ def whiskerIsoMapGenerateCocone (hY : Y = iSup U) :
   hom :=
     { hom := F.map (eqToHom (congr_arg op hY.symm))
       w := fun j => by
-        erw [← F.map_comp]
+        rw [Functor.mapCone_π_app, Cone.whisker_π, ← F.map_comp]
         dsimp
         congr 1 }
   inv :=
     { hom := F.map (eqToHom (congr_arg op hY))
       w := fun j => by
-        erw [← F.map_comp]
+        rw [Cone.whisker_π]
         dsimp
+        rw [← F.map_comp]
         congr 1 }
   hom_inv_id := by
     ext
