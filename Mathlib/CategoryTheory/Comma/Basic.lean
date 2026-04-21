@@ -267,10 +267,33 @@ instance full_map [F.Faithful] [F₁.Full] [F₂.Full] [IsIso α] [IsIso β] : (
       right := F₂.preimage φ.right
       w := F.map_injective (by
         rw [← cancel_mono (β.app _), ← cancel_epi (α.app _), F.map_comp, F.map_comp, assoc, assoc]
-        erw [← α.naturality_assoc, β.naturality]
-        dsimp
-        rw [F₁.map_preimage, F₂.map_preimage]
-        simpa using φ.w) }, by cat_disch⟩
+        have h₁ :
+            α.app X.left ≫ F.map (L.map (F₁.preimage φ.left)) ≫ F.map Y.hom ≫ β.app Y.right =
+              (F₁ ⋙ L').map (F₁.preimage φ.left) ≫ α.app Y.left ≫ F.map Y.hom ≫ β.app Y.right := by
+          simpa only [Functor.comp_map, Category.assoc] using
+            (α.naturality_assoc (F₁.preimage φ.left) (F.map Y.hom ≫ β.app Y.right)).symm
+        have h₂ :
+            (F₁ ⋙ L').map (F₁.preimage φ.left) ≫ α.app Y.left ≫ F.map Y.hom ≫ β.app Y.right =
+              L'.map φ.left ≫ α.app Y.left ≫ F.map Y.hom ≫ β.app Y.right := by
+          simp [Functor.comp_map, F₁.map_preimage]
+        have h₃ :
+            L'.map φ.left ≫ α.app Y.left ≫ F.map Y.hom ≫ β.app Y.right =
+              α.app X.left ≫ F.map X.hom ≫ β.app X.right ≫ R'.map φ.right := by
+          simpa [Comma.map] using φ.w
+        have h₄ :
+            α.app X.left ≫ F.map X.hom ≫ β.app X.right ≫ R'.map φ.right =
+              α.app X.left ≫ F.map X.hom ≫ β.app X.right ≫
+                (F₂ ⋙ R').map (F₂.preimage φ.right) := by
+          simp [Functor.comp_map, F₂.map_preimage]
+        have h₅ :
+            α.app X.left ≫ F.map X.hom ≫ β.app X.right ≫
+                (F₂ ⋙ R').map (F₂.preimage φ.right) =
+              α.app X.left ≫ F.map X.hom ≫ F.map (R.map (F₂.preimage φ.right)) ≫
+                β.app Y.right := by
+          simpa only [Functor.comp_map, Category.assoc] using
+            congrArg (fun k => α.app X.left ≫ F.map X.hom ≫ k)
+              (β.naturality (F₂.preimage φ.right)).symm
+        exact h₁.trans <| h₂.trans <| h₃.trans <| h₄.trans <| h₅) }, by cat_disch⟩
 
 instance essSurj_map [F₁.EssSurj] [F₂.EssSurj] [F.Full] [IsIso α] [IsIso β] :
     (map α β).EssSurj where
