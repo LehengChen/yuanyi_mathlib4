@@ -209,10 +209,9 @@ example :
     PseudoMetricSpace.toUniformSpace := rfl
 
 theorem norm_def (x : tsze R M) : ‖x‖ = ‖fst x‖ + ‖snd x‖ := by
-  erw [WithLp.norm_seminormedAddCommGroupToProd]
+  rw [show ‖x‖ = ‖@WithLp.toLp 1 (R × M) x‖ by rfl]
   rw [WithLp.prod_norm_eq_add (by norm_num)]
-  simp only [WithLp.toLp_fst, ENNReal.toReal_one, Real.rpow_one, WithLp.toLp_snd, ne_eq,
-    one_ne_zero, not_false_eq_true, div_self, fst, snd]
+  simp [fst, snd]
 
 theorem nnnorm_def (x : tsze R M) : ‖x‖₊ = ‖fst x‖₊ + ‖snd x‖₊ := by
   ext; simp [norm_def]
