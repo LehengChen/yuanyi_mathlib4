@@ -493,8 +493,10 @@ theorem adjoin_minpoly_coeff_of_exists_primitive_element
     apply Subtype.mem
   have dvd_g : minpoly K' α ∣ g.toSubring K'.toSubring (subset_adjoin F _) := by
     apply minpoly.dvd
+    have hmap : Polynomial.map (algebraMap K' E) (g.toSubring K'.toSubring (subset_adjoin F _)) = g := by
+      simpa using g.map_toSubring K'.toSubring (subset_adjoin F _)
     rw [aeval_def, eval₂_eq_eval_map]
-    erw [g.map_toSubring K'.toSubring]
+    rw [hmap]
     rw [eval_map_algebraMap]
     exact minpoly.aeval K α
   have finrank_eq : ∀ K : IntermediateField F E, finrank K E = natDegree (minpoly K α) := by
