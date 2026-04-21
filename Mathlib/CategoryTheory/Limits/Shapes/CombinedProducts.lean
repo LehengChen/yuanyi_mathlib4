@@ -54,10 +54,37 @@ def combPairIsLimit : IsLimit (Fan.mk bc.pt (combPairHoms c₁ c₂ bc)) :=
       · exact Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a))
       · exact Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a)))
     (fun s w ↦ by
-      cases w <;>
-      · simp only [fan_mk_proj, combPairHoms]
-        erw [← Category.assoc, h.fac]
-        simp only [pair_obj_left, mk_pt, mk_π_app, IsLimit.fac])
+      cases w with
+      | inl a =>
+          simp only [fan_mk_proj, combPairHoms]
+          let t : BinaryFan c₁.pt c₂.pt := BinaryFan.mk
+            (Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a)))
+            (Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a)))
+          have hfst :
+              Fan.IsLimit.lift h (fun i ↦ by
+                cases i
+                · exact Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a))
+                · exact Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a))) ≫ bc.fst =
+                Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a)) := by
+            simpa [t, Fan.IsLimit.lift, pair_obj_left, mk_pt, mk_π_app, BinaryFan.π_app_left,
+              BinaryFan.mk_fst] using h.fac t ⟨WalkingPair.left⟩
+          rw [← Category.assoc, hfst]
+          exact Fan.IsLimit.fac h₁ (fun a ↦ s.proj (.inl a)) a
+      | inr a =>
+          simp only [fan_mk_proj, combPairHoms]
+          let t : BinaryFan c₁.pt c₂.pt := BinaryFan.mk
+            (Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a)))
+            (Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a)))
+          have hsnd :
+              Fan.IsLimit.lift h (fun i ↦ by
+                cases i
+                · exact Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a))
+                · exact Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a))) ≫ bc.snd =
+                Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a)) := by
+            simpa [t, Fan.IsLimit.lift, pair_obj_right, mk_pt, mk_π_app, BinaryFan.π_app_right,
+              BinaryFan.mk_snd] using h.fac t ⟨WalkingPair.right⟩
+          rw [← Category.assoc, hsnd]
+          exact Fan.IsLimit.fac h₂ (fun a ↦ s.proj (.inr a)) a)
     (fun s m hm ↦ Fan.IsLimit.hom_ext h _ _ <| fun w ↦ by
       cases w
       · refine Fan.IsLimit.hom_ext h₁ _ _ (fun a ↦ by aesop)
@@ -90,10 +117,39 @@ def combPairIsColimit : IsColimit (Cofan.mk bc.pt (combPairHoms c₁ c₂ bc)) :
       · exact Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a))
       · exact Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a)))
     (fun s w ↦ by
-      cases w <;>
-      · simp only [cofan_mk_inj, combPairHoms, Category.assoc]
-        erw [h.fac]
-        simp only [Cofan.mk_ι_app, Cofan.IsColimit.fac])
+      cases w with
+      | inl a =>
+          simp only [cofan_mk_inj, combPairHoms, Category.assoc]
+          let t : BinaryCofan c₁.pt c₂.pt := BinaryCofan.mk
+            (Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a)))
+            (Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a)))
+          have hinl :
+              bc.inl ≫
+                  Cofan.IsColimit.desc h (fun i ↦ by
+                    cases i
+                    · exact Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a))
+                    · exact Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a))) =
+                Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a)) := by
+            simpa [t, Cofan.IsColimit.desc, pair_obj_left, mk_pt, mk_ι_app,
+              BinaryCofan.ι_app_left, BinaryCofan.mk_inl] using h.fac t ⟨WalkingPair.left⟩
+          rw [hinl]
+          exact Cofan.IsColimit.fac h₁ (fun a ↦ s.inj (.inl a)) a
+      | inr a =>
+          simp only [cofan_mk_inj, combPairHoms, Category.assoc]
+          let t : BinaryCofan c₁.pt c₂.pt := BinaryCofan.mk
+            (Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a)))
+            (Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a)))
+          have hinr :
+              bc.inr ≫
+                  Cofan.IsColimit.desc h (fun i ↦ by
+                    cases i
+                    · exact Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a))
+                    · exact Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a))) =
+                Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a)) := by
+            simpa [t, Cofan.IsColimit.desc, pair_obj_right, mk_pt, mk_ι_app,
+              BinaryCofan.ι_app_right, BinaryCofan.mk_inr] using h.fac t ⟨WalkingPair.right⟩
+          rw [hinr]
+          exact Cofan.IsColimit.fac h₂ (fun a ↦ s.inj (.inr a)) a)
     (fun s m hm ↦ Cofan.IsColimit.hom_ext h _ _ <| fun w ↦ by
       cases w
       · refine Cofan.IsColimit.hom_ext h₁ _ _ (fun a ↦ by aesop)
