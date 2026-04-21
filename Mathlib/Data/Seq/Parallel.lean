@@ -89,23 +89,40 @@ theorem terminates_parallel.aux :
     have H1 (l') (e' : parallel.aux2 l = Sum.inr l') : s ∈ l' := by
       induction l generalizing l' with | nil => simp at m | cons c l IH' => ?_
       simp only [List.mem_cons] at m
-      rcases m with e | m <;> simp only [parallel.aux2, rmap, List.foldr_cons] at e'
-      · rw [← e] at e'
-        -- Porting note: `revert e'` is required.
-        revert e'
-        split
-        · simp
-        · simp only [destruct_think, Sum.inr.injEq]
-          rintro rfl
+      rcases m with rfl | m
+      · rcases h : parallel.aux2 l with a | ls
+        · have : False := by
+            have hfold := h
+            simp only [parallel.aux2, rmap] at hfold
+            simp only [parallel.aux2, rmap, List.foldr_cons] at e'
+            simp [hfold] at e'
+          exact False.elim this
+        · have hl' : s :: ls = l' := by
+            have hfold := h
+            simp only [parallel.aux2, rmap] at hfold
+            simp only [parallel.aux2, rmap, List.foldr_cons] at e'
+            simpa [hfold, destruct_think, Sum.inr.injEq] using e'
+          rw [← hl']
           simp
-      · rcases e : List.foldr (fun c o =>
-            match o with
-            | Sum.inl a => Sum.inl a
-            | Sum.inr ls => rmap (fun c' => c' :: ls) (destruct c))
-          (Sum.inr List.nil) l with a' | ls <;> erw [e] at e'
-        · contradiction
-        have := IH' m _ e
-        grind
+      · rcases h : parallel.aux2 l with a | ls
+        · have : False := by
+            have hfold := h
+            simp only [parallel.aux2, rmap] at hfold
+            simp only [parallel.aux2, rmap, List.foldr_cons] at e'
+            simp [hfold] at e'
+          exact False.elim this
+        · have hs : s ∈ ls := IH' m _ h
+          have hfold := h
+          simp only [parallel.aux2, rmap] at hfold
+          simp only [parallel.aux2, rmap, List.foldr_cons] at e'
+          rcases hc : destruct c with a | c'
+          · have : False := by
+              simp [hfold, hc] at e'
+            exact False.elim this
+          · have hl' : c' :: ls = l' := by
+              simpa [hfold, hc, Sum.inr.injEq] using e'
+            rw [← hl']
+            exact List.mem_cons_of_mem _ hs
     rcases h : parallel.aux2 l with a | l'
     · exact lem1 _ _ ⟨a, h⟩
     · have H2 : corec parallel.aux1 (l, S) = think _ := destruct_eq_think (by
