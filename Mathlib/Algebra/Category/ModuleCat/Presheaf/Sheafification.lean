@@ -127,14 +127,48 @@ noncomputable def sheafificationAdjunction :
       homEquiv_naturality_left_symm := fun {P₀ Q₀ N} f g ↦ by
         apply (SheafOfModules.toSheaf _).map_injective
         rw [Functor.map_comp]
-        erw [toSheaf_map_sheafificationHomEquiv_symm,
-          toSheaf_map_sheafificationHomEquiv_symm α g]
-        rw [Functor.map_comp]
-        apply (CategoryTheory.sheafificationAdjunction J
-          AddCommGrpCat.{v}).homEquiv_naturality_left_symm
+        let f' : P₀.presheaf ⟶ Q₀.presheaf := (toPresheaf R₀).map f
+        let g' : Q₀.presheaf ⟶ (sheafToPresheaf J AddCommGrpCat).obj
+            ((SheafOfModules.toSheaf R).obj N) := (toPresheaf R₀).map g
+        calc
+          (SheafOfModules.toSheaf R).map ((sheafificationHomEquiv α).symm (f ≫ g))
+            = ((CategoryTheory.sheafificationAdjunction J AddCommGrpCat).homEquiv P₀.presheaf
+                ((SheafOfModules.toSheaf R).obj N)).symm ((toPresheaf R₀).map (f ≫ g)) :=
+              toSheaf_map_sheafificationHomEquiv_symm (α := α) (g := f ≫ g)
+          _ = (presheafToSheaf J AddCommGrpCat).map f' ≫
+                ((CategoryTheory.sheafificationAdjunction J AddCommGrpCat).homEquiv
+                  Q₀.presheaf ((SheafOfModules.toSheaf R).obj N)).symm g' :=
+              by
+                exact Adjunction.homEquiv_naturality_left_symm
+                  (CategoryTheory.sheafificationAdjunction J AddCommGrpCat.{v}) f' g'
+          _ = (SheafOfModules.toSheaf R).map ((sheafification α).map f) ≫
+                ((CategoryTheory.sheafificationAdjunction J AddCommGrpCat).homEquiv
+                  Q₀.presheaf ((SheafOfModules.toSheaf R).obj N)).symm g' := by
+              rfl
+          _ = (SheafOfModules.toSheaf R).map ((sheafification α).map f) ≫
+                (SheafOfModules.toSheaf R).map ((sheafificationHomEquiv α).symm g) := by
+              exact congrArg ((SheafOfModules.toSheaf R).map ((sheafification α).map f) ≫ ·)
+                (toSheaf_map_sheafificationHomEquiv_symm (α := α) (g := g)).symm
       homEquiv_naturality_right := fun {P₀ M N} f g ↦ by
         apply (toPresheaf _).map_injective
-        erw [toPresheaf_map_sheafificationHomEquiv] }
+        calc
+          (toPresheaf R₀).map ((sheafificationHomEquiv α) (f ≫ g))
+            = ((CategoryTheory.sheafificationAdjunction J AddCommGrpCat).homEquiv P₀.presheaf
+                ((SheafOfModules.toSheaf R).obj N)) ((SheafOfModules.toSheaf R).map (f ≫ g)) :=
+              toPresheaf_map_sheafificationHomEquiv (α := α) (f := f ≫ g)
+          _ = ((CategoryTheory.sheafificationAdjunction J AddCommGrpCat).homEquiv P₀.presheaf
+                ((SheafOfModules.toSheaf R).obj M)) ((SheafOfModules.toSheaf R).map f) ≫
+              (sheafToPresheaf J AddCommGrpCat).map ((SheafOfModules.toSheaf R).map g) :=
+              by
+                exact Adjunction.homEquiv_naturality_right
+                  (CategoryTheory.sheafificationAdjunction J AddCommGrpCat.{v})
+                  ((SheafOfModules.toSheaf R).map f) ((SheafOfModules.toSheaf R).map g)
+          _ = (toPresheaf R₀).map ((sheafificationHomEquiv α) f) ≫
+                (sheafToPresheaf J AddCommGrpCat).map ((SheafOfModules.toSheaf R).map g) := by
+              rfl
+          _ = (toPresheaf R₀).map ((sheafificationHomEquiv α) f) ≫
+                (toPresheaf R₀).map ((SheafOfModules.forget R ⋙ restrictScalars α).map g) := by
+              rfl }
 
 lemma sheafificationAdjunction_homEquiv_apply {P : PresheafOfModules.{v} R₀}
     {F : SheafOfModules.{v} R} (f : (sheafification α).obj P ⟶ F) :
