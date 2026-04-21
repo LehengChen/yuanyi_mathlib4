@@ -139,7 +139,6 @@ theorem Hσ_eq_zero (q : ℕ) : (Hσ q : K[X] ⟶ K[X]).f 0 = 0 := by
     rw [AlternatingFaceMapComplex.obj_d_eq]
     rw [Fin.sum_univ_two, Fin.val_zero, Fin.val_one, pow_zero, pow_one, one_smul, neg_smul,
       one_smul, comp_add, comp_neg, add_neg_eq_zero,
-      pow_one, one_smul, neg_smul, one_smul, comp_add, comp_neg, add_neg_eq_zero,
       ← Fin.succ_zero_eq_one, δ_comp_σ_succ, δ_comp_σ_self' X (by rw [Fin.castSucc_zero'])]
   · rw [hσ'_eq_zero (Nat.succ_pos q) (c_mk 1 0 rfl), zero_comp]
 

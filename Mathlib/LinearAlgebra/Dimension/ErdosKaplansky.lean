@@ -126,7 +126,6 @@ theorem lift_rank_lt_rank_dual' {V : Type v} [AddCommGroup V] [Module K V]
       ← (b.constr ℕ (M' := K)).toEquiv.cardinal_eq, mk_arrow]
   apply cantor'
   exact one_lt_iff_nontrivial.2 inferInstance
-  infer_instance
 
 theorem lift_rank_lt_rank_dual {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
     (h : ℵ₀ ≤ Module.rank K V) :

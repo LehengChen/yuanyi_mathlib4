@@ -50,11 +50,9 @@ def homObjEquiv (F G A : C ⥤ Type w) : (HomObj F G A) ≃ (F ⊗ A ⟶ G) wher
   toFun a := ⟨fun X ⟨x, y⟩ ↦ a.app X y x, fun X Y f ↦ by
     ext ⟨x, y⟩
     simpa using congr_fun (a.naturality f y) x ⟩
-    rfl ⟩
   invFun a := ⟨fun X y x ↦ a.app X (x, y), fun φ y ↦ by
     ext x
     simpa using congr_fun (a.naturality φ) (x, y) ⟩
-    rfl ⟩
   left_inv _ := by aesop
   right_inv _ := by aesop
 

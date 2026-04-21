@@ -55,7 +55,6 @@ of orbits of the action of `Rˣ`, or equivalently that there is some unit `u` of
 lemmas `smul_fin3` and `smul_fin3_ext` can be used to convert between the two forms. Local explicit
 rewrites and extensionality arguments are often enough to bridge these syntactic differences, though
 some additional automation could simplify this further.
-cause any issues. It would alternatively be possible to add some automation to assist here.
 
 Whenever possible, all changes to documentation and naming of definitions and theorems should be
 mirrored in `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Basic.lean`.

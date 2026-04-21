@@ -51,7 +51,6 @@ def neg (hr : ∀ ⦃X Y : C⦄ (f₁ f₂ g₁ g₂ : X ⟶ Y) (_ : r f₁ f₂
       simp only [HomRel.compClosure_iff_self] at hfg
       exact Quotient.sound (r := r) <| Congruence.equivalence.symm <| by
         convert hr f g _ _ hfg (Congruence.equivalence.refl (-f - g)) using 1 <;> abel)
-      convert hr f g _ _ hfg (Congruence.equivalence.refl (-f - g)) using 1 <;> abel)
 
 end Preadditive
 

@@ -185,8 +185,6 @@ noncomputable def rTensorAlgEquiv :
     exact finsuppLeft_symm_apply_single (R := R) (0 : σ →₀ ℕ) (1 : S) (1 : N)
   · intro x y
     simpa [rTensorAlgHom_apply_eq] using (map_mul rTensorAlgHom x y)
-    simp only [map_mul, rTensorAlgHom_apply_eq]
-    rfl
 
 @[simp]
 lemma rTensorAlgEquiv_apply (x : (MvPolynomial σ S) ⊗[R] N) :

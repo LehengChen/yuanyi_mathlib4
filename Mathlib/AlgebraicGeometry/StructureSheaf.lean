@@ -843,7 +843,6 @@ def commRingCatStalkEquivModuleStalk (x : PrimeSpectrum.Top R) :
     congr 1
     · dsimp [toStalk]
       simpa [toStalk] using algebraMap_germ_apply (R := R) U x hxU r
-      rfl
     · exact congr($this _).symm
 
 public instance (x : PrimeSpectrum.Top R) :

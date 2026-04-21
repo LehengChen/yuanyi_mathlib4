@@ -570,8 +570,6 @@ lemma _root_.AlgHom.liftOfSurjective_apply (f : A →ₐ[R] B) (hf : Function.Su
     rfl
   dsimp [AlgHom.liftOfSurjective]
   convert hx using 1
-  rw [Ideal.quotientKerAlgEquivOfSurjective_symm_apply]
-  rfl
 
 lemma _root_.AlgHom.liftOfSurjective_comp (f : A →ₐ[R] B) (hf : Function.Surjective f)
     (g : A →ₐ[R] C) (H : RingHom.ker f.toRingHom ≤ RingHom.ker g.toRingHom) :

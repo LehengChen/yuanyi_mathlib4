@@ -251,7 +251,6 @@ noncomputable def adj : completionFunctor ⊣ forget₂ CpltSepUniformSpace Unif
         ext x
         dsimp [-Function.comp_apply]
         simpa using congrFun (Completion.extension_map (γ := Y) g.hom.2 f.hom.2).symm x }
-        rfl }
 
 noncomputable instance : Reflective (forget₂ CpltSepUniformSpace UniformSpaceCat) where
   L := completionFunctor

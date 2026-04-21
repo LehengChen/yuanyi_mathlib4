@@ -121,7 +121,6 @@ instance isThin {X : C} : Quiver.IsThin (MonoOver X) := fun f g =>
     apply Over.OverMorphism.ext
     rw [← cancel_mono g.arrow]
     simpa using (Over.w h₁.hom).trans (Over.w h₂.hom).symm⟩
-    erw [Over.w h₂.hom]⟩
 
 @[reassoc]
 theorem w {f g : MonoOver X} (k : f ⟶ g) : k.hom.left ≫ g.arrow = f.arrow :=

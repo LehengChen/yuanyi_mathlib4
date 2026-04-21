@@ -231,7 +231,6 @@ instance mono_r {A : C} : Mono (r A) := by
   rw [KernelFork.ι_ofι] at hy
   have hyy : y = 0 := by
     simpa [Limits.prod.lift_snd] using congrArg (fun k => k ≫ Limits.prod.snd) hy
-      Category.assoc, prod.lift_snd, HasZeroMorphisms.comp_zero]
   haveI : Mono (prod.lift (𝟙 A) (0 : A ⟶ A)) := mono_of_mono_fac (prod.lift_fst _ _)
   apply (cancel_mono (prod.lift (𝟙 A) (0 : A ⟶ A))).1
   rw [← hy, hyy, zero_comp, zero_comp]

@@ -302,7 +302,6 @@ set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 theorem ι_gluedIso_hom (i : D.J) : F.map (D.ι i) ≫ (D.gluedIso F).hom = (D.mapGlueData F).ι i := by
   simp [GlueData.ι, gluedIso]
-  simp [GlueData.ι]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]

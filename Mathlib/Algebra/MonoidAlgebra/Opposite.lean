@@ -34,7 +34,6 @@ protected noncomputable def opRingEquiv : R[M]ᵐᵒᵖ ≃+* Rᵐᵒᵖ[Mᵐᵒ
       (Finsupp.mapRange.addEquiv (opAddEquiv : R ≃+ Rᵐᵒᵖ)).trans <| Finsupp.domCongr opEquiv
   map_mul' := by
     rw [Equiv.toFun_as_coe, AddEquiv.toEquiv_eq_coe, AddEquiv.coe_toEquiv]
-    rw [Equiv.toFun_as_coe, AddEquiv.toEquiv_eq_coe]; erw [AddEquiv.coe_toEquiv]
     rw [← AddEquiv.coe_toAddMonoidHom]
     refine (AddMonoidHom.map_mul_iff (R := R[M]ᵐᵒᵖ) (S := Rᵐᵒᵖ[Mᵐᵒᵖ]) _).mpr ?_
     ext m₂ r₂ m₁ r₁ m
