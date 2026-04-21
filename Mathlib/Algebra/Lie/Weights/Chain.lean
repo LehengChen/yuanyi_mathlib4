@@ -233,12 +233,24 @@ lemma exists_forall_mem_corootSpace_smul_add_eq_zero
     simp_rw [N, genWeightSpaceChain_def', LieSubmodule.iSup_toSubmodule]
   rw [← trace_toEnd_genWeightSpaceChain_eq_zero M α χ p q hp hq hx,
     ← LieSubmodule.toEnd_restrict_eq_toEnd]
-  -- The lines below illustrate the cost of treating `LieSubmodule` as both a
-  -- `Submodule` and a `LieSubmodule` simultaneously.
-  #adaptation_note /-- 2025-06-18 (https://github.com/leanprover/lean4/issues/8804).
-    The `erw` causes a kernel timeout if there is no `subst`. -/
   subst a b N
-  erw [LinearMap.trace_eq_sum_trace_restrict_of_eq_biSup _ h₁ h₂ (genWeightSpaceChain M α χ p q) h₃]
+  have htrace :
+      (LinearMap.trace R ↥(genWeightSpaceChain M α χ p q))
+        (LinearMap.restrict ((toEnd R H M) x)
+          (by
+            simpa [h₃] using
+              LinearMap.mapsTo_biSup_of_mapsTo (R := R) (M := M)
+                (N := fun k : ℤ ↦ genWeightSpace M (k • α + χ))
+                (s := (Finset.Ioo p q : Set ℤ)) h₂)) =
+      ∑ i ∈ Finset.Ioo p q,
+        (LinearMap.trace R ↥(genWeightSpace M (i • α + χ)))
+          (LinearMap.restrict ((toEnd R H M) x) (h₂ i)) := by
+    exact
+      (LinearMap.trace_eq_sum_trace_restrict_of_eq_biSup
+        (R := R) (M := M) (N := fun k : ℤ ↦ genWeightSpace M (k • α + χ))
+        (s := Finset.Ioo p q) (h := h₁) (f := toEnd R H M x) (hf := h₂)
+        (p := ((genWeightSpaceChain M α χ p q : LieSubmodule R H M) : Submodule R M)) h₃)
+  rw [htrace]
   simp_rw [LieSubmodule.toEnd_restrict_eq_toEnd]
   convert_to _ =
     ∑ k ∈ Finset.Ioo p q, (LinearMap.trace R { x // x ∈ (genWeightSpace M (k • α + χ)) })
