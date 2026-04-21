@@ -152,11 +152,11 @@ theorem leftDistributor_hom {J : Type} [Fintype J] (X : C) (f : J → C) :
     (leftDistributor X f).hom =
       ∑ j : J, (X ◁ biproduct.π f j) ≫ biproduct.ι (fun j => X ⊗ f j) j := by
   classical
-  ext
+  refine biproduct.hom_ext _ _ fun j => ?_
   dsimp [leftDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
-  simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
-    Finset.sum_dite_eq', Finset.mem_univ, ite_true, eqToHom_refl, Category.comp_id]
+  simpa only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
+    Finset.sum_dite_eq', Finset.mem_univ, ite_true, eqToHom_refl, Category.comp_id] using
+    (biproduct.lift_π (p := fun k => X ◁ biproduct.π f k) j)
 
 set_option backward.isDefEq.respectTransparency false in
 theorem leftDistributor_inv {J : Type} [Fintype J] (X : C) (f : J → C) :
@@ -221,11 +221,11 @@ theorem rightDistributor_hom {J : Type} [Fintype J] (f : J → C) (X : C) :
     (rightDistributor f X).hom =
       ∑ j : J, (biproduct.π f j ▷ X) ≫ biproduct.ι (fun j => f j ⊗ X) j := by
   classical
-  ext
+  refine biproduct.hom_ext _ _ fun j => ?_
   dsimp [rightDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
-  simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
-    Finset.sum_dite_eq', Finset.mem_univ, eqToHom_refl, Category.comp_id, ite_true]
+  simpa only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
+    Finset.sum_dite_eq', Finset.mem_univ, eqToHom_refl, Category.comp_id, ite_true] using
+    (biproduct.lift_π (p := fun k => biproduct.π f k ▷ X) j)
 
 set_option backward.isDefEq.respectTransparency false in
 theorem rightDistributor_inv {J : Type} [Fintype J] (f : J → C) (X : C) :
