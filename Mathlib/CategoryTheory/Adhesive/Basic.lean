@@ -185,7 +185,10 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
     dsimp
     refine ⟨h.desc (BinaryCofan.mk (c.inr ≫ s.inr) s.inl), h.fac _ ⟨WalkingPair.right⟩, ?_, ?_⟩
     · apply BinaryCofan.IsColimit.hom_ext hc
-      · rw [← H.w_assoc]; erw [h.fac _ ⟨WalkingPair.right⟩]; exact s.condition
+      · have hy : iY ≫ h.desc (BinaryCofan.mk (c.inr ≫ s.inr) s.inl) = s.inl := by
+          simpa using h.fac (BinaryCofan.mk (c.inr ≫ s.inr) s.inl) ⟨WalkingPair.right⟩
+        rw [← H.w_assoc, hy]
+        exact s.condition
       · rw [← Category.assoc]; exact h.fac _ ⟨WalkingPair.left⟩
     · intro m e₁ e₂
       apply BinaryCofan.IsColimit.hom_ext h
@@ -197,20 +200,44 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
     · exact fun s => H.isColimit.desc (PushoutCocone.mk s.inr _ <|
         (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm)
     · intro s
-      rw [Category.assoc]
-      erw [H.isColimit.fac _ WalkingSpan.right]
-      erw [hc.fac]
-      rfl
+      have hright :
+          fE ≫
+              H.isColimit.desc
+                (PushoutCocone.mk s.inr _ <|
+                  (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm) =
+            hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl) := by
+        simpa using
+          H.isColimit.fac
+            (PushoutCocone.mk s.inr _ <|
+              (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm)
+            WalkingSpan.right
+      have hcinr :
+          c.inr ≫ hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl) = s.inl := by
+        exact hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.right⟩
+      rw [Category.assoc, hright, hcinr]
     · intro s; exact H.isColimit.fac _ WalkingSpan.left
     · intro s m e₁ e₂
       apply PushoutCocone.IsColimit.hom_ext H.isColimit
       · symm; exact (H.isColimit.fac _ WalkingSpan.left).trans e₂.symm
       · rw [H.isColimit.fac _ WalkingSpan.right]
         apply BinaryCofan.IsColimit.hom_ext hc
-        · erw [hc.fac]
-          erw [← H.w_assoc]
-          rw [e₂]
-          rfl
+        · have hcinl :
+              c.inl ≫
+                  (PushoutCocone.mk s.inr (hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl)) <|
+                    (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm).ι.app
+                    WalkingSpan.right =
+                f ≫ s.inr := by
+            rw [PushoutCocone.ι_app_right]
+            exact hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩
+          calc
+            c.inl ≫ H.cocone.inr ≫ m = f ≫ iY ≫ m := by
+              simpa using (H.w_assoc m).symm
+            _ = f ≫ s.inr := by rw [e₂]
+            _ = c.inl ≫
+                  (PushoutCocone.mk s.inr (hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl)) <|
+                    (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm).ι.app
+                    WalkingSpan.right := by
+              exact hcinl.symm
         · refine ((Category.assoc _ _ _).symm.trans e₁).trans ?_; symm; exact hc.fac _ _
 
 set_option backward.isDefEq.respectTransparency false in
