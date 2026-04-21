@@ -285,7 +285,7 @@ This is def-eq to `(SubmersivePresentation.localizationAway T g).basisCotangent`
   (Generators.localizationAway T g).toExtension
 ```
 is not reducibly def-eq. Hence using the general `SubmersivePresentation.basisCotangent` leads
-to `erw` hell.
+to painful rewriting.
 -/
 noncomputable
 def Generators.basisCotangentAway (r : R) [IsLocalization.Away r S] :
