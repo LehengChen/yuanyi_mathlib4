@@ -74,19 +74,64 @@ noncomputable def colimitPresheafOfModules : PresheafOfModules R where
   map_id X := colimit.hom_ext (fun j => by
     dsimp
     rw [ι_colimMap_assoc, Functor.whiskerLeft_app, restriction_app]
-    -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (𝟙 X)).hom)]
+    rw [show
+      colimit.ι (F ⋙ evaluation R X ⋙ ModuleCat.restrictScalars (R.map (𝟙 X)).hom) j ≫
+          (preservesColimitIso (ModuleCat.restrictScalars (R.map (𝟙 X)).hom)
+            (F ⋙ evaluation R X)).inv =
+        (ModuleCat.restrictScalars (R.map (𝟙 X)).hom).map (colimit.ι (F ⋙ evaluation R X) j) from
+      ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (𝟙 X)).hom)
+        (F := F ⋙ evaluation R X) j]
     rw [ModuleCat.restrictScalarsId'App_inv_naturality, map_id]
     dsimp)
   map_comp {X Y Z} f g := colimit.hom_ext (fun j => by
     dsimp
     rw [ι_colimMap_assoc, Functor.whiskerLeft_app, restriction_app, assoc, ι_colimMap_assoc]
-    -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (f ≫ g)).hom),
-      ι_preservesColimitIso_inv_assoc (G := ModuleCat.restrictScalars (R.map f).hom)]
+    have hcomp : (R.map (f ≫ g)).hom = (R.map g).hom.comp (R.map f).hom := by
+      exact congrArg RingCat.Hom.hom (R.map_comp f g)
+    have hfg :
+        colimit.ι (F ⋙ evaluation R Z ⋙ ModuleCat.restrictScalars (R.map (f ≫ g)).hom) j ≫
+            (preservesColimitIso (ModuleCat.restrictScalars (R.map (f ≫ g)).hom)
+              (F ⋙ evaluation R Z)).inv =
+          (ModuleCat.restrictScalars (R.map (f ≫ g)).hom).map
+            (colimit.ι (F ⋙ evaluation R Z) j) :=
+      ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (f ≫ g)).hom)
+        (F := F ⋙ evaluation R Z) j
+    have hf :
+        colimit.ι (F ⋙ evaluation R Y ⋙ ModuleCat.restrictScalars (R.map f).hom) j ≫
+            (preservesColimitIso (ModuleCat.restrictScalars (R.map f).hom)
+              (F ⋙ evaluation R Y)).inv ≫
+              (ModuleCat.restrictScalars (R.map f).hom).map
+                (colimMap (F.whiskerLeft (restriction R g)) ≫
+                  (preservesColimitIso (ModuleCat.restrictScalars (R.map g).hom)
+                    (F ⋙ evaluation R Z)).inv) ≫
+            (ModuleCat.restrictScalarsComp'App (R.map f).hom (R.map g).hom
+              (R.map (f ≫ g)).hom hcomp (colimit (F ⋙ evaluation R Z))).inv =
+          (ModuleCat.restrictScalars (R.map f).hom).map
+              (colimit.ι (F ⋙ evaluation R Y) j) ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map
+                (colimMap (F.whiskerLeft (restriction R g)) ≫
+                  (preservesColimitIso (ModuleCat.restrictScalars (R.map g).hom)
+                    (F ⋙ evaluation R Z)).inv) ≫
+              (ModuleCat.restrictScalarsComp'App (R.map f).hom (R.map g).hom
+                (R.map (f ≫ g)).hom hcomp (colimit (F ⋙ evaluation R Z))).inv :=
+      ι_preservesColimitIso_inv_assoc (G := ModuleCat.restrictScalars (R.map f).hom)
+        (F := F ⋙ evaluation R Y) j
+          ((ModuleCat.restrictScalars (R.map f).hom).map
+              (colimMap (F.whiskerLeft (restriction R g)) ≫
+                (preservesColimitIso (ModuleCat.restrictScalars (R.map g).hom)
+                  (F ⋙ evaluation R Z)).inv) ≫
+            (ModuleCat.restrictScalarsComp'App (R.map f).hom (R.map g).hom
+              (R.map (f ≫ g)).hom hcomp (colimit (F ⋙ evaluation R Z))).inv)
+    rw [hfg, hf]
     rw [← Functor.map_comp_assoc, ι_colimMap_assoc]
-    erw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map g).hom)]
-    rw [map_comp, ModuleCat.restrictScalarsComp'_inv_app, assoc, assoc,
+    rw [show
+      colimit.ι (F ⋙ evaluation R Z ⋙ ModuleCat.restrictScalars (R.map g).hom) j ≫
+          (preservesColimitIso (ModuleCat.restrictScalars (R.map g).hom)
+            (F ⋙ evaluation R Z)).inv =
+        (ModuleCat.restrictScalars (R.map g).hom).map (colimit.ι (F ⋙ evaluation R Z) j) from
+      ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map g).hom)
+        (F := F ⋙ evaluation R Z) j]
+    rw [map_comp, ModuleCat.restrictScalarsComp'_inv_app (hgf := hcomp), assoc, assoc,
       Functor.whiskerLeft_app, Functor.whiskerLeft_app, restriction_app, restriction_app]
     simp only [Functor.map_comp, assoc]
     rfl)
@@ -101,8 +146,32 @@ noncomputable def colimitCocone : Cocone F where
         { app := fun X ↦ colimit.ι (F ⋙ evaluation R X) j
           naturality := fun {X Y} f ↦ by
             dsimp
-            erw [colimit.ι_desc_assoc, assoc, ← ι_preservesColimitIso_inv]
-            rfl }
+            have hι :
+                colimit.ι (F ⋙ evaluation R Y ⋙ ModuleCat.restrictScalars (R.map f).hom) j ≫
+                    (preservesColimitIso (ModuleCat.restrictScalars (R.map f).hom)
+                      (F ⋙ evaluation R Y)).inv =
+                  (ModuleCat.restrictScalars (R.map f).hom).map
+                    (colimit.ι (F ⋙ evaluation R Y) j) :=
+              ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map f).hom)
+                (F := F ⋙ evaluation R Y) j
+            calc
+              (F.obj j).map f ≫ (ModuleCat.restrictScalars (R.map f).hom).map
+                  (colimit.ι (F ⋙ evaluation R Y) j) =
+                  (F.obj j).map f ≫
+                    colimit.ι (F ⋙ evaluation R Y ⋙ ModuleCat.restrictScalars (R.map f).hom) j ≫
+                      (preservesColimitIso (ModuleCat.restrictScalars (R.map f).hom)
+                        (F ⋙ evaluation R Y)).inv := by
+                    simpa [assoc] using congrArg (fun k ↦ (F.obj j).map f ≫ k) hι.symm
+              _ =
+                  colimit.ι (F ⋙ evaluation R X) j ≫
+                    colimMap (F.whiskerLeft (restriction R f)) ≫
+                      (preservesColimitIso (ModuleCat.restrictScalars (R.map f).hom)
+                        (F ⋙ evaluation R Y)).inv := by
+                    simpa [assoc] using
+                      congrArg (fun k ↦
+                        k ≫ (preservesColimitIso (ModuleCat.restrictScalars (R.map f).hom)
+                          (F ⋙ evaluation R Y)).inv)
+                        ((ι_colimMap (α := F.whiskerLeft (restriction R f)) (j := j)).symm) }
       naturality := fun {X Y} f ↦ by
         ext1 X
         simpa using colimit.w (F ⋙ evaluation R X) f }
