@@ -80,7 +80,15 @@ noncomputable def limitPresheafOfModules : PresheafOfModules R where
     simp only [limMap_π, Functor.comp_obj, evaluation_obj, Functor.whiskerLeft_app,
       restriction_app, assoc]
     -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [preservesLimitIso_hom_π]
+    have h :
+        (preservesLimitIso (ModuleCat.restrictScalars (RingCat.Hom.hom (R.map (𝟙 X))))
+            (F ⋙ evaluation R X)).hom ≫
+          limit.π (F ⋙ evaluation R X ⋙
+            ModuleCat.restrictScalars (RingCat.Hom.hom (R.map (𝟙 X)))) j =
+            (ModuleCat.restrictScalars (RingCat.Hom.hom (R.map (𝟙 X)))).map
+              (limit.π (F ⋙ evaluation R X) j) :=
+      preservesLimitIso_hom_π _ _ _
+    rw [h]
     rw [← ModuleCat.restrictScalarsId'App_inv_naturality, map_id,
       ModuleCat.restrictScalarsId'_inv_app]
     dsimp
@@ -93,17 +101,38 @@ noncomputable def limitPresheafOfModules : PresheafOfModules R where
     simp only [Functor.comp_obj, evaluation_obj, limMap_π, Functor.whiskerLeft_app, restriction_app,
       map_comp, ModuleCat.restrictScalarsComp'_inv_app, Functor.map_comp, assoc]
     -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [preservesLimitIso_hom_π]
+    have h :
+        (preservesLimitIso (ModuleCat.restrictScalars (RingCat.Hom.hom (R.map (f ≫ g))))
+            (F ⋙ evaluation R Z)).hom ≫
+          limit.π (F ⋙ evaluation R Z ⋙
+            ModuleCat.restrictScalars (RingCat.Hom.hom (R.map (f ≫ g)))) j =
+            (ModuleCat.restrictScalars (RingCat.Hom.hom (R.map (f ≫ g)))).map
+              (limit.π (F ⋙ evaluation R Z) j) :=
+      preservesLimitIso_hom_π _ _ _
+    rw [h]
     rw [← ModuleCat.restrictScalarsComp'App_inv_naturality]
     dsimp
     rw [← Functor.map_comp_assoc, ← Functor.map_comp_assoc, assoc,
       preservesLimitIso_inv_π]
     -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [limMap_π]
+    have h' :
+        limMap (F.whiskerLeft (restriction R g)) ≫
+          limit.π ((F ⋙ evaluation R Z) ⋙
+            ModuleCat.restrictScalars (RingCat.Hom.hom (R.map g))) j =
+            limit.π (F ⋙ evaluation R Y) j ≫ (F.whiskerLeft (restriction R g)).app j :=
+      limMap_π _ _
+    rw [h']
     dsimp
     simp only [Functor.map_comp, assoc, preservesLimitIso_inv_π_assoc]
     -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [limMap_π_assoc]
+    have h'' :
+        limMap (F.whiskerLeft (restriction R f)) ≫
+          limit.π ((F ⋙ evaluation R Y) ⋙
+            ModuleCat.restrictScalars (RingCat.Hom.hom (R.map f))) j =
+            limit.π (F ⋙ evaluation R X) j ≫ (F.whiskerLeft (restriction R f)).app j :=
+      limMap_π _ _
+    conv_rhs =>
+      rw [← assoc, h'', assoc]
     dsimp
 
 set_option backward.isDefEq.respectTransparency false in
