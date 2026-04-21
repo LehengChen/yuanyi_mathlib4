@@ -282,8 +282,9 @@ def coconesIsoComponentInv {J : Type u} [Category.{v} J] {K : J ⥤ C} (Y : D)
     (t : (G ⋙ (cocones J C).obj (op K)).obj Y) : ((cocones J D).obj (op (K ⋙ F))).obj Y where
   app j := (adj.homEquiv (K.obj j) Y).symm (t.app j)
   naturality j j' f := by
-    erw [← adj.homEquiv_naturality_left_symm, ← adj.homEquiv_naturality_right_symm, t.naturality]
-    simp
+    simpa using
+      (adj.homEquiv_naturality_right_square (f := K.map f) (g := t.app j') (h := t.app j)
+        (k := ((const J).obj Y).map f) (w := by simpa using t.naturality f))
 
 /-- auxiliary construction for `conesIso` -/
 @[simp]
@@ -291,8 +292,10 @@ def conesIsoComponentHom {J : Type u} [Category.{v} J] {K : J ⥤ D} (X : Cᵒ�
     (t : (Functor.op F ⋙ (cones J D).obj K).obj X) : ((cones J C).obj (K ⋙ G)).obj X where
   app j := (adj.homEquiv (unop X) (K.obj j)) (t.app j)
   naturality j j' f := by
-    erw [← adj.homEquiv_naturality_right, ← t.naturality, Category.id_comp, Category.id_comp]
-    rfl
+    simpa using
+      (adj.homEquiv_naturality_left_square
+        (f := (unop ((const J).op.obj X)).map f) (g := t.app j') (h := t.app j)
+        (k := K.map f) (w := by simpa using t.naturality f))
 
 /-- auxiliary construction for `conesIso` -/
 @[simp]
@@ -300,7 +303,10 @@ def conesIsoComponentInv {J : Type u} [Category.{v} J] {K : J ⥤ D} (X : Cᵒ�
     (t : ((cones J C).obj (K ⋙ G)).obj X) : (Functor.op F ⋙ (cones J D).obj K).obj X where
   app j := (adj.homEquiv (unop X) (K.obj j)).symm (t.app j)
   naturality j j' f := by
-    erw [← adj.homEquiv_naturality_right_symm, ← t.naturality, Category.id_comp, Category.id_comp]
+    simpa using
+      (adj.homEquiv_naturality_right_square
+        (f := (unop ((const J).op.obj X)).map f) (g := t.app j') (h := t.app j)
+        (k := K.map f) (w := by simpa using t.naturality f))
 
 end ArbitraryUniverse
 
