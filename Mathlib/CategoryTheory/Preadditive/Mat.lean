@@ -195,7 +195,7 @@ instance hasFiniteBiproducts : HasFiniteBiproducts (Mat_ C) where
               simp_rw [dite_comp, comp_dite]
               simp only [ite_self, dite_eq_ite, Limits.comp_zero, Limits.zero_comp,
                 eqToHom_trans]
-              erw [Finset.sum_sigma]
+              rw [← Finset.univ_sigma_univ, Finset.sum_sigma]
               dsimp +instances
               simp only [if_true, Finset.sum_dite_irrel, Finset.mem_univ,
                 Finset.sum_const_zero, Finset.sum_dite_eq']
@@ -358,10 +358,9 @@ def additiveObjIsoBiproduct (F : Mat_ C ⥤ D) [Functor.Additive F] (M : Mat_ C)
 lemma additiveObjIsoBiproduct_hom_π (F : Mat_ C ⥤ D) [Functor.Additive F] (M : Mat_ C) (i : M.ι) :
     (additiveObjIsoBiproduct F M).hom ≫ biproduct.π _ i =
       F.map (M.isoBiproductEmbedding.hom ≫ biproduct.π _ i) := by
-  dsimp [additiveObjIsoBiproduct]
-  rw [biproduct.lift_π, Category.assoc]
-  erw [biproduct.lift_π, ← F.map_comp]
-  simp
+  dsimp only [additiveObjIsoBiproduct, Iso.trans_hom, Functor.mapIso_hom,
+    Functor.mapBiproduct_hom]
+  rw [Category.assoc, biproduct.lift_π, ← F.map_comp]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
