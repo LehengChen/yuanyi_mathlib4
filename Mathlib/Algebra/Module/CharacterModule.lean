@@ -200,16 +200,41 @@ noncomputable def ofSpanSingleton (a : A) : CharacterModule (ℤ ∙ a) :=
 
 lemma eq_zero_of_ofSpanSingleton_apply_self (a : A)
     (h : ofSpanSingleton a ⟨a, Submodule.mem_span_singleton_self a⟩ = 0) : a = 0 := by
-  erw [ofSpanSingleton, LinearMap.toAddMonoidHom_coe, LinearMap.comp_apply,
-     intSpanEquivQuotAddOrderOf_apply_self, Submodule.liftQSpanSingleton_apply,
-    AddMonoidHom.coe_toIntLinearMap, int.divByNat, LinearMap.toSpanSingleton_apply_one,
-    AddCircle.coe_eq_zero_iff] at h
-  rcases h with ⟨n, hn⟩
-  apply_fun Rat.den at hn
-  rw [zsmul_one, Rat.den_intCast, Rat.inv_natCast_den_of_pos] at hn
-  · split_ifs at hn
-    · cases hn
-    · rwa [eq_comm, AddMonoid.addOrderOf_eq_one_iff] at hn
+  let n := if addOrderOf a = 0 then 2 else addOrderOf a
+  have hker : (AddMonoidHom.toIntLinearMap (CharacterModule.int.divByNat n))
+      (↑(addOrderOf a)) = 0 := by
+    dsimp [n]
+    split_ifs with h
+    · simp [h]
+    · exact CharacterModule.int.divByNat_self _
+  have hlift :
+      (Submodule.liftQSpanSingleton (↑(addOrderOf a))
+        (AddMonoidHom.toIntLinearMap (CharacterModule.int.divByNat n)) hker)
+        ((intSpanEquivQuotAddOrderOf a) ⟨a, Submodule.mem_span_singleton_self a⟩) = 0 := by
+    simpa [ofSpanSingleton, n, LinearMap.toAddMonoidHom_coe, hker] using h
+  rw [intSpanEquivQuotAddOrderOf_apply_self] at hlift
+  have hq :
+      (Submodule.liftQSpanSingleton (↑(addOrderOf a))
+        (AddMonoidHom.toIntLinearMap (CharacterModule.int.divByNat n)) hker)
+        (Submodule.Quotient.mk 1) = CharacterModule.int.divByNat n 1 := by
+    rfl
+  have hdiv : CharacterModule.int.divByNat n 1 = 0 := hq.symm.trans hlift
+  rw [int.divByNat] at hdiv
+  have hone :
+      (LinearMap.toSpanSingleton ℤ (ℚ ⧸ AddSubgroup.zmultiples 1)
+        (((n : ℚ)⁻¹ : ℚ) : AddCircle (1 : ℚ))).toAddMonoidHom 1 =
+      (((n : ℚ)⁻¹ : ℚ) : AddCircle (1 : ℚ)) := by
+    rw [LinearMap.toAddMonoidHom_coe]
+    exact LinearMap.toSpanSingleton_apply_one _ _ _
+  have hzero : (((n : ℚ)⁻¹ : ℚ) : AddCircle (1 : ℚ)) = 0 := hone.symm.trans hdiv
+  rw [AddCircle.coe_eq_zero_iff] at hzero
+  rcases hzero with ⟨m, hm⟩
+  apply_fun Rat.den at hm
+  rw [zsmul_one, Rat.den_intCast, Rat.inv_natCast_den_of_pos] at hm
+  · dsimp [n] at hm
+    split_ifs at hm
+    · cases hm
+    · rwa [eq_comm, AddMonoid.addOrderOf_eq_one_iff] at hm
   · grind
 
 lemma exists_character_apply_ne_zero_of_ne_zero {a : A} (ne_zero : a ≠ 0) :
