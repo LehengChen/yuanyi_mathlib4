@@ -265,9 +265,41 @@ noncomputable def Scheme.Modules.fromTildeΓNatTrans :
       moduleSpecΓFunctor, Sheaf.forget]
     simp only [← ModuleCat.hom_comp, Functor.map_comp]
     congr 1
-    erw [tilde.toOpen_map_app_assoc, toOpen_fromTildeΓ_app N (PrimeSpectrum.basicOpen r.unop),
-      toOpen_fromTildeΓ_app_assoc M (PrimeSpectrum.basicOpen r.unop),
-      ← (modulesSpecToSheaf.map f).hom.naturality]
+    let U := PrimeSpectrum.basicOpen (R := R) r.unop
+    have h₁ :
+        tilde.toOpen ((modulesSpecToSheaf.obj M).presheaf.obj (.op ⊤)) U ≫
+          (modulesSpecToSheaf.map
+              (tilde.map ((modulesSpecToSheaf.map f).hom.app (.op ⊤))) ≫
+                modulesSpecToSheaf.map N.fromTildeΓ).hom.app (.op U) =
+        (modulesSpecToSheaf.map f).hom.app (.op ⊤) ≫
+          (modulesSpecToSheaf.obj N).obj.map (homOfLE le_top).op := by
+      calc
+        tilde.toOpen ((modulesSpecToSheaf.obj M).presheaf.obj (.op ⊤)) U ≫
+            (modulesSpecToSheaf.map
+                (tilde.map ((modulesSpecToSheaf.map f).hom.app (.op ⊤))) ≫
+                  modulesSpecToSheaf.map N.fromTildeΓ).hom.app (.op U) =
+            (tilde.toOpen ((modulesSpecToSheaf.obj M).presheaf.obj (.op ⊤)) U ≫
+                (modulesSpecToSheaf.map
+                    (tilde.map ((modulesSpecToSheaf.map f).hom.app (.op ⊤)))).hom.app
+                  (.op U)) ≫
+              (modulesSpecToSheaf.map N.fromTildeΓ).hom.app (.op U) := by
+              rw [ObjectProperty.FullSubcategory.comp_hom, NatTrans.comp_app, ← Category.assoc]
+        _ = (modulesSpecToSheaf.map f).hom.app (.op ⊤) ≫
+              (tilde.toOpen ((modulesSpecToSheaf.obj N).presheaf.obj (.op ⊤)) U ≫
+                (modulesSpecToSheaf.map N.fromTildeΓ).hom.app (.op U)) := by
+              simp [Category.assoc]
+        _ = (modulesSpecToSheaf.map f).hom.app (.op ⊤) ≫
+              (modulesSpecToSheaf.obj N).obj.map (homOfLE le_top).op := by
+              rw [toOpen_fromTildeΓ_app N U]
+    have h₂ :
+        tilde.toOpen ((modulesSpecToSheaf.obj M).presheaf.obj (.op ⊤)) U ≫
+          (modulesSpecToSheaf.map M.fromTildeΓ ≫ modulesSpecToSheaf.map f).hom.app (.op U) =
+        (modulesSpecToSheaf.obj M).obj.map (homOfLE le_top).op ≫
+          (modulesSpecToSheaf.map f).hom.app (.op U) := by
+      simpa [U, ObjectProperty.FullSubcategory.comp_hom, NatTrans.comp_app, Category.assoc] using
+        (toOpen_fromTildeΓ_app_assoc M U ((modulesSpecToSheaf.map f).hom.app (.op U)))
+    rw [h₁, h₂]
+    rw [← (modulesSpecToSheaf.map f).hom.naturality]
 
 /-- `tilde.isoTop` bundled as a natural isomorphism.
 This is the unit of the tilde-Gamma adjunction. -/
