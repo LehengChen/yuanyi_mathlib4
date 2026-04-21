@@ -388,7 +388,25 @@ variable (D : L ⥤ K)
 theorem limit.pre_pre [h : HasLimit (D ⋙ E ⋙ F)] : haveI : HasLimit ((D ⋙ E) ⋙ F) := h
     limit.pre F E ≫ limit.pre (E ⋙ F) D = limit.pre F (D ⋙ E) := by
   haveI : HasLimit ((D ⋙ E) ⋙ F) := h
-  ext j; erw [assoc, limit.pre_π, limit.pre_π, limit.pre_π]; rfl
+  ext j
+  have h₁ :
+      (limit.pre F E ≫ limit.pre (E ⋙ F) D) ≫ limit.π (D ⋙ E ⋙ F) j =
+        limit.pre F E ≫ limit.π (E ⋙ F) (D.obj j) := by
+    simpa [assoc] using congrArg (fun f => limit.pre F E ≫ f)
+      (limit.pre_π (F := E ⋙ F) (E := D) (k := j))
+  have h₂ :
+      limit.pre F E ≫ limit.π (E ⋙ F) (D.obj j) =
+        limit.π F (E.obj (D.obj j)) := by
+    simpa using (limit.pre_π (F := F) (E := E) (k := D.obj j))
+  have h₃ :
+      limit.pre F (D ⋙ E) ≫ limit.π (D ⋙ E ⋙ F) j =
+        limit.π F (E.obj (D.obj j)) := by
+    simpa using (limit.pre_π (F := F) (E := D ⋙ E) (k := j))
+  have h :
+      (limit.pre F E ≫ limit.pre (E ⋙ F) D) ≫ limit.π (D ⋙ E ⋙ F) j =
+        limit.pre F (D ⋙ E) ≫ limit.π (D ⋙ E ⋙ F) j :=
+    (h₁.trans h₂).trans h₃.symm
+  simpa [assoc] using h
 
 variable {E F}
 
@@ -433,7 +451,22 @@ theorem limit.post_post {E : Type u''} [Category.{v''} E] (H : D ⥤ E) [h : Has
     haveI : HasLimit (F ⋙ G ⋙ H) := h
     H.map (limit.post F G) ≫ limit.post (F ⋙ G) H = limit.post F (G ⋙ H) := by
   haveI : HasLimit (F ⋙ G ⋙ H) := h
-  ext; erw [assoc, limit.post_π, ← H.map_comp, limit.post_π, limit.post_π]; rfl
+  ext j
+  have h₁ :
+      (H.map (limit.post F G) ≫ limit.post (F ⋙ G) H) ≫ limit.π ((F ⋙ G) ⋙ H) j =
+        H.map (limit.post F G) ≫ H.map (limit.π (F ⋙ G) j) := by
+    simpa [assoc] using congrArg (fun f => H.map (limit.post F G) ≫ f)
+      (limit.post_π (F := F ⋙ G) (G := H) (j := j))
+  have h₂ :
+      H.map (limit.post F G) ≫ H.map (limit.π (F ⋙ G) j) =
+        H.map (G.map (limit.π F j)) := by
+    rw [← H.map_comp, limit.post_π]
+    rfl
+  have h₃ :
+      limit.post F (G ⋙ H) ≫ limit.π ((F ⋙ G) ⋙ H) j =
+        H.map (G.map (limit.π F j)) := by
+    simpa using (limit.post_π (F := F) (G := G ⋙ H) (j := j))
+  exact (h₁.trans h₂).trans h₃.symm
 
 end Post
 
@@ -445,7 +478,23 @@ theorem limit.pre_post {D : Type u'} [Category.{v'} D] (E : K ⥤ J) (F : J ⥤ 
     haveI : HasLimit (E ⋙ F ⋙ G) := h
     G.map (limit.pre F E) ≫ limit.post (E ⋙ F) G = limit.post F G ≫ limit.pre (F ⋙ G) E := by
   haveI : HasLimit (E ⋙ F ⋙ G) := h
-  ext; erw [assoc, limit.post_π, ← G.map_comp, limit.pre_π, assoc, limit.pre_π, limit.post_π]
+  ext j
+  have h₁ :
+      (G.map (limit.pre F E) ≫ limit.post (E ⋙ F) G) ≫ limit.π ((E ⋙ F) ⋙ G) j =
+        G.map (limit.π F (E.obj j)) := by
+    rw [assoc, limit.post_π, ← G.map_comp]
+    exact congrArg (fun f => G.map f) (limit.pre_π (F := F) (E := E) (k := j))
+  have h₂ :
+      G.map (limit.π F (E.obj j)) =
+        limit.post F G ≫ limit.π (F ⋙ G) (E.obj j) := by
+    exact (limit.post_π (F := F) (G := G) (j := E.obj j)).symm
+  have h₃ :
+      limit.post F G ≫ limit.π (F ⋙ G) (E.obj j) =
+        (limit.post F G ≫ limit.pre (F ⋙ G) E) ≫ limit.π ((E ⋙ F) ⋙ G) j := by
+    rw [assoc]
+    exact congrArg (fun f => limit.post F G ≫ f)
+      (limit.pre_π (F := F ⋙ G) (E := E) (k := j)).symm
+  exact h₁.trans (h₂.trans h₃)
 
 open CategoryTheory.Equivalence
 
@@ -1027,7 +1076,12 @@ theorem colimit.pre_post {D : Type u'} [Category.{v'} D] (E : K ⥤ J) (F : J �
   ext j
   rw [← assoc, colimit.ι_post, ← G.map_comp, colimit.ι_pre, ← assoc]
   haveI : HasColimit (E ⋙ F ⋙ G) := h
-  erw [colimit.ι_pre (F ⋙ G) E j, colimit.ι_post]
+  calc
+    G.map (colimit.ι F (E.obj j)) = colimit.ι (F ⋙ G) (E.obj j) ≫ colimit.post F G := by
+      exact (colimit.ι_post (F := F) (G := G) (j := E.obj j)).symm
+    _ = (colimit.ι ((E ⋙ F) ⋙ G) j ≫ colimit.pre (F ⋙ G) E) ≫ colimit.post F G := by
+      exact congrArg (fun f => f ≫ colimit.post F G)
+        (colimit.ι_pre (F := F ⋙ G) (E := E) (k := j)).symm
 
 open CategoryTheory.Equivalence
 
