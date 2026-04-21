@@ -53,9 +53,10 @@ two forms. The equivalence of two point representatives `P` and `Q` is implement
 of orbits of the action of `Rˣ`, or equivalently that there is some unit `u` of `R` such that
 `P = u • Q`. However, `u • Q` is not definitionally equal to `![u * Q x, u * Q y, u * Q z]`, so the
 lemmas `smul_fin3` and `smul_fin3_ext` can be used to convert between the two forms. Files in
-`Mathlib/AlgebraicGeometry/EllipticCurve/Projective` make extensive use of `erw` to get around this.
-While `erw` is often an indication of a problem, in this case it is self-contained and should not
-cause any issues. It would alternatively be possible to add some automation to assist here.
+`Mathlib/AlgebraicGeometry/EllipticCurve/Projective` therefore use explicit rewriting steps to get
+around this. While this bookkeeping is often an indication of a problem, in this case it is
+self-contained and should not cause any issues. It would alternatively be possible to add some
+automation to assist here.
 
 Whenever possible, all changes to documentation and naming of definitions and theorems should be
 mirrored in `Mathlib/AlgebraicGeometry/EllipticCurve/Jacobian/Basic.lean`.
