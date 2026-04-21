@@ -198,13 +198,43 @@ theorem adjoin_rootSet (n : ℕ) :
     rw [roots_mul hmf0, Polynomial.map_sub, map_X, map_C, roots_X_sub_C, Multiset.toFinset_add,
       Finset.coe_union, Multiset.toFinset_singleton, Finset.coe_singleton,
       Algebra.adjoin_union_eq_adjoin_adjoin, ← Set.image_singleton]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [Algebra.adjoin_algebraMap K (SplittingFieldAux n f.removeFactor)]
+    have hadjoin :
+        Subalgebra.restrictScalars K
+          (Algebra.adjoin
+            ↥(Algebra.adjoin K
+              (⇑(algebraMap (AdjoinRoot f.factor) (SplittingFieldAux n f.removeFactor)) ''
+                {AdjoinRoot.root f.factor}))
+            (↑(map (algebraMap (AdjoinRoot f.factor) (SplittingFieldAux n f.removeFactor))
+              f.removeFactor).roots.toFinset : Set (SplittingFieldAux n f.removeFactor))) =
+        Subalgebra.restrictScalars K
+          (Algebra.adjoin
+            ↥((Algebra.adjoin K ({AdjoinRoot.root f.factor} : Set (AdjoinRoot f.factor))).map
+              (IsScalarTower.toAlgHom K (AdjoinRoot f.factor)
+                (SplittingFieldAux n f.removeFactor)))
+            (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))) := by
+      simpa [rootSet_def, aroots_def, Set.image_singleton] using
+        congrArg
+          (fun S : Subalgebra K (SplittingFieldAux n f.removeFactor) =>
+            Subalgebra.restrictScalars K
+              (Algebra.adjoin ↥S (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))))
+          (Algebra.adjoin_algebraMap K (SplittingFieldAux n f.removeFactor)
+            ({AdjoinRoot.root f.factor} : Set (AdjoinRoot f.factor)))
+    refine hadjoin.trans ?_
     rw [AdjoinRoot.adjoinRoot_eq_top, Algebra.map_top]
-    -- Porting note: was `rw`
-    erw [IsScalarTower.adjoin_range_toAlgHom K (AdjoinRoot f.factor)
-        (SplittingFieldAux n f.removeFactor)
-        (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))]
+    have htower :
+        Subalgebra.restrictScalars K
+          (Algebra.adjoin
+            ↥(IsScalarTower.toAlgHom K (AdjoinRoot f.factor)
+              (SplittingFieldAux n f.removeFactor)).range
+            (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))) =
+        Subalgebra.restrictScalars K
+          (Algebra.adjoin (AdjoinRoot f.factor)
+            (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))) := by
+      simpa using
+        IsScalarTower.adjoin_range_toAlgHom K (AdjoinRoot f.factor)
+          (SplittingFieldAux n f.removeFactor)
+          (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))
+    refine htower.trans ?_
     rw [ih _ (natDegree_removeFactor' hfn), Subalgebra.restrictScalars_top]
 
 instance (f : K[X]) : IsSplittingField K (SplittingFieldAux f.natDegree f) f :=
