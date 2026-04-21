@@ -66,7 +66,6 @@ lemma freeDesc_apply {X : Type u} {M : ModuleCat.{u} R} (f : X ⟶ M) (x : X) :
     freeDesc f (freeMk x) = f x := by
   change (Finsupp.lift M R X f) (Finsupp.single x 1) = f x
   simp
-  all_goals simp
 
 @[simp]
 lemma free_map_apply {X Y : Type u} (f : X → Y) (x : X) :
@@ -133,7 +132,6 @@ lemma εIso_hom_one : (εIso R).hom 1 = freeMk PUnit.unit := rfl
 lemma εIso_inv_freeMk (x : PUnit) : (εIso R).inv (freeMk x) = 1 := by
   change (Finsupp.lapply PUnit.unit : (PUnit →₀ R) →ₗ[R] R) (Finsupp.single x 1) = 1
   simp
-  rw [Finsupp.single_eq_same]
 
 /-- The canonical isomorphism `(free R).obj X ⊗ (free R).obj Y ≅ (free R).obj (X ⊗ Y)`
 for two types `X` and `Y`.

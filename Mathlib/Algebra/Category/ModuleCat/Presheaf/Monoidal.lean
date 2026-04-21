@@ -107,8 +107,6 @@ set_option backward.isDefEq.respectTransparency false in
     simpa [tensorObj_map_tmul, ModuleCat.MonoidalCategory.tensorHom_tmul] using
       congrArg₂ (fun x y ↦ x ⊗ₜ[↑(R.obj Y)] y) (naturality_apply f φ m₁)
         (naturality_apply g φ m₃))
-    rw [naturality_apply, naturality_apply]
-    simp)
 
 end Monoidal
 

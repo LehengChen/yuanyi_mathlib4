@@ -571,7 +571,6 @@ def HomEquiv.toRestriction {X Y} (g : Y ⟶ (coextendScalars f).obj X) :
     map_smul' := fun r (y : Y) => by
       dsimp
       rw [map_smul]
-      erw [smul_eq_mul, mul_one, map_smul]
       rw [CoextendScalars.smul_apply (s := f r) (g := g y) (s' := 1), one_mul]
       convert (g y).map_smul r (1 : S) using 1
       change ((ConcreteCategory.hom g) y) (f r) = ((ConcreteCategory.hom g) y) ((f r) * 1)
@@ -754,9 +753,6 @@ def HomEquiv.fromExtendScalars {X Y} (g : X ⟶ (restrictScalars f).obj Y) :
     | tmul s' x =>
       rw [LinearMap.coe_mk, ExtendScalars.smul_tmul]
       simp [mul_smul]
-      set s' : S := s'
-      change (s * s') • (g x) = s • s' • (g x)
-      rw [mul_smul]
     | add _ _ ih1 ih2 => rw [smul_add, map_add, ih1, ih2, map_add, smul_add]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -781,8 +777,6 @@ def homEquiv {X Y} :
       simp [HomEquiv.fromExtendScalars, HomEquiv.evalAt]
       change S at x
       rw [← g.hom.map_smul, ExtendScalars.smul_tmul, mul_one]
-      erw [← map_smul, ExtendScalars.smul_tmul, mul_one x]
-      rfl
     | add _ _ ih1 ih2 => rw [map_add, map_add, ih1, ih2]
   right_inv g := by
     letI m1 : Module R S := Module.compHom S f; letI m2 : Module R Y := Module.compHom Y f
@@ -851,9 +845,6 @@ def Counit.map {Y} : (restrictScalars f ⋙ extendScalars f).obj Y ⟶ Y :=
       | tmul s' y =>
         rw [ExtendScalars.smul_tmul, LinearMap.coe_mk]
         simp [mul_smul]
-        set s' : S := s'
-        change (s * s') • y = s • s' • y
-        rw [mul_smul]
       | add _ _ ih1 ih2 => rw [smul_add, map_add, map_add, ih1, ih2, smul_add] }
 
 lemma Counit.map_apply_one_tmul {Y : ModuleCat S} (y : Y) :
