@@ -115,9 +115,8 @@ lemma additive_of_full_essSurj_comp [Full F] [EssSurj F] (G : D ⥤ E)
     simp only [← cancel_mono (G.map (F.objObjPreimageIso Y).inv),
       ← cancel_epi (G.map (F.objObjPreimageIso X).hom),
       Preadditive.add_comp, Preadditive.comp_add, ← Functor.map_comp]
-    erw [← hf', ← hg', ← (F ⋙ G).map_add]
-    dsimp
-    rw [F.map_add]
+    rw [← hf', ← hg', ← F.map_add]
+    simpa using ((F ⋙ G).map_add (f := f') (g := g'))
 
 set_option backward.isDefEq.respectTransparency false in
 lemma additive_of_comp_faithful
@@ -202,7 +201,7 @@ instance (priority := 100) preservesFiniteBiproductsOfAdditive [Additive F] :
       { preserves := fun hb =>
           ⟨isBilimitOfTotal _ (by
             simp_rw [F.mapBicone_π, F.mapBicone_ι, ← F.map_comp]
-            erw [← F.map_sum, ← F.map_id, IsBilimit.total hb])⟩ } }
+            simpa using congrArg F.map (IsBilimit.total hb))⟩ } }
 
 instance (priority := 100) preservesFiniteCoproductsOfAdditive [Additive F] :
     PreservesFiniteCoproducts F where
