@@ -72,12 +72,26 @@ noncomputable def pushforwardCompCoyonedaFreeYonedaCorepresentableBy (X : C) :
       ((free R).obj (yoneda.obj (F.obj X))) where
   homEquiv {M} := freeYonedaEquiv.trans
     (freeYonedaEquiv (M := (pushforward φ).obj M)).symm
-  homEquiv_comp {M N} g f := freeYonedaEquiv.injective (by
+  homEquiv_comp {M N} g f := by
+    let eR_M :
+        ((free R).obj (yoneda.obj (F.obj X)) ⟶ M) ≃ M.obj (op (F.obj X)) := freeYonedaEquiv
+    let eR_N :
+        ((free R).obj (yoneda.obj (F.obj X)) ⟶ N) ≃ N.obj (op (F.obj X)) := freeYonedaEquiv
+    let eS_M :
+        ((free S).obj (yoneda.obj X) ⟶ (pushforward φ).obj M) ≃
+          ((pushforward φ).obj M).obj (op X) := freeYonedaEquiv
+    let eS_N :
+        ((free S).obj (yoneda.obj X) ⟶ (pushforward φ).obj N) ≃
+          ((pushforward φ).obj N).obj (op X) := freeYonedaEquiv
     dsimp
-    erw [Equiv.apply_symm_apply, freeYonedaEquiv_comp]
-    conv_rhs => erw [freeYonedaEquiv_comp]
-    erw [Equiv.apply_symm_apply]
-    rfl)
+    refine eS_N.injective ?_
+    change eS_N (eS_N.symm (eR_N (f ≫ g))) = eS_N (eS_M.symm (eR_M f) ≫ (pushforward φ).map g)
+    conv_rhs => rw [freeYonedaEquiv_comp]
+    rw [Equiv.apply_symm_apply]
+    rw [freeYonedaEquiv_comp]
+    rw [Equiv.apply_symm_apply]
+    simpa [eS_M, eS_N, eR_M, eR_N] using
+      (pushforward_map_app_apply (φ := φ) g (op X) (eR_M f)).symm
 
 lemma pullbackObjIsDefined_free_yoneda (X : C) :
     pullbackObjIsDefined φ ((free S).obj (yoneda.obj X)) :=
