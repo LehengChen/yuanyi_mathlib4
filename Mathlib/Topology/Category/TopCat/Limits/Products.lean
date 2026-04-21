@@ -201,14 +201,20 @@ theorem range_prod_map {W X Y Z : TopCat.{u}} (f : W ⟶ Y) (g : X ⟶ Z) :
       and_self_iff]
   · rintro ⟨⟨x₁, hx₁⟩, ⟨x₂, hx₂⟩⟩
     use (prodIsoProd W X).inv (x₁, x₂)
-    apply Concrete.limit_ext
-    rintro ⟨⟨⟩⟩
-    · rw [← ConcreteCategory.comp_apply]
-      erw [Limits.prod.map_fst]
+    apply (homeoOfIso (prodIsoProd Y Z)).injective
+    ext
+    · show (Limits.prod.fst : Y ⨯ Z ⟶ _)
+          ((ConcreteCategory.hom (Limits.prod.map f g)) ((prodIsoProd W X).inv (x₁, x₂))) =
+          (Limits.prod.fst : Y ⨯ Z ⟶ _) x
+      rw [← ConcreteCategory.comp_apply]
+      rw [Limits.prod.map_fst]
       rw [ConcreteCategory.comp_apply, TopCat.prodIsoProd_inv_fst_apply]
       exact hx₁
-    · rw [← ConcreteCategory.comp_apply]
-      erw [Limits.prod.map_snd]
+    · show (Limits.prod.snd : Y ⨯ Z ⟶ _)
+          ((ConcreteCategory.hom (Limits.prod.map f g)) ((prodIsoProd W X).inv (x₁, x₂))) =
+          (Limits.prod.snd : Y ⨯ Z ⟶ _) x
+      rw [← ConcreteCategory.comp_apply]
+      rw [Limits.prod.map_snd]
       rw [ConcreteCategory.comp_apply, TopCat.prodIsoProd_inv_snd_apply]
       exact hx₂
 
@@ -265,8 +271,15 @@ theorem binaryCofan_isColimit_iff {X Y : TopCat} (c : BinaryCofan X Y) :
             (binaryCofanIsColimit X Y)).symm.isOpenEmbedding.comp .inr, ?_⟩
       rw [Set.range_comp, ← eq_compl_iff_isCompl]
       conv_rhs => rw [Set.range_comp]
-      erw [← Set.image_compl_eq (homeoOfIso <| h.coconePointUniqueUpToIso
-            (binaryCofanIsColimit X Y)).symm.bijective, Set.compl_range_inr, Set.image_comp]
+      let e := homeoOfIso (h.coconePointUniqueUpToIso (binaryCofanIsColimit X Y))
+      have himage :
+          e.symm '' (Set.range ((TopCat.binaryCofan X Y).inr))ᶜ =
+            (e.symm '' Set.range ((TopCat.binaryCofan X Y).inr))ᶜ :=
+        Set.image_compl_eq
+          (f := e.symm)
+          (s := Set.range ((TopCat.binaryCofan X Y).inr))
+          e.symm.bijective
+      simpa [e, TopCat.homeoOfIso, TopCat.binaryCofan, Set.compl_range_inr] using himage
     · rintro ⟨h₁, h₂, h₃⟩
       have : ∀ x, x ∈ Set.range c.inl ∨ x ∈ Set.range c.inr := by
         rw [eq_compl_iff_isCompl.mpr h₃.symm]
