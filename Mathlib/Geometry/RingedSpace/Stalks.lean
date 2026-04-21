@@ -91,12 +91,19 @@ theorem restrictStalkIso_inv_eq_ofRestrict {U : TopCat} (X : PresheafedSpace.{_,
   induction V with | op V => ?_
   let i : (h.functorNhds x).obj ((OpenNhds.map f x).obj V) ⟶ V :=
     homOfLE (Set.image_preimage_subset f _)
-  erw [Iso.comp_inv_eq, colimit.ι_map_assoc, colimit.ι_map_assoc, colimit.ι_pre]
-  simp_rw [Category.assoc]
-  erw [colimit.ι_pre ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf)
-      (h.functorNhds x).op]
-  erw [← X.presheaf.map_comp_assoc]
-  exact (colimit.w ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf) i.op).symm
+  let G : (OpenNhds (f x))ᵒᵖ ⥤ C := (OpenNhds.inclusion (f x)).op ⋙ X.presheaf
+  let U' : Opens U := (Opens.map (X.ofRestrict h).base).obj V.1
+  rw [Iso.comp_inv_eq]
+  trans (X.ofRestrict h).c.app (op V.1) ≫ X.presheaf.germ (h.functor.obj U') (f x) ⟨x, V.2, rfl⟩
+  · simpa [G, U', TopCat.Presheaf.germ, Category.assoc] using (colimit.w G i.op).symm
+  · trans (X.ofRestrict h).c.app (op V.1) ≫
+        (X.restrict h).presheaf.germ U' x V.2 ≫ (X.restrictStalkIso h x).hom
+    · have h₁ := congrArg (fun k => (X.ofRestrict h).c.app (op V.1) ≫ k)
+          (restrictStalkIso_hom_eq_germ X h U' x V.2)
+      simpa [Category.assoc, U', TopCat.Presheaf.germ] using h₁.symm
+    · have h₂ := congrArg (fun k => k ≫ (X.restrictStalkIso h x).hom)
+          (stalkMap_germ (X.ofRestrict h) V.1 x V.2)
+      simpa [G, U', TopCat.Presheaf.germ, Category.assoc] using h₂.symm
 
 instance ofRestrict_stalkMap_isIso {U : TopCat} (X : PresheafedSpace.{_, _, v} C)
     {f : U ⟶ (X : TopCat.{v})} (h : IsOpenEmbedding f) (x : U) :
@@ -171,7 +178,9 @@ instance isIso {X Y : PresheafedSpace.{_, _, v} C} (α : X ⟶ Y) [IsIso α] (x 
           (β.stalkMap (α.base x) :),
         ?_, ?_⟩
     · rw [← Category.assoc, congr_point α x ((α ≫ β).base x) h_eq.symm, Category.assoc]
-      erw [← stalkMap.comp β α (α.base x)]
+      rw [show Hom.stalkMap α ((α ≫ β).base x) ≫ Hom.stalkMap β (α.base x) =
+          Hom.stalkMap (β ≫ α) (α.base x) by
+            simpa using (stalkMap.comp β α (α.base x)).symm]
       rw [congr_hom _ _ (IsIso.inv_hom_id α), stalkMap.id, eqToHom_trans_assoc, eqToHom_refl,
         Category.id_comp]
     · rw [Category.assoc, ← stalkMap.comp, congr_hom _ _ (IsIso.hom_inv_id α), stalkMap.id,
