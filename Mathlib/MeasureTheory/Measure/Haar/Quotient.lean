@@ -94,21 +94,30 @@ lemma MeasureTheory.QuotientMeasureEqMeasurePreimage.smulInvariantMeasure_quotie
     have meas_π : Measurable π := continuous_quotient_mk'.measurable
     obtain ⟨𝓕, h𝓕⟩ := hasFun.ExistsIsFundamentalDomain
     have h𝓕_translate_fundom : IsFundamentalDomain Γ.op (g • 𝓕) ν := h𝓕.smul_of_comm g
-    -- TODO: why `rw` fails with both of these rewrites?
-    erw [h𝓕.projection_respects_measure_apply (μ := μ)
-      (meas_π (measurableSet_preimage (measurable_const_smul g) hA)),
-      h𝓕_translate_fundom.projection_respects_measure_apply (μ := μ) hA]
-    change ν ((π ⁻¹' _) ∩ _) = ν ((π ⁻¹' _) ∩ _)
-    set π_preA := π ⁻¹' A
-    have : π ⁻¹' ((fun x : G ⧸ Γ => g • x) ⁻¹' A) = (g * ·) ⁻¹' π_preA := by ext1; simp [π_preA]
-    rw [this]
-    have : ν ((g * ·) ⁻¹' π_preA ∩ 𝓕) = ν (π_preA ∩ (g⁻¹ * ·) ⁻¹' 𝓕) := by
-      trans ν ((g * ·) ⁻¹' (π_preA ∩ (g⁻¹ * ·) ⁻¹' 𝓕))
-      · rw [preimage_inter]
-        congr 2
-        simp [Set.preimage]
-      rw [measure_preimage_mul]
-    rw [this, ← preimage_smul_inv]; rfl
+    calc
+      μ ((fun x : G ⧸ Γ => g • x) ⁻¹' A) = ν (π ⁻¹' ((fun x : G ⧸ Γ => g • x) ⁻¹' A) ∩ 𝓕) := by
+        simpa using h𝓕.projection_respects_measure_apply (μ := μ)
+          (meas_π (measurableSet_preimage (measurable_const_smul g) hA))
+      _ = ν (π ⁻¹' A ∩ (g • 𝓕)) := by
+        set π_preA := π ⁻¹' A
+        have hpre :
+            π ⁻¹' ((fun x : G ⧸ Γ => g • x) ⁻¹' A) = (g * ·) ⁻¹' π_preA := by
+          ext1
+          simp [π_preA]
+        rw [hpre]
+        have hmul :
+            ν ((g * ·) ⁻¹' π_preA ∩ 𝓕) = ν (π_preA ∩ (g⁻¹ * ·) ⁻¹' 𝓕) := by
+          trans ν ((g * ·) ⁻¹' (π_preA ∩ (g⁻¹ * ·) ⁻¹' 𝓕))
+          · rw [preimage_inter]
+            congr 2
+            simp [Set.preimage]
+          rw [measure_preimage_mul]
+        have hsmul : (g⁻¹ * ·) ⁻¹' 𝓕 = g • 𝓕 := by
+          simpa [smul_eq_mul] using (preimage_smul_inv g 𝓕)
+        rw [hmul, hsmul]
+      _ = μ A := by
+        symm
+        simpa using h𝓕_translate_fundom.projection_respects_measure_apply (μ := μ) hA
 
 end smulInvariantMeasure
 
@@ -233,8 +242,9 @@ theorem MeasureTheory.QuotientMeasureEqMeasurePreimage.haarMeasure_quotient [Loc
     ne_top_of_lt <| QuotientMeasureEqMeasurePreimage.covolume_ne_top μ (ν := ν)
   obtain ⟨s, fund_dom_s⟩ := i
   rw [fund_dom_s.covolume_eq_volume] at finiteCovol
-  -- TODO: why `rw` fails?
-  erw [fund_dom_s.projection_respects_measure_apply μ K'.isCompact.measurableSet]
+  have hK' : μ (↑K') = ν (π ⁻¹' (↑K') ∩ s) := by
+    simpa using fund_dom_s.projection_respects_measure_apply (μ := μ) K'.isCompact.measurableSet
+  rw [hK']
   apply IsHaarMeasure.smul
   · intro h
     have i' : IsOpenPosMeasure (ν : Measure G) := inferInstance
