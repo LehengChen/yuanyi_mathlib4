@@ -199,19 +199,29 @@ theorem imageBasicOpen_image_preimage :
     dsimp
     rw [← ConcreteCategory.comp_apply, ← PresheafedSpace.comp_c_app,
       ← CommRingCat.comp_apply, ← PresheafedSpace.comp_c_app]
-    -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): change `rw` to `erw`
-    erw [SheafedSpace.congr_hom_app (coequalizer.condition f.toShHom g.toShHom),
-      CommRingCat.comp_apply, X.toRingedSpace.basicOpen_res]
-    apply inf_eq_right.mpr
-    refine (RingedSpace.basicOpen_le _ _).trans ?_
-    rw [coequalizer.condition f.toShHom g.toShHom]
+    have hfg :=
+      congrArg
+        (fun k => X.toRingedSpace.basicOpen ((ConcreteCategory.hom k) s))
+        (SheafedSpace.congr_hom_app (coequalizer.condition f.toShHom g.toShHom) (op U))
+    simpa [LocallyRingedSpace.Hom.toShHom, CommRingCat.comp_apply,
+      X.toRingedSpace.basicOpen_res_eq] using hfg
 
 set_option backward.isDefEq.respectTransparency false in
 theorem imageBasicOpen_image_open :
     IsOpen ((coequalizer.π f.toShHom g.toShHom).hom.base '' (imageBasicOpen f g U s).1) := by
   rw [← (TopCat.homeoOfIso (PreservesCoequalizer.iso (SheafedSpace.forget _) f.toShHom
     g.toShHom)).isOpen_preimage, TopCat.coequalizer_isOpen_iff, ← Set.preimage_comp]
-  erw [← TopCat.coe_comp]
+  rw [show
+      ⇑(TopCat.homeoOfIso (PreservesCoequalizer.iso (SheafedSpace.forget _) f.toShHom g.toShHom)) ∘
+          ⇑(ConcreteCategory.hom
+            (coequalizer.π ((SheafedSpace.forget CommRingCat).map f.toShHom)
+              ((SheafedSpace.forget CommRingCat).map g.toShHom))) =
+        ⇑(ConcreteCategory.hom
+          (coequalizer.π ((SheafedSpace.forget CommRingCat).map f.toShHom)
+              ((SheafedSpace.forget CommRingCat).map g.toShHom) ≫
+            (PreservesCoequalizer.iso (SheafedSpace.forget _) f.toShHom g.toShHom).hom)) by
+      ext x
+      rfl]
   rw [PreservesCoequalizer.iso_hom, ι_comp_coequalizerComparison]
   dsimp only [SheafedSpace.forget]
   rw [imageBasicOpen_image_preimage]
@@ -243,8 +253,64 @@ theorem coequalizer_π_stalk_isLocalHom (x : Y) :
   rw [← isUnit_map_iff ((coequalizer.π f.toShHom g.toShHom).hom.c.app _).hom,
     ← CommRingCat.comp_apply, NatTrans.naturality, CommRingCat.comp_apply,
     ← isUnit_map_iff (Y.presheaf.map (eqToHom hV').op).hom]
-  -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): change `rw` to `erw`
-  erw [← CommRingCat.comp_apply, ← CommRingCat.comp_apply, ← Y.presheaf.map_comp]
+  have hs :
+      ((CommRingCat.Hom.hom (Y.presheaf.map (eqToHom hV').op))
+          ((ConcreteCategory.hom
+              (((TopCat.Presheaf.pushforward CommRingCat
+                    (coequalizer.π f.toShHom g.toShHom).hom.base).obj Y.presheaf).map
+                (homOfLE VleU).op))
+            ((ConcreteCategory.hom ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U))) s))) =
+        ((ConcreteCategory.hom
+            ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U) ≫
+              Y.presheaf.map
+                ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).op.map
+                    (homOfLE VleU).op ≫
+                  (eqToHom hV').op))) s) := by
+    simp only [TopCat.Presheaf.pushforward_obj_obj, TopCat.Presheaf.pushforward_obj_map,
+      Quiver.Hom.unop_op]
+    calc
+      (ConcreteCategory.hom (Y.presheaf.map (eqToHom hV').op))
+          ((ConcreteCategory.hom
+              (Y.presheaf.map
+                ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).map
+                  (homOfLE VleU)).op))
+            ((ConcreteCategory.hom ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U))) s)) =
+      (ConcreteCategory.hom (Y.presheaf.map (eqToHom hV').op))
+          ((ConcreteCategory.hom
+              ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U) ≫
+                Y.presheaf.map
+                  ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).map
+                    (homOfLE VleU)).op)) s) := by
+            simpa using
+              (CommRingCat.comp_apply
+                ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U))
+                (Y.presheaf.map
+                  ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).map
+                    (homOfLE VleU)).op) s).symm
+      _ =
+        (ConcreteCategory.hom
+            (((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U) ≫
+                Y.presheaf.map
+                  ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).map
+                    (homOfLE VleU)).op) ≫
+              Y.presheaf.map (eqToHom hV').op)) s := by
+            simpa using
+              (CommRingCat.comp_apply
+                ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U) ≫
+                  Y.presheaf.map
+                    ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).map
+                      (homOfLE VleU)).op)
+                (Y.presheaf.map (eqToHom hV').op) s).symm
+      _ =
+        (ConcreteCategory.hom
+            ((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U) ≫
+              Y.presheaf.map
+                ((Opens.map (coequalizer.π f.toShHom g.toShHom).hom.base).op.map
+                    (homOfLE VleU).op ≫
+                  (eqToHom hV').op))) s := by
+            simp only [Category.assoc, Quiver.Hom.unop_op, Functor.op_map,
+              ← Y.presheaf.map_comp]
+  rw [hs]
   convert @RingedSpace.isUnit_res_basicOpen Y.toRingedSpace (unop _)
       (((coequalizer.π f.toShHom g.toShHom).hom.c.app (op U)) s)
 
@@ -295,7 +361,14 @@ noncomputable def coequalizerCoforkIsColimit : IsColimit (coequalizerCofork f g)
   suffices _ : IsLocalHom (((coequalizerCofork f g).π.1.stalkMap _).hom.comp h) by
     apply isLocalHom_of_comp _ ((coequalizerCofork f g).π.1.stalkMap _).hom
   rw [← CommRingCat.hom_ofHom h, ← CommRingCat.hom_comp]
-  erw [← PresheafedSpace.stalkMap.comp]
+  have hcomp :
+      CommRingCat.ofHom h ≫ (coequalizerCofork f g).π.1.stalkMap y =
+        PresheafedSpace.Hom.stalkMap
+          ((coequalizer.π f.toShHom g.toShHom).hom ≫ (coequalizer.desc s.π.toShHom e).hom) y := by
+    simpa [h, coequalizerCofork] using
+      (PresheafedSpace.stalkMap.comp (coequalizer.π f.toShHom g.toShHom).hom
+        (coequalizer.desc s.π.toShHom e).hom y).symm
+  rw [hcomp]
   apply isLocalHom_stalkMap_congr _ _ (coequalizer.π_desc s.π.toShHom e).symm y
   change IsLocalHom (s.π.stalkMap y).hom
   infer_instance
