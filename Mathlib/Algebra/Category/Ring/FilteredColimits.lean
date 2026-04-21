@@ -69,18 +69,30 @@ instance colimitSemiring : Semiring.{max v u} <| R.{v, u} F :=
     mul_zero := fun x => by
       refine Quot.inductionOn x ?_; clear x; intro x
       obtain ⟨j, x⟩ := x
-      erw [colimit_zero_eq _ j, colimit_mul_mk_eq _ ⟨j, _⟩ ⟨j, _⟩ j (𝟙 j) (𝟙 j)]
-      rw [CategoryTheory.Functor.map_id]
-      dsimp
-      rw [mul_zero x]
+      have h0 := colimit_zero_eq
+        (F ⋙ forget₂ SemiRingCat AddCommMonCat ⋙ forget₂ AddCommMonCat AddMonCat) j
+      rw [h0]
+      change MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j, x⟩ *
+          MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j, (0 : F.obj j)⟩ =
+        AddMonCat.FilteredColimits.M.mk
+          (F ⋙ forget₂ SemiRingCat AddCommMonCat ⋙ forget₂ AddCommMonCat AddMonCat)
+          ⟨j, (0 : F.obj j)⟩
+      rw [colimit_mul_mk_eq _ ⟨j, x⟩ ⟨j, (0 : F.obj j)⟩ j (𝟙 j) (𝟙 j)]
+      simp [CategoryTheory.Functor.map_id]
       rfl
     zero_mul := fun x => by
       refine Quot.inductionOn x ?_; clear x; intro x
       obtain ⟨j, x⟩ := x
-      erw [colimit_zero_eq _ j, colimit_mul_mk_eq _ ⟨j, _⟩ ⟨j, _⟩ j (𝟙 j) (𝟙 j)]
-      rw [CategoryTheory.Functor.map_id]
-      dsimp
-      rw [zero_mul x]
+      have h0 := colimit_zero_eq
+        (F ⋙ forget₂ SemiRingCat AddCommMonCat ⋙ forget₂ AddCommMonCat AddMonCat) j
+      rw [h0]
+      change MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j, (0 : F.obj j)⟩ *
+          MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j, x⟩ =
+        AddMonCat.FilteredColimits.M.mk
+          (F ⋙ forget₂ SemiRingCat AddCommMonCat ⋙ forget₂ AddCommMonCat AddMonCat)
+          ⟨j, (0 : F.obj j)⟩
+      rw [colimit_mul_mk_eq _ ⟨j, (0 : F.obj j)⟩ ⟨j, x⟩ j (𝟙 j) (𝟙 j)]
+      simp [CategoryTheory.Functor.map_id]
       rfl
     left_distrib := fun x y z => by
       refine Quot.induction_on₃ x y z ?_; clear x y z; intro x y z
@@ -89,11 +101,87 @@ instance colimitSemiring : Semiring.{max v u} <| R.{v, u} F :=
       let f := IsFiltered.firstToMax₃ j₁ j₂ j₃
       let g := IsFiltered.secondToMax₃ j₁ j₂ j₃
       let h := IsFiltered.thirdToMax₃ j₁ j₂ j₃
-      erw [colimit_add_mk_eq _ ⟨j₂, _⟩ ⟨j₃, _⟩ k g h, colimit_mul_mk_eq _ ⟨j₁, _⟩ ⟨k, _⟩ k f (𝟙 k),
-        colimit_mul_mk_eq _ ⟨j₁, _⟩ ⟨j₂, _⟩ k f g, colimit_mul_mk_eq _ ⟨j₁, _⟩ ⟨j₃, _⟩ k f h,
-        colimit_add_mk_eq _ ⟨k, _⟩ ⟨k, _⟩ k (𝟙 k) (𝟙 k)]
+      have hsum :
+          ((AddMonCat.FilteredColimits.M.mk
+                ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+                ⟨j₂, y⟩ +
+              AddMonCat.FilteredColimits.M.mk
+                ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+                ⟨j₃, z⟩) :
+            MonCat.FilteredColimits.M (F ⋙ forget₂ SemiRingCat MonCat)) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map g y + F.map h z⟩ := by
+        exact colimit_add_mk_eq
+          (F ⋙ forget₂ SemiRingCat AddCommMonCat ⋙ forget₂ AddCommMonCat AddMonCat)
+          ⟨j₂, y⟩ ⟨j₃, z⟩ k g h
+      have hmul_left :
+          ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨k, F.map g y + F.map h z⟩ : ↑(R F))) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map f x * (F.map g y + F.map h z)⟩ := by
+        simpa [CategoryTheory.Functor.map_id] using
+          (colimit_mul_mk_eq _ ⟨j₁, x⟩ ⟨k, F.map g y + F.map h z⟩ k f (𝟙 k))
+      have hmul_xy :
+          ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₂, y⟩ : ↑(R F))) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map f x * F.map g y⟩ := by
+        exact colimit_mul_mk_eq _ ⟨j₁, x⟩ ⟨j₂, y⟩ k f g
+      have hmul_xz :
+          ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F))) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map f x * F.map h z⟩ := by
+        exact colimit_mul_mk_eq _ ⟨j₁, x⟩ ⟨j₃, z⟩ k f h
+      conv_lhs =>
+        arg 2
+        change ((AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨j₂, y⟩ +
+            AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨j₃, z⟩) :
+          MonCat.FilteredColimits.M (F ⋙ forget₂ SemiRingCat MonCat))
+        rw [hsum]
+      conv_lhs =>
+        change ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨k, F.map g y + F.map h z⟩ : ↑(R F)))
+        rw [hmul_left]
+      conv_rhs =>
+        lhs
+        change ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₂, y⟩ : ↑(R F)))
+        rw [hmul_xy]
+      conv_rhs =>
+        rhs
+        change ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F)))
+        rw [hmul_xz]
+      conv_rhs =>
+        change ((AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨k, F.map f x * F.map g y⟩ +
+            AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨k, F.map f x * F.map h z⟩) :
+          ↑(R F))
+        rw [colimit_add_mk_eq _ ⟨k, _⟩ ⟨k, _⟩ k (𝟙 k) (𝟙 k)]
       simp only [CategoryTheory.Functor.map_id]
-      erw [left_distrib (F.map f x) (F.map g y) (F.map h z)]
+      change MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+          ⟨k, F.map f x * (F.map g y + F.map h z)⟩ =
+        AddMonCat.FilteredColimits.M.mk
+          ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+          ⟨k, F.map f x * F.map g y + F.map f x * F.map h z⟩
+      rw [left_distrib]
       rfl
     right_distrib := fun x y z => by
       refine Quot.induction_on₃ x y z ?_; clear x y z; intro x y z
@@ -102,11 +190,88 @@ instance colimitSemiring : Semiring.{max v u} <| R.{v, u} F :=
       let f := IsFiltered.firstToMax₃ j₁ j₂ j₃
       let g := IsFiltered.secondToMax₃ j₁ j₂ j₃
       let h := IsFiltered.thirdToMax₃ j₁ j₂ j₃
-      erw [colimit_add_mk_eq _ ⟨j₁, _⟩ ⟨j₂, _⟩ k f g, colimit_mul_mk_eq _ ⟨k, _⟩ ⟨j₃, _⟩ k (𝟙 k) h,
-        colimit_mul_mk_eq _ ⟨j₁, _⟩ ⟨j₃, _⟩ k f h, colimit_mul_mk_eq _ ⟨j₂, _⟩ ⟨j₃, _⟩ k g h,
-        colimit_add_mk_eq _ ⟨k, _⟩ ⟨k, _⟩ k (𝟙 k) (𝟙 k)]
+      have hsum :
+          ((AddMonCat.FilteredColimits.M.mk
+                ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+                ⟨j₁, x⟩ +
+              AddMonCat.FilteredColimits.M.mk
+                ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+                ⟨j₂, y⟩) :
+            MonCat.FilteredColimits.M (F ⋙ forget₂ SemiRingCat MonCat)) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map f x + F.map g y⟩ := by
+        exact colimit_add_mk_eq
+          (F ⋙ forget₂ SemiRingCat AddCommMonCat ⋙ forget₂ AddCommMonCat AddMonCat)
+          ⟨j₁, x⟩ ⟨j₂, y⟩ k f g
+      have hmul_left :
+          ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨k, F.map f x + F.map g y⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F))) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, (F.map f x + F.map g y) * F.map h z⟩ := by
+        simpa [CategoryTheory.Functor.map_id] using
+          (colimit_mul_mk_eq _ ⟨k, F.map f x + F.map g y⟩ ⟨j₃, z⟩ k (𝟙 k) h)
+      have hmul_xz :
+          ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F))) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map f x * F.map h z⟩ := by
+        exact colimit_mul_mk_eq _ ⟨j₁, x⟩ ⟨j₃, z⟩ k f h
+      have hmul_yz :
+          ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat) ⟨j₂, y⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F))) =
+            MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+              ⟨k, F.map g y * F.map h z⟩ := by
+        exact colimit_mul_mk_eq _ ⟨j₂, y⟩ ⟨j₃, z⟩ k g h
+      conv_lhs =>
+        arg 1
+        change ((AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨j₁, x⟩ +
+            AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨j₂, y⟩) :
+          MonCat.FilteredColimits.M (F ⋙ forget₂ SemiRingCat MonCat))
+        rw [hsum]
+      conv_lhs =>
+        change ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨k, F.map f x + F.map g y⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F)))
+        rw [hmul_left]
+      conv_rhs =>
+        lhs
+        change ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₁, x⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F)))
+        rw [hmul_xz]
+      conv_rhs =>
+        rhs
+        change ((MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₂, y⟩ : ↑(R F)) *
+              (MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+                ⟨j₃, z⟩ : ↑(R F)))
+        rw [hmul_yz]
+      conv_rhs =>
+        change ((AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨k, F.map f x * F.map h z⟩ +
+            AddMonCat.FilteredColimits.M.mk
+              ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+              ⟨k, F.map g y * F.map h z⟩) :
+          ↑(R F))
+        rw [colimit_add_mk_eq _ ⟨k, _⟩ ⟨k, _⟩ k (𝟙 k) (𝟙 k)]
       simp only [CategoryTheory.Functor.map_id]
-      erw [right_distrib (F.map f x) (F.map g y) (F.map h z)]
+      change MonCat.FilteredColimits.M.mk (F ⋙ forget₂ SemiRingCat MonCat)
+          ⟨k, (F.map f x + F.map g y) * F.map h z⟩ =
+        AddMonCat.FilteredColimits.M.mk
+          ((F ⋙ forget₂ SemiRingCat AddCommMonCat) ⋙ forget₂ AddCommMonCat AddMonCat)
+          ⟨k, F.map f x * F.map h z + F.map g y * F.map h z⟩
+      rw [right_distrib]
       rfl }
 
 /-- The bundled semiring giving the filtered colimit of a diagram. -/
