@@ -70,8 +70,11 @@ lemma _root_.PresheafOfModules.Sheafify.app_eq_of_isLocallyInjective
     · exact Presheaf.equalizerSieve_mem J φ _ _ hm₀
   · intro Z g hg
     rw [← NatTrans.naturality_apply (D := Ab), ← NatTrans.naturality_apply (D := Ab)]
-    erw [M₀.map_smul, M₀.map_smul, hg.1, hg.2]
-    rfl
+    change φ.app _ (M₀.map g.op (r₀ • m₀)) = φ.app _ (M₀.map g.op (r₀' • m₀'))
+    rw [M₀.map_smul, M₀.map_smul]
+    change φ.app _ ((R₀.map g.op r₀) • (M₀.presheaf.map g.op m₀)) =
+      φ.app _ ((R₀.map g.op r₀') • (M₀.presheaf.map g.op m₀'))
+    rw [hg.1, hg.2]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma isCompatible_map_smul_aux {Y Z : C} (f : Y ⟶ X) (g : Z ⟶ Y)
@@ -85,7 +88,7 @@ lemma isCompatible_map_smul_aux {Y Z : C} (f : Y ⟶ X) (g : Z ⟶ Y)
   · rw [hr₀', R.map_comp, RingCat.comp_apply, ← hr₀, ← RingCat.comp_apply, NatTrans.naturality,
       RingCat.comp_apply]
   · rw [hm₀', A.map_comp, AddCommGrpCat.coe_comp, Function.comp_apply, ← hm₀]
-    erw [NatTrans.naturality_apply φ]
+    simpa using (NatTrans.naturality_apply (D := Ab) φ g.op m₀)
 
 variable (hr₀ : (r₀.map (whiskerRight α (forget _))).IsAmalgamation r)
   (hm₀ : (m₀.map (whiskerRight φ (forget _))).IsAmalgamation m)
@@ -108,15 +111,20 @@ lemma isCompatible_map_smul : ((r₀.smul m₀).map (whiskerRight φ (forget _))
       RingCat.comp_apply]
   have hb₀ : (φ.app (Opposite.op Z)) b₀ = (A.map (f₁.op ≫ g₁.op)) m := by
     dsimp [b₀]
-    erw [NatTrans.naturality_apply φ, hb₁, Functor.map_comp, ConcreteCategory.comp_apply]
+    trans A.map g₁.op (φ.app (Opposite.op Y₁) b₁)
+    · simpa using (NatTrans.naturality_apply (D := Ab) φ g₁.op b₁)
+    · rw [hb₁, Functor.map_comp, ConcreteCategory.comp_apply]
   have ha₀' : (α.app (Opposite.op Z)) a₀ = (R.map (f₂.op ≫ g₂.op)) r := by
     rw [ha₀, ← op_comp, fac, op_comp]
   have hb₀' : (φ.app (Opposite.op Z)) b₀ = (A.map (f₂.op ≫ g₂.op)) m := by
     rw [hb₀, ← op_comp, fac, op_comp]
   dsimp
-  erw [← NatTrans.naturality_apply φ, ← NatTrans.naturality_apply φ]
-  exact (isCompatible_map_smul_aux α φ hA r m f₁ g₁ a₁ a₀ b₁ b₀ ha₁ ha₀ hb₁ hb₀).trans
-    (isCompatible_map_smul_aux α φ hA r m f₂ g₂ a₂ a₀ b₂ b₀ ha₂ ha₀' hb₂ hb₀').symm
+  trans φ.app (Opposite.op Z) (M₀.map g₁.op (r₀.smul m₀ f₁ h₁))
+  · simpa using (NatTrans.naturality_apply (D := Ab) φ g₁.op (r₀.smul m₀ f₁ h₁)).symm
+  · trans φ.app (Opposite.op Z) (M₀.map g₂.op (r₀.smul m₀ f₂ h₂))
+    · exact (isCompatible_map_smul_aux α φ hA r m f₁ g₁ a₁ a₀ b₁ b₀ ha₁ ha₀ hb₁ hb₀).trans
+        (isCompatible_map_smul_aux α φ hA r m f₂ g₂ a₂ a₀ b₂ b₀ ha₂ ha₀' hb₂ hb₀').symm
+    · simpa using (NatTrans.naturality_apply (D := Ab) φ g₂.op (r₀.smul m₀ f₂ h₂))
 
 end
 
@@ -164,12 +172,14 @@ def SMulCandidate.mk' (S : Sieve X.unop) (hS : S ∈ J X.unop)
     rintro Z g hg
     dsimp at hg
     rw [← ConcreteCategory.comp_apply, ← A.obj.map_comp, ← NatTrans.naturality_apply (D := Ab)]
-    erw [M₀.map_smul] -- Mismatch between `M₀.map` and `M₀.presheaf.map`
+    change A.obj.map (f ≫ g.op) a = φ.app _ (M₀.map g.op (a₀ • b₀))
+    rw [M₀.map_smul]
     refine (ha _ hg).trans (app_eq_of_isLocallyInjective α φ A.isSeparated _ _ _ _ ?_ ?_)
     · rw [← RingCat.comp_apply, NatTrans.naturality, RingCat.comp_apply, ha₀]
       apply (hr₀ _ hg).symm.trans
       simp
-    · erw [NatTrans.naturality_apply φ, hb₀]
+    · rw [show φ.app _ (M₀.map g.op b₀) = A.obj.map g.op (φ.app _ b₀) by
+        simpa using (NatTrans.naturality_apply (D := Ab) φ g.op b₀), hb₀]
       apply (hm₀ _ hg).symm.trans
       dsimp
       rw [Functor.map_comp]
@@ -396,8 +406,11 @@ noncomputable def sheafifyMap (fac : (toPresheaf R₀).map τ₀ ≫ φ' = φ �
     suffices τ.hom = (toPresheaf _).map f by simpa only [this] using (f.app X).hom.map_smul r m
     apply ((J.W_of_isLocallyBijective φ).homEquiv _ A'.property).injective
     dsimp [f]
-    erw [comp_toPresheaf_map_sheafifyHomEquiv'_symm_hom]
-    rw [← fac, Functor.map_comp, toPresheaf_map_toSheafify])
+    trans (toPresheaf R₀).map (τ₀ ≫ toSheafify α φ')
+    · rw [← fac, Functor.map_comp, toPresheaf_map_toSheafify]
+    · simpa using
+        (comp_toPresheaf_map_sheafifyHomEquiv'_symm_hom (α := α) (φ := φ)
+          (hF := by exact A'.property) (f := τ₀ ≫ toSheafify α φ')).symm)
 
 end
 
