@@ -84,13 +84,31 @@ noncomputable def adjunction :
             (((PresheafOfModules.pullbackPushforwardAdjunction φ.hom).homEquiv F.val G.val).trans
               ((fullyFaithfulForget S).homEquiv (Y := (pushforward φ).obj G)).symm)
       homEquiv_naturality_left_symm := by
-        intros
-        dsimp [Functor.FullyFaithful.homEquiv]
-        -- these erw seem difficult to remove
-        erw [Adjunction.homEquiv_naturality_left_symm,
-          Adjunction.homEquiv_naturality_left_symm]
-        dsimp [pushforward_obj_val]
-        simp only [Functor.map_comp, Category.assoc]
+        intros X1 X2 Y f g
+        dsimp [Functor.FullyFaithful.homEquiv, pushforward_obj_val]
+        let adj₁ := PresheafOfModules.pullbackPushforwardAdjunction φ.hom
+        let adj₂ := PresheafOfModules.sheafificationAdjunction (𝟙 R.obj)
+        have h₁ :
+            (adj₁.homEquiv X1.val Y.val).symm (f.val ≫ g.val) =
+              (PresheafOfModules.pullback φ.hom).map f.val ≫
+                ((adj₁.homEquiv X2.val Y.val).symm g.val) := by
+          exact adj₁.homEquiv_naturality_left_symm f.val g.val
+        have h₁' := congrArg
+          (fun k ↦
+            (((adj₂.homEquiv ((PresheafOfModules.pullback φ.hom).obj X1.val) Y).symm) k))
+          h₁
+        have h₂ :
+            (adj₂.homEquiv ((PresheafOfModules.pullback φ.hom).obj X1.val) Y).symm
+              ((PresheafOfModules.pullback φ.hom).map f.val ≫
+                ((adj₁.homEquiv X2.val Y.val).symm g.val)) =
+            (PresheafOfModules.sheafification (𝟙 R.obj)).map
+                ((PresheafOfModules.pullback φ.hom).map f.val) ≫
+              ((adj₂.homEquiv ((PresheafOfModules.pullback φ.hom).obj X2.val) Y).symm
+                ((adj₁.homEquiv X2.val Y.val).symm g.val)) := by
+          exact adj₂.homEquiv_naturality_left_symm
+            ((PresheafOfModules.pullback φ.hom).map f.val) ((adj₁.homEquiv X2.val Y.val).symm g.val)
+        dsimp [adj₁, adj₂] at h₁ h₁' h₂ ⊢
+        exact Eq.trans h₁' h₂
       homEquiv_naturality_right := by
         tauto }
 
