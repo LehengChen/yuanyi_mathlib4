@@ -380,13 +380,13 @@ theorem sheafHom_restrict_eq (α : G.op ⋙ ℱ ⟶ G.op ⋙ ℱ'.obj) :
     whiskerLeft G.op (sheafHom α) = α := by
   ext X
   apply yoneda.map_injective
-  ext U
-  erw [yoneda.map_preimage]
-  symm
-  change (show (ℱ'.obj ⋙ coyoneda.obj (op (unop U))).obj (op (G.obj (unop X))) from _) = _
-  apply sheaf_eq_amalgamation ℱ' (G.is_cover_of_isCoverDense _ _)
-  -- Porting note: next line was not needed in mathlib3
-  · exact (pushforwardFamily_compatible _ _)
+  ext U x
+  simp [sheafYonedaHom, sheafCoyonedaHom, presheafHom, sheafHom, yoneda.map_preimage]
+  rw [appHom]
+  refine (sheaf_eq_amalgamation (X := unop U) ℱ' (G.is_cover_of_isCoverDense _ _)
+    (pushforwardFamily (homOver α (unop U)) x)
+    (pushforwardFamily_compatible _ _)
+    (x ≫ α.app X) ?_).symm
   intro Y f hf
   conv_lhs => rw [← hf.some.fac]
   simp only [pushforwardFamily, Functor.comp_map, yoneda_map_app, flip_obj_map, op_comp,
@@ -408,13 +408,13 @@ then the result `sheaf_hom (whisker_left G.op α)` is equal to `α`.
 theorem sheafHom_eq (α : ℱ ⟶ ℱ'.obj) : sheafHom (whiskerLeft G.op α) = α := by
   ext X
   apply yoneda.map_injective
-  ext U
-  erw [yoneda.map_preimage]
-  symm
-  change (show (ℱ'.obj ⋙ coyoneda.obj (op (unop U))).obj (op (unop X)) from _) = _
-  apply sheaf_eq_amalgamation ℱ' (G.is_cover_of_isCoverDense _ _)
-  -- Porting note: next line was not needed in mathlib3
-  · exact (pushforwardFamily_compatible _ _)
+  ext U x
+  simp [sheafYonedaHom, sheafCoyonedaHom, presheafHom, sheafHom, yoneda.map_preimage]
+  rw [appHom]
+  refine (sheaf_eq_amalgamation (X := unop U) ℱ' (G.is_cover_of_isCoverDense _ _)
+    (pushforwardFamily (homOver (G.op.whiskerLeft α) (unop U)) x)
+    (pushforwardFamily_compatible _ _)
+    (x ≫ α.app X) ?_).symm
   intro Y f hf
   conv_lhs => rw [← hf.some.fac]
   dsimp; simp
