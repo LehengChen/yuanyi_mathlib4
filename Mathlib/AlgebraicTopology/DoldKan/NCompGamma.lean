@@ -68,13 +68,19 @@ theorem PInfty_comp_map_mono_eq_zero (X : SimplicialObject C) {n : ℕ} {Δ' : S
     · subst hj₁
       rw [assoc, ← SimplexCategory.δ_comp_δ'' (Fin.zero_le _)]
       simp only [op_comp, X.map_comp, assoc, PInfty_f]
-      erw [(HigherFacesVanish.of_P _ _).comp_δ_eq_zero_assoc _ j₂.succ_ne_zero, zero_comp]
-      simp only [Fin.succ]
-      lia
+      have hzero : (P (m + k + 2)).f (m + k + 2) ≫ X.map (SimplexCategory.δ j₂.succ).op = 0 := by
+        simpa only [SimplicialObject.δ] using
+          (HigherFacesVanish.of_P (m + k + 2) (m + k + 1)) j₂ (by lia)
+      simpa only [assoc, zero_comp] using
+        congrArg
+          (fun f => f ≫ X.map (SimplexCategory.δ (Fin.castLT 0 (by simp))).op ≫ X.map i.op) hzero
     · simp only [op_comp, X.map_comp, assoc, PInfty_f]
-      erw [(HigherFacesVanish.of_P _ _).comp_δ_eq_zero_assoc _ hj₁, zero_comp]
-      by_contra
-      exact hj₁ (by simp only [Fin.ext_iff, Fin.val_zero]; lia)
+      obtain ⟨j₁, rfl⟩ := Fin.eq_succ_of_ne_zero hj₁
+      have hzero : (P (m + k + 2)).f (m + k + 2) ≫ X.map (SimplexCategory.δ j₁.succ).op = 0 := by
+        simpa only [SimplicialObject.δ] using
+          (HigherFacesVanish.of_P (m + k + 2) (m + k + 1)) j₁ (by lia)
+      simpa only [assoc, zero_comp] using
+        congrArg (fun f => f ≫ X.map (SimplexCategory.δ j₂).op ≫ X.map i.op) hzero
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -136,7 +142,8 @@ def natTrans : (N₁ : SimplicialObject C ⥤ _) ⋙ Γ₂ ⟶ toKaroubi _ where
             change _ ≫ (Γ₀.obj K[X]).map θ ≫ _ = _
             simp only [Splitting.ι_desc_assoc, assoc, Γ₀.Obj.map_on_summand'_assoc,
               Splitting.ι_desc]
-            erw [Γ₀_obj_termwise_mapMono_comp_PInfty_assoc X (image.ι (θ.unop ≫ A.e))]
+            refine (Γ₀_obj_termwise_mapMono_comp_PInfty_assoc X
+              (image.ι (θ.unop ≫ A.e)) (X.map (A.pull θ).e.op)).trans ?_
             dsimp only [toKaroubi]
             simp only [← X.map_comp]
             congr 2
@@ -191,8 +198,8 @@ theorem compatibility_Γ₂N₁_Γ₂N₂_natTrans (X : SimplicialObject C) :
     NatTrans.comp_app]
   rw [N₂.map_id, Γ₂.map_id, Iso.app_inv]
   dsimp only [toKaroubi]
-  erw [id_comp]
-  rw [comp_id, Iso.inv_hom_id_app_assoc]
+  convert (Iso.inv_hom_id_app_assoc Γ₂N₂ToKaroubiIso X (Γ₂N₁.natTrans.app X)).symm using 1
+  · simp [toKaroubi]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem identity_N₂_objectwise (P : Karoubi (SimplicialObject C)) :
