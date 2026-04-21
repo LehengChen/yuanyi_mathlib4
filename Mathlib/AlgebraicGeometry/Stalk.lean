@@ -54,14 +54,10 @@ theorem IsAffineOpen.fromSpecStalk_eq (x : X) (hxU : x ∈ U) (hxV : x ∈ V) :
   transitivity fromSpecStalk h₁ h₂
   · delta fromSpecStalk
     rw [← hU.map_fromSpec h₁ (homOfLE <| h₃.trans inf_le_left).op]
-    erw [← Scheme.Spec_map (X.presheaf.map _).op, ← Scheme.Spec_map (X.presheaf.germ _ x h₂).op]
-    rw [← Functor.map_comp_assoc, ← op_comp, TopCat.Presheaf.germ_res, Scheme.Spec_map,
-      Quiver.Hom.unop_op]
+    rw [← Spec.map_comp_assoc, TopCat.Presheaf.germ_res]
   · delta fromSpecStalk
     rw [← hV.map_fromSpec h₁ (homOfLE <| h₃.trans inf_le_right).op]
-    erw [← Scheme.Spec_map (X.presheaf.map _).op, ← Scheme.Spec_map (X.presheaf.germ _ x h₂).op]
-    rw [← Functor.map_comp_assoc, ← op_comp, TopCat.Presheaf.germ_res, Scheme.Spec_map,
-      Quiver.Hom.unop_op]
+    rw [← Spec.map_comp_assoc, TopCat.Presheaf.germ_res]
 
 /--
 If `x` is a point of `X`, this is the canonical morphism from `Spec(O_x)` to `X`.
@@ -208,7 +204,12 @@ lemma Opens.fromSpecStalkOfMem_toSpecΓ {X : Scheme.{u}} (U : X.Opens) (x : X) (
     ← Spec.map_comp, ← Spec.map_comp]
   congr 1
   rw [IsIso.comp_inv_eq, Iso.inv_comp_eq]
-  erw [Hom.germ_stalkMap U.ι U ⟨x, hxU⟩]
+  have hstalk :
+      X.presheaf.germ U x hxU ≫ Hom.stalkMap U.ι ⟨x, hxU⟩ =
+        Hom.app U.ι U ≫ U.toScheme.presheaf.germ (U.ι ⁻¹ᵁ U) ⟨x, hxU⟩ hxU := by
+    simpa [Opens.ι_app] using
+      Hom.germ_stalkMap U.ι U ⟨x, hxU⟩ (by simpa using hxU)
+  rw [hstalk]
   rw [Opens.ι_app, Opens.topIso_hom, ← Functor.map_comp_assoc]
   exact (U.toScheme.presheaf.germ_res (homOfLE le_top) ⟨x, hxU⟩ (U := U.ι ⁻¹ᵁ U) hxU).symm
 
