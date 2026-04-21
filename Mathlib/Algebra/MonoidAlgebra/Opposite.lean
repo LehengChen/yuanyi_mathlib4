@@ -33,21 +33,26 @@ protected noncomputable def opRingEquiv : R[M]ᵐᵒᵖ ≃+* Rᵐᵒᵖ[Mᵐᵒ
   __ := opAddEquiv.symm.trans <|
       (Finsupp.mapRange.addEquiv (opAddEquiv : R ≃+ Rᵐᵒᵖ)).trans <| Finsupp.domCongr opEquiv
   map_mul' := by
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    rw [Equiv.toFun_as_coe, AddEquiv.toEquiv_eq_coe]; erw [AddEquiv.coe_toEquiv]
-    rw [← AddEquiv.coe_toAddMonoidHom]
-    refine (AddMonoidHom.map_mul_iff (R := R[M]ᵐᵒᵖ) (S := Rᵐᵒᵖ[Mᵐᵒᵖ]) _).mpr ?_
-    ext
-    -- Porting note: `reducible` cannot be `local` so proof gets long.
-    simp only [AddMonoidHom.coe_comp, Function.comp_apply, singleAddHom_apply,
-      AddMonoidHom.compr₂_apply, AddMonoidHom.coe_mul, AddMonoidHom.coe_mulLeft,
-      AddMonoidHom.compl₂_apply, AddEquiv.toAddMonoidHom_eq_coe,
-      AddEquiv.coe_addMonoidHom_trans]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [AddEquiv.trans_apply, AddEquiv.trans_apply, AddEquiv.trans_apply,
-      MulOpposite.opAddEquiv_symm_apply]
-    rw [MulOpposite.unop_mul (α := R[M])]
-    simp
+    let f : R[M]ᵐᵒᵖ →+ Rᵐᵒᵖ[Mᵐᵒᵖ] :=
+      (opAddEquiv.symm.trans <|
+        (Finsupp.mapRange.addEquiv (opAddEquiv : R ≃+ Rᵐᵒᵖ)).trans <| Finsupp.domCongr opEquiv
+      ).toAddMonoidHom
+    have hf' {m : M} {r : R} :
+        ((opAddEquiv.symm.trans
+        ((Finsupp.mapRange.addEquiv (opAddEquiv : R ≃+ Rᵐᵒᵖ)).trans (Finsupp.domCongr opEquiv))
+      ).toAddMonoidHom) (op (single m r)) = single (op m) (op r) := by
+      simp
+    have hf {m : M} {r : R} : f (op (single m r)) = single (op m) (op r) := by
+      simpa only [f] using (hf' (m := m) (r := r))
+    rw [Equiv.toFun_as_coe, AddEquiv.toEquiv_eq_coe, AddEquiv.coe_toEquiv]
+    exact f.map_mul_iff.2 <| by
+      ext m₁ r₁ m₂ r₂ m
+      have hmul :
+          (f (op (single m₁ r₁) * op (single m₂ r₂))) m =
+            (f (op (single m₁ r₁)) * f (op (single m₂ r₂))) m := by
+        rw [hf, hf, ← MulOpposite.op_mul, single_mul_single, hf, single_mul_single]
+        rfl
+      simpa using hmul
 
 set_option backward.isDefEq.respectTransparency false in
 @[to_additive (dont_translate := R)]
