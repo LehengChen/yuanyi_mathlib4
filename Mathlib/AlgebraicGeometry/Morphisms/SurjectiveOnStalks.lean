@@ -130,12 +130,14 @@ lemma isEmbedding_pullback {X Y S : Scheme.{u}} (f : X ⟶ S) (g : Y ⟶ S) [Sur
     ext
     · simp only [L, ← Scheme.Hom.comp_apply, pullback.lift_fst, Iso.symm_hom,
         Iso.inv_hom_id]
-      erw [← Scheme.Hom.comp_apply, pullbackSpecIso_inv_fst_assoc]
-      rfl
+      simpa only [Scheme.Hom.comp_apply] using
+        congrArg (fun k => k x) <|
+          pullbackSpecIso_inv_fst_assoc (R := R) (S := A) (T := B) iX
     · simp only [L, ← Scheme.Hom.comp_apply, pullback.lift_snd, Iso.symm_hom,
         Iso.inv_hom_id]
-      erw [← Scheme.Hom.comp_apply, pullbackSpecIso_inv_snd_assoc]
-      rfl
+      simpa only [Scheme.Hom.comp_apply] using
+        congrArg (fun k => k x) <|
+          pullbackSpecIso_inv_snd_assoc (R := R) (S := A) (T := B) iY
   let 𝒰 := S.affineOpenCover.openCover
   let 𝒱 (i) := ((𝒰.pullback₁ f).X i).affineOpenCover.openCover
   let 𝒲 (i) := ((𝒰.pullback₁ g).X i).affineOpenCover.openCover
@@ -182,9 +184,20 @@ lemma isEmbedding_pullback {X Y S : Scheme.{u}} (f : X ⟶ S) (g : Y ⟶ S) [Sur
     · simp [pullback.condition]
     · dsimp only
       rw [← hx₁', ← hz, ← Scheme.Hom.comp_apply]
-      erw [← Scheme.Hom.comp_apply]
-      congr 5
-      apply pullback.hom_ext <;> simp [𝓤, ← pullback.condition, ← pullback.condition_assoc]
+      have hcomp :
+          (pullbackFstFstIso ((𝒱 i.1).f i.2.1 ≫ pullback.snd f (𝒰.f i.1))
+              ((𝒲 i.1).f i.2.2 ≫ pullback.snd g (𝒰.f i.1)) f g
+              ((𝒱 i.1).f i.2.1 ≫ (𝒰.pullback₁ f).f i.1)
+              ((𝒲 i.1).f i.2.2 ≫ (𝒰.pullback₁ g).f i.1) (𝒰.f i.1)
+              (by simp [pullback.condition]) (by simp [pullback.condition])).hom ≫
+              𝓤.f i =
+            pullback.fst
+                (pullback.fst (pullback.fst f g) ((𝒱 i.1).f i.2.1 ≫ (𝒰.pullback₁ f).f i.1))
+                (pullback.fst (pullback.snd f g) ((𝒲 i.1).f i.2.2 ≫ (𝒰.pullback₁ g).f i.1)) ≫
+              pullback.fst (pullback.fst f g) ((𝒱 i.1).f i.2.1 ≫ (𝒰.pullback₁ f).f i.1) := by
+        apply pullback.hom_ext <;>
+          simp [𝓤, ← pullback.condition, ← pullback.condition_assoc]
+      simpa only [Scheme.Hom.comp_apply] using congrArg (fun k => k z) hcomp
   · intro i
     have := H (S.affineOpenCover.X i.1) (((𝒰.pullback₁ f).X i.1).affineOpenCover.X i.2.1)
         (((𝒰.pullback₁ g).X i.1).affineOpenCover.X i.2.2)
