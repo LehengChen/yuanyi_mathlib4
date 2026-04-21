@@ -203,8 +203,17 @@ def StarModule.decomposeProdAdjoint : A ≃ₗ[R] selfAdjoint A × skewAdjoint A
   refine LinearEquiv.ofLinear ((selfAdjointPart R).prod (skewAdjointPart R))
     (LinearMap.coprod ((selfAdjoint.submodule R A).subtype) (skewAdjoint.submodule R A).subtype)
     ?_ (LinearMap.ext <| StarModule.selfAdjointPart_add_skewAdjointPart R)
-  -- Note: with https://github.com/leanprover-community/mathlib4/pull/6965 `Submodule.coe_subtype` doesn't fire in `dsimp` or `simp`
-  ext x <;> dsimp <;> erw [Submodule.coe_subtype, Submodule.coe_subtype] <;> simp
+  refine LinearMap.prod_ext ?_ ?_
+  · rw [LinearMap.comp_assoc, LinearMap.coprod_inl, LinearMap.prod_comp,
+      LinearMap.id_comp, LinearMap.inl_eq_prod]
+    exact congrArg₂ LinearMap.prod
+      (selfAdjointPart_comp_subtype_selfAdjoint (R := R) (A := A))
+      (skewAdjointPart_comp_subtype_selfAdjoint (R := R) (A := A))
+  · rw [LinearMap.comp_assoc, LinearMap.coprod_inr, LinearMap.prod_comp,
+      LinearMap.id_comp, LinearMap.inr_eq_prod]
+    exact congrArg₂ LinearMap.prod
+      (selfAdjointPart_comp_subtype_skewAdjoint (R := R) (A := A))
+      (skewAdjointPart_comp_subtype_skewAdjoint (R := R) (A := A))
 
 end SelfSkewAdjoint
 
