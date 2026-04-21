@@ -131,12 +131,23 @@ theorem Measurable.lintegral_prod_right' [SFinite ν] :
     suffices Measurable fun x => c * ν (Prod.mk x ⁻¹' s) by simpa [lintegral_indicator (m hs)]
     exact (measurable_measure_prodMk_left hs).const_mul _
   · rintro f g - hf - h2f h2g
-    simp only [Pi.add_apply]
-    conv => enter [1, x]; erw [lintegral_add_left (hf.comp m)]
+    have hfg :
+        (fun x => ∫⁻ y, (f + g) (x, y) ∂ν) =
+          fun x => ∫⁻ y, f (x, y) ∂ν + ∫⁻ y, g (x, y) ∂ν := by
+      funext x
+      simpa only [Function.comp_apply, Pi.add_apply] using
+        lintegral_add_left (hf.comp m) (g ∘ Prod.mk x)
+    rw [hfg]
     exact h2f.add h2g
   · intro f hf h2f h3f
     have : ∀ x, Monotone fun n y => f n (x, y) := fun x i j hij y => h2f hij (x, y)
-    conv => enter [1, x]; erw [lintegral_iSup (fun n => (hf n).comp m) (this x)]
+    have hfi :
+        (fun x => ∫⁻ y, (fun x => ⨆ n, f n x) (x, y) ∂ν) =
+          fun x => ⨆ n, ∫⁻ y, f n (x, y) ∂ν := by
+      funext x
+      simpa only [Function.comp_apply] using
+        lintegral_iSup (fun n => (hf n).comp m) (this x)
+    rw [hfi]
     exact .iSup h3f
 
 /-- The Lebesgue integral is measurable. This shows that the integrand of (the right-hand-side of)
