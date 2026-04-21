@@ -76,14 +76,25 @@ noncomputable def limitPresheafOfModules : PresheafOfModules R where
     rw [← cancel_mono (preservesLimitIso _ _).hom, assoc, Iso.inv_hom_id, comp_id]
     apply limit.hom_ext
     intro j
-    dsimp
     simp only [limMap_π, Functor.comp_obj, evaluation_obj, Functor.whiskerLeft_app,
       restriction_app, assoc]
-    -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [preservesLimitIso_hom_π]
-    rw [← ModuleCat.restrictScalarsId'App_inv_naturality, map_id,
-      ModuleCat.restrictScalarsId'_inv_app]
-    dsimp
+    let e := ModuleCat.restrictScalarsId'App (R.map (𝟙 X)).hom (by simp) (limit (F ⋙ evaluation R X))
+    have h :
+        e.inv ≫ (preservesLimitIso (ModuleCat.restrictScalars (R.map (𝟙 X)).hom)
+            (F ⋙ evaluation R X)).hom ≫
+          limit.π ((F ⋙ evaluation R X) ⋙ ModuleCat.restrictScalars (R.map (𝟙 X)).hom) j =
+        e.inv ≫ (ModuleCat.restrictScalars (R.map (𝟙 X)).hom).map (limit.π (F ⋙ evaluation R X) j) := by
+      simp [e, preservesLimitIso_hom_π]
+    calc
+      limit.π (F ⋙ evaluation R X) j ≫ (F.obj j).map (𝟙 X) =
+          e.inv ≫ (ModuleCat.restrictScalars (R.map (𝟙 X)).hom).map (limit.π (F ⋙ evaluation R X) j) := by
+        rw [← ModuleCat.restrictScalarsId'App_inv_naturality, map_id,
+          ModuleCat.restrictScalarsId'_inv_app]
+        dsimp [e]
+      _ = e.inv ≫ (preservesLimitIso (ModuleCat.restrictScalars (R.map (𝟙 X)).hom)
+            (F ⋙ evaluation R X)).hom ≫
+          limit.π ((F ⋙ evaluation R X) ⋙ ModuleCat.restrictScalars (R.map (𝟙 X)).hom) j := by
+        exact h.symm
   map_comp {X Y Z} f g := by
     dsimp
     rw [← cancel_mono (preservesLimitIso _ _).hom, assoc, assoc, assoc, assoc, Iso.inv_hom_id,
@@ -92,19 +103,83 @@ noncomputable def limitPresheafOfModules : PresheafOfModules R where
     intro j
     simp only [Functor.comp_obj, evaluation_obj, limMap_π, Functor.whiskerLeft_app, restriction_app,
       map_comp, ModuleCat.restrictScalarsComp'_inv_app, Functor.map_comp, assoc]
-    -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [preservesLimitIso_hom_π]
-    rw [← ModuleCat.restrictScalarsComp'App_inv_naturality]
-    dsimp
-    rw [← Functor.map_comp_assoc, ← Functor.map_comp_assoc, assoc,
-      preservesLimitIso_inv_π]
-    -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [limMap_π]
-    dsimp
-    simp only [Functor.map_comp, assoc, preservesLimitIso_inv_π_assoc]
-    -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [limMap_π_assoc]
-    dsimp
+    let lf := limMap (Functor.whiskerLeft F (restriction R f))
+    let lg := limMap (Functor.whiskerLeft F (restriction R g))
+    let pf := (preservesLimitIso (ModuleCat.restrictScalars (R.map f).hom) (F ⋙ evaluation R Y)).inv
+    let pg := (preservesLimitIso (ModuleCat.restrictScalars (R.map g).hom) (F ⋙ evaluation R Z)).inv
+    let e := ModuleCat.restrictScalarsComp'App (R.map f).hom (R.map g).hom (R.map (f ≫ g)).hom
+      (by simp) (limit (F ⋙ evaluation R Z))
+    let ej := ModuleCat.restrictScalarsComp'App (R.map f).hom (R.map g).hom (R.map (f ≫ g)).hom
+      (by simp) ((F.obj j).obj Z)
+    have h1 :
+        lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map lg ≫
+          (ModuleCat.restrictScalars (R.map f).hom).map pg ≫ e.inv ≫
+            (preservesLimitIso (ModuleCat.restrictScalars (R.map (f ≫ g)).hom)
+              (F ⋙ evaluation R Z)).hom ≫
+              limit.π ((F ⋙ evaluation R Z) ⋙ ModuleCat.restrictScalars (R.map (f ≫ g)).hom) j =
+        lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map lg ≫
+          (ModuleCat.restrictScalars (R.map f).hom).map pg ≫ e.inv ≫
+            (ModuleCat.restrictScalars (R.map (f ≫ g)).hom).map (limit.π (F ⋙ evaluation R Z) j) := by
+      simp [lf, lg, pf, pg, e, preservesLimitIso_hom_π]
+    have h2 :
+        (ModuleCat.restrictScalars (R.map f).hom).map lg ≫
+          (ModuleCat.restrictScalars (R.map f).hom).map pg ≫ e.inv ≫
+            (ModuleCat.restrictScalars (R.map (f ≫ g)).hom).map (limit.π (F ⋙ evaluation R Z) j) =
+          (ModuleCat.restrictScalars (R.map f).hom).map
+              (lg ≫ limit.π ((F ⋙ evaluation R Z) ⋙ ModuleCat.restrictScalars (R.map g).hom) j) ≫
+            ej.inv := by
+      rw [← ModuleCat.restrictScalarsComp'App_inv_naturality]
+      dsimp [pg, e, ej]
+      rw [← Functor.map_comp_assoc, ← Functor.map_comp_assoc, Category.assoc,
+        preservesLimitIso_inv_π]
+    have step3 :
+        lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map
+            (lg ≫ limit.π ((F ⋙ evaluation R Z) ⋙ ModuleCat.restrictScalars (R.map g).hom) j) ≫
+            ej.inv =
+          lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map
+            (limit.π (F ⋙ evaluation R Y) j ≫ (Functor.whiskerLeft F (restriction R g)).app j) ≫
+            ej.inv := by
+      convert congrArg
+        (fun t => lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map t ≫ ej.inv)
+        (limMap_π (Functor.whiskerLeft F (restriction R g)) j) using 1
+    have step5 :
+        lf ≫ limit.π ((F ⋙ evaluation R Y) ⋙ ModuleCat.restrictScalars (R.map f).hom) j ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map ((F.obj j).map g) ≫
+            ej.inv =
+          limit.π (F ⋙ evaluation R X) j ≫ (Functor.whiskerLeft F (restriction R f)).app j ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map ((F.obj j).map g) ≫
+            ej.inv := by
+      convert (limMap_π_assoc (Functor.whiskerLeft F (restriction R f)) j
+        ((ModuleCat.restrictScalars (R.map f).hom).map ((F.obj j).map g) ≫ ej.inv)) using 1
+    symm
+    calc
+      lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map lg ≫
+          (ModuleCat.restrictScalars (R.map f).hom).map pg ≫ e.inv ≫
+            (preservesLimitIso (ModuleCat.restrictScalars (R.map (f ≫ g)).hom)
+              (F ⋙ evaluation R Z)).hom ≫
+              limit.π ((F ⋙ evaluation R Z) ⋙ ModuleCat.restrictScalars (R.map (f ≫ g)).hom) j =
+          lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map lg ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map pg ≫ e.inv ≫
+              (ModuleCat.restrictScalars (R.map (f ≫ g)).hom).map (limit.π (F ⋙ evaluation R Z) j) := h1
+      _ = lf ≫ pf ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map
+              (lg ≫ limit.π ((F ⋙ evaluation R Z) ⋙ ModuleCat.restrictScalars (R.map g).hom) j) ≫
+            ej.inv := by
+          simpa [Category.assoc] using congrArg (fun t => lf ≫ pf ≫ t) h2
+      _ = lf ≫ pf ≫ (ModuleCat.restrictScalars (R.map f).hom).map
+            (limit.π (F ⋙ evaluation R Y) j ≫ (Functor.whiskerLeft F (restriction R g)).app j) ≫
+            ej.inv := step3
+      _ = lf ≫ limit.π ((F ⋙ evaluation R Y) ⋙ ModuleCat.restrictScalars (R.map f).hom) j ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map ((F.obj j).map g) ≫
+            ej.inv := by
+          simp [pf, Category.assoc, preservesLimitIso_inv_π_assoc]
+      _ = limit.π (F ⋙ evaluation R X) j ≫ (Functor.whiskerLeft F (restriction R f)).app j ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map ((F.obj j).map g) ≫
+            ej.inv := step5
+      _ = limit.π (F ⋙ evaluation R X) j ≫ (F.obj j).map f ≫
+            (ModuleCat.restrictScalars (R.map f).hom).map ((F.obj j).map g) ≫
+            ej.inv := by
+          simp [Functor.whiskerLeft_app, restriction_app]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The (limit) cone for `F : J ⥤ PresheafOfModules.{v} R` that is constructed from the limit
