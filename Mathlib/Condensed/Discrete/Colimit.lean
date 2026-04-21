@@ -272,7 +272,9 @@ lemma isoLocallyConstantOfIsColimit_inv (X : Profinite.{u}ᵒᵖ ⥤ Type (u + 1
   suffices _ ≫ (isoFinYonedaComponents _ _).inv ≫ X.map g =
     (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X by
       simpa [locallyConstantIsoFinYoneda, isoFinYoneda, counitApp]
-  erw [(counitApp.{u, u + 1} X).naturality]
+  rw [show (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X =
+      (counitApp.{u, u + 1} X).app (toProfinite.op.obj Y) ≫ X.map g by
+    simpa [counitApp] using (counitApp.{u, u + 1} X).naturality g]
   simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
   congr
   ext f
@@ -546,7 +548,9 @@ lemma isoLocallyConstantOfIsColimit_inv (X : LightProfinite.{u}ᵒᵖ ⥤ Type u
   suffices _ ≫ (isoFinYonedaComponents _ _).inv ≫ X.map g =
     (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X by
       simpa [locallyConstantIsoFinYoneda, isoFinYoneda, counitApp]
-  erw [(counitApp.{u, u} X).naturality]
+  rw [show (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X =
+      (counitApp.{u, u} X).app (toLightProfinite.op.obj Y) ≫ X.map g by
+    simpa [counitApp] using (counitApp.{u, u} X).naturality g]
   simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
   congr
   ext f
