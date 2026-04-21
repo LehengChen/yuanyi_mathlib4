@@ -318,12 +318,15 @@ lemma adjunction_left_triangle [HasExplicitFiniteCoproducts.{u} P]
     (X := ((functor P hs).obj X).obj) (Y := ((functor.{u, w} P hs).obj X).obj)
       (f.map ((unit P hs).app X))
   intro a
-  erw [incl_of_counitAppApp]
+  simp only [ObjectProperty.homMk_hom, counitApp_app, functorToPresheaves_map_app]
+  refine (incl_of_counitAppApp (S := S) (Y := ((functor P hs).obj X).obj)
+    (f := f.map ((unit P hs).app X)) (a := a)).trans ?_
   simp only [functor_obj_obj, functorToPresheaves_obj_obj, Functor.id_obj,
     counitAppAppImage, functorToPresheaves_obj_map, Quiver.Hom.unop_op]
   ext x
-  erw [← map_eq_image _ a x]
-  rfl
+  simpa [functorToPresheaves_obj_map, Quiver.Hom.unop_op, unit_app] using
+    congrArg (fun g : LocallyConstant PUnit.{u + 1} X => g.toFun PUnit.unit)
+      (map_eq_image ((unit P hs).app X ∘ f) a x).symm
 
 /--
 `CompHausLike.LocallyConstant.functor` is left adjoint to the forgetful functor.
@@ -345,10 +348,16 @@ noncomputable def adjunction [HasExplicitFiniteCoproducts.{u} P] :
       inferInstanceAs (PreservesFiniteProducts X.obj)
     apply presheaf_ext ((unit P hs).app _ x)
     intro a
-    erw [incl_of_counitAppApp]
-    simp only [unit_app, counitAppAppImage, coe_const]
-    erw [← map_eq_image _ a ⟨PUnit.unit, by simp [mem_iff_eq_image, ← map_preimage_eq_image]⟩]
-    rfl
+    simp only [unit_app]
+    refine (incl_of_counitAppApp (S := CompHausLike.of P PUnit.{u + 1}) (Y := X.obj)
+      (f := LocallyConstant.const PUnit.{u + 1} x) (a := a)).trans ?_
+    simp only [counitAppAppImage, coe_const]
+    simpa using
+      congrArg
+        (fun y : X.obj.obj (op (CompHausLike.of P PUnit.{u + 1})) =>
+          X.obj.map (sigmaIncl (LocallyConstant.const PUnit.{u + 1} x) a).op y)
+        ((map_eq_image _ a ⟨PUnit.unit, by
+          simp [mem_iff_eq_image, ← map_preimage_eq_image]⟩).symm)
 
 instance [HasExplicitFiniteCoproducts.{u} P] : IsIso (adjunction P hs).unit :=
   inferInstanceAs (IsIso (unitIso P hs).hom)
