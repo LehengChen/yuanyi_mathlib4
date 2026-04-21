@@ -144,11 +144,7 @@ def basicOpenToSpec : (basicOpen 𝒜 f).toScheme ⟶ Spec (.of <| Away 𝒜 f) 
 lemma basicOpenToSpec_app_top :
     (basicOpenToSpec 𝒜 f).app ⊤ = (Scheme.ΓSpecIso _).hom ≫ awayToSection 𝒜 f ≫
       (basicOpen 𝒜 f).topIso.inv := by
-  rw [basicOpenToSpec]
-  simp only [Scheme.Hom.comp_base, TopologicalSpace.Opens.map_comp_obj,
-    TopologicalSpace.Opens.map_top, Scheme.Hom.comp_app, Scheme.Opens.topIso_inv, eqToHom_op]
-  erw [Scheme.Hom.comp_app]
-  simp
+  simp [basicOpenToSpec, Scheme.Opens.toSpecΓ_appTop]
 
 /-- The structure map `Proj A ⟶ Spec A₀`. -/
 noncomputable
@@ -232,14 +228,22 @@ lemma awayMap_awayToSection :
   ext ⟨i, hi⟩
   obtain ⟨⟨n, a, ⟨b, hb'⟩, i, rfl : _ = b⟩, rfl⟩ := mk_surjective a
   simp only [homOfLE_leOfHom, CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply]
-  erw [ProjectiveSpectrum.Proj.awayToSection_apply]
-  rw [CommRingCat.hom_ofHom, val_awayMap_mk, Localization.mk_eq_mk', IsLocalization.map_mk',
-    ← Localization.mk_eq_mk']
-  refine Localization.mk_eq_mk_iff.mpr ?_
-  rw [Localization.r_iff_exists]
-  use 1
-  simp [hx]
-  ring
+  let p : basicOpen 𝒜 x := ⟨_, hi⟩
+  let y : Away 𝒜 x :=
+    (awayMap 𝒜 g_deg hx)
+      (mk { deg := n, num := a, den := ⟨f ^ i, hb'⟩, den_mem := by exact ⟨i, rfl⟩ })
+  trans
+    IsLocalization.map (M := Submonoid.powers x) (T := p.1.1.toIdeal.primeCompl) _
+      (RingHom.id _) (Submonoid.powers_le.mpr p.2) y.val
+  · simpa [p, y, CommRingCat.hom_ofHom] using
+      (ProjectiveSpectrum.Proj.awayToSection_apply (𝒜 := 𝒜) (f := x) y p)
+  · rw [show y.val = _ by rfl]
+    rw [val_awayMap_mk, Localization.mk_eq_mk', IsLocalization.map_mk', ← Localization.mk_eq_mk']
+    refine Localization.mk_eq_mk_iff.mpr ?_
+    rw [Localization.r_iff_exists]
+    use 1
+    simp [hx]
+    ring
 
 @[reassoc]
 lemma basicOpenToSpec_SpecMap_awayMap :
