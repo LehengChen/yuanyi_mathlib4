@@ -146,11 +146,13 @@ lemma Scheme.IsGermInjective.Spec
   rw [← RingHom.mem_ker, IsLocalization.mk'_eq_mul_mk'_one, Ideal.mul_unit_mem_iff_mem,
     RingHom.mem_ker] at hx
   swap; · exact @isUnit_of_invertible _ _ _ (@IsLocalization.invertible_mk'_one ..)
-  -- There is an `Opposite.unop (Opposite.op _)` in `hx` which doesn't seem removable using
-  -- `simp`/`rw`.
-  erw [elementwise_of% StructureSheaf.algebraMap_germ] at hx
+  have h := (elementwise_of% StructureSheaf.algebraMap_germ
+    (R := R) (PrimeSpectrum.basicOpen f) p hf) x
+  have hx' : (ConcreteCategory.hom (StructureSheaf.toStalk R p)) x = 0 := by
+    rw [← h]
+    exact hx
   obtain ⟨⟨y, hy⟩, hy'⟩ := (IsLocalization.map_eq_zero_iff p.asIdeal.primeCompl
-    ((Spec.structureSheaf R).presheaf.stalk p) _).mp hx
+    ((Spec.structureSheaf R).presheaf.stalk p) _).mp hx'
   obtain ⟨n, hn⟩ := H x y hy' hy
   refine (@IsLocalization.mk'_eq_zero_iff ..).mpr ?_
   exact ⟨⟨_, n, rfl⟩, hn⟩
