@@ -315,20 +315,171 @@ theorem snoc_snoc_swap {s : CompositionSeries X} {x₁ x₂ y₁ y₂ : X} {hsat
     intro i
     dsimp only [e]
     refine Fin.lastCases ?_ (fun i => ?_) i
-    · erw [Equiv.swap_apply_left, snoc_castSucc,
-      show (snoc s x₁ hsat₁).toFun (Fin.last _) = x₁ from last_snoc _ _ _, Fin.succ_last,
-      show ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁).toFun (Fin.last _) = y₁ from last_snoc _ _ _,
-      snoc_castSucc, snoc_castSucc, Fin.succ_castSucc, snoc_castSucc, Fin.succ_last,
-      show (s.snoc _ hsat₂).toFun (Fin.last _) = x₂ from last_snoc _ _ _]
-      exact hr₂
+    · convert hr₂ using 1
+      · rw [Prod.mk.injEq]
+        constructor
+        · calc
+            ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) ((Fin.last (s.length + 1)).castSucc)
+                = (s.snoc x₁ hsat₁) (Fin.last (s.length + 1)) := by
+                    simpa using
+                      (snoc_castSucc (s := s.snoc x₁ hsat₁) (a := y₁) (connect := hsaty₁)
+                        (i := Fin.last (s.length + 1)))
+            _ = x₁ := by simp
+        · simpa using (last_snoc' (p := s.snoc x₁ hsat₁) (newLast := y₁) (rel := hsaty₁))
+      · rw [Prod.mk.injEq]
+        constructor
+        · have hs :
+            (Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+              (Fin.last (s.length + 1))) = (Fin.last s.length).castSucc :=
+            Equiv.swap_apply_left _ _
+          calc
+            ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂)
+                (((Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                    (Fin.last (s.length + 1))).castSucc))
+                = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) ((Fin.last s.length).castSucc.castSucc) := by
+                    simp [hs]
+            _ = (s.snoc x₂ hsat₂) ((Fin.last s.length).castSucc) := by
+                  simpa using
+                    (snoc_castSucc (s := s.snoc x₂ hsat₂) (a := y₂) (connect := hsaty₂)
+                      (i := (Fin.last s.length).castSucc))
+            _ = s.last := by
+                  simpa using
+                    (snoc_castSucc (s := s) (a := x₂) (connect := hsat₂)
+                      (i := Fin.last s.length))
+        · have hs :
+            (Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+              (Fin.last (s.length + 1))) = (Fin.last s.length).castSucc :=
+            Equiv.swap_apply_left _ _
+          calc
+            ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂)
+                ((Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                    (Fin.last (s.length + 1))).succ)
+                = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) ((Fin.last s.length).castSucc.succ) := by
+                    simp [hs]
+            _ = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) ((Fin.last (s.length + 1)).castSucc) := by
+                  rw [Fin.succ_castSucc, Fin.succ_last]
+            _ = (s.snoc x₂ hsat₂) (Fin.last (s.length + 1)) := by
+                  simpa using
+                    (snoc_castSucc (s := s.snoc x₂ hsat₂) (a := y₂) (connect := hsaty₂)
+                      (i := Fin.last (s.length + 1)))
+            _ = x₂ := by simp
     · refine Fin.lastCases ?_ (fun i => ?_) i
-      · erw [Equiv.swap_apply_right, snoc_castSucc, snoc_castSucc, snoc_castSucc,
-          Fin.succ_castSucc, snoc_castSucc, Fin.succ_last, last_snoc', last_snoc', last_snoc']
-        exact hr₁
-      · erw [Equiv.swap_apply_of_ne_of_ne h2 h1, snoc_castSucc, snoc_castSucc,
-          snoc_castSucc, snoc_castSucc, Fin.succ_castSucc, snoc_castSucc,
-          Fin.succ_castSucc, snoc_castSucc, snoc_castSucc, snoc_castSucc]
-        exact (s.step i).iso_refl⟩
+      · convert hr₁ using 1
+        · rw [Prod.mk.injEq]
+          constructor
+          · calc
+              ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) ((Fin.last s.length).castSucc.castSucc)
+                  = (s.snoc x₁ hsat₁) ((Fin.last s.length).castSucc) := by
+                      simpa using
+                        (snoc_castSucc (s := s.snoc x₁ hsat₁) (a := y₁) (connect := hsaty₁)
+                          (i := (Fin.last s.length).castSucc))
+              _ = s.last := by
+                    simpa using
+                      (snoc_castSucc (s := s) (a := x₁) (connect := hsat₁)
+                        (i := Fin.last s.length))
+          · calc
+              ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) ((Fin.last s.length).castSucc.succ)
+                  = ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) ((Fin.last (s.length + 1)).castSucc) := by
+                      rw [Fin.succ_castSucc, Fin.succ_last]
+              _ = (s.snoc x₁ hsat₁) (Fin.last (s.length + 1)) := by
+                    simpa using
+                      (snoc_castSucc (s := s.snoc x₁ hsat₁) (a := y₁) (connect := hsaty₁)
+                        (i := Fin.last (s.length + 1)))
+              _ = x₁ := by simp
+        · rw [Prod.mk.injEq]
+          constructor
+          · have hs :
+              (Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                ((Fin.last s.length).castSucc)) = Fin.last (s.length + 1) :=
+              Equiv.swap_apply_right _ _
+            calc
+              ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂)
+                  (((Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                      ((Fin.last s.length).castSucc)).castSucc))
+                  = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) ((Fin.last (s.length + 1)).castSucc) := by
+                      simp [hs]
+              _ = (s.snoc x₂ hsat₂) (Fin.last (s.length + 1)) := by
+                    simpa using
+                      (snoc_castSucc (s := s.snoc x₂ hsat₂) (a := y₂) (connect := hsaty₂)
+                        (i := Fin.last (s.length + 1)))
+              _ = x₂ := by simp
+          · have hs :
+              (Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                ((Fin.last s.length).castSucc)) = Fin.last (s.length + 1) :=
+              Equiv.swap_apply_right _ _
+            calc
+              ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂)
+                  ((Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                      ((Fin.last s.length).castSucc)).succ)
+                  = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) ((Fin.last (s.length + 1)).succ) := by
+                      simp [hs]
+              _ = y₂ := by
+                    rw [Fin.succ_last]
+                    simpa using
+                      (last_snoc' (p := s.snoc x₂ hsat₂) (newLast := y₂) (rel := hsaty₂))
+      · convert (s.step i).iso_refl using 1
+        · rw [Prod.mk.injEq]
+          constructor
+          · calc
+              ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) (i.castSucc.castSucc.castSucc)
+                  = (s.snoc x₁ hsat₁) (i.castSucc.castSucc) := by
+                      simpa using
+                        (snoc_castSucc (s := s.snoc x₁ hsat₁) (a := y₁) (connect := hsaty₁)
+                          (i := i.castSucc.castSucc))
+              _ = s i.castSucc := by
+                    simpa using
+                      (snoc_castSucc (s := s) (a := x₁) (connect := hsat₁) (i := i.castSucc))
+          · calc
+              ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) (i.castSucc.castSucc.succ)
+                  = ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁) ((i.castSucc.succ).castSucc) := by
+                      rw [Fin.succ_castSucc]
+              _ = (s.snoc x₁ hsat₁) (i.castSucc.succ) := by
+                    simpa using
+                      (snoc_castSucc (s := s.snoc x₁ hsat₁) (a := y₁) (connect := hsaty₁)
+                        (i := i.castSucc.succ))
+              _ = (s.snoc x₁ hsat₁) ((i.succ).castSucc) := by rw [Fin.succ_castSucc]
+              _ = s i.succ := by
+                    simpa using
+                      (snoc_castSucc (s := s) (a := x₁) (connect := hsat₁) (i := i.succ))
+        · rw [Prod.mk.injEq]
+          constructor
+          · have hs :
+              (Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                (i.castSucc.castSucc)) = i.castSucc.castSucc :=
+              Equiv.swap_apply_of_ne_of_ne h2 h1
+            calc
+              ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂)
+                  (((Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                      (i.castSucc.castSucc)).castSucc))
+                  = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) (i.castSucc.castSucc.castSucc) := by
+                      simpa [hs]
+              _ = (s.snoc x₂ hsat₂) (i.castSucc.castSucc) := by
+                    simpa using
+                      (snoc_castSucc (s := s.snoc x₂ hsat₂) (a := y₂) (connect := hsaty₂)
+                        (i := i.castSucc.castSucc))
+              _ = s i.castSucc := by
+                    simpa using
+                      (snoc_castSucc (s := s) (a := x₂) (connect := hsat₂) (i := i.castSucc))
+          · have hs :
+              (Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                (i.castSucc.castSucc)) = i.castSucc.castSucc :=
+              Equiv.swap_apply_of_ne_of_ne h2 h1
+            calc
+              ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂)
+                  (((Equiv.swap (Fin.last (s.length + 1)) (Fin.castSucc (Fin.last s.length))
+                      (i.castSucc.castSucc)).succ))
+                  = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) (i.castSucc.castSucc.succ) := by
+                      simpa [hs]
+              _ = ((s.snoc x₂ hsat₂).snoc y₂ hsaty₂) ((i.castSucc.succ).castSucc) := by
+                    rw [Fin.succ_castSucc]
+              _ = (s.snoc x₂ hsat₂) (i.castSucc.succ) := by
+                    simpa using
+                      (snoc_castSucc (s := s.snoc x₂ hsat₂) (a := y₂) (connect := hsaty₂)
+                        (i := i.castSucc.succ))
+              _ = (s.snoc x₂ hsat₂) ((i.succ).castSucc) := by rw [Fin.succ_castSucc]
+              _ = s i.succ := by
+                    simpa using
+                      (snoc_castSucc (s := s) (a := x₂) (connect := hsat₂) (i := i.succ))⟩
 
 end Equivalent
 
