@@ -261,14 +261,20 @@ set_option backward.isDefEq.respectTransparency false in
 theorem eq_diag_path : (πₘ (TopCat.ofHom f)).map p ≫ ⟦H.evalAt x₁⟧ = H.diagonalPath' p ∧
     (⟦H.evalAt x₀⟧ ≫ (πₘ (TopCat.ofHom g)).map p :
     fromTop (f x₀) ⟶ fromTop (g x₁)) = H.diagonalPath' p := by
-  rw [H.apply_zero_path, H.apply_one_path, H.evalAt_eq]
-  erw [H.evalAt_eq]
-  dsimp only [prodToProdTopI]
+  rw [H.apply_zero_path, H.apply_one_path, H.evalAt_eq x₀]
   constructor
-  · slice_lhs 2 4 => rw [eqToHom_trans, eqToHom_refl] -- Porting note: this ↓ `simp` didn't do this
+  · refine (congrArg
+        ((hcast (H.apply_zero x₀).symm ≫
+            (πₘ (TopCat.ofHom H.uliftMap)).map
+              (prodToProdTopI (𝟙 (@fromTop (TopCat.of _) (ULift.up 0))) p) ≫
+            hcast (H.apply_zero x₁)) ≫ ·)
+        (H.evalAt_eq x₁)).trans ?_
+    dsimp only [prodToProdTopI]
+    slice_lhs 2 4 => rw [eqToHom_trans, eqToHom_refl] -- Porting note: this ↓ `simp` didn't do this
     slice_lhs 2 4 => simp [← CategoryTheory.Functor.map_comp]
     rfl
-  · slice_lhs 2 4 => rw [eqToHom_trans, eqToHom_refl] -- Porting note: this ↓ `simp` didn't do this
+  · dsimp only [prodToProdTopI]
+    slice_lhs 2 4 => rw [eqToHom_trans, eqToHom_refl] -- Porting note: this ↓ `simp` didn't do this
     slice_lhs 2 4 => simp [← CategoryTheory.Functor.map_comp]
     rfl
 
