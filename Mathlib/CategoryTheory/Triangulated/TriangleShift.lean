@@ -63,8 +63,9 @@ noncomputable def Triangle.shiftFunctor (n : ℤ) : Triangle C ⥤ Triangle C wh
         dsimp
         rw [Linear.units_smul_comp, Linear.comp_units_smul, ← Functor.map_comp_assoc, ← f.comm₃,
           Functor.map_comp, assoc, assoc]
-        erw [(shiftFunctorComm C 1 n).hom.naturality]
-        rfl }
+        have h := ((shiftFunctorComm C 1 n).hom.naturality f.hom₁).symm
+        simpa only [Functor.comp_map, assoc] using
+          congrArg (fun k => n.negOnePow • (CategoryTheory.shiftFunctor C n).map _ ≫ k) h }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The canonical isomorphism `Triangle.shiftFunctor C 0 ≅ 𝟭 (Triangle C)`. -/
@@ -108,7 +109,28 @@ noncomputable def Triangle.shiftFunctorAdd' (a b n : ℤ) (h : a + b = n) :
         rw [Linear.units_smul_comp, Linear.comp_units_smul, Functor.map_units_smul,
           Linear.units_smul_comp, Linear.comp_units_smul, smul_smul, assoc,
           Functor.map_comp, assoc]
-        erw [← NatTrans.naturality_assoc]
+        have h_naturality :
+            (CategoryTheory.shiftFunctorAdd' C a b (a + b) rfl).hom.app T.obj₃ ≫
+              (CategoryTheory.shiftFunctor C b).map
+                ((CategoryTheory.shiftFunctor C a).map T.mor₃) ≫
+              (CategoryTheory.shiftFunctor C b).map
+                ((shiftFunctorComm C 1 a).hom.app T.obj₁) ≫
+              (shiftFunctorComm C 1 b).hom.app
+                ((CategoryTheory.shiftFunctor C a).obj T.obj₁) =
+            (CategoryTheory.shiftFunctor C (a + b)).map T.mor₃ ≫
+              (CategoryTheory.shiftFunctorAdd' C a b (a + b) rfl).hom.app
+                ((CategoryTheory.shiftFunctor C 1).obj T.obj₁) ≫
+              (CategoryTheory.shiftFunctor C b).map
+                ((shiftFunctorComm C 1 a).hom.app T.obj₁) ≫
+              (shiftFunctorComm C 1 b).hom.app
+                ((CategoryTheory.shiftFunctor C a).obj T.obj₁) := by
+          simpa only [Functor.comp_map, assoc] using
+            ((CategoryTheory.shiftFunctorAdd' C a b (a + b) rfl).hom.naturality_assoc T.mor₃
+              ((CategoryTheory.shiftFunctor C b).map
+                  ((shiftFunctorComm C 1 a).hom.app T.obj₁) ≫
+                (shiftFunctorComm C 1 b).hom.app
+                  ((CategoryTheory.shiftFunctor C a).obj T.obj₁))).symm
+        rw [h_naturality]
         simp only [shiftFunctorAdd'_eq_shiftFunctorAdd, Int.negOnePow_add,
           shiftFunctorComm_hom_app_comp_shift_shiftFunctorAdd_hom_app, add_comm a]))
     (by cat_disch)
