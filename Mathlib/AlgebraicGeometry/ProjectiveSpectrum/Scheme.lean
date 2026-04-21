@@ -710,10 +710,12 @@ set_option backward.isDefEq.respectTransparency false in
 lemma toStalk_stalkMap_toSpec (f) (x) :
     (Scheme.ΓSpecIso _).inv ≫ (Spec A⁰_ f).presheaf.germ _ _ (by simp) ≫
       (toSpec 𝒜 f).stalkMap x = awayToΓ 𝒜 f ≫ (Proj| pbo f).presheaf.Γgerm x := by
-  dsimp
-  erw [LocallyRingedSpace.stalkMap_germ (toSpec 𝒜 f) ⊤ x (by simp)]
-  erw [toOpen_toSpec_val_c_app_assoc]
-  rfl
+  rw [LocallyRingedSpace.stalkMap_germ (toSpec 𝒜 f) ⊤ x (by simp)]
+  have h :
+      (Scheme.ΓSpecIso _).inv ≫ (toSpec 𝒜 f).c.app (op ⊤) =
+        awayToΓ 𝒜 f ≫ (Proj| pbo f).presheaf.map (homOfLE le_top).op := by
+    simpa using toOpen_toSpec_val_c_app (𝒜 := 𝒜) f (op ⊤)
+  rw [← Category.assoc, h, Category.assoc, TopCat.Presheaf.map_germ_eq_Γgerm]
 
 set_option backward.isDefEq.respectTransparency false in
 /--
