@@ -87,12 +87,25 @@ def cokernelSolution :
   var g := Submodule.mkQ _ (pres₂.var g)
   linearCombination_var_relation := by
     intro x
-    erw [← Finsupp.apply_linearCombination]
+    have happly :
+        (Submodule.mkQ (LinearMap.range f))
+            ((Finsupp.linearCombination A pres₂.var) ((pres₂.cokernelRelations data).relation x)) =
+          (Finsupp.linearCombination A
+            (fun g ↦ Submodule.mkQ (LinearMap.range f) (pres₂.var g)))
+            ((pres₂.cokernelRelations data).relation x) := by
+      simpa [Function.comp_apply] using
+        (Finsupp.apply_linearCombination A (Submodule.mkQ (LinearMap.range f)) pres₂.var
+          ((pres₂.cokernelRelations data).relation x))
+    refine happly.symm.trans ?_
     obtain (r | i) := x
-    · erw [pres₂.linearCombination_var_relation]
-      dsimp
-    · erw [data.π_lift]
-      simp
+    · simpa using congrArg (Submodule.mkQ (LinearMap.range f))
+        (pres₂.linearCombination_var_relation r)
+    · have hπ :
+          (Finsupp.linearCombination A pres₂.var)
+            ((pres₂.cokernelRelations data).relation (.inr i)) = f (g₁ i) := by
+        simpa [Module.Relations.Solution.π] using data.π_lift i
+      rw [hπ]
+      exact (Submodule.Quotient.mk_eq_zero (LinearMap.range f)).2 ⟨g₁ i, rfl⟩
 
 variable (hg₁ : Submodule.span A (Set.range g₁) = ⊤)
 
