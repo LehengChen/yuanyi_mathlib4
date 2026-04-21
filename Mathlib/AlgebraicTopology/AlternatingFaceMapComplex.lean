@@ -215,6 +215,27 @@ theorem karoubi_alternatingFaceMapComplex_d (P : Karoubi (SimplicialObject C)) (
 namespace AlternatingFaceMapComplex
 
 set_option backward.isDefEq.respectTransparency false in
+/-- The augmentation kills the degree-one differential of the alternating face map complex. -/
+lemma d_comp_augmentation_zero [Limits.HasZeroObject C] (X : SimplicialObject.Augmented C) :
+    ((alternatingFaceMapComplex C).obj X.left).d 1 0 ≫ X.hom.app (op ⦋0⦌) = 0 := by
+  dsimp
+  rw [alternatingFaceMapComplex_obj_d, objD, Fin.sum_univ_two, Fin.val_zero,
+    pow_zero, one_smul, Fin.val_one, pow_one, neg_smul, one_smul, add_comp,
+    neg_comp, SimplicialObject.δ_naturality, SimplicialObject.δ_naturality]
+  apply add_neg_cancel
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The degree-zero component of the augmentation chain map defined via
+`ChainComplex.toSingle₀Equiv`. -/
+@[simp]
+lemma toSingle₀Equiv_symm_augmentation_f_zero [Limits.HasZeroObject C]
+    (X : SimplicialObject.Augmented C)
+    (h : ((alternatingFaceMapComplex C).obj X.left).d 1 0 ≫ X.hom.app (op ⦋0⦌) = 0) :
+    ((((alternatingFaceMapComplex C).obj X.left).toSingle₀Equiv X.right).symm
+      ⟨X.hom.app (op ⦋0⦌), h⟩).f 0 = X.hom.app (op ⦋0⦌) := by
+  exact ChainComplex.toSingle₀Equiv_symm_apply_f_zero _ _
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The natural transformation which gives the augmentation of the alternating face map
 complex attached to an augmented simplicial object. -/
 def ε [Limits.HasZeroObject C] :
@@ -222,19 +243,28 @@ def ε [Limits.HasZeroObject C] :
       SimplicialObject.Augmented.point ⋙ ChainComplex.single₀ C where
   app X := by
     refine (ChainComplex.toSingle₀Equiv _ _).symm ?_
-    refine ⟨X.hom.app (op ⦋0⦌), ?_⟩
-    dsimp
-    rw [alternatingFaceMapComplex_obj_d, objD, Fin.sum_univ_two, Fin.val_zero,
-      pow_zero, one_smul, Fin.val_one, pow_one, neg_smul, one_smul, add_comp,
-      neg_comp, SimplicialObject.δ_naturality, SimplicialObject.δ_naturality]
-    apply add_neg_cancel
+    exact ⟨X.hom.app (op ⦋0⦌), d_comp_augmentation_zero X⟩
   naturality X Y f := by
     apply HomologicalComplex.to_single_hom_ext
     dsimp
-    erw [ChainComplex.toSingle₀Equiv_symm_apply_f_zero,
-      ChainComplex.toSingle₀Equiv_symm_apply_f_zero]
-    simp only [ChainComplex.single₀_map_f_zero]
-    exact congr_app f.w _
+    calc
+      f.left.app (op ⦋0⦌) ≫
+          ((((alternatingFaceMapComplex C).obj Y.left).toSingle₀Equiv Y.right).symm
+            ⟨Y.hom.app (op ⦋0⦌), d_comp_augmentation_zero Y⟩).f 0
+          = f.left.app (op ⦋0⦌) ≫ Y.hom.app (op ⦋0⦌) := by
+              congr 1
+              exact toSingle₀Equiv_symm_augmentation_f_zero _ _
+      _ = X.hom.app (op ⦋0⦌) ≫ f.right := by
+            exact congr_app f.w _
+      _ = ((((alternatingFaceMapComplex C).obj X.left).toSingle₀Equiv X.right).symm
+            ⟨X.hom.app (op ⦋0⦌), d_comp_augmentation_zero X⟩).f 0 ≫ f.right := by
+              congr 1
+              symm
+              exact toSingle₀Equiv_symm_augmentation_f_zero _ _
+      _ = ((((alternatingFaceMapComplex C).obj X.left).toSingle₀Equiv X.right).symm
+            ⟨X.hom.app (op ⦋0⦌), d_comp_augmentation_zero X⟩).f 0 ≫
+            ((ChainComplex.single₀ C).map f.right).f 0 := by
+              simp only [ChainComplex.single₀_map_f_zero]
 
 @[simp]
 lemma ε_app_f_zero [Limits.HasZeroObject C] (X : SimplicialObject.Augmented C) :
