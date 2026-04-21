@@ -80,6 +80,10 @@ def lieModuleOf [DecidableEq ι] (j : ι) : M j →ₗ⁅R,L⁆ ⨁ i, M i :=
       · exact show (DFinsupp.single j ⁅x, m⁆ : ⨁ i, M i) i =
           ⁅x, (DFinsupp.single j m : ⨁ i, M i) i⁆ by
           simp [h] }
+        -- The coercion in the goal is `DFunLike.coe (β := fun x ↦ Π₀ (i : ι), M i)`
+        -- but the lemma is expecting `DFunLike.coe (β := fun x ↦ ⨁ (i : ι), M i)`
+        erw [AddHom.coe_mk]
+        simp [h] }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The projection map onto one component, as a morphism of Lie modules. -/

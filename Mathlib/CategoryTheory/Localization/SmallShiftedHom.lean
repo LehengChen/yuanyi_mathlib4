@@ -245,6 +245,9 @@ lemma equiv_mk₀ [HasSmallLocalizedShiftedHom.{w} W M X Y]
   subst hm₀
   simpa only [SmallShiftedHom.mk₀, ShiftedHom.map_mk₀] using
     (equiv_mk (W := W) (L := L) (f := ShiftedHom.mk₀ (0 : M) rfl f))
+  dsimp [equiv, mk₀, ShiftedHom.mk₀, shiftFunctorZero']
+  simp only [comp_id, L.commShiftIso_zero, Functor.CommShift.isoZero_hom_app, assoc,
+    ← Functor.map_comp_assoc, Iso.inv_hom_id_app, Functor.id_obj, Functor.map_id, id_comp]
 
 @[simp]
 lemma equiv_mk₀Inv [HasSmallLocalizedShiftedHom.{w} W M Y X] [W.RespectsIso]

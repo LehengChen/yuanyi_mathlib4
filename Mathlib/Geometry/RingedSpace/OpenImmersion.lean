@@ -124,6 +124,7 @@ noncomputable def isoRestrict : X ≅ Y.restrict H.base_open :=
       dsimp only [IsOpenMap.functor, Functor.op, Opens.map]
       congr 2
       simpa using Set.preimage_image_eq _ H.base_open.injective
+      rfl
     · intro U V i
       dsimp
       simp only [NatTrans.naturality_assoc, TopCat.Presheaf.pushforward_obj_obj,

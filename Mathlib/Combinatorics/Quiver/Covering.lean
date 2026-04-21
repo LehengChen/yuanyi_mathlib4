@@ -146,6 +146,7 @@ theorem Prefunctor.symmetrifyStar (u : U) :
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/10745): was `simp [Quiver.symmetrifyStar]`
     simp only [Quiver.symmetrifyStar, Function.comp_apply] <;>
     rfl
+    simp
 
 set_option backward.isDefEq.respectTransparency false in
 protected theorem Prefunctor.symmetrifyCostar (u : U) :
@@ -157,6 +158,7 @@ protected theorem Prefunctor.symmetrifyCostar (u : U) :
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/10745): was `simp [Quiver.symmetrifyCostar]`
     simp only [Quiver.symmetrifyCostar, Function.comp_apply] <;>
     rfl
+    simp
 
 set_option backward.isDefEq.respectTransparency false in
 protected theorem Prefunctor.IsCovering.symmetrify (hφ : φ.IsCovering) :

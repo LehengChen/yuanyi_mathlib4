@@ -330,6 +330,7 @@ theorem dist_sq_eq_dist_sq_add_dist_sq_iff_angle_eq_pi_div_two (p₁ p₂ p₃ :
       ∠ p₁ p₂ p₃ = π / 2 := by
   simpa [EuclideanGeometry.angle, dist_eq_norm_vsub V, vsub_sub_vsub_cancel_right] using
     (norm_sub_sq_eq_norm_sq_add_norm_sq_iff_angle_eq_pi_div_two (p₁ -ᵥ p₂ : V) (p₃ -ᵥ p₂))
+    vsub_sub_vsub_cancel_right p₁, ← neg_vsub_eq_vsub_rev p₂ p₃, norm_neg]
 
 /-- An angle in a right-angled triangle expressed using `arccos`. -/
 theorem angle_eq_arccos_of_angle_eq_pi_div_two {p₁ p₂ p₃ : P} (h : ∠ p₁ p₂ p₃ = π / 2) :

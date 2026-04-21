@@ -218,6 +218,14 @@ theorem map_of_image (h : f '' I = J) : I.map f = J := by
   apply le_antisymm
   · rw [map, LieSubmodule.lieSpan_le, Submodule.map_coe]
     exact h.le
+    ```
+    have : (↑(toLieSubalgebra R L I).toSubmodule : Set L) = I := rfl
+    rw [this]
+    simp [h]
+    ```
+    works, but still feels awkward. There are missing `simp` lemmas here.`
+    -/
+    erw [h]
   · rw [← SetLike.coe_subset_coe, ← h]; exact LieSubmodule.subset_lieSpan
 
 /-- Note that this is not a special case of `LieSubmodule.subsingleton_of_bot`. Indeed, given

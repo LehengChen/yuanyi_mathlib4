@@ -154,6 +154,7 @@ lemma isSimple_of_isAtom (I : LieIdeal R L) (hI : IsAtom I) : IsSimple R I where
         · simp only [Submodule.mem_map, LieSubmodule.mem_toSubmodule, Subtype.exists]
           refine ⟨⁅a, y.val⁆, lie_mem_left R L I a y.val ha, ?_, rfl⟩
           simpa using lie_mem_right R I J ⟨a, ha⟩ y hy
+          exact lie_mem_right R I J ⟨a, ha⟩ y hy
         -- Finally `⁅b, y⁆ = 0`, by the independence of the atoms.
         · suffices h : ⁅b, y.val⁆ = 0 by
             simp only [Submodule.mem_map, LieSubmodule.mem_toSubmodule, Subtype.exists]

@@ -78,6 +78,7 @@ theorem _root_.MeasureTheory.Measure.ext_of_integral_eq_on_compactlySupported_nn
   intro f
   repeat rw [integral_eq_integral_pos_part_sub_integral_neg_part f.integrable]
   simpa using congrArg₂ (fun a b => a - b) (hμν f.nnrealPart) (hμν (-f).nnrealPart)
+  rfl
 
 /-- If two regular measures induce the same linear functional on `C_c(X, ℝ≥0)`, then they are
 equal. -/

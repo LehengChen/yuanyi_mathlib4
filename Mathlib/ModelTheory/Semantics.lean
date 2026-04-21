@@ -475,6 +475,10 @@ theorem realize_constantsVarsEquiv [L[[α]].Structure M] [(lhomWithConstants L �
   refine realize_mapTermRel_id (fun n t xs => realize_constantsVarsEquivLeft) fun n R xs => ?_
   obtain R | R := R
   · simpa using (withConstants_relMap_sumInl (L := L) (α := α) (R := R) (x := xs)).symm
+      (Equiv.sumEmpty (L.Relations n) ((constantsOn α).Relations n) R) xs]
+  rcongr
+  obtain - | R := R
+  · simp
   · exact isEmptyElim R
 
 @[simp]

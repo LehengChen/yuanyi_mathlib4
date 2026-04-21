@@ -548,6 +548,7 @@ theorem isPullback_morphismRestrict {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Open
     (IsPullback.of_horiz_isIso ⟨?_⟩).paste_horiz
       (IsPullback.of_hasPullback f (Y.ofRestrict U.isOpenEmbedding)).flip
   simpa using (pullbackRestrictIsoRestrict_inv_fst (𝟙 X ≫ f) U)
+  rw [Category.comp_id]
 
 lemma isPullback_opens_inf_le {X : Scheme} {U V W : X.Opens} (hU : U ≤ W) (hV : V ≤ W) :
     IsPullback (X.homOfLE inf_le_left) (X.homOfLE inf_le_right) (X.homOfLE hU) (X.homOfLE hV) := by
@@ -676,6 +677,15 @@ def morphismRestrictRestrictBasicOpen {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Op
       Arrow.mk (f ∣_ Y.basicOpen r) := by
   refine morphismRestrictRestrict _ _ _ ≪≫ morphismRestrictEq _ ?_
   exact Scheme.Opens.ι_image_basicOpen_topIso_inv (X := Y) (U := U) r
+  rw [Scheme.Opens.ι_app] at e
+  rw [← U.toScheme.basicOpen_res_eq _ (eqToHom U.inclusion'_map_eq_top).op]
+  erw [← elementwise_of% Y.presheaf.map_comp]
+  rw [eqToHom_op, eqToHom_op, eqToHom_map, eqToHom_trans]
+  erw [← e]
+  ext1
+  dsimp [Opens.map_coe]
+  rw [Set.image_preimage_eq_inter_range, Set.inter_eq_left, Scheme.Opens.range_ι]
+  exact Y.basicOpen_le r
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The stalk map of a restriction of a morphism is isomorphic to the stalk map of the original map.

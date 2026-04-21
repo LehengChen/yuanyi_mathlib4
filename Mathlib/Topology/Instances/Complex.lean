@@ -80,6 +80,9 @@ theorem Complex.uniformContinuous_ringHom_eq_id_or_conj (K : Subfield ℂ) {ψ :
           RingHom.congr_fun (ringHom_eq_ofReal_of_continuous hψ₁) r
         rw [RingHom.comp_apply, RingHom.comp_apply] at this
         rw [hr] at this
+        -- while in `hr`, we have a `(ℝ →+* ↥ofRealHom.range)`.
+        -- We could add a `@[simp]` lemma fixing this, but it breaks later steps of the proof.
+        erw [hr] at this
         rw [RingEquiv.toRingHom_eq_coe] at this
         convert this using 1
         · exact (IsDenseInducing.extend_eq di hc.continuous _).symm

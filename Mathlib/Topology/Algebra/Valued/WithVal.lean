@@ -514,6 +514,8 @@ theorem IsEquiv.uniformContinuous_equiv_symm [hval : Valued R Γ₀'] (hv : Valu
   simp only [orderRingIso_apply, toVal_mul, lt_def, ofVal_mul, restrict_lt_iff]
   rw [map_mul]
   exact hx
+  · rw [restrict_pos_iff, hv, h.pos_iff]
+    exact hs₀
 
 set_option backward.isDefEq.respectTransparency false in
 lemma IsEquiv.uniformContinuous (h : v.IsEquiv w) :

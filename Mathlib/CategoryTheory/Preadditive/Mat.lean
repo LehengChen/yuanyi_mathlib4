@@ -361,6 +361,7 @@ lemma additiveObjIsoBiproduct_hom_π (F : Mat_ C ⥤ D) [Functor.Additive F] (M 
   dsimp only [additiveObjIsoBiproduct, Iso.trans_hom, Functor.mapIso_hom,
     Functor.mapBiproduct_hom]
   rw [Category.assoc, biproduct.lift_π, ← F.map_comp]
+  simp
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]

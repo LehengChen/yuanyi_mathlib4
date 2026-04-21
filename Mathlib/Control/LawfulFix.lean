@@ -181,6 +181,7 @@ theorem ωScottContinuous_toUnitMono (f : Part α → Part α) (hc : ωScottCont
   dsimp [OmegaCompletePartialOrder.ωSup]
   simpa [OmegaCompletePartialOrder.Chain.map_comp] using
     hc.map_ωSup (c.map (Pi.evalOrderHom PUnit.unit))
+  rfl
 
 noncomputable instance lawfulFix : LawfulFix (Part α) :=
   ⟨fun {f : Part α → Part α} hc ↦ show Part.fix (toUnitMono ⟨f,hc.monotone⟩) () = _ by
@@ -261,5 +262,6 @@ instance lawfulFix' [LawfulFix <| (x : Sigma β) → γ x.1 x.2] :
   fix_eq {_f} hc := by
     dsimp [fix]
     simpa using congrArg curry (LawfulFix.fix_eq (uncurry_curry_ωScottContinuous hc))
+    rfl
 
 end Pi

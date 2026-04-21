@@ -472,11 +472,15 @@ instance : MonoidalPreadditive (ModuleCat.{u} R) := by
     convert (show x ⊗ₜ[R] ((f + g) y) = x ⊗ₜ[R] (f y) + x ⊗ₜ[R] (g y) by
       simp [TensorProduct.tmul_add]) using 1
   · intro X Y Z f g
+    simp [TensorProduct.tmul_add]
+  · intros
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_add, LinearMap.add_apply]
     convert (show ((f + g) x) ⊗ₜ[R] y = (f x) ⊗ₜ[R] y + (g x) ⊗ₜ[R] y by
       simp [TensorProduct.add_tmul]) using 1
+    erw [MonoidalCategory.whiskerRight_apply]
+    simp [TensorProduct.add_tmul]
 
 set_option backward.isDefEq.respectTransparency false in
 instance : MonoidalLinear R (ModuleCat.{u} R) := by
@@ -487,11 +491,14 @@ instance : MonoidalLinear R (ModuleCat.{u} R) := by
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_smul, LinearMap.smul_apply]
     convert (show x ⊗ₜ[R] ((r • f) y) = r • (x ⊗ₜ[R] (f y)) by simp) using 1
   · intro r Y Z f X
+    simp
+  · intros
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_smul, LinearMap.smul_apply]
     convert (show ((r • f) x) ⊗ₜ[R] y = r • ((f x) ⊗ₜ[R] y) by
       simp [TensorProduct.smul_tmul, TensorProduct.tmul_smul]) using 1
+    simp [TensorProduct.smul_tmul, TensorProduct.tmul_smul]
 
 @[simp] lemma ofHom₂_compr₂ {M N P Q : ModuleCat.{u} R} (f : M →ₗ[R] N →ₗ[R] P) (g : P →ₗ[R] Q) :
     ofHom₂ (f.compr₂ g) = ofHom₂ f ≫ ofHom (Linear.rightComp R _ (ofHom g)) := rfl

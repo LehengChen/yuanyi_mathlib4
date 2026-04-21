@@ -55,9 +55,13 @@ theorem IsAffineOpen.fromSpecStalk_eq (x : X) (hxU : x ∈ U) (hxV : x ∈ V) :
   · delta fromSpecStalk
     rw [← hU.map_fromSpec h₁ (homOfLE <| h₃.trans inf_le_left).op]
     rw [← Spec.map_comp_assoc, TopCat.Presheaf.germ_res]
+    rw [← Functor.map_comp_assoc, ← op_comp, TopCat.Presheaf.germ_res, Scheme.Spec_map,
+      Quiver.Hom.unop_op]
   · delta fromSpecStalk
     rw [← hV.map_fromSpec h₁ (homOfLE <| h₃.trans inf_le_right).op]
     rw [← Spec.map_comp_assoc, TopCat.Presheaf.germ_res]
+    rw [← Functor.map_comp_assoc, ← op_comp, TopCat.Presheaf.germ_res, Scheme.Spec_map,
+      Quiver.Hom.unop_op]
 
 /--
 If `x` is a point of `X`, this is the canonical morphism from `Spec(O_x)` to `X`.

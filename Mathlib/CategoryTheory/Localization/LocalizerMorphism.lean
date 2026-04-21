@@ -190,6 +190,7 @@ lemma IsLocalizedEquivalence.of_equivalence [Φ.functor.IsEquivalence]
         leftUnitor _)
     simpa [W₁.isoClosure.inverseImage_equivalence_functor_eq_map_inverse,
       MorphismProperty.map_isoClosure] using h
+    exact h
   exact IsLocalizedEquivalence.of_isLocalization_of_isLocalization Φ W₂.Q
 
 instance IsLocalizedEquivalence.isLocalization [Φ.IsLocalizedEquivalence] :
