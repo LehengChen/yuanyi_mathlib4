@@ -75,9 +75,16 @@ theorem IsStableUnderBaseChange.pullback_fst_appTop
     (hP : IsStableUnderBaseChange P) (hP' : RespectsIso P)
     {X Y S : Scheme} [IsAffine X] [IsAffine Y] [IsAffine S] (f : X ⟶ S) (g : Y ⟶ S)
     (H : P g.appTop.hom) : P (pullback.fst f g).appTop.hom := by
-  -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): change `rw` to `erw`
-  erw [← PreservesPullback.iso_inv_fst AffineScheme.forgetToScheme (AffineScheme.ofHom f)
-      (AffineScheme.ofHom g)]
+  have hfst :
+      ((PreservesPullback.iso AffineScheme.forgetToScheme (AffineScheme.ofHom f)
+          (AffineScheme.ofHom g)).inv ≫
+        AffineScheme.forgetToScheme.map (pullback.fst (AffineScheme.ofHom f)
+          (AffineScheme.ofHom g))).appTop.hom =
+        (pullback.fst f g).appTop.hom := by
+    simpa using congrArg (fun k => k.appTop.hom)
+      (PreservesPullback.iso_inv_fst AffineScheme.forgetToScheme (AffineScheme.ofHom f)
+        (AffineScheme.ofHom g))
+  rw [← hfst]
   rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp, hP'.cancel_right_isIso,
     AffineScheme.forgetToScheme_map]
   have := congr_arg Quiver.Hom.unop
