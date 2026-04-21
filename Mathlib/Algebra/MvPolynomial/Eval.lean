@@ -567,9 +567,23 @@ theorem mapAlgHom_coe_ringHom [CommSemiring S₂] [Algebra R S₁] [Algebra R S�
 lemma range_mapAlgHom [CommSemiring S₂] [Algebra R S₁] [Algebra R S₂] (f : S₁ →ₐ[R] S₂) :
     (mapAlgHom f).range.toSubmodule = coeffsIn σ f.range.toSubmodule := by
   simp only [← SetLike.coe_set_eq, Subalgebra.coe_toSubmodule, AlgHom.coe_range]
-  ext
-  erw [mem_range_map_iff_coeffs_subset, mem_coeffsIn_iff_coeffs_subset]
-  simp [Set.subset_def]
+  ext x
+  constructor
+  · intro hx
+    have hx' : x ∈ Set.range (MvPolynomial.map (↑f : S₁ →+* S₂)) := by
+      simpa only [mapAlgHom_apply] using hx
+    have hx'' : (x.coeffs : Set S₂) ⊆ Set.range (↑f : S₁ →+* S₂) :=
+      (mem_range_map_iff_coeffs_subset (f := (↑f : S₁ →+* S₂)) (x := x)).1 hx'
+    exact (mem_coeffsIn_iff_coeffs_subset (σ := σ) (M := f.range.toSubmodule) (p := x)).2 <|
+      by simpa [Set.subset_def] using hx''
+  · intro hx
+    have hx' : (x.coeffs : Set S₂) ⊆ Set.range (↑f : S₁ →+* S₂) := by
+      have hx'' :=
+        (mem_coeffsIn_iff_coeffs_subset (σ := σ) (M := f.range.toSubmodule) (p := x)).1 hx
+      simpa [Set.subset_def] using hx''
+    have hx'' : x ∈ Set.range (MvPolynomial.map (↑f : S₁ →+* S₂)) :=
+      (mem_range_map_iff_coeffs_subset (f := (↑f : S₁ →+* S₂)) (x := x)).2 hx'
+    simpa only [mapAlgHom_apply] using hx''
 
 end Map
 
