@@ -80,7 +80,9 @@ theorem sheafificationWhiskerLeftIso_inv_app (P : Cᵒᵖ ⥤ D) (F : D ⥤ E)
         PreservesLimit (W.index P).multicospan F] :
     (sheafificationWhiskerLeftIso J P).inv.app F = (J.sheafifyCompIso F P).inv := by
   dsimp [sheafificationWhiskerLeftIso, sheafifyCompIso]
-  erw [Category.id_comp]
+  ext X
+  simp only [comp_obj, Category.assoc, NatTrans.comp_app, NatTrans.id_app]
+  exact Category.id_comp _
 
 /-- The isomorphism between the sheafification of `P` composed with `F` and
 the sheafification of `P ⋙ F`, functorially in `P`. -/
@@ -99,7 +101,7 @@ theorem sheafificationWhiskerRightIso_hom_app :
     (J.sheafificationWhiskerRightIso F).hom.app P = (J.sheafifyCompIso F P).hom := by
   dsimp [sheafificationWhiskerRightIso, sheafifyCompIso]
   simp only [Category.id_comp, Category.comp_id]
-  erw [Category.id_comp]
+  exact Category.id_comp _
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -107,14 +109,18 @@ theorem sheafificationWhiskerRightIso_inv_app :
     (J.sheafificationWhiskerRightIso F).inv.app P = (J.sheafifyCompIso F P).inv := by
   dsimp [sheafificationWhiskerRightIso, sheafifyCompIso]
   simp only [Category.comp_id]
-  erw [Category.id_comp]
+  ext X
+  simp only [comp_obj, Category.assoc, NatTrans.comp_app, NatTrans.id_app]
+  exact Category.id_comp _
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp, reassoc]
 theorem whiskerRight_toSheafify_sheafifyCompIso_hom :
     whiskerRight (J.toSheafify _) _ ≫ (J.sheafifyCompIso F P).hom = J.toSheafify _ := by
   dsimp [sheafifyCompIso]
-  erw [whiskerRight_comp, Category.assoc]
+  rw [show whiskerRight (J.toSheafify P) F =
+    whiskerRight (J.toPlus P ≫ J.plusMap (J.toPlus P)) F by rfl]
+  rw [whiskerRight_comp, Category.assoc]
   slice_lhs 2 3 => rw [plusCompIso_whiskerRight]
   rw [Category.assoc, ← J.plusMap_comp, whiskerRight_toPlus_comp_plusCompIso_hom, ←
     Category.assoc, whiskerRight_toPlus_comp_plusCompIso_hom]
