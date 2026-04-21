@@ -455,31 +455,27 @@ instance : MonoidalPreadditive (ModuleCat.{u} R) := by
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_zero, LinearMap.zero_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [MonoidalCategory.whiskerLeft_apply]
+    rw [hom_whiskerLeft]
     simp
   · intros
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_zero, LinearMap.zero_apply, ]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [MonoidalCategory.whiskerRight_apply]
+    rw [hom_whiskerRight]
     simp
   · intros
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_add, LinearMap.add_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [MonoidalCategory.whiskerLeft_apply, MonoidalCategory.whiskerLeft_apply]
-    erw [MonoidalCategory.whiskerLeft_apply]
+    rw [hom_whiskerLeft, hom_whiskerLeft, hom_whiskerLeft]
+    rw [LinearMap.lTensor_tmul, LinearMap.lTensor_tmul, LinearMap.lTensor_tmul]
     simp [TensorProduct.tmul_add]
   · intros
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_add, LinearMap.add_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [MonoidalCategory.whiskerRight_apply, MonoidalCategory.whiskerRight_apply]
-    erw [MonoidalCategory.whiskerRight_apply]
+    rw [hom_whiskerRight, hom_whiskerRight, hom_whiskerRight]
+    rw [LinearMap.rTensor_tmul, LinearMap.rTensor_tmul, LinearMap.rTensor_tmul]
     simp [TensorProduct.add_tmul]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -489,16 +485,14 @@ instance : MonoidalLinear R (ModuleCat.{u} R) := by
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_smul, LinearMap.smul_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [MonoidalCategory.whiskerLeft_apply, MonoidalCategory.whiskerLeft_apply]
-    simp
+    rw [hom_whiskerLeft, hom_whiskerLeft, hom_smul, LinearMap.lTensor_smul]
+    rfl
   · intros
     ext : 1
     refine TensorProduct.ext (LinearMap.ext fun x => LinearMap.ext fun y => ?_)
     simp only [LinearMap.compr₂ₛₗ_apply, TensorProduct.mk_apply, hom_smul, LinearMap.smul_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [MonoidalCategory.whiskerRight_apply, MonoidalCategory.whiskerRight_apply]
-    simp [TensorProduct.smul_tmul, TensorProduct.tmul_smul]
+    rw [hom_whiskerRight, hom_whiskerRight, hom_smul, LinearMap.rTensor_smul]
+    rfl
 
 @[simp] lemma ofHom₂_compr₂ {M N P Q : ModuleCat.{u} R} (f : M →ₗ[R] N →ₗ[R] P) (g : P →ₗ[R] Q) :
     ofHom₂ (f.compr₂ g) = ofHom₂ f ≫ ofHom (Linear.rightComp R _ (ofHom g)) := rfl
