@@ -954,12 +954,25 @@ theorem affineSpan_eq_affineSpan_lineMap_units [Nontrivial k] {s : Set P} {p : P
   conv_rhs =>
     rw [this]
   apply le_antisymm
-    <;> intro q hq
-    <;> erw [mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V _ (⟨p, hp⟩ : s) q] at hq ⊢
-    <;> obtain ⟨t, μ, rfl⟩ := hq
-    <;> use t
-    <;> [use fun x => μ x * ↑(w x); use fun x => μ x * ↑(w x)⁻¹]
-    <;> simp [smul_smul]
+  · intro q hq
+    rcases
+      (mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V
+        (fun q : s => AffineMap.lineMap p ↑q (w q : k)) (⟨p, hp⟩ : s) q).mp hq with ⟨t, μ, hμ⟩
+    refine
+      (mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V ((↑) : s → P) (⟨p, hp⟩ : s) q).2 ?_
+    refine ⟨t, fun x => μ x * ↑(w x), ?_⟩
+    simpa [Finset.weightedVSubOfPoint_apply, AffineMap.lineMap_same_apply,
+      AffineMap.lineMap_vsub_left, smul_smul, mul_assoc] using hμ
+  · intro q hq
+    rcases
+      (mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V ((↑) : s → P) (⟨p, hp⟩ : s) q).mp hq with
+        ⟨t, μ, hμ⟩
+    refine
+      (mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V
+        (fun q : s => AffineMap.lineMap p ↑q (w q : k)) (⟨p, hp⟩ : s) q).2 ?_
+    refine ⟨t, fun x => μ x * ↑(w x)⁻¹, ?_⟩
+    simpa [Finset.weightedVSubOfPoint_apply, AffineMap.lineMap_same_apply,
+      AffineMap.lineMap_vsub_left, smul_smul, mul_assoc] using hμ
 
 end AffineSpace'
 
