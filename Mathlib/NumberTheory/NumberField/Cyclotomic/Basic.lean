@@ -109,12 +109,13 @@ theorem isIntegralClosure_adjoin_singleton_of_prime_pow [hcycl : IsCyclotomicExt
       have h₁ := minpoly.isIntegrallyClosed_eq_field_fractions' ℚ hint
       have h₂ := hζ.minpoly_sub_one_eq_cyclotomic_comp (cyclotomic.irreducible_rat (NeZero.pos _))
       rw [IsPrimitiveRoot.subOnePowerBasis_gen] at h₁
-      #adaptation_note /-- After https://github.com/leanprover/lean4/pull/12179
-      we needed to change the next line from `rw` to `erw`. -/
-      erw [h₁, ← map_cyclotomic_int, show Int.castRingHom ℚ = algebraMap ℤ ℚ by rfl,
-        show X + 1 = map (algebraMap ℤ ℚ) (X + 1) by simp, ← map_comp] at h₂
+      have h₂' := h₂
+      rw [h₁] at h₂'
+      conv_rhs at h₂' => rw [← map_cyclotomic_int]
+      rw [show Int.castRingHom ℚ = algebraMap ℤ ℚ by rfl] at h₂'
+      rw [show X + 1 = map (algebraMap ℤ ℚ) (X + 1) by simp, ← map_comp] at h₂'
       rw [IsPrimitiveRoot.subOnePowerBasis_gen,
-        map_injective (algebraMap ℤ ℚ) (algebraMap ℤ ℚ).injective_int h₂]
+        map_injective (algebraMap ℤ ℚ) (algebraMap ℤ ℚ).injective_int h₂']
       exact cyclotomic_prime_pow_comp_X_add_one_isEisensteinAt p _
     refine
       adjoin_le ?_
