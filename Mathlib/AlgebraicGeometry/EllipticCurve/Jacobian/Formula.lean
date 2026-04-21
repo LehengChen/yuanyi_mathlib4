@@ -340,8 +340,11 @@ lemma dblY_of_Z_ne_zero [DecidableEq F] {P Q : Fin 3 → F}
     (hx : P x * Q z ^ 2 = Q x * P z ^ 2) (hy : P y * Q z ^ 3 ≠ W.negY Q * P z ^ 3) :
     W.dblY P / W.dblZ P ^ 3 = W.toAffine.addY (P x / P z ^ 2) (Q x / Q z ^ 2) (P y / P z ^ 3)
       (W.toAffine.slope (P x / P z ^ 2) (Q x / Q z ^ 2) (P y / P z ^ 3) (Q y / Q z ^ 3)) := by
-  erw [dblY, negY_of_Z_ne_zero <| dblZ_ne_zero_of_Y_ne' hP hQ hPz hx hy,
-    dblX_of_Z_ne_zero hP hQ hPz hQz hx hy, negDblY_of_Z_ne_zero hP hQ hPz hQz hx hy, Affine.addY]
+  rw [Affine.addY]
+  simpa [dblY, dblX_of_Z_ne_zero hP hQ hPz hQz hx hy,
+    negDblY_of_Z_ne_zero hP hQ hPz hQz hx hy] using
+    (negY_of_Z_ne_zero (W := W) (P := ![W.dblX P, W.negDblY P, W.dblZ P]) <|
+      dblZ_ne_zero_of_Y_ne' hP hQ hPz hx hy)
 
 variable (W') in
 /-- The coordinates of a representative of `2 • P` for a Jacobian point representative `P` on a
@@ -387,8 +390,12 @@ lemma dblXYZ_of_Z_ne_zero [DecidableEq F] {P Q : Fin 3 → F}
           (W.toAffine.slope (P x / P z ^ 2) (Q x / Q z ^ 2) (P y / P z ^ 3) (Q y / Q z ^ 3)),
         1] := by
   have hZ {n : ℕ} : IsUnit <| W.dblZ P ^ n := (isUnit_dblZ_of_Y_ne' hP hQ hPz hx hy).pow n
-  erw [dblXYZ, smul_fin3, ← dblX_of_Z_ne_zero hP hQ hPz hQz hx hy, hZ.mul_div_cancel,
-    ← dblY_of_Z_ne_zero hP hQ hPz hQz hx hy, hZ.mul_div_cancel, mul_one]
+  rw [dblXYZ, smul_fin3]
+  congr
+  · rw [(fin3_def_ext _ _ _).1]
+    rw [← dblX_of_Z_ne_zero hP hQ hPz hQz hx hy, hZ.mul_div_cancel]
+  · rw [← dblY_of_Z_ne_zero hP hQ hPz hQz hx hy, (fin3_def_ext _ _ _).2.1, hZ.mul_div_cancel]
+  · rw [(fin3_def_ext _ _ _).2.2, mul_one]
 
 /-! ## Addition formulae in Jacobian coordinates -/
 
@@ -650,8 +657,10 @@ lemma addY_of_Z_ne_zero [DecidableEq F] {P Q : Fin 3 → F} (hP : W.Equation P) 
     (hPz : P z ≠ 0) (hQz : Q z ≠ 0) (hx : P x * Q z ^ 2 ≠ Q x * P z ^ 2) :
     W.addY P Q / addZ P Q ^ 3 = W.toAffine.addY (P x / P z ^ 2) (Q x / Q z ^ 2) (P y / P z ^ 3)
       (W.toAffine.slope (P x / P z ^ 2) (Q x / Q z ^ 2) (P y / P z ^ 3) (Q y / Q z ^ 3)) := by
-  erw [addY, negY_of_Z_ne_zero <| addZ_ne_zero_of_X_ne hx, addX_of_Z_ne_zero hP hQ hPz hQz hx,
-    negAddY_of_Z_ne_zero hP hQ hPz hQz hx, Affine.addY]
+  rw [Affine.addY]
+  simpa [addY, addX_of_Z_ne_zero hP hQ hPz hQz hx, negAddY_of_Z_ne_zero hP hQ hPz hQz hx] using
+    (negY_of_Z_ne_zero (W := W) (P := ![W.addX P Q, W.negAddY P Q, addZ P Q]) <|
+      addZ_ne_zero_of_X_ne hx)
 
 variable (W') in
 /-- The coordinates of a representative of `P + Q` for two distinct Jacobian point
@@ -701,8 +710,12 @@ lemma addXYZ_of_Z_ne_zero [DecidableEq F] {P Q : Fin 3 → F} (hP : W.Equation P
           (W.toAffine.slope (P x / P z ^ 2) (Q x / Q z ^ 2) (P y / P z ^ 3) (Q y / Q z ^ 3)),
         1] := by
   have hZ {n : ℕ} : IsUnit <| addZ P Q ^ n := (isUnit_addZ_of_X_ne hx).pow n
-  erw [addXYZ, smul_fin3, ← addX_of_Z_ne_zero hP hQ hPz hQz hx, hZ.mul_div_cancel,
-    ← addY_of_Z_ne_zero hP hQ hPz hQz hx, hZ.mul_div_cancel, mul_one]
+  rw [addXYZ, smul_fin3]
+  congr
+  · rw [(fin3_def_ext _ _ _).1]
+    rw [← addX_of_Z_ne_zero hP hQ hPz hQz hx, hZ.mul_div_cancel]
+  · rw [← addY_of_Z_ne_zero hP hQ hPz hQz hx, (fin3_def_ext _ _ _).2.1, hZ.mul_div_cancel]
+  · rw [(fin3_def_ext _ _ _).2.2, mul_one]
 
 /-! ## Maps and base changes -/
 
