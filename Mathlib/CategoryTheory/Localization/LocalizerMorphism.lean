@@ -188,9 +188,8 @@ lemma IsLocalizedEquivalence.of_equivalence [Φ.functor.IsEquivalence]
       (asEquivalence Φ.functor).symm ?_ (Φ.inverts W₂.Q)
       ((associator _ _ _).symm ≪≫ isoWhiskerRight ((Equivalence.unitIso _).symm) _ ≪≫
         leftUnitor _)
-    erw [W₁.isoClosure.inverseImage_equivalence_functor_eq_map_inverse]
-    rw [MorphismProperty.map_isoClosure]
-    exact h
+    simpa [W₁.isoClosure.inverseImage_equivalence_functor_eq_map_inverse,
+      MorphismProperty.map_isoClosure] using h
   exact IsLocalizedEquivalence.of_isLocalization_of_isLocalization Φ W₂.Q
 
 instance IsLocalizedEquivalence.isLocalization [Φ.IsLocalizedEquivalence] :
