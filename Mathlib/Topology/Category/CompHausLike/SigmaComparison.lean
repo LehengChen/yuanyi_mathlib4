@@ -62,8 +62,9 @@ theorem sigmaComparison_eq_comp_isos : sigmaComparison X σ =
   rw [← opCoproductIsoProduct_inv_comp_ι]
   simp only [Opposite.unop_op, unop_comp, Quiver.Hom.unop_op, Category.assoc]
   simp only [opCoproductIsoProduct, ← unop_comp, opCoproductIsoProduct'_comp_self]
-  erw [IsColimit.fac]
-  rfl
+  simpa [finiteCoproduct.cofan] using
+    ((finiteCoproduct.isColimit (fun a ↦ of P (σ a))).comp_coconePointUniqueUpToIso_inv
+      (coproductIsCoproduct fun a ↦ of P (σ a)) ⟨a⟩).symm
 
 set_option backward.isDefEq.respectTransparency false in
 instance isIsoSigmaComparison : IsIso <| sigmaComparison X σ := by
