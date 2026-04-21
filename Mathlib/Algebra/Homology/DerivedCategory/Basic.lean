@@ -260,8 +260,11 @@ lemma singleFunctorsPostcompQIso_hom_hom (n : ℤ) :
   ext X
   dsimp [singleFunctorsPostcompQIso, HomotopyCategory.singleFunctorsPostcompQuotientIso,
     quotientCompQhIso, HomologicalComplexUpToQuasiIso.quotientCompQhIso]
-  rw [CategoryTheory.Functor.map_id, Category.id_comp]
-  erw [Category.id_comp]
+  rw [CategoryTheory.Functor.map_id]
+  change 𝟙 ((singleFunctor C n).obj X) ≫ 𝟙 ((singleFunctor C n).obj X) ≫
+      𝟙 (Q.obj (((CochainComplex.singleFunctors C).functor n).obj X)) =
+    𝟙 (((singleFunctors C).functor n).obj X)
+  rw [Category.id_comp, Category.id_comp]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
