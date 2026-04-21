@@ -268,9 +268,9 @@ instance : (total β C).Faithful where
   map_injective {X Y} f g w := by
     ext i
     replace w := Sigma.ι (fun i : β => X i) i ≫= w
-    erw [colimit.ι_map, colimit.ι_map] at w
     replace w : f i ≫ colimit.ι (Discrete.functor Y) ⟨i⟩ =
-      g i ≫ colimit.ι (Discrete.functor Y) ⟨i⟩ := by simpa
+      g i ≫ colimit.ι (Discrete.functor Y) ⟨i⟩ := by
+        simpa [GradedObject.total, colimit.ι_map] using w
     exact Mono.right_cancellation _ _ w
 
 end GradedObject
