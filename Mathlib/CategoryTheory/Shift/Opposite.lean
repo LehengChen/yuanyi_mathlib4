@@ -176,14 +176,12 @@ instance commShiftOp [CommShift F A] :
     ext
     simp only [op_obj, comp_obj, Iso.symm_hom, NatIso.op_inv, NatTrans.op_app,
       CommShift.isoZero_inv_app, op_comp, CommShift.isoZero_hom_app]
-    erw [oppositeShiftFunctorZero_inv_app, oppositeShiftFunctorZero_hom_app]
     rfl
   commShiftIso_add a b := by
     rw [commShiftIso_add]
     ext
     simp only [op_obj, comp_obj, Iso.symm_hom, NatIso.op_inv, NatTrans.op_app,
       CommShift.isoAdd_inv_app, op_comp, Category.assoc, CommShift.isoAdd_hom_app]
-    erw [oppositeShiftFunctorAdd_inv_app, oppositeShiftFunctorAdd_hom_app]
     rfl
 
 lemma commShiftOp_iso_eq [CommShift F A] (a : A) :
@@ -203,7 +201,6 @@ def commShiftUnop
     ext
     simp only [comp_obj, NatIso.removeOp_hom, Iso.symm_hom, NatTrans.removeOp_app, op_obj,
       CommShift.isoZero_inv_app, unop_comp, CommShift.isoZero_hom_app]
-    erw [oppositeShiftFunctorZero_hom_app, oppositeShiftFunctorZero_inv_app]
     rfl
   commShiftIso_add a b := by
     rw [commShiftIso_add]
@@ -211,7 +208,6 @@ def commShiftUnop
     simp only [comp_obj, NatIso.removeOp_hom, Iso.symm_hom, NatTrans.removeOp_app, op_obj,
       CommShift.isoAdd_inv_app, unop_comp, Category.assoc,
       CommShift.isoAdd_hom_app]
-    erw [oppositeShiftFunctorAdd_hom_app, oppositeShiftFunctorAdd_inv_app]
     rfl
 
 end Functor
