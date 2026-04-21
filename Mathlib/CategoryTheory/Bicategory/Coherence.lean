@@ -179,7 +179,17 @@ theorem normalizeAux_nil_comp {a b c : B} (f : Hom a b) (g : Hom b c) :
   induction g generalizing a with
   | id => rfl
   | of => rfl
-  | comp g _ ihf ihg => erw [ihg (f.comp g), ihf f, ihg g, comp_assoc]
+  | comp g h ihf ihg =>
+      calc
+        normalizeAux nil (f.comp (g.comp h)) =
+            (normalizeAux nil (f.comp g)).comp (normalizeAux nil h) := by
+              simpa [normalizeAux] using ihg (f.comp g)
+        _ = ((normalizeAux nil f).comp (normalizeAux nil g)).comp (normalizeAux nil h) := by
+              rw [ihf f]
+        _ = (normalizeAux nil f).comp ((normalizeAux nil g).comp (normalizeAux nil h)) := by
+              rw [comp_assoc]
+        _ = (normalizeAux nil f).comp (normalizeAux nil (g.comp h)) := by
+              rw [← ihg g]
 
 /-- The normalization pseudofunctor for the free bicategory on a quiver `B`. -/
 def normalize (B : Type u) [Quiver.{v} B] :
@@ -196,7 +206,8 @@ def normalizeUnitIso (a b : FreeBicategory B) :
   NatIso.ofComponents (fun f => (λ_ f).symm ≪≫ normalizeIso nil f)
     (by
       intro f g η
-      erw [leftUnitor_inv_naturality_assoc, assoc]
+      dsimp
+      rw [leftUnitor_inv_naturality_assoc, assoc]
       congr 1
       exact normalize_naturality nil η)
 
