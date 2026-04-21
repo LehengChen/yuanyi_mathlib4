@@ -79,8 +79,10 @@ theorem Hom.ext {X Y : PresheafedSpace C} (α β : Hom X Y) (w : α.base = β.ba
   dsimp at w
   subst w
   dsimp at h
-  erw [whiskerRight_id', comp_id] at h
-  subst h
+  have h' : c = c' := by
+    ext U
+    simpa using congr_app h (op U)
+  cases h'
   rfl
 
 -- TODO including `injections` would make tidy work earlier.
@@ -241,7 +243,11 @@ def sheafIsoOfIso (H : X ≅ Y) : Y.2 ≅ H.hom.base _* X.2 where
       ((forget C).congr_map H.inv_hom_id.symm)) U)).op
     rw [id_c, NatTrans.id_app, id_comp, eqToHom_map, comp_c_app] at eq₁
     rw [eqToHom_op, eqToHom_map] at eq₂
-    erw [eq₂, reassoc_of% eq₁]
+    have eq₂' := by simpa using eq₂
+    have hU : H.hom.c.app (op U) = H.hom.c.app (op ((Opens.map (𝟙 (Y : TopCat))).obj U)) := by
+      rfl
+    rw [hU, eq₂']
+    rw [← Category.assoc, eq₁]
     simp
 
 instance base_isIso_of_iso (f : X ⟶ Y) [IsIso f] : IsIso f.base :=
@@ -328,8 +334,17 @@ theorem ofRestrict_top_c (X : PresheafedSpace C) :
        issue when `apply NatIso.isIso_of_isIso_app`. -/
   ext
   dsimp [ofRestrict]
-  erw [eqToHom_map, eqToHom_app]
-  simp
+  rename_i U
+  have hU :
+      (Opens.isOpenEmbedding (X := X.carrier) ⊤).isOpenMap.adjunction.counit.app U =
+        eqToHom (by simp) := by
+    exact Subsingleton.elim _ _
+  rw [show X.presheaf.map
+      ((Opens.isOpenEmbedding (X := X.carrier) ⊤).isOpenMap.adjunction.counit.app U).op =
+      X.presheaf.map (eqToHom (by simp)).op by
+        simpa using congrArg (fun f => X.presheaf.map f.op) hU]
+  rw [eqToHom_app]
+  simp [id_obj, comp_obj, eqToHom_op, eqToHom_map]
 
 /-- The map to the restriction of a presheafed space along the canonical inclusion from the top
 subspace.
