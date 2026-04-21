@@ -199,10 +199,10 @@ set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem id (ℱ : X.Presheaf C) (x : X) :
     ℱ.stalkPushforward C (𝟙 X) x = (stalkFunctor C x).map (Pushforward.id ℱ).hom := by
-  ext
-  simp only [stalkPushforward, germ, colim_map, ι_colimMap_assoc, whiskerRight_app]
-  erw [CategoryTheory.Functor.map_id]
-  simp [stalkFunctor]
+  ext U hU
+  simp only [pushforward_obj_obj, hom_id, ContinuousMap.id_apply, stalkFunctor_map_germ,
+    Pushforward.id_hom_app, Category.id_comp]
+  simpa using stalkPushforward_germ (C := C) (f := 𝟙 X) (F := ℱ) (U := U) x hU
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -306,7 +306,14 @@ def stalkPullbackInv (f : X ⟶ Y) (F : Y.Presheaf C) (x : X) :
             dsimp [OpenNhds.inclusion]
             rw [Category.comp_id, ← Functor.map_comp_assoc,
               pullbackPushforwardAdjunction_unit_pullback_map_germToPullbackStalk]
-            erw [pullbackPushforwardAdjunction_unit_pullback_map_germToPullbackStalk] } }
+            have hV' : (OpenNhds.inclusion x).obj (unop V) ≤ (Opens.map f).obj W := by
+              exact
+                (show (OpenNhds.inclusion x).obj (unop V) ≤ (OpenNhds.inclusion x).obj (unop U)
+                  from i.unop.le).trans hW
+            convert
+              (pullbackPushforwardAdjunction_unit_pullback_map_germToPullbackStalk
+                (C := C) (f := f) (F := F) (U := (OpenNhds.inclusion x).obj (unop V)) (x := x)
+                (hx := (unop V).2) (V := W) (hV := hV')) using 1 } }
 
 @[reassoc (attr := simp)]
 lemma germ_stalkPullbackInv (f : X ⟶ Y) (F : Y.Presheaf C) (x : X) (V : Opens X) (hV : x ∈ V) :
