@@ -204,7 +204,6 @@ theorem liftToPlusObjLimitObj_fac {K : Type s} [SmallCategory K] [FinCategory K]
   congr 1
   rw [← Iso.comp_inv_eq]
   exact colimitObjIsoColimitCompEvaluation_ι_inv (F ⋙ J.diagramFunctor D X).flip j k
-  rfl
 
 set_option backward.isDefEq.respectTransparency false in
 instance preservesLimitsOfShape_plusFunctor

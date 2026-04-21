@@ -272,7 +272,6 @@ noncomputable def isLimit : IsLimit (cone f) where
     simp only [Functor.ofOpSequence_obj, functorObj, dite_eq_ite, limit.lift_π, Fan.mk_pt,
       Fan.mk_π_app, ← h ⟨n + 1⟩, Category.assoc]
     rw [cone_π_app_comp_Pi_π_pos_full (f := f) m n]
-    simp
 
 section
 

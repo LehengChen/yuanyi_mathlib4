@@ -198,13 +198,9 @@ def linearEquivIncludeRange :
     rintro ⟨x', x, rfl : x ⊗ₜ 1 = x'⟩ ⟨y', y, rfl : 1 ⊗ₜ y = y'⟩
     rw [LinearMap.comp_apply, LinearMap.id_apply]
     exact linearEquivIncludeRange_left_inv_tmul (R := R) (S := S) (T := T) x y)
-    rw [tmul_mul_tmul, mul_one, one_mul, _root_.TensorProduct.map_tmul]
-    rfl)
   (_root_.TensorProduct.ext' fun x y ↦ by
     rw [LinearMap.comp_apply, LinearMap.id_apply, _root_.TensorProduct.map_tmul]
     exact linearEquivIncludeRange_right_inv_tmul (R := R) (S := S) (T := T) x y)
-    change (x ⊗ₜ 1) * (1 ⊗ₜ y) = _
-    rw [tmul_mul_tmul, mul_one, one_mul])
 
 theorem linearEquivIncludeRange_toLinearMap :
     (linearEquivIncludeRange R S T).toLinearMap =

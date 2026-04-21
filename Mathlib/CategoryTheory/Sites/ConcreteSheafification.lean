@@ -159,7 +159,6 @@ theorem res_mk_eq_mk_pullback {Y X : C} {P : Cᵒᵖ ⥤ D} {S : J.Cover X} (x :
     diagramPullback_app, Meq.equiv_apply, Meq.pullback_apply]
   rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
   simpa using (Meq.equiv_symm_eq_apply (P := P) (S := S) (x := x) (I := i.base))
-  cases i; rfl
 
 set_option backward.isDefEq.respectTransparency false in
 theorem toPlus_mk {X : C} {P : Cᵒᵖ ⥤ D} (S : J.Cover X) (x : ToType (P.obj (op X))) :
@@ -228,7 +227,6 @@ theorem eq_mk_iff_exists {X : C} {P : Cᵒᵖ ⥤ D} {S T : J.Cover X} (x : Meq 
     apply_fun Multiequalizer.ι (W.unop.index P) I at hh
     convert hh
     · dsimp [diagram]
-      dsimp [diagram]
       rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
       refine
         (show x { Y := I.Y, f := I.f, hf := _ } = x (I.map h1.unop) from by
@@ -252,7 +250,6 @@ theorem eq_mk_iff_exists {X : C} {P : Cᵒᵖ ⥤ D} {S T : J.Cover X} (x : Meq 
     apply_fun fun ee => ee i at e
     convert e using 1
     · dsimp [diagram]
-      dsimp [diagram]
       rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
       refine
         (Meq.equiv_symm_eq_apply (P := P) (S := S) (x := x)
@@ -473,8 +470,6 @@ theorem isSheaf_of_sep (P : Cᵒᵖ ⥤ D)
     apply_fun fun e => e I at h
     dsimp only [ConcreteCategory.forget_map_eq_coe] at h
     simpa only [Meq.equiv_apply, ← ConcreteCategory.comp_apply, Multiequalizer.lift_ι] using h
-      rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι] <;>
-      rfl
   · rintro (x : ToType (multiequalizer (S.index _)))
     obtain ⟨t, ht⟩ := exists_of_sep P hsep X S (Meq.equiv _ _ x)
     use t
@@ -647,7 +642,6 @@ instance plusPlusSheaf_preservesZeroMorphisms [Preadditive D] :
     ext : 3
     refine colimit.hom_ext (fun j => ?_)
     simp [GrothendieckTopology.sheafifyMap, GrothendieckTopology.sheafify, comp_zero]
-    simp
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The sheafification functor is left adjoint to the forgetful functor. -/

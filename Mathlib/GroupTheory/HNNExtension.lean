@@ -503,8 +503,6 @@ theorem unitsSMul_one_group_smul (g : A) (w : NormalWord d) :
     · simpa [toSubgroup_one, map_mul, Subgroup.coe_mul] using
         congrArg (fun x => (φ x : G)) hmul_fst
     · simpa using congrArg (fun x => (((x : d.set 1) : G) * w.head⁻¹) • w) hmul_snd
-    conv_lhs => erw [IsComplement.equiv_mul_left]
-    rfl
 
 noncomputable instance : MulAction (HNNExtension G A B φ) (NormalWord d) :=
   MulAction.ofEndHom <| (MulAction.toEndHom (M := Equiv.Perm (NormalWord d))).comp
