@@ -258,8 +258,26 @@ lemma le_of_iSup_eq_top {I J : X.IdealSheafData} {ι : Type*}
   dsimp
   simp +instances only [← Submodule.restrictScalars_localized' Γ(X, X.basicOpen (r j)),
     Ideal.localized'_eq_map, RingHom.algebraMap_toAlgebra]
-  erw [I.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j)),
-    J.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))]
+  suffices h :
+      Submodule.restrictScalars (Γ(X, V.1)) (I.ideal ⟨_, V.2.basicOpen (r j)⟩) ≤
+        Submodule.restrictScalars (Γ(X, V.1)) (J.ideal ⟨_, V.2.basicOpen (r j)⟩) by
+    intro x hx
+    have hI := I.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))
+    have hJ := J.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))
+    have hx0 :
+        x ∈ Ideal.map (X.presheaf.map (homOfLE (X.basicOpen_le (r j))).op).hom (I.ideal V) := by
+      simpa using hx
+    have hx' :
+        x ∈ Submodule.restrictScalars (Γ(X, V.1)) (I.ideal ⟨_, V.2.basicOpen (r j)⟩) := by
+      have hxI : x ∈ I.ideal ⟨_, V.2.basicOpen (r j)⟩ := hI ▸ hx0
+      simpa using hxI
+    have hx'' := h hx'
+    have hx1 : x ∈ J.ideal ⟨_, V.2.basicOpen (r j)⟩ := by
+      simpa using hx''
+    have hx2 :
+        x ∈ Ideal.map (X.presheaf.map (homOfLE (X.basicOpen_le (r j))).op).hom (J.ideal V) := by
+      exact hJ.symm ▸ hx1
+    simpa using hx2
   delta algebra_section_section_basicOpen
   rw! [e]
   rw [← I.map_ideal (V := (U _)) (X.basicOpen_le _), ← J.map_ideal (V := (U _)) (X.basicOpen_le _)]
@@ -593,7 +611,14 @@ noncomputable nonrec def vanishingIdeal (Z : Closeds X) : IdealSheafData X :=
         rw [← vanishingIdeal_closure,
           ← this.isOpenMap.preimage_closure_eq_closure_preimage this.continuous, e] at hx
         rw [← vanishingIdeal_closure, e]
-        erw [preimage_comap_zeroLocus] at hx
+        have hpre :
+            ⇑(Spec.map F) ⁻¹' PrimeSpectrum.zeroLocus ↑I =
+              PrimeSpectrum.zeroLocus (⇑(CommRingCat.Hom.hom F) '' ↑I) := by
+          ext p
+          rw [Set.mem_preimage, PrimeSpectrum.mem_zeroLocus, PrimeSpectrum.mem_zeroLocus,
+            Set.image_subset_iff]
+          rfl
+        rw [hpre] at hx
         rwa [← PrimeSpectrum.zeroLocus_span, ← Ideal.map, vanishingIdeal_zeroLocus_eq_radical,
           ← RingHom.algebraMap_toAlgebra (X.presheaf.map _).hom,
           ← IsLocalization.map_radical (.powers f), ← vanishingIdeal_zeroLocus_eq_radical] at hx)
