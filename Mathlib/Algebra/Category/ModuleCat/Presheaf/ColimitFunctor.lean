@@ -250,9 +250,7 @@ noncomputable def homEquiv {N : ModuleCat.{w} cR.pt} :
         simp only [← hφ, AddEquiv.symm_apply_apply, RingHom.id_apply]
         refine (map_smul_homEquiv'_iff hcR hcM φ).1 (fun U r m ↦ ?_)
         rw [hφ]
-        erw [toPresheaf_map_app_apply]
-        rw [map_smul]
-        rfl}
+        exact (ψ.app U).hom.map_smul r m}
   left_inv φ := (forget₂ _ AddCommGrpCat).map_injective (by
     ext : 1
     exact (homEquiv' hcR hcM).left_inv ((forget₂ _ AddCommGrpCat).map φ).hom)
@@ -294,8 +292,19 @@ noncomputable def map (f : M ⟶ M') :
     have h₂ := ConcreteCategory.congr_hom (hcM.fac c U) m
     dsimp [c] at h₁ h₂ ⊢
     rw [ModuleColimit.smul_eq]
-    erw [h₁, h₂, ModuleColimit.smul_eq, ← (f.app U).hom.map_smul]
-    rfl
+    have h₁' :
+        (ConcreteCategory.hom (hcM.desc ((Cocone.precompose ((toPresheaf _).map f)).obj cM')))
+            (ιM (hcR := hcR) (hcM := hcM) (r • m)) =
+          ιM (hcR := hcR) (hcM := hcM') ((f.app U).hom (r • m)) := by
+      exact h₁.trans rfl
+    have h₂' :
+        (ConcreteCategory.hom (hcM.desc ((Cocone.precompose ((toPresheaf _).map f)).obj cM')))
+            (ιM (hcR := hcR) (hcM := hcM) m) =
+          ιM (hcR := hcR) (hcM := hcM') ((f.app U).hom m) := by
+      exact h₂.trans rfl
+    exact h₁'.trans <| by
+      rw [(f.app U).hom.map_smul, ← ModuleColimit.smul_eq]
+      exact (congr_arg (fun x : ModuleColimit hcR hcM' => (ιR cR) r • x) h₂').symm
 
 @[simp]
 lemma map_apply (f : M ⟶ M') {U : Cᵒᵖ} (m : M.obj U) :
