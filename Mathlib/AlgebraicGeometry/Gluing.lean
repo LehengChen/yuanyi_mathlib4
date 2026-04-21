@@ -367,15 +367,25 @@ theorem fromGlued_injective : Function.Injective 𝒰.fromGlued := by
   let e :=
     (TopCat.pullbackConeIsLimit _ _).conePointUniqueUpToIso
       (isLimitOfHasPullbackOfPreservesLimit Scheme.forgetToTop (𝒰.f i) (𝒰.f j))
+  let z : (TopCat.pullbackCone (forgetToTop.map (𝒰.f i)) (forgetToTop.map (𝒰.f j))).pt :=
+    ⟨⟨x, y⟩, h⟩
+  have hleft :=
+    ConcreteCategory.congr_hom
+      ((TopCat.pullbackConeIsLimit _ _).conePointUniqueUpToIso_hom_comp
+        (isLimitOfHasPullbackOfPreservesLimit Scheme.forgetToTop (𝒰.f i) (𝒰.f j))
+        WalkingCospan.left)
+      z
+  have hright :=
+    ConcreteCategory.congr_hom
+      ((TopCat.pullbackConeIsLimit _ _).conePointUniqueUpToIso_hom_comp
+        (isLimitOfHasPullbackOfPreservesLimit Scheme.forgetToTop (𝒰.f i) (𝒰.f j))
+        WalkingCospan.right)
+      z
   rw [𝒰.gluedCover.ι_eq_iff]
-  use e.hom ⟨⟨x, y⟩, h⟩
+  use e.hom z
   constructor
-  · erw [← ConcreteCategory.comp_apply e.hom,
-      IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.left]
-    rfl
-  · erw [← ConcreteCategory.comp_apply e.hom, pullbackSymmetry_hom_comp_fst,
-      IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.right]
-    rfl
+  · simpa [e, z, ConcreteCategory.comp_apply] using hleft
+  · simpa [e, z, pullbackSymmetry_hom_comp_fst, ConcreteCategory.comp_apply] using hright
 
 set_option backward.isDefEq.respectTransparency false in
 instance (x : 𝒰.gluedCover.glued.carrier) :
