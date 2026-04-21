@@ -181,10 +181,36 @@ theorem ext_functor {C} [Category* C] {F G : Paths V ⥤ C} (h_obj : F.obj = G.o
     rw [h_obj]
   · intro X Y f
     induction f with
-    | nil => erw [F.map_id, G.map_id, Category.id_comp, eqToHom_trans, eqToHom_refl]
+    | nil =>
+      calc
+        F.map Quiver.Path.nil = 𝟙 (F.obj X) := by
+          convert F.map_id (X := X)
+        _ = eqToHom (congr_fun h_obj X) ≫ 𝟙 (G.obj X) ≫ eqToHom (congr_fun h_obj.symm X) := by
+          simp [Category.id_comp, eqToHom_trans, eqToHom_refl]
+        _ = eqToHom (congr_fun h_obj X) ≫ G.map Quiver.Path.nil ≫
+              eqToHom (congr_fun h_obj.symm X) := by
+          rw [show G.map Quiver.Path.nil = 𝟙 (G.obj X) by
+            convert G.map_id (X := X)]
     | cons g e ih =>
-      erw [F.map_comp g (Quiver.Hom.toPath e), G.map_comp g (Quiver.Hom.toPath e), ih, h]
-      simp only [Category.id_comp, eqToHom_refl, eqToHom_trans_assoc, Category.assoc]
+      calc
+        F.map (Quiver.Path.cons g e) = F.map g ≫ F.map (Quiver.Hom.toPath e) := by
+          convert F.map_comp g (Quiver.Hom.toPath e)
+        _ =
+            (eqToHom (congr_fun h_obj X) ≫ G.map g ≫ eqToHom (congr_fun h_obj.symm _)) ≫
+              F.map (Quiver.Hom.toPath e) := by
+          rw [ih]
+        _ =
+            (eqToHom (congr_fun h_obj X) ≫ G.map g ≫ eqToHom (congr_fun h_obj.symm _)) ≫
+              (eqToHom (congr_fun h_obj _) ≫ G.map (Quiver.Hom.toPath e) ≫
+                eqToHom (congr_fun h_obj.symm _)) := by
+          rw [h _ _ e]
+        _ =
+            eqToHom (congr_fun h_obj X) ≫ G.map (Quiver.Path.cons g e) ≫
+              eqToHom (congr_fun h_obj.symm _) := by
+          rw [show G.map (Quiver.Path.cons g e) =
+              G.map g ≫ G.map (Quiver.Hom.toPath e) by
+            convert G.map_comp g (Quiver.Hom.toPath e)]
+          simp only [Category.id_comp, eqToHom_refl, eqToHom_trans_assoc, Category.assoc]
 
 end Paths
 
