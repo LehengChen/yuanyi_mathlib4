@@ -69,8 +69,41 @@ theorem coimageImageComparison_app :
   simp only [coimage_image_factorisation, PreservesKernel.iso_hom, Category.assoc,
     kernel.lift_ι, Category.comp_id, PreservesCokernel.iso_inv,
     cokernel.π_desc_assoc, Category.id_comp]
-  erw [kernelComparison_comp_ι _ ((evaluation C D).obj X)]
-  erw [π_comp_cokernelComparison_assoc _ ((evaluation C D).obj X)]
+  have hκ :
+      cokernel.π ((kernel.ι α).app X) ≫
+          cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+            (coimageImageComparison α).app X ≫
+              kernelComparison (cokernel.π α) ((evaluation C D).obj X) ≫
+                kernel.ι ((cokernel.π α).app X) =
+        cokernel.π ((kernel.ι α).app X) ≫
+          cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+            (coimageImageComparison α).app X ≫
+              ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)) := by
+    simpa only [Category.assoc] using
+      congrArg
+        (fun t =>
+          cokernel.π ((kernel.ι α).app X) ≫
+            cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+              (coimageImageComparison α).app X ≫ t)
+        (show
+          kernelComparison (cokernel.π α) ((evaluation C D).obj X) ≫
+              kernel.ι ((cokernel.π α).app X) =
+            ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)) by
+          simpa using kernelComparison_comp_ι (cokernel.π α) ((evaluation C D).obj X))
+  conv_rhs => exact hκ
+  have hπ :
+      cokernel.π ((kernel.ι α).app X) ≫
+          cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+            (coimageImageComparison α).app X ≫
+              ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)) =
+        ((evaluation C D).obj X).map (cokernel.π (kernel.ι α)) ≫
+          (coimageImageComparison α).app X ≫
+            ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)) := by
+    simpa only [Category.assoc] using
+      π_comp_cokernelComparison_assoc (kernel.ι α) ((evaluation C D).obj X)
+        ((coimageImageComparison α).app X ≫
+          ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)))
+  conv_rhs => exact hπ
   conv_lhs => rw [← coimage_image_factorisation α]
   rfl
 
