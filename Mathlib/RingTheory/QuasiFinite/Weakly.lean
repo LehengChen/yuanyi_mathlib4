@@ -197,9 +197,23 @@ lemma baseChange (p : Ideal S) [p.IsPrime] [WeaklyQuasiFiniteAt R p]
     (Ideal.quotientKerAlgEquivOfSurjective hφ₁)
   refine .of_surjectiveOnStalks (q.map φ.toRingHom) e.symm.toAlgHom
     e.symm.toRingEquiv.surjectiveOnStalks _ ?_
-  erw [Ideal.comap_symm] -- This should be fixed once `Ideal.map` does not take homclasses.
-  rw [← Ideal.map_coe e.toRingEquiv, Ideal.map_map]
-  rfl
+  ext x
+  rw [Ideal.mem_comap]
+  constructor
+  · intro hx
+    have hx' : x ∈ Ideal.map e.toRingEquiv
+        (Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap _ _))) q) := by
+      rw [← Ideal.map_coe e.toRingEquiv, Ideal.map_map]
+      exact hx
+    exact (Ideal.symm_apply_mem_of_equiv_iff
+      (I := Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap _ _))) q)
+      (f := e.toRingEquiv) (y := x)).mpr hx'
+  · intro hx
+    have hx' := (Ideal.symm_apply_mem_of_equiv_iff
+      (I := Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap _ _))) q)
+      (f := e.toRingEquiv) (y := x)).mp hx
+    rw [← Ideal.map_coe e.toRingEquiv, Ideal.map_map] at hx'
+    exact hx'
 
 open _root_.TensorProduct in
 variable (R S) in
