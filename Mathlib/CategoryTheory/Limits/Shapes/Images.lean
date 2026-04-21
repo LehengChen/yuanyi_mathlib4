@@ -741,9 +741,10 @@ instance (priority := 100) hasImageMapOfIsIso {f g : Arrow C} [HasImage f.hom] [
   HasImageMap.mk
     { map := image.lift ((Image.monoFactorisation g.hom).ofArrowIso (inv sq))
       map_ι := by
-        erw [← cancel_mono (inv sq).right, Category.assoc, ← MonoFactorisation.ofArrowIso_m,
-          image.lift_fac, Category.assoc, ← Comma.comp_right, IsIso.hom_inv_id, Comma.id_right,
-          Category.comp_id] }
+        apply (cancel_mono (inv sq).right).1
+        rw [show image.ι g.hom = (Image.monoFactorisation g.hom).m by rfl]
+        rw [Category.assoc, ← MonoFactorisation.ofArrowIso_m, image.lift_fac, Category.assoc,
+          ← Comma.comp_right, IsIso.hom_inv_id, Comma.id_right, Category.comp_id] }
 
 set_option backward.isDefEq.respectTransparency false in
 instance HasImageMap.comp {f g h : Arrow C} [HasImage f.hom] [HasImage g.hom] [HasImage h.hom]
