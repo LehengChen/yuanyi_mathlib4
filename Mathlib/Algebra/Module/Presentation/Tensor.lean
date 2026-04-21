@@ -73,18 +73,34 @@ noncomputable def isPresentationCoreTensor :
     { var := fun g₁ ↦ h₂.desc
         { var := fun g₂ ↦ s.var ⟨g₁, g₂⟩
           linearCombination_var_relation := fun r₂ ↦ by
-            erw [← Finsupp.linearCombination_embDomain A
-              (Function.Embedding.sectR g₁ relations₂.G)]
-            exact s.linearCombination_var_relation (.inr ⟨g₁, r₂⟩) }
+            simpa [Finsupp.linearCombination_embDomain] using
+              s.linearCombination_var_relation (.inr ⟨g₁, r₂⟩) }
       linearCombination_var_relation := fun r₁ ↦ h₂.postcomp_injective (by
         ext g₂
         dsimp
-        erw [Finsupp.apply_linearCombination A (LinearMap.applyₗ (solution₂.var g₂))]
-        have := s.linearCombination_var_relation (.inl ⟨r₁, g₂⟩)
-        erw [Finsupp.linearCombination_embDomain] at this
-        convert this
-        ext g₁
-        simp) })
+        let t := fun g₁ ↦
+          h₂.desc
+            { var := fun g₂ ↦ s.var ⟨g₁, g₂⟩
+              linearCombination_var_relation := fun r₂ ↦ by
+                simpa [Finsupp.linearCombination_embDomain] using
+                  s.linearCombination_var_relation (.inr ⟨g₁, r₂⟩) }
+        have hs := s.linearCombination_var_relation (.inl ⟨r₁, g₂⟩)
+        have ht : (LinearMap.applyₗ (solution₂.var g₂)) ∘ t =
+            s.var ∘ Function.Embedding.sectL relations₁.G g₂ := by
+          funext g₁
+          simp [t]
+        calc
+          ((Finsupp.linearCombination A t) (relations₁.relation r₁)) (solution₂.var g₂) =
+              (Finsupp.linearCombination A ((LinearMap.applyₗ (solution₂.var g₂)) ∘ t))
+                (relations₁.relation r₁) := by
+                  simpa [t] using
+                    (Finsupp.apply_linearCombination A (LinearMap.applyₗ (solution₂.var g₂))
+                      t (relations₁.relation r₁))
+          _ = (Finsupp.linearCombination A (s.var ∘ Function.Embedding.sectL relations₁.G g₂))
+                (relations₁.relation r₁) := by
+                  rw [ht]
+          _ = 0 := by
+                  simpa [Finsupp.linearCombination_embDomain] using hs) })
   postcomp_desc _ := by aesop
   postcomp_injective h := curry_injective (h₁.postcomp_injective (by
     ext g₁ : 2
