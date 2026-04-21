@@ -126,14 +126,13 @@ noncomputable def partialLeftAdjoint : F.PartialLeftAdjointSource ⥤ D where
   map_id X := by
     apply F.partialLeftAdjointHomEquiv.injective
     dsimp
-    rw [partialLeftAdjointHomEquiv_map]
-    erw [id_comp]
+    simp [partialLeftAdjointHomEquiv_map]
   map_comp {X Y Z} f g := by
     apply F.partialLeftAdjointHomEquiv.injective
     dsimp
     rw [partialLeftAdjointHomEquiv_map, partialLeftAdjointHomEquiv_comp,
       partialLeftAdjointHomEquiv_map, assoc]
-    erw [assoc]
+    rw [ObjectProperty.FullSubcategory.comp_hom, assoc]
     rw [← F.partialLeftAdjointHomEquiv_comp, id_comp,
       partialLeftAdjointHomEquiv_map]
 
@@ -282,14 +281,13 @@ noncomputable def partialRightAdjoint : F.PartialRightAdjointSource ⥤ C where
   map_id X := by
     apply F.partialRightAdjointHomEquiv.injective
     dsimp
-    rw [partialRightAdjointHomEquiv_map]
-    erw [comp_id]
+    simp [partialRightAdjointHomEquiv_map]
   map_comp {X Y Z} f g := by
     apply F.partialRightAdjointHomEquiv.injective
     dsimp
     rw [partialRightAdjointHomEquiv_map, partialRightAdjointHomEquiv_comp,
       partialRightAdjointHomEquiv_map, ← assoc]
-    erw [← assoc]
+    rw [ObjectProperty.FullSubcategory.comp_hom, ← assoc]
     rw [← F.partialRightAdjointHomEquiv_comp, comp_id,
       partialRightAdjointHomEquiv_map]
 
