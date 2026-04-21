@@ -84,9 +84,30 @@ noncomputable def extClass : Ext.{w} S.X₃ S.X₁ 1 := by
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma extClass_hom [HasDerivedCategory.{w'} C] : hS.extClass.hom = hS.singleδ := by
+  have h₁ : HasSmallLocalizedHom.{w} W (S').X₃ K := hS.hasSmallLocalizedHom_S'_X₃_K
+  letI := h₁
+  have h₂ : HasSmallLocalizedShiftedHom.{w} W ℤ K (S').X₁ :=
+    hS.hasSmallLocalizedShiftedHom_K_S'_X₁
+  letI := h₂
+  have h₃ : HasSmallLocalizedHom.{w} W K ((S').X₁⟦(1 : ℤ)⟧) := by
+    infer_instance
+  letI := h₃
+  have h₄ : HasSmallLocalizedHom.{w} W (S').X₃ ((S').X₁⟦(1 : ℤ)⟧) := by
+    infer_instance
+  letI := h₄
   change SmallShiftedHom.equiv W Q hS.extClass = _
   dsimp [extClass, SmallShiftedHom.equiv]
-  erw [SmallHom.equiv_comp]
+  have h :=
+    @SmallHom.equiv_comp _ _ W _ _ Q _ (S').X₃ K ((S').X₁⟦(1 : ℤ)⟧) h₁ h₃ h₄
+      (SmallHom.mkInv qis hqis)
+      (SmallHom.mk W
+        (CochainComplex.mappingCone.triangle ((CochainComplex.singleFunctor C 0).map S.f)).mor₃)
+  have h' :=
+    congrArg
+      (fun t =>
+        t ≫ (Functor.commShiftIso Q 1).hom.app ((CochainComplex.singleFunctor C 0).obj S.X₁))
+      h
+  refine h'.trans ?_
   rw [SmallHom.equiv_mkInv, SmallHom.equiv_mk]
   dsimp [- Q_obj_single_obj, singleδ, triangleOfSESδ]
   rw [Category.assoc, Category.assoc, Category.assoc,
