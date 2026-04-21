@@ -567,9 +567,23 @@ theorem mapAlgHom_coe_ringHom [CommSemiring S₂] [Algebra R S₁] [Algebra R S�
 lemma range_mapAlgHom [CommSemiring S₂] [Algebra R S₁] [Algebra R S₂] (f : S₁ →ₐ[R] S₂) :
     (mapAlgHom f).range.toSubmodule = coeffsIn σ f.range.toSubmodule := by
   simp only [← SetLike.coe_set_eq, Subalgebra.coe_toSubmodule, AlgHom.coe_range]
-  ext
-  erw [mem_range_map_iff_coeffs_subset, mem_coeffsIn_iff_coeffs_subset]
-  simp [Set.subset_def]
+  ext x
+  constructor
+  · rintro ⟨p, rfl⟩
+    refine (mem_coeffsIn_iff_coeffs_subset (M := Subalgebra.toSubmodule f.range)
+      (p := mapAlgHom f p)).mpr ?_
+    refine subset_trans
+      (show (((mapAlgHom f p).coeffs : Set S₂) ⊆ (↑f : S₁ →+* S₂) '' p.coeffs) by
+        simpa [mapAlgHom_apply] using (coe_coeffs_map (f := (↑f : S₁ →+* S₂)) p))
+      ?_
+    rintro y ⟨z, _, rfl⟩
+    exact ⟨z, rfl⟩
+  · intro hx
+    obtain ⟨p, hp⟩ :=
+      (mem_range_map_iff_coeffs_subset (f := (↑f : S₁ →+* S₂)) (x := x)).mpr <|
+        (mem_coeffsIn_iff_coeffs_subset (M := Subalgebra.toSubmodule f.range) (p := x)).mp <|
+          by simpa using hx
+    exact ⟨p, by simpa [mapAlgHom_apply] using hp⟩
 
 end Map
 
