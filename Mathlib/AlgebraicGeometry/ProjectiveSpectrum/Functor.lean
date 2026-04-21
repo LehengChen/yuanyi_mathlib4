@@ -133,10 +133,10 @@ lemma germ_map_sectionInBasicOpen {p : ProjectiveSpectrum ℬ}
   simp only [GradedRingHom.toRingHom_eq_toRingHom, Localization.localRingHom_mk,
     GradedRingHom.coe_toRingHom]
   -- I sincerely apologise for your eyes.
-  erw [stalkIso'_symm_mk]
-  erw [PresheafedSpace.stalkMap_germ_apply]
-  erw [germ_map_sectionInBasicOpen]
-  erw [stalkIso'_germ]
+  grw (transparency := default) [stalkIso'_symm_mk]
+  grw (transparency := default) [PresheafedSpace.stalkMap_germ_apply]
+  grw (transparency := default) [germ_map_sectionInBasicOpen]
+  grw (transparency := default) [stalkIso'_germ]
   simp
 
 set_option backward.isDefEq.respectTransparency false in
