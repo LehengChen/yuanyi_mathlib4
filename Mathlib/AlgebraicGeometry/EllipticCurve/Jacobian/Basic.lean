@@ -52,10 +52,9 @@ notation `![x, y, z]`. However, `P` is not syntactically equivalent to the expan
 two forms. The equivalence of two point representatives `P` and `Q` is implemented as an equivalence
 of orbits of the action of `Rˣ`, or equivalently that there is some unit `u` of `R` such that
 `P = u • Q`. However, `u • Q` is not syntactically equal to `![u² * Q x, u³ * Q y, u * Q z]`, so the
-lemmas `smul_fin3` and `smul_fin3_ext` can be used to convert between the two forms. Files in
-`Mathlib/AlgebraicGeometry/EllipticCurve/Jacobian` make extensive use of `erw` to get around this.
-While `erw` is often an indication of a problem, in this case it is self-contained and should not
-cause any issues. It would alternatively be possible to add some automation to assist here.
+lemmas `smul_fin3` and `smul_fin3_ext` can be used to convert between the two forms. Local explicit
+rewrites and extensionality arguments are often enough to bridge these syntactic differences, though
+some additional automation could simplify this further.
 
 Whenever possible, all changes to documentation and naming of definitions and theorems should be
 mirrored in `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Basic.lean`.
