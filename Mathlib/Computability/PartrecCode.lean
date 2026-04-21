@@ -839,7 +839,10 @@ private theorem hG : Primrec G := by
       congr
       · ext p
         dsimp only []
-        erw [Option.bind_eq_bind, ← Option.map_eq_bind]
+        rw [Option.bind_eq_bind]
+        rw [show (fun y => some (Nat.pair p.2 y)) = some ∘ Nat.pair p.2 by
+          rfl]
+        rw [← Option.map_eq_bind]
     refine Primrec.option_map ((hlup.comp <| L.pair <| (k.pair cg).pair n).comp Primrec.fst) ?_
     unfold Primrec₂
     exact Primrec₂.natPair.comp (Primrec.snd.comp Primrec.fst) Primrec.snd
