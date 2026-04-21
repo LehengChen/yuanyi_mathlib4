@@ -374,20 +374,20 @@ def interUnionPullbackConeLift : s.pt ⟶ F.1.obj (op (U ⊔ V)) := by
 set_option backward.isDefEq.respectTransparency false in
 theorem interUnionPullbackConeLift_left :
     interUnionPullbackConeLift F U V s ≫ F.1.map (homOfLE le_sup_left).op = s.fst := by
-  erw [Category.assoc]
-  simp_rw [← F.1.map_comp]
-  exact
-    (F.presheaf.isSheaf_iff_isSheafPairwiseIntersections.mp F.2 _).some.fac _ <|
-      op <| Pairwise.single <| ULift.up WalkingPair.left
+  simpa [interUnionPullbackConeLift, Pairwise.cocone_ι_app, Functor.mapCone_π_app, Cocone.op,
+    Pairwise.coconeιApp, Functor.op, NatTrans.op, unop_op, op_comp, Category.assoc,
+    ← F.1.map_comp] using
+    ((F.presheaf.isSheaf_iff_isSheafPairwiseIntersections.mp F.2 _).some.fac _
+      (op (Pairwise.single (ULift.up WalkingPair.left))))
 
 set_option backward.isDefEq.respectTransparency false in
 theorem interUnionPullbackConeLift_right :
     interUnionPullbackConeLift F U V s ≫ F.1.map (homOfLE le_sup_right).op = s.snd := by
-  erw [Category.assoc]
-  simp_rw [← F.1.map_comp]
-  exact
-    (F.presheaf.isSheaf_iff_isSheafPairwiseIntersections.mp F.2 _).some.fac _ <|
-      op <| Pairwise.single <| ULift.up WalkingPair.right
+  simpa [interUnionPullbackConeLift, Pairwise.cocone_ι_app, Functor.mapCone_π_app, Cocone.op,
+    Pairwise.coconeιApp, Functor.op, NatTrans.op, unop_op, op_comp, Category.assoc,
+    ← F.1.map_comp] using
+    ((F.presheaf.isSheaf_iff_isSheafPairwiseIntersections.mp F.2 _).some.fac _
+      (op (Pairwise.single (ULift.up WalkingPair.right))))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- For a sheaf `F`, `F(U ⊔ V)` is the pullback of `F(U) ⟶ F(U ⊓ V)` and `F(V) ⟶ F(U ⊓ V)`. -/
@@ -412,12 +412,12 @@ def isLimitPullbackCone : IsLimit (interUnionPullbackCone F U V) := by
     apply (F.presheaf.isSheaf_iff_isSheafPairwiseIntersections.mp F.2 ι).some.hom_ext
     rintro ((_ | _) | (_ | _)) <;>
     rw [Category.assoc, Category.assoc]
-    · erw [← F.1.map_comp]
-      convert h₁
-      apply interUnionPullbackConeLift_left
-    · erw [← F.1.map_comp]
-      convert h₂
-      apply interUnionPullbackConeLift_right
+    · simpa [Pairwise.cocone_ι_app, Functor.mapCone_π_app, Cocone.op, Pairwise.coconeιApp,
+        Functor.op, NatTrans.op, unop_op, op_comp, Category.assoc, ← F.1.map_comp] using
+        h₁.trans (interUnionPullbackConeLift_left (F := F) (U := U) (V := V) (s := s)).symm
+    · simpa [Pairwise.cocone_ι_app, Functor.mapCone_π_app, Cocone.op, Pairwise.coconeιApp,
+        Functor.op, NatTrans.op, unop_op, op_comp, Category.assoc, ← F.1.map_comp] using
+        h₂.trans (interUnionPullbackConeLift_right (F := F) (U := U) (V := V) (s := s)).symm
     all_goals
       dsimp only [Functor.op, Pairwise.cocone_ι_app, Functor.mapCone_π_app, Cocone.op,
         Pairwise.coconeιApp, unop_op, op_comp, NatTrans.op]
