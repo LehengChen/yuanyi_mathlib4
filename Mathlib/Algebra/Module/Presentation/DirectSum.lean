@@ -134,9 +134,8 @@ noncomputable def finsupp : Presentation A (ι →₀ N) :=
 lemma finsupp_var (i : ι) (g : pres.G) :
     (finsupp pres ι).var ⟨i, g⟩ = Finsupp.single i (pres.var g) := by
   apply (finsuppLequivDFinsupp A).injective
-  erw [(finsuppLequivDFinsupp A).apply_symm_apply]
-  rw [directSum_var, finsuppLequivDFinsupp_apply_apply, Finsupp.toDFinsupp_single]
-  rfl
+  rw [finsuppLequivDFinsupp_apply_apply, Finsupp.toDFinsupp_single]
+  exact DFinsupp.toFinsupp_toDFinsupp _
 
 end
 
