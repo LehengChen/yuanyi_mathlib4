@@ -711,9 +711,27 @@ lemma toStalk_stalkMap_toSpec (f) (x) :
     (Scheme.ΓSpecIso _).inv ≫ (Spec A⁰_ f).presheaf.germ _ _ (by simp) ≫
       (toSpec 𝒜 f).stalkMap x = awayToΓ 𝒜 f ≫ (Proj| pbo f).presheaf.Γgerm x := by
   dsimp
-  erw [LocallyRingedSpace.stalkMap_germ (toSpec 𝒜 f) ⊤ x (by simp)]
-  erw [toOpen_toSpec_val_c_app_assoc]
-  rfl
+  have h1 :
+      (Scheme.ΓSpecIso _).inv ≫
+          (Spec A⁰_ f).presheaf.germ ⊤ ((ConcreteCategory.hom (toSpec 𝒜 f).base) x)
+            (by simp) ≫
+            (toSpec 𝒜 f).stalkMap x =
+        (Scheme.ΓSpecIso _).inv ≫
+          (toSpec 𝒜 f).c.app (op ⊤) ≫
+            (Proj| pbo f).presheaf.germ ((Opens.map (toSpec 𝒜 f).base).obj ⊤) x (by simp) := by
+    simpa only [Category.assoc] using
+      congrArg (fun k => (Scheme.ΓSpecIso _).inv ≫ k)
+        (LocallyRingedSpace.stalkMap_germ (toSpec 𝒜 f) ⊤ x (by simp))
+  have h2 :
+      (Scheme.ΓSpecIso _).inv ≫ (toSpec 𝒜 f).c.app (op ⊤) ≫
+          (Proj| pbo f).presheaf.germ ((Opens.map (toSpec 𝒜 f).base).obj ⊤) x (by simp) =
+        awayToΓ 𝒜 f ≫ (Proj| pbo f).presheaf.Γgerm x := by
+    simpa only [Category.assoc, Presheaf.Γgerm] using
+      congrArg
+        (fun k =>
+          k ≫ (Proj| pbo f).presheaf.germ ((Opens.map (toSpec 𝒜 f).base).obj ⊤) x (by simp))
+        (toOpen_toSpec_val_c_app (𝒜 := 𝒜) f (op ⊤))
+  exact Eq.trans h1 h2
 
 set_option backward.isDefEq.respectTransparency false in
 /--
