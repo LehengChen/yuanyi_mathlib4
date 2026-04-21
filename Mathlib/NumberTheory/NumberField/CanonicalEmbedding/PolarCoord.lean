@@ -401,12 +401,34 @@ theorem volume_eq_two_pi_pow_mul_integral [NumberField K]
       ← two_mul, Finset.prod_const, Finset.card_univ, ← Set.indicator_const_mul,
       ← Set.indicator_comp_right, Function.comp_def, Pi.one_apply, mul_one]
     rw [lintegral_mul_const' _ _ (ne_of_beq_false rfl).symm, mul_comm]
-    erw [setLIntegral_indicator (by convert hm.preimage mixedSpaceOfRealSpace.measurable)]
-    rw [hA, volume_eq_two_pi_pow_mul_integral_aux hA]
     congr 1
-    refine setLIntegral_congr (ae_eq_set_inter (by rfl) (Measure.ae_eq_set_pi fun w _ ↦ ?_))
-    split_ifs
-    exacts [ae_eq_rfl, Ioi_ae_eq_Ici]
+    calc
+      ∫⁻ a in Set.univ.pi (fun w ↦ if w.IsReal then Set.univ else Set.Ioi 0),
+          (⇑mixedSpaceOfRealSpace ⁻¹'
+              (normAtComplexPlaces ⁻¹' (normAtComplexPlaces '' A))).indicator
+            (fun x : realSpace K ↦ ∏ w : {w // IsComplex w}, ENNReal.ofReal (x w.1)) a
+            ∂Measure.pi (fun _ : InfinitePlace K ↦ volume)
+        = ∫⁻ a in
+            ⇑mixedSpaceOfRealSpace ⁻¹' (normAtComplexPlaces ⁻¹' (normAtComplexPlaces '' A)) ∩
+              Set.univ.pi (fun w ↦ if w.IsReal then Set.univ else Set.Ioi 0),
+            (fun x : realSpace K ↦ ∏ w : {w // IsComplex w}, ENNReal.ofReal (x w.1)) a
+            ∂Measure.pi (fun _ : InfinitePlace K ↦ volume) := by
+              simpa using
+                (setLIntegral_indicator
+                  (μ := Measure.pi fun _ : InfinitePlace K => volume)
+                  (s := ⇑mixedSpaceOfRealSpace ⁻¹'
+                    (normAtComplexPlaces ⁻¹' (normAtComplexPlaces '' A)))
+                  (t := Set.univ.pi fun w ↦ if w.IsReal then Set.univ else Set.Ioi 0)
+                  (by convert hm.preimage mixedSpaceOfRealSpace.measurable)
+                  (fun x : realSpace K ↦ ∏ w : {w // IsComplex w}, ENNReal.ofReal (x w.1)))
+      _ = ∫⁻ x in normAtComplexPlaces '' A, ∏ w : {w // IsComplex w}, ENNReal.ofReal (x w.1)
+            ∂Measure.pi (fun _ : InfinitePlace K ↦ volume) := by
+              rw [hA, volume_eq_two_pi_pow_mul_integral_aux hA]
+              refine setLIntegral_congr (ae_eq_set_inter (by rfl)
+                (Measure.ae_eq_set_pi (μ := fun _ : InfinitePlace K ↦ (volume : Measure ℝ))
+                  fun w _ ↦ ?_))
+              split_ifs
+              exacts [ae_eq_rfl, Ioi_ae_eq_Ici]
   · exact (Measurable.mul (by fun_prop)
       <| measurable_const.indicator <| hm.preimage (measurable_polarSpaceCoord_symm K)).aemeasurable
 
