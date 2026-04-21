@@ -307,9 +307,13 @@ lemma sheafAdjunctionCocontinuous_unit_app_hom (F : Sheaf K A) :
     (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).symm
     (G.sheafPushforwardCocontinuousCompSheafToPresheafIso A J K).symm F).trans
   dsimp
-  erw [Functor.map_id]
-  change _ ≫ 𝟙 _ ≫ 𝟙 _ = _
-  simp only [Category.comp_id]
+  have h : (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).inv.app F = 𝟙 _ := rfl
+  rw [h]
+  change (G.op.ranAdjunction A).unit.app F.obj ≫
+      G.op.ran.map (𝟙 ((sheafToPresheaf K A ⋙ (whiskeringLeft Cᵒᵖ Dᵒᵖ A).obj G.op).obj F)) ≫
+      𝟙 (G.op.ran.obj ((sheafToPresheaf K A ⋙ (whiskeringLeft Cᵒᵖ Dᵒᵖ A).obj G.op).obj F)) =
+    (G.op.ranAdjunction A).unit.app F.obj
+  simp
 
 @[deprecated (since := "2026-03-05")]
 alias sheafAdjunctionCocontinuous_unit_app_val :=
@@ -340,8 +344,28 @@ lemma sheafAdjunctionCocontinuous_homEquiv_apply_hom {F : Sheaf K A} {H : Sheaf 
       (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).symm
       (G.sheafPushforwardCocontinuousCompSheafToPresheafIso A J K).symm f))).trans (by
         dsimp
-        erw [Functor.map_id, Category.comp_id, Category.id_comp,
-          Adjunction.homEquiv_unit])
+        have h₁ :
+            (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).inv.app F = 𝟙 _ :=
+          rfl
+        rw [h₁]
+        change (G.op.ranAdjunction A).unit.app F.obj ≫
+            G.op.ran.map (𝟙 ((sheafToPresheaf K A ⋙ (whiskeringLeft Cᵒᵖ Dᵒᵖ A).obj G.op).obj F)) ≫
+            G.op.ran.map f.hom ≫ 𝟙 ((G.sheafPushforwardCocontinuous A J K).obj H).obj =
+          (G.op.ranAdjunction A).homEquiv F.obj H.obj f.hom
+        simp only [Functor.id_obj, Functor.comp_obj, whiskeringLeft_obj_obj, ObjectProperty.ι_obj,
+          Functor.map_id, Category.id_comp]
+        calc
+          (G.op.ranAdjunction A).unit.app F.obj ≫ G.op.ran.map f.hom ≫
+              𝟙 ((G.sheafPushforwardCocontinuous A J K).obj H).obj
+              = (G.op.ranAdjunction A).unit.app F.obj ≫ G.op.ran.map f.hom := by
+                  change (G.op.ranAdjunction A).unit.app F.obj ≫ G.op.ran.map f.hom ≫
+                      𝟙 (G.op.ran.obj H.obj) =
+                    (G.op.ranAdjunction A).unit.app F.obj ≫ G.op.ran.map f.hom
+                  simp
+          _ = (G.op.ranAdjunction A).homEquiv F.obj H.obj f.hom := by
+                simpa using
+                  ((G.op.ranAdjunction A).homEquiv_unit (X := F.obj) (Y := H.obj)
+                    (f := f.hom)).symm)
 
 @[deprecated (since := "2026-03-05")]
 alias sheafAdjunctionCocontinuous_homEquiv_apply_val :=
