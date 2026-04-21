@@ -208,9 +208,12 @@ theorem algebraMap_gradedMul (r : R) (x : (⨁ i, 𝒜 i) ⊗[R] (⨁ i, ℬ i))
     exact DFunLike.congr_fun this x
   ext ia a ib b
   dsimp
-  erw [tmul_of_gradedMul_of_tmul]
-  rw [zero_mul, uzpow_zero, one_smul, smul_tmul']
-  erw [one_mul, _root_.Algebra.smul_def]
+  have h_one : (lof R _ ℬ 0 GradedMonoid.GOne.one : ⨁ i, ℬ i) = 1 := by
+    simp [DirectSum.one_def, ← DirectSum.lof_eq_of R]
+  have h := tmul_of_gradedMul_of_tmul (R := R) (𝒜 := 𝒜) (ℬ := ℬ) (j₁ := 0) (i₂ := ia)
+    (a₁ := algebraMap R _ r) (b₁ := GradedMonoid.GOne.one) (a₂ := a) (b₂ := lof R _ ℬ ib b)
+  rw [h_one] at h
+  simpa [zero_mul, uzpow_zero, one_smul, smul_tmul', one_mul, _root_.Algebra.smul_def] using h
 
 theorem one_gradedMul (x : (⨁ i, 𝒜 i) ⊗[R] (⨁ i, ℬ i)) :
     gradedMul R 𝒜 ℬ 1 x = x := by
@@ -221,12 +224,15 @@ theorem gradedMul_algebraMap (x : (⨁ i, 𝒜 i) ⊗[R] (⨁ i, ℬ i)) (r : R)
     gradedMul R 𝒜 ℬ x (algebraMap R _ r ⊗ₜ 1) = r • x := by
   suffices (gradedMul R 𝒜 ℬ).flip (algebraMap R _ r ⊗ₜ 1) = DistribSMul.toLinearMap R _ r by
     exact DFunLike.congr_fun this x
-  ext
+  ext ia a ib b
   dsimp
-  erw [tmul_of_gradedMul_of_tmul]
-  rw [mul_zero, uzpow_zero, one_smul, smul_tmul',
-      mul_one, _root_.Algebra.smul_def, Algebra.commutes]
-  rfl
+  have h_alg : (lof R _ 𝒜 0 (DirectSum.GAlgebra.toFun r) : ⨁ i, 𝒜 i) = algebraMap R _ r := by
+    rw [DirectSum.algebraMap_apply, ← DirectSum.lof_eq_of R]
+  have h := tmul_of_gradedMul_of_tmul (R := R) (𝒜 := 𝒜) (ℬ := ℬ) (j₁ := ib) (i₂ := 0)
+    (a₁ := lof R _ 𝒜 ia a) (b₁ := b) (a₂ := DirectSum.GAlgebra.toFun r) (b₂ := 1)
+  rw [h_alg] at h
+  simpa [mul_zero, uzpow_zero, one_smul, smul_tmul', mul_one, _root_.Algebra.smul_def,
+    Algebra.commutes] using h
 
 theorem gradedMul_one (x : (⨁ i, 𝒜 i) ⊗[R] (⨁ i, ℬ i)) :
     gradedMul R 𝒜 ℬ x 1 = x := by
