@@ -66,8 +66,6 @@ def diagramNatTrans {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (X : C) : J.diagram P X
     Multiequalizer.lift _ _ (fun _ => Multiequalizer.ι _ _ ≫ η.app _) (fun i => by
       dsimp only
       simpa using Multiequalizer.condition_assoc ((unop W).index P) i (η.app (op i.r.Z)))
-        Multiequalizer.condition_assoc]
-      rfl)
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]

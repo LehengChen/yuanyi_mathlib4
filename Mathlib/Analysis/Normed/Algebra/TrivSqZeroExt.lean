@@ -212,7 +212,6 @@ theorem norm_def (x : tsze R M) : ‖x‖ = ‖fst x‖ + ‖snd x‖ := by
   rw [show ‖x‖ = ‖@WithLp.toLp 1 (R × M) x‖ by rfl]
   rw [WithLp.prod_norm_eq_add (by norm_num)]
   simp [fst, snd]
-    one_ne_zero, not_false_eq_true, div_self, fst, snd]
 
 theorem nnnorm_def (x : tsze R M) : ‖x‖₊ = ‖fst x‖₊ + ‖snd x‖₊ := by
   ext; simp [norm_def]
