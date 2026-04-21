@@ -86,8 +86,7 @@ def postcomp (f : M ⟶ N) : N.Derivation φ where
   d_map {X Y} g x := by simpa using naturality_apply f g (d.d x)
   d_app {X} a := by
     dsimp
-    erw [d_app]
-    rw [map_zero]
+    exact d.d_app a ▸ map_zero ((f.app _).hom)
 
 /-- The universal property that a derivation `d : M.Derivation φ` must
 satisfy so that the presheaf of modules `M` can be considered as the presheaf of
@@ -219,9 +218,8 @@ noncomputable def isUniversal' : (derivation' φ').Universal :=
       { app := fun X ↦ (d'.app X).desc
         naturality := fun {X Y} f ↦ CommRingCat.KaehlerDifferential.ext (fun b ↦ by
           dsimp
-          rw [ModuleCat.Derivation.desc_d, Derivation'.app_apply]
-          erw [relativeDifferentials'_map_d φ' f]
-          simp) })
+          exact (relativeDifferentials'_map_d φ' f b) ▸ by
+            simp [ModuleCat.Derivation.desc_d, Derivation'.app_apply]) })
     (fun {M'} d' ↦ by
       ext X b
       apply ModuleCat.Derivation.desc_d)
