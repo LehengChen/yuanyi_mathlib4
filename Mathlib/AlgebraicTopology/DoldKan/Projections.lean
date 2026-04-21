@@ -162,9 +162,10 @@ def natTransP (q : ℕ) : alternatingFaceMapComplex C ⟶ alternatingFaceMapComp
       simp only [P_zero, id_comp, comp_id]
     | succ q hq =>
       simp only [P_succ, add_comp, comp_add, assoc, comp_id, hq, reassoc_of% hq]
-      -- `erw` is needed to see through `natTransHσ q).app = Hσ q`
-      erw [(natTransHσ q).naturality f]
-      rfl
+      have hH : (alternatingFaceMapComplex C).map f ≫ Hσ q =
+          Hσ q ≫ (alternatingFaceMapComplex C).map f := by
+        exact (natTransHσ q).naturality f
+      simp only [hH]
 
 set_option backward.isDefEq.respectTransparency false in -- This is needed in AlgebraicTopology/DoldKan/Decomposition.lean
 @[reassoc (attr := simp)]
