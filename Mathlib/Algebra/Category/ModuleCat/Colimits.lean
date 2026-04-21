@@ -66,14 +66,16 @@ noncomputable def colimitCocone : Cocone F where
   ι :=
     { app := fun j => homMk (colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j) (fun r => by
         dsimp
-        -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-        erw [mkOfSMul_smul]
-        simp)
+        have h :
+            colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫ (coconePointSMul F) r =
+              (F.obj j).smul r ≫ colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j := by
+          simp [coconePointSMul]
+        simpa [mkOfSMul_smul (φ := coconePointSMul F)])
       naturality := fun i j f => by
         apply (forget₂ _ AddCommGrpCat).map_injective
         simp only [Functor.map_comp, forget₂_map_homMk]
         dsimp
-        erw [colimit.w (F ⋙ forget₂ _ AddCommGrpCat), comp_id] }
+        simpa using colimit.w (F ⋙ forget₂ _ AddCommGrpCat) f }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The cocone for `F` constructed from the colimit of
@@ -84,12 +86,15 @@ noncomputable def isColimitColimitCocone : IsColimit (colimitCocone F) where
     intro j
     dsimp
     rw [colimit.ι_desc_assoc]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [mkOfSMul_smul]
-    dsimp
-    simp only [ι_colimMap_assoc, Functor.comp_obj, forget₂_obj, colimit.ι_desc,
-      Functor.mapCocone_pt, Functor.mapCocone_ι_app, forget₂_map]
-    exact smul_naturality (s.ι.app j) r)
+    have h :
+        ((forget₂ _ AddCommGrpCat).mapCocone s).ι.app j ≫ s.pt.smul r =
+          colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫ (coconePointSMul F) r ≫
+            colimit.desc (F ⋙ forget₂ _ AddCommGrpCat) ((forget₂ _ AddCommGrpCat).mapCocone s) := by
+      simp only [Functor.comp_obj, forget₂_obj, Functor.mapCocone_pt, Functor.const_obj_obj,
+        Functor.mapCocone_ι_app, forget₂_map, coconePointSMul_apply, ι_colimMap_assoc,
+        colimit.ι_desc]
+      exact smul_naturality (s.ι.app j) r
+    simpa [colimitCocone, mkOfSMul_smul (φ := coconePointSMul F)])
   fac s j := by
     apply (forget₂ _ AddCommGrpCat).map_injective
     exact colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j
@@ -97,7 +102,7 @@ noncomputable def isColimitColimitCocone : IsColimit (colimitCocone F) where
     apply (forget₂ _ AddCommGrpCat).map_injective
     apply colimit.hom_ext
     intro j
-    erw [colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j]
+    rw [forget₂_map_homMk, colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j]
     dsimp
     rw [← hm]
     rfl
