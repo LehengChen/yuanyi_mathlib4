@@ -98,13 +98,19 @@ lemma surjective_π_app_zero_of_surjective_map_aux :
   intro ⟨n⟩ ⟨m⟩ ⟨⟨⟨(h : m ≤ n)⟩⟩⟩
   induction h with
   | refl =>
-    erw [CategoryTheory.Functor.map_id, types_id_apply]
+    change F.map (homOfLE (show m ≤ m by exact le_rfl)).op (preimage hF a m) = preimage hF a m
+    simp
   | @step p h ih =>
     rw [← ih]
     have h' : m ≤ p := h
-    erw [CategoryTheory.Functor.map_comp (f := (homOfLE (Nat.le_succ p)).op) (g := (homOfLE h').op),
-      types_comp_apply, (hF p _).choose_spec]
-    rfl
+    change F.map (homOfLE (Nat.le_succ_of_le h')).op (preimage hF a (p + 1)) =
+      F.map (homOfLE h').op (preimage hF a p)
+    rw [show (homOfLE (Nat.le_succ_of_le h')).op =
+          (homOfLE (Nat.le_succ p)).op ≫ (homOfLE h').op by
+            rw [← op_comp, CategoryTheory.homOfLE_comp],
+      CategoryTheory.Functor.map_comp, types_comp_apply]
+    simpa [limitOfSurjectionsSurjective.preimage] using
+      congrArg (F.map (homOfLE h').op) ((hF p (preimage hF a p)).choose_spec)
 
 set_option backward.isDefEq.respectTransparency false in
 /--
