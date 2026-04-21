@@ -159,6 +159,64 @@ lemma cone_π_app_comp_Pi_π_neg (m n : ℕ) (h : ¬(n < m)) : (cone f).π.app �
     Discrete.functor_obj_eq_as, Discrete.natTrans_app]
   rw [dif_neg h]
 
+lemma functorMap_commSq_full {X : C} {n m : ℕ} (g : X ⟶ functorObj M N (m + 1))
+    (h : ¬(m < n)) :
+    g ≫ Pi.π (fun i ↦ if i < m + 1 then M i else N i) m ≫
+      eqToHom (dif_pos (by lia : m < m + 1)) ≫ f m ≫ eqToHom (functorObj_eq_neg h).symm =
+        g ≫ (Functor.ofOpSequence (functorMap f)).map (homOfLE (by lia : n ≤ m + 1)).op ≫
+          Pi.π (fun i ↦ if i < n then M i else N i) m := by
+  have hsq :
+      Pi.π (fun i ↦ if i < m + 1 then M i else N i) m ≫
+        eqToHom (functorObj_eq_pos (n := m + 1) (m := m) (by lia)) ≫ f m =
+          (Functor.ofOpSequence (functorMap f)).map (homOfLE (by lia : n ≤ m + 1)).op ≫
+            Pi.π (fun i ↦ if i < n then M i else N i) m ≫ eqToHom (functorObj_eq_neg h) := by
+    simpa using (functorMap_commSq f h).symm
+  have hsq' :
+      g ≫ Pi.π (fun i ↦ if i < m + 1 then M i else N i) m ≫
+        eqToHom (functorObj_eq_pos (n := m + 1) (m := m) (by lia)) ≫ f m =
+          g ≫ (Functor.ofOpSequence (functorMap f)).map (homOfLE (by lia : n ≤ m + 1)).op ≫
+            Pi.π (fun i ↦ if i < n then M i else N i) m ≫ eqToHom (functorObj_eq_neg h) := by
+    simpa only [Category.assoc] using congrArg (fun k => g ≫ k) hsq
+  calc
+    g ≫ Pi.π (fun i ↦ if i < m + 1 then M i else N i) m ≫ eqToHom (dif_pos (by lia : m < m + 1)) ≫
+        f m ≫ eqToHom (functorObj_eq_neg h).symm =
+      (g ≫ Pi.π (fun i ↦ if i < m + 1 then M i else N i) m ≫
+        eqToHom (functorObj_eq_pos (n := m + 1) (m := m) (by lia)) ≫ f m) ≫
+          eqToHom (functorObj_eq_neg h).symm := by
+      simp [Category.assoc]
+    _ = (g ≫ (Functor.ofOpSequence (functorMap f)).map (homOfLE (by lia : n ≤ m + 1)).op ≫
+          Pi.π (fun i ↦ if i < n then M i else N i) m ≫ eqToHom (functorObj_eq_neg h)) ≫
+            eqToHom (functorObj_eq_neg h).symm := by
+      rw [hsq']
+    _ = g ≫ (Functor.ofOpSequence (functorMap f)).map (homOfLE (by lia : n ≤ m + 1)).op ≫
+          Pi.π (fun i ↦ if i < n then M i else N i) m := by
+      simp [Category.assoc]
+
+lemma cone_π_app_comp_Pi_π_pos_full {X : C} (g : X ⟶ ∏ᶜ M) (n : ℕ) :
+    g ≫ (cone f).π.app ⟨n + 1⟩ ≫ Pi.π (fun i ↦ if i < n + 1 then M i else N i) n ≫
+      eqToHom (dif_pos (by lia : n < n + 1)) =
+        g ≫ Pi.π M n := by
+  have hπ :
+      (cone f).π.app ⟨n + 1⟩ ≫ Pi.π (fun i ↦ if i < n + 1 then M i else N i) n =
+        Pi.π M n ≫ eqToHom (functorObj_eq_pos (n := n + 1) (m := n) (by lia)).symm := by
+    simpa using cone_π_app_comp_Pi_π_pos f (n + 1) n (by lia)
+  have hπ' :
+      (g ≫ (cone f).π.app ⟨n + 1⟩) ≫ Pi.π (fun i ↦ if i < n + 1 then M i else N i) n =
+        g ≫ Pi.π M n ≫ eqToHom (functorObj_eq_pos (n := n + 1) (m := n) (by lia)).symm := by
+    simpa only [Category.assoc] using congrArg (fun k => g ≫ k) hπ
+  calc
+    g ≫ (cone f).π.app ⟨n + 1⟩ ≫ Pi.π (fun i ↦ if i < n + 1 then M i else N i) n ≫
+        eqToHom (dif_pos (by lia : n < n + 1)) =
+      ((g ≫ (cone f).π.app ⟨n + 1⟩) ≫ Pi.π (fun i ↦ if i < n + 1 then M i else N i) n) ≫
+        eqToHom (functorObj_eq_pos (n := n + 1) (m := n) (by lia)) := by
+      simp [Category.assoc]
+    _ = (g ≫ Pi.π M n ≫ eqToHom (functorObj_eq_pos (n := n + 1) (m := n) (by lia)).symm) ≫
+          eqToHom (functorObj_eq_pos (n := n + 1) (m := n) (by lia)) := by
+      rw [hπ']
+      rfl
+    _ = g ≫ Pi.π M n := by
+      simp [Category.assoc]
+
 set_option backward.isDefEq.respectTransparency false in
 /--
 The cone over the tower
@@ -205,15 +263,15 @@ noncomputable def isLimit : IsLimit (cone f) where
       rw [cone_π_app_comp_Pi_π_neg f _ _ h]
       simp only [dite_eq_ite, Functor.ofOpSequence_obj, limit.lift_π_assoc, Fan.mk_pt,
         Discrete.functor_obj_eq_as, Fan.mk_π_app, Category.assoc]
-      slice_lhs 2 4 => erw [← functorMap_commSq f h]
-      simp
+      rw [functorMap_commSq_full (f := f) (g := s.π.app (Opposite.op (m + 1))) h]
+      rw [← s.w (homOfLE (by lia : n ≤ m + 1)).op]
+      simp only [Functor.ofOpSequence_obj, homOfLE_leOfHom, Category.assoc]
   uniq s m h := by
     apply Pi.hom_ext
     intro n
-    simp only [Functor.ofOpSequence_obj, dite_eq_ite, limit.lift_π, Fan.mk_pt,
+    simp only [Functor.ofOpSequence_obj, functorObj, dite_eq_ite, limit.lift_π, Fan.mk_pt,
       Fan.mk_π_app, ← h ⟨n + 1⟩, Category.assoc]
-    slice_rhs 2 3 => erw [cone_π_app_comp_Pi_π_pos f (n + 1) _ (by lia)]
-    simp
+    rw [cone_π_app_comp_Pi_π_pos_full (f := f) m n]
 
 section
 
