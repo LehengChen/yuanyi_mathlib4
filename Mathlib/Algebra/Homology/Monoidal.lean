@@ -297,35 +297,57 @@ noncomputable def Monoidal.inducingFunctorData :
   whiskerLeft_eq K₁ K₂ L₂ g := by
     dsimp [forget]
     rw [comp_id]
-    erw [id_comp]
-    rfl
+    exact
+      (show (K₁ ◁ g).f = 𝟙 _ ≫ CategoryTheory.GradedObject.Monoidal.whiskerLeft K₁.X g.f from
+        (show (K₁ ◁ g).f = CategoryTheory.GradedObject.Monoidal.whiskerLeft K₁.X g.f from rfl).trans
+          (Category.id_comp _).symm)
   whiskerRight_eq {K₁ L₁} f K₂ := by
     dsimp [forget]
     rw [comp_id]
-    erw [id_comp]
-    rfl
+    exact
+      (show (f ▷ K₂).f = 𝟙 _ ≫ CategoryTheory.GradedObject.Monoidal.whiskerRight f.f K₂.X from
+        ((show (f ▷ K₂).f = CategoryTheory.GradedObject.Monoidal.whiskerRight f.f K₂.X from
+            rfl).trans
+          (Category.id_comp _).symm))
   tensorHom_eq {K₁ L₁ K₂ L₂} f g := by
     dsimp [forget]
     rw [comp_id]
-    erw [id_comp]
-    rfl
+    exact
+      (show (f ⊗ₘ g).f = 𝟙 _ ≫ CategoryTheory.GradedObject.Monoidal.tensorHom f.f g.f from
+        (show (f ⊗ₘ g).f = CategoryTheory.GradedObject.Monoidal.tensorHom f.f g.f from rfl).trans
+          (Category.id_comp _).symm)
   associator_eq K₁ K₂ K₃ := by
     dsimp [forget]
     simp only [tensorHom_id, whiskerRight_tensor, id_whiskerRight,
       id_comp, Iso.inv_hom_id, comp_id, assoc]
-    erw [id_whiskerRight]
-    rw [id_comp]
-    erw [id_comp]
-    rfl
+    exact
+      (show (α_ K₁ K₂ K₃).hom.f =
+          𝟙 (CategoryTheory.GradedObject.Monoidal.tensorObj
+              (CategoryTheory.GradedObject.Monoidal.tensorObj K₁.X K₂.X) K₃.X) ≫
+            CategoryTheory.GradedObject.Monoidal.tensorHom
+              (𝟙 (CategoryTheory.GradedObject.Monoidal.tensorObj K₁.X K₂.X)) (𝟙 K₃.X) ≫
+            (CategoryTheory.GradedObject.Monoidal.associator K₁.X K₂.X K₃.X).hom from by
+        rw [CategoryTheory.GradedObject.Monoidal.id_tensorHom_id, id_comp, id_comp]
+        rfl)
   leftUnitor_eq K := by
     dsimp
-    erw [id_comp]
-    rfl
+    exact
+      (show (forget C c).map (λ_ K).hom =
+          (𝟙 ((forget C c).obj (𝟙_ (HomologicalComplex C c)) ⊗ (forget C c).obj K) ≫
+              ((tensorUnitIso C c).inv ⊗ₘ 𝟙 ((forget C c).obj K))) ≫
+            (λ_ ((forget C c).obj K)).hom from by
+        rw [id_comp]
+        rfl)
   rightUnitor_eq K := by
     dsimp
     rw [assoc]
-    erw [id_comp]
-    rfl
+    exact
+      (show (forget C c).map (ρ_ K).hom =
+          𝟙 ((forget C c).obj K ⊗ (forget C c).obj (𝟙_ (HomologicalComplex C c))) ≫
+            (𝟙 ((forget C c).obj K) ⊗ₘ (tensorUnitIso C c).inv) ≫
+            (ρ_ ((forget C c).obj K)).hom from by
+        rw [id_comp]
+        rfl)
 
 noncomputable instance monoidalCategory : MonoidalCategory (HomologicalComplex C c) :=
   Monoidal.induced _ (Monoidal.inducingFunctorData C c)
