@@ -470,7 +470,8 @@ lemma isIso₂_of_isIso₁₃ {T T' : Triangle C} (φ : T ⟶ T') (hT : T ∈ di
       have eq := ((invRotate C).map φ).comm₁
       dsimp only [invRotate] at eq
       rw [← cancel_mono φ.hom₁, assoc, assoc, eq, IsIso.inv_hom_id_assoc, hh]
-    erw [assoc, comp_distTriang_mor_zero₁₂ _ (inv_rot_of_distTriang _ hT), comp_zero]
+    simpa [assoc] using congrArg (fun t => k ≫ t)
+      (comp_distTriang_mor_zero₁₂ T.invRotate (inv_rot_of_distTriang _ hT))
   refine isIso_of_yoneda_map_bijective _ (fun A => ⟨?_, ?_⟩)
   · intro f₁ f₂ h
     simpa only [← cancel_mono φ.hom₂] using h
@@ -653,9 +654,23 @@ lemma productTriangle_distinguished {J : Type*} (T : J → Triangle C)
       exact ⟨g, hg.symm⟩
     have ha'' := fun (j : J) => (T j).coyoneda_exact₃ (hT j) ((a - a' ≫ φ'.hom₃) ≫ Pi.π _ j) (by
       simp only [sub_comp, assoc]
-      erw [← (productTriangle.π T j).comm₃]
-      rw [← φ'.comm₃_assoc]
-      rw [reassoc_of% ha', sub_eq_zero, h₁, Functor.map_id, id_comp])
+      have hcomm :
+          Pi.π (fun j ↦ (T j).obj₃) j ≫ (T j).mor₃ =
+            (productTriangle T).mor₃ ≫ (shiftFunctor C 1).map (productTriangle.π T j).hom₁ := by
+        simpa only [comp_id] using ((productTriangle.π T j).comm₃_assoc (𝟙 _)).symm
+      calc
+        a ≫ Pi.π (fun j ↦ (T j).obj₃) j ≫ (T j).mor₃ -
+            a' ≫ φ'.hom₃ ≫ Pi.π (fun j ↦ (T j).obj₃) j ≫ (T j).mor₃
+            =
+            a ≫
+                ((productTriangle T).mor₃ ≫
+                  (shiftFunctor C 1).map (productTriangle.π T j).hom₁) -
+              a' ≫ φ'.hom₃ ≫
+                ((productTriangle T).mor₃ ≫
+                  (shiftFunctor C 1).map (productTriangle.π T j).hom₁) := by
+              rw [hcomm]
+        _ = 0 := by
+          rw [← φ'.comm₃_assoc, reassoc_of% ha', sub_eq_zero, h₁, Functor.map_id, id_comp])
     let b := fun j => (ha'' j).choose
     have hb : ∀ j, _ = b j ≫ _ := fun j => (ha'' j).choose_spec
     have hb' : a - a' ≫ φ'.hom₃ = Pi.lift b ≫ (productTriangle T).mor₂ :=
