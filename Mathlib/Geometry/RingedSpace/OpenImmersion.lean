@@ -123,8 +123,7 @@ noncomputable def isoRestrict : X ≅ Y.restrict H.base_open :=
       cases U
       dsimp only [IsOpenMap.functor, Functor.op, Opens.map]
       congr 2
-      erw [Set.preimage_image_eq _ H.base_open.injective]
-      rfl
+      simpa using Set.preimage_image_eq _ H.base_open.injective
     · intro U V i
       dsimp
       simp only [NatTrans.naturality_assoc, TopCat.Presheaf.pushforward_obj_obj,
@@ -215,7 +214,8 @@ theorem app_invApp (U : Opens Y) :
       Y.presheaf.map
         ((homOfLE (Set.image_preimage_subset f.base U.1)).op :
           op U ⟶ op (opensFunctor f |>.obj ((Opens.map f.base).obj U))) := by
-  erw [← Category.assoc]; rw [IsIso.comp_inv_eq, f.c.naturality]; congr
+  rw [invApp, ← Category.assoc, IsIso.comp_inv_eq, f.c.naturality]
+  congr
 
 set_option backward.isDefEq.respectTransparency false in
 /-- A variant of `app_inv_app` that gives an `eqToHom` instead of `homOfLe`. -/
@@ -427,8 +427,9 @@ theorem pullbackConeOfLeftLift_snd :
 
 set_option backward.isDefEq.respectTransparency false in
 instance pullbackConeSndIsOpenImmersion : IsOpenImmersion (pullbackConeOfLeft f g).snd := by
-  erw [CategoryTheory.Limits.PullbackCone.mk_snd]
-  infer_instance
+  simpa [pullbackConeOfLeft] using
+    (show IsOpenImmersion (Y.ofRestrict (TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base))
+      by infer_instance)
 
 /-- The constructed pullback cone is indeed the pullback. -/
 def pullbackConeOfLeftIsLimit : IsLimit (pullbackConeOfLeft f g) := by
