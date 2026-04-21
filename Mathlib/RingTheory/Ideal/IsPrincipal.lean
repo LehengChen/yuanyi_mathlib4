@@ -108,6 +108,7 @@ noncomputable def associatesMulEquivIsPrincipal :
   map_mul' x y := by
     rw [Subtype.ext_iff]
     simpa using (associatesEquivIsPrincipal_mul (R := R) x y)
+    -- we can redefine `associatesEquivIsPrincipal` to get rid of this `erw` but then we'd need
 
 variable (R) in
 /-- A version of `Ideal.associatesEquivIsPrincipal` for non-zero-divisors generators. -/
