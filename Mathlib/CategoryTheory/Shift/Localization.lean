@@ -202,8 +202,31 @@ noncomputable def commShiftOfLocalization : F'.CommShift A where
     congr 1
     rw [← cancel_epi (F'.map ((shiftFunctor D b).map ((L.commShiftIso a).hom.app X))),
       ← F'.map_comp_assoc, ← map_comp, Iso.hom_inv_id_app, map_id, map_id, Category.id_comp]
+    have hnat :
+        (shiftFunctor D b ⋙ F').map ((L.commShiftIso a).inv.app X) ≫
+          (commShiftOfLocalization.iso L W F F' b).hom.app (L.obj ((shiftFunctor C a).obj X)) ≫
+            (shiftFunctor E b).map ((Lifting.iso L W F F').hom.app ((shiftFunctor C a).obj X)) ≫
+              (shiftFunctor E b).map ((F.commShiftIso a).hom.app X) ≫
+                (shiftFunctor E b).map
+                  ((shiftFunctor E a).map ((Lifting.iso L W F F').inv.app X)) ≫
+                  (shiftFunctorAdd E a b).inv.app (F'.obj (L.obj X)) =
+        (commShiftOfLocalization.iso L W F F' b).hom.app ((shiftFunctor D a).obj (L.obj X)) ≫
+          (shiftFunctor E b).map (F'.map ((L.commShiftIso a).inv.app X)) ≫
+            (shiftFunctor E b).map ((Lifting.iso L W F F').hom.app ((shiftFunctor C a).obj X)) ≫
+              (shiftFunctor E b).map ((F.commShiftIso a).hom.app X) ≫
+                (shiftFunctor E b).map
+                  ((shiftFunctor E a).map ((Lifting.iso L W F F').inv.app X)) ≫
+                  (shiftFunctorAdd E a b).inv.app (F'.obj (L.obj X)) := by
+      simpa only [Functor.comp_map, Functor.comp_obj, Category.assoc] using
+        (NatTrans.naturality_assoc ((commShiftOfLocalization.iso L W F F' b).hom)
+          ((L.commShiftIso a).inv.app X)
+          ((shiftFunctor E b).map ((Lifting.iso L W F F').hom.app ((shiftFunctor C a).obj X)) ≫
+            (shiftFunctor E b).map ((F.commShiftIso a).hom.app X) ≫
+            (shiftFunctor E b).map
+              ((shiftFunctor E a).map ((Lifting.iso L W F F').inv.app X)) ≫
+            (shiftFunctorAdd E a b).inv.app (F'.obj (L.obj X))))
     conv_lhs =>
-      erw [← NatTrans.naturality_assoc]
+      rw [← NatTrans.naturality_assoc]
       dsimp
       rw [← Functor.map_comp_assoc, ← map_comp_assoc, Category.assoc,
         ← map_comp, Iso.inv_hom_id_app]
@@ -211,7 +234,7 @@ noncomputable def commShiftOfLocalization : F'.CommShift A where
       rw [map_id, Category.comp_id, ← NatTrans.naturality]
       dsimp
     conv_rhs =>
-      erw [← NatTrans.naturality_assoc]
+      rw [← hnat]
       dsimp
       rw [← Functor.map_comp_assoc, ← map_comp, Iso.hom_inv_id_app]
       dsimp
