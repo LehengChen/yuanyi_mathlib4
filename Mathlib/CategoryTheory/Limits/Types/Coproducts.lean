@@ -277,8 +277,16 @@ theorem binaryCofan_isColimit_iff {X Y : Type u} (c : BinaryCofan X Y) :
           (h.coconePointUniqueUpToIso (binaryCoproductColimit X Y)).symm.toEquiv.injective.comp
             Sum.inr_injective, ?_⟩
       rw [types_comp, Set.range_comp, ← eq_compl_iff_isCompl, types_comp, Set.range_comp _ Sum.inr]
-      erw [← Set.image_compl_eq
-          (h.coconePointUniqueUpToIso (binaryCoproductColimit X Y)).symm.toEquiv.bijective]
+      have h_image_compl :
+          ((h.coconePointUniqueUpToIso (binaryCoproductColimit X Y)).inv '' Set.range Sum.inr)ᶜ =
+            (h.coconePointUniqueUpToIso (binaryCoproductColimit X Y)).symm.toEquiv ''
+              (Set.range Sum.inr)ᶜ := by
+        simpa using
+          (Set.image_compl_eq
+            (h.coconePointUniqueUpToIso (binaryCoproductColimit X Y)).symm.toEquiv.bijective
+            (f := (h.coconePointUniqueUpToIso (binaryCoproductColimit X Y)).symm.toEquiv)
+            (s := Set.range Sum.inr)).symm
+      rw [h_image_compl]
       simp
     · rintro ⟨h₁, h₂, h₃⟩
       have : ∀ x, x ∈ Set.range c.inl ∨ x ∈ Set.range c.inr := by
