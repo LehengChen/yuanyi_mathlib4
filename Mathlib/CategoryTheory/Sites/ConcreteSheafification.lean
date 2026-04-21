@@ -158,8 +158,7 @@ theorem res_mk_eq_mk_pullback {Y X : C} {P : Cᵒᵖ ⥤ D} {S : J.Cover X} (x :
   simp only [Functor.op_obj, unop_op, pullback_obj, diagram_obj, Functor.comp_obj,
     diagramPullback_app, Meq.equiv_apply, Meq.pullback_apply]
   rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
-  erw [Meq.equiv_symm_eq_apply]
-  cases i; rfl
+  simpa using (Meq.equiv_symm_eq_apply (P := P) (S := S) (x := x) (I := i.base))
 
 set_option backward.isDefEq.respectTransparency false in
 theorem toPlus_mk {X : C} {P : Cᵒᵖ ⥤ D} (S : J.Cover X) (x : ToType (P.obj (op X))) :
@@ -194,8 +193,15 @@ theorem toPlus_apply {X : C} {P : Cᵒᵖ ⥤ D} (S : J.Cover X) (x : Meq P S) (
   dsimp
   rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply,
     Multiequalizer.lift_ι, Multiequalizer.lift_ι, Multiequalizer.lift_ι]
-  erw [Meq.equiv_symm_eq_apply]
-  simpa using (x.condition (Cover.Relation.mk' (I.precompRelation i.f))).symm
+  calc
+    (ConcreteCategory.hom (P.map i.f.op)) (x I)
+      = x (Cover.Arrow.base i) := by
+          simpa using (x.condition (Cover.Relation.mk' (I.precompRelation i.f))).symm
+    _ = (ConcreteCategory.hom (Multiequalizer.ι (S.index P) (Cover.Arrow.base i)))
+          ((Meq.equiv P S).symm x) := by
+          simpa using
+            (Meq.equiv_symm_eq_apply (P := P) (S := S) (x := x)
+              (I := Cover.Arrow.base i)).symm
 
 theorem toPlus_eq_mk {X : C} {P : Cᵒᵖ ⥤ D} (x : ToType (P.obj (op X))) :
     (J.toPlus P).app _ x = mk (Meq.mk ⊤ x) := toPlus_mk ⊤ x
@@ -220,23 +226,43 @@ theorem eq_mk_iff_exists {X : C} {P : Cᵒᵖ ⥤ D} {S T : J.Cover X} (x : Meq 
     ext I
     apply_fun Multiequalizer.ι (W.unop.index P) I at hh
     convert hh
-    all_goals
-      dsimp [diagram]
+    · dsimp [diagram]
       rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
-      erw [Meq.equiv_symm_eq_apply]
-      cases I; rfl
-  · rintro ⟨S, h1, h2, e⟩
+      refine
+        (show x { Y := I.Y, f := I.f, hf := _ } = x (I.map h1.unop) from by
+          cases I
+          rfl).trans ?_
+      simpa using
+        (Meq.equiv_symm_eq_apply (P := P) (S := S) (x := x) (I := I.map h1.unop)).symm
+    · dsimp [diagram]
+      rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
+      refine
+        (show y { Y := I.Y, f := I.f, hf := _ } = y (I.map h2.unop) from by
+          cases I
+          rfl).trans ?_
+      simpa using
+        (Meq.equiv_symm_eq_apply (P := P) (S := T) (x := y) (I := I.map h2.unop)).symm
+  · rintro ⟨W, h1, h2, e⟩
     apply Concrete.colimit_rep_eq_of_exists (C := D)
-    use op S, h1.op, h2.op
+    use op W, h1.op, h2.op
     apply Concrete.multiequalizer_ext
     intro i
     apply_fun fun ee => ee i at e
     convert e using 1
-    all_goals
-      dsimp [diagram]
+    · dsimp [diagram]
       rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
-      erw [Meq.equiv_symm_eq_apply]
-      cases i; rfl
+      refine
+        (Meq.equiv_symm_eq_apply (P := P) (S := S) (x := x)
+          (I := Cover.Arrow.map i h1)).trans ?_
+      cases i
+      rfl
+    · dsimp [diagram]
+      rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι]
+      refine
+        (Meq.equiv_symm_eq_apply (P := P) (S := T) (x := y)
+          (I := Cover.Arrow.map i h2)).trans ?_
+      cases i
+      rfl
 
 /-- `P⁺` is always separated. -/
 theorem sep {X : C} (P : Cᵒᵖ ⥤ D) (S : J.Cover X) (x y : ToType ((J.plusObj P).obj (op X)))
@@ -316,10 +342,47 @@ def meqOfSep (P : Cᵒᵖ ⥤ D)
     apply inj_of_sep P hsep
     rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, (J.toPlus P).naturality,
       (J.toPlus P).naturality, ConcreteCategory.comp_apply, ConcreteCategory.comp_apply]
-    erw [toPlus_apply (T II.fst.fromMiddle) (t II.fst.fromMiddle) II.fst.toMiddle,
-      toPlus_apply (T II.snd.fromMiddle) (t II.snd.fromMiddle) II.snd.toMiddle]
+    have hfst :
+        (ConcreteCategory.hom ((J.plusObj P).map II.r.g₁.op))
+            ((ConcreteCategory.hom ((J.toPlus P).app (op II.fst.Y)))
+              ((fun I => t I.fromMiddle I.toMiddle) II.fst)) =
+          (ConcreteCategory.hom ((J.plusObj P).map II.r.g₁.op))
+            ((ConcreteCategory.hom ((J.plusObj P).map II.fst.toMiddle.f.op))
+              (mk (t II.fst.fromMiddle))) := by
+      simpa using congrArg (ConcreteCategory.hom ((J.plusObj P).map II.r.g₁.op))
+        (toPlus_apply (J := J) (P := P) (S := T II.fst.fromMiddle)
+          (x := t II.fst.fromMiddle) (I := II.fst.toMiddle))
+    have hsnd :
+        (ConcreteCategory.hom ((J.plusObj P).map II.r.g₂.op))
+            ((ConcreteCategory.hom ((J.toPlus P).app (op II.snd.Y)))
+              ((fun I => t I.fromMiddle I.toMiddle) II.snd)) =
+          (ConcreteCategory.hom ((J.plusObj P).map II.r.g₂.op))
+            ((ConcreteCategory.hom ((J.plusObj P).map II.snd.toMiddle.f.op))
+              (mk (t II.snd.fromMiddle))) := by
+      simpa using congrArg (ConcreteCategory.hom ((J.plusObj P).map II.r.g₂.op))
+        (toPlus_apply (J := J) (P := P) (S := T II.snd.fromMiddle)
+          (x := t II.snd.fromMiddle) (I := II.snd.toMiddle))
+    rw [hfst, hsnd]
     rw [← ht, ← ht]
-    erw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply];
+    have hcomp_fst :
+        (ConcreteCategory.hom ((J.plusObj P).map II.r.g₁.op))
+            ((ConcreteCategory.hom ((J.plusObj P).map II.fst.toMiddle.f.op))
+              (s II.fst.fromMiddle)) =
+          (ConcreteCategory.hom ((J.plusObj P).map II.fst.toMiddle.f.op ≫
+              (J.plusObj P).map II.r.g₁.op)) (s II.fst.fromMiddle) := by
+      exact
+        (ConcreteCategory.comp_apply ((J.plusObj P).map II.fst.toMiddle.f.op)
+          ((J.plusObj P).map II.r.g₁.op) (s II.fst.fromMiddle)).symm
+    have hcomp_snd :
+        (ConcreteCategory.hom ((J.plusObj P).map II.r.g₂.op))
+            ((ConcreteCategory.hom ((J.plusObj P).map II.snd.toMiddle.f.op))
+              (s II.snd.fromMiddle)) =
+          (ConcreteCategory.hom ((J.plusObj P).map II.snd.toMiddle.f.op ≫
+              (J.plusObj P).map II.r.g₂.op)) (s II.snd.fromMiddle) := by
+      exact
+        (ConcreteCategory.comp_apply ((J.plusObj P).map II.snd.toMiddle.f.op)
+          ((J.plusObj P).map II.r.g₂.op) (s II.snd.fromMiddle)).symm
+    rw [hcomp_fst, hcomp_snd]
     rw [← (J.plusObj P).map_comp, ← (J.plusObj P).map_comp, ← op_comp, ← op_comp]
     exact s.condition
       { fst.hf := II.fst.from_middle_condition
@@ -376,7 +439,11 @@ theorem exists_of_sep (P : Cᵒᵖ ⥤ D)
   change t IB IC = t I ID
   apply inj IV.Y
   rw [toPlus_apply (T I) (t I) ID]
-  erw [toPlus_apply (T IB) (t IB) IC]
+  have hIB :
+      (ConcreteCategory.hom ((J.toPlus P).app (op IV.Y))) (t IB IC) =
+        (ConcreteCategory.hom ((J.plusObj P).map IC.f.op)) (mk (t IB)) := by
+    simpa using toPlus_apply (J := J) (P := P) (S := T IB) (x := t IB) (I := IC)
+  rw [hIB]
   rw [← ht, ← ht]
   -- Conclude by constructing the relation showing equality...
   let IR : S.Relation := { fst.hf := IB.hf, snd.hf := I.hf, r.w := IA.middle_spec, .. }
@@ -402,9 +469,7 @@ theorem isSheaf_of_sep (P : Cᵒᵖ ⥤ D)
     apply_fun Meq.equiv (J.plusObj P) S at h
     apply_fun fun e => e I at h
     dsimp only [ConcreteCategory.forget_map_eq_coe] at h
-    convert h <;> erw [Meq.equiv_apply] <;>
-      rw [← ConcreteCategory.comp_apply, Multiequalizer.lift_ι] <;>
-      rfl
+    simpa only [Meq.equiv_apply, ← ConcreteCategory.comp_apply, Multiequalizer.lift_ι] using h
   · rintro (x : ToType (multiequalizer (S.index _)))
     obtain ⟨t, ht⟩ := exists_of_sep P hsep X S (Meq.equiv _ _ x)
     use t
@@ -576,8 +641,7 @@ instance plusPlusSheaf_preservesZeroMorphisms [Preadditive D] :
   map_zero F G := by
     ext : 3
     refine colimit.hom_ext (fun j => ?_)
-    erw [colimit.ι_map, comp_zero]
-    simp
+    simp [GrothendieckTopology.sheafifyMap, GrothendieckTopology.sheafify, comp_zero]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The sheafification functor is left adjoint to the forgetful functor. -/
