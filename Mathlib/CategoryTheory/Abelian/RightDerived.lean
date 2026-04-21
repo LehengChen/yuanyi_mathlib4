@@ -88,8 +88,9 @@ lemma InjectiveResolution.isoRightDerivedToHomotopyCategoryObj_hom_naturality
   dsimp [Functor.rightDerivedToHomotopyCategory, isoRightDerivedToHomotopyCategoryObj]
   rw [← Functor.map_comp_assoc, iso_hom_naturality f I J φ comm, Functor.map_comp,
     assoc, assoc]
-  erw [(F.mapHomotopyCategoryFactors (ComplexShape.up ℕ)).hom.naturality]
-  rfl
+  simpa only [Functor.comp_map] using
+    congrArg (((F.mapHomotopyCategory (ComplexShape.up ℕ)).map I.iso.hom) ≫ ·)
+      ((F.mapHomotopyCategoryFactors (ComplexShape.up ℕ)).hom.naturality φ)
 
 @[reassoc]
 lemma InjectiveResolution.isoRightDerivedToHomotopyCategoryObj_inv_naturality
@@ -131,8 +132,12 @@ lemma InjectiveResolution.isoRightDerivedObj_hom_naturality
   rw [assoc, ← Functor.map_comp_assoc,
     InjectiveResolution.isoRightDerivedToHomotopyCategoryObj_hom_naturality f I J φ comm F,
     Functor.map_comp, assoc]
-  erw [(HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).hom.naturality]
-  rfl
+  simpa only [Functor.comp_map] using
+    congrArg
+      (((HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+          (I.isoRightDerivedToHomotopyCategoryObj F).hom) ≫ ·)
+      ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).hom.naturality
+        ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map φ))
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -152,8 +157,11 @@ lemma Functor.isZero_rightDerived_obj_injective_succ
     (F : C ⥤ D) [F.Additive] (n : ℕ) (X : C) [Injective X] :
     IsZero ((F.rightDerived (n + 1)).obj X) := by
   refine IsZero.of_iso ?_ ((InjectiveResolution.self X).isoRightDerivedObj F (n + 1))
-  erw [← HomologicalComplex.exactAt_iff_isZero_homology]
-  exact ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero))
+  exact show
+      IsZero (((F.mapHomologicalComplex _).obj (InjectiveResolution.self X).cocomplex).homology
+        (n + 1)) from by
+    simpa only [← HomologicalComplex.exactAt_iff_isZero_homology] using
+      (ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero)))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- We can compute a right derived functor on a morphism using a descent of that morphism
@@ -193,12 +201,38 @@ lemma InjectiveResolution.rightDerivedToHomotopyCategory_app_eq
   dsimp [isoRightDerivedToHomotopyCategoryObj, Functor.mapHomotopyCategoryFactors,
     NatTrans.rightDerivedToHomotopyCategory]
   rw [assoc]
-  erw [id_comp, comp_id]
   obtain ⟨β, hβ⟩ := (HomotopyCategory.quotient _ _).map_surjective (iso P).hom
   rw [← hβ]
   dsimp
-  simp only [← Functor.map_comp, NatTrans.mapHomologicalComplex_naturality]
-  rfl
+  calc
+    (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app
+            ((injectiveResolutions C).obj X).as) ≫
+        (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+          ((G.mapHomologicalComplex (ComplexShape.up ℕ)).map β) ≫
+        𝟙 ((HomotopyCategory.quotient D (ComplexShape.up ℕ)).obj
+          ((G.mapHomologicalComplex (ComplexShape.up ℕ)).obj P.cocomplex)) =
+      (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+        (((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app
+            ((injectiveResolutions C).obj X).as) ≫
+          (G.mapHomologicalComplex (ComplexShape.up ℕ)).map β) := by
+        simp [← Functor.map_comp]
+    _ = (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+          (((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app
+              (injectiveResolution X).cocomplex) ≫
+            (G.mapHomologicalComplex (ComplexShape.up ℕ)).map β) := by
+        rfl
+    _ = (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+          ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map β ≫
+            (NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex) := by
+        rw [NatTrans.mapHomologicalComplex_naturality]
+    _ = (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+          ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map β) ≫
+        𝟙 ((HomotopyCategory.quotient D (ComplexShape.up ℕ)).obj
+          ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj P.cocomplex)) ≫
+          (HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+            ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex) := by
+        simp [← Functor.map_comp]
 
 @[simp]
 lemma NatTrans.rightDerivedToHomotopyCategory_id (F : C ⥤ D) [F.Additive] :
@@ -247,9 +281,40 @@ lemma rightDerived_app_eq
   dsimp [NatTrans.rightDerived, isoRightDerivedObj]
   rw [InjectiveResolution.rightDerivedToHomotopyCategory_app_eq α P,
     Functor.map_comp, Functor.map_comp, assoc]
-  erw [← (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).hom.naturality_assoc
-    ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex)]
-  simp only [Functor.comp_map, Iso.hom_inv_id_app_assoc]
+  calc
+    (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+          (P.isoRightDerivedToHomotopyCategoryObj F).hom ≫
+        (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+            ((HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+              ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex)) ≫
+          (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+            (P.isoRightDerivedToHomotopyCategoryObj G).inv =
+      (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+            (P.isoRightDerivedToHomotopyCategoryObj F).hom ≫
+          ((HomotopyCategory.quotient D (ComplexShape.up ℕ) ⋙
+                HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+              ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex) ≫
+            (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).hom.app
+              ((G.mapHomologicalComplex (ComplexShape.up ℕ)).obj P.cocomplex) ≫
+            (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).inv.app
+              ((G.mapHomologicalComplex (ComplexShape.up ℕ)).obj P.cocomplex) ≫
+            (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+              (P.isoRightDerivedToHomotopyCategoryObj G).inv) := by
+        simp [Functor.comp_map, Iso.hom_inv_id_app_assoc]
+    _ = (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+          (P.isoRightDerivedToHomotopyCategoryObj F).hom ≫
+        ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).hom.app
+            ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj P.cocomplex) ≫
+          (HomologicalComplex.homologyFunctor D (ComplexShape.up ℕ) n).map
+            ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex) ≫
+          (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).inv.app
+            ((G.mapHomologicalComplex (ComplexShape.up ℕ)).obj P.cocomplex) ≫
+          (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) n).map
+            (P.isoRightDerivedToHomotopyCategoryObj G).inv) := by
+        rw [(HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) n).hom.naturality_assoc
+          ((NatTrans.mapHomologicalComplex α (ComplexShape.up ℕ)).app P.cocomplex)]
+    _ = _ := by
+        simp
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If `P : InjectiveResolution X` and `F` is an additive functor, this is
@@ -312,8 +377,48 @@ noncomputable def Functor.toRightDerivedZero (F : C ⥤ D) [F.Additive] :
       (injectiveResolution X) (injectiveResolution Y)
       (InjectiveResolution.desc f _ _) (by simp),
       ← HomologicalComplex.homologyπ_naturality_assoc]
-    erw [← NatTrans.naturality]
-    rfl
+    calc
+      (injectiveResolution X).toRightDerivedZero' F ≫
+            ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution X).cocomplex).homologyπ 0 ≫
+          HomologicalComplex.homologyMap
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                (InjectiveResolution.desc f (injectiveResolution Y) (injectiveResolution X))) 0 ≫
+            (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.app
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution Y).cocomplex) =
+        (injectiveResolution X).toRightDerivedZero' F ≫
+            ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution X).cocomplex).homologyπ 0 ≫
+          (HomologicalComplex.homologyFunctor D (ComplexShape.up ℕ) 0).map
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                (InjectiveResolution.desc f (injectiveResolution Y) (injectiveResolution X))) ≫
+            (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.app
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution Y).cocomplex) := by
+          rfl
+      _ = (injectiveResolution X).toRightDerivedZero' F ≫
+            ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution X).cocomplex).homologyπ 0 ≫
+          (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.app
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution X).cocomplex) ≫
+            (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) 0).map
+              ((HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+                ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                  (InjectiveResolution.desc f
+                    (injectiveResolution Y) (injectiveResolution X)))) := by
+          simpa only [Functor.comp_map, assoc] using
+            congrArg
+              (((injectiveResolution X).toRightDerivedZero' F ≫
+                  ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                      (injectiveResolution X).cocomplex).homologyπ 0) ≫ ·)
+              ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.naturality
+                ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                  (InjectiveResolution.desc f (injectiveResolution Y)
+                    (injectiveResolution X))))
+      _ = _ := by
+          rfl
 
 set_option backward.isDefEq.respectTransparency false in
 lemma InjectiveResolution.toRightDerivedZero_eq
@@ -332,8 +437,36 @@ lemma InjectiveResolution.toRightDerivedZero_eq
     assoc, assoc, assoc, assoc, assoc, ← Functor.map_comp,
     Iso.inv_hom_id, Functor.map_id, comp_id,
     reassoc_of% h₁, h₂, ← HomologicalComplex.homologyπ_naturality_assoc]
-  erw [← NatTrans.naturality]
-  rfl
+  calc
+    (injectiveResolution X).toRightDerivedZero' F ≫
+          ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+              (injectiveResolution X).cocomplex).homologyπ 0 ≫
+        (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.app
+            ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+              (injectiveResolution X).cocomplex) ≫
+          (HomotopyCategory.homologyFunctor D (ComplexShape.up ℕ) 0).map
+            ((HomotopyCategory.quotient D (ComplexShape.up ℕ)).map
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                (desc (𝟙 X) I (injectiveResolution X)))) =
+      (injectiveResolution X).toRightDerivedZero' F ≫
+            ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                (injectiveResolution X).cocomplex).homologyπ 0 ≫
+          (HomologicalComplex.homologyFunctor D (ComplexShape.up ℕ) 0).map
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                (desc (𝟙 X) I (injectiveResolution X))) ≫
+            (HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.app
+              ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj I.cocomplex) := by
+        simpa only [Functor.comp_map, assoc] using
+          congrArg
+            (((injectiveResolution X).toRightDerivedZero' F ≫
+                ((F.mapHomologicalComplex (ComplexShape.up ℕ)).obj
+                    (injectiveResolution X).cocomplex).homologyπ 0) ≫ ·)
+            (Eq.symm
+              ((HomotopyCategory.homologyFunctorFactors D (ComplexShape.up ℕ) 0).inv.naturality
+                ((F.mapHomologicalComplex (ComplexShape.up ℕ)).map
+                  (desc (𝟙 X) I (injectiveResolution X)))))
+    _ = _ := by
+        rfl
 
 instance (F : C ⥤ D) [F.Additive] (X : C) [Injective X] :
     IsIso (F.toRightDerivedZero.app X) := by
