@@ -303,17 +303,21 @@ theorem trunc_C_mul_T (n : ℤ) (r : R) : trunc (C r * T n) = ite (0 ≤ n) (mon
   simp only [← single_eq_C_mul_T, trunc, AddMonoidHom.coe_comp, Function.comp_apply,
     RingHom.toAddMonoidHom_eq_coe, RingEquiv.toRingHom_eq_coe, Int.ofNat_eq_natCast,
     AddMonoidHom.coe_coe, RingHom.coe_coe, RingEquiv.apply_symm_apply, toFinsuppIso_apply]
-  -- We need `erw` to see through the identification of `Finsupp` with `LaurentSeries`.
-  erw [comapDomain.addMonoidHom_apply Int.ofNat_injective]
+  -- Expose the underlying `Finsupp.comapDomain` map explicitly.
+  refine (show Finsupp.comapDomain Int.ofNat (AddMonoidAlgebra.single n r)
+      (Int.ofNat_injective.injOn) = (if 0 ≤ n then (monomial n.toNat) r else 0).toFinsupp from ?_)
   split_ifs with n0
   · rw [toFinsupp_monomial]
     lift n to ℕ using n0
     apply comapDomain_single
-  · rw [toFinsupp_inj]
+  · rw [Polynomial.toFinsupp_zero]
     ext a
-    have : a ≠ n := by lia
-    simp only [coeff_ofFinsupp, comapDomain_apply, Int.ofNat_eq_natCast, Polynomial.coeff_zero,
-      single_eq_of_ne this]
+    have : (a : ℤ) ≠ n := by lia
+    have hna : n ≠ (a : ℤ) := by simpa using this.symm
+    have hcoeff : (C r * T n : R[T;T⁻¹]) (a : ℤ) = (0 : ℕ →₀ R) a := by
+      rw [← single_eq_C_mul_T]
+      simp only [AddMonoidAlgebra.single_apply, Finsupp.zero_apply, if_neg hna]
+    simpa [comapDomain_apply, Int.ofNat_eq_natCast] using hcoeff
 
 @[simp]
 theorem leftInverse_trunc_toLaurent :
