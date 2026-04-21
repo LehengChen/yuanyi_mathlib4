@@ -612,8 +612,8 @@ def modulePresheafStalkIso (x : PrimeSpectrum.Top R) :
     rw [← map_smul]
     refine (this _).trans ?_
     dsimp [toStalk]
-    erw [this]
-    exact ((structurePresheafInModuleCat R M).germ U x hxU).hom.map_smul _ _
+    refine (((structurePresheafInModuleCat R M).germ U x hxU).hom.map_smul _ _).trans ?_
+    exact congrArg (fun t => r • t) (this s).symm
 
 instance (x : PrimeSpectrum.Top R) :
     Module ((structurePresheafInCommRingCat R).stalk x)
@@ -842,8 +842,7 @@ def commRingCatStalkEquivModuleStalk (x : PrimeSpectrum.Top R) :
     refine (((structurePresheafInCommRingCat R).germ U x hxU).hom.map_mul _ _).trans ?_
     congr 1
     · dsimp [toStalk]
-      erw [← (structurePresheafInCommRingCat R).germ_res_apply (homOfLE (le_top : U ≤ ⊤)) _ hxU]
-      rfl
+      simpa [toStalk] using algebraMap_germ_apply (R := R) U x hxU r
     · exact congr($this _).symm
 
 public instance (x : PrimeSpectrum.Top R) :
