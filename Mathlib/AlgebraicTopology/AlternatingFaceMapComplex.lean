@@ -231,10 +231,41 @@ def ε [Limits.HasZeroObject C] :
   naturality X Y f := by
     apply HomologicalComplex.to_single_hom_ext
     dsimp
-    erw [ChainComplex.toSingle₀Equiv_symm_apply_f_zero,
-      ChainComplex.toSingle₀Equiv_symm_apply_f_zero]
-    simp only [ChainComplex.single₀_map_f_zero]
-    exact congr_app f.w _
+    have h0 (Z : SimplicialObject.Augmented C) :
+        ((((alternatingFaceMapComplex C).obj Z.left).toSingle₀Equiv Z.right).symm
+            ⟨Z.hom.app (op ⦋0⦌), by
+              dsimp
+              rw [alternatingFaceMapComplex_obj_d, objD, Fin.sum_univ_two, Fin.val_zero,
+                pow_zero, one_smul, Fin.val_one, pow_one, neg_smul, one_smul, add_comp,
+                neg_comp, SimplicialObject.δ_naturality, SimplicialObject.δ_naturality]
+              apply add_neg_cancel⟩).f 0 =
+          Z.hom.app (op ⦋0⦌) :=
+      ChainComplex.toSingle₀Equiv_symm_apply_f_zero _ _
+    calc
+      f.left.app (op ⦋0⦌) ≫
+          ((((alternatingFaceMapComplex C).obj Y.left).toSingle₀Equiv Y.right).symm
+              ⟨Y.hom.app (op ⦋0⦌), by
+                dsimp
+                rw [alternatingFaceMapComplex_obj_d, objD, Fin.sum_univ_two, Fin.val_zero,
+                  pow_zero, one_smul, Fin.val_one, pow_one, neg_smul, one_smul, add_comp,
+                  neg_comp, SimplicialObject.δ_naturality, SimplicialObject.δ_naturality]
+                apply add_neg_cancel⟩).f 0
+          = f.left.app (op ⦋0⦌) ≫ Y.hom.app (op ⦋0⦌) := by
+            congr 1
+            exact h0 Y
+      _ = X.hom.app (op ⦋0⦌) ≫ f.right := congr_app f.w _
+      _ =
+          ((((alternatingFaceMapComplex C).obj X.left).toSingle₀Equiv X.right).symm
+              ⟨X.hom.app (op ⦋0⦌), by
+                dsimp
+                rw [alternatingFaceMapComplex_obj_d, objD, Fin.sum_univ_two, Fin.val_zero,
+                  pow_zero, one_smul, Fin.val_one, pow_one, neg_smul, one_smul, add_comp,
+                  neg_comp, SimplicialObject.δ_naturality, SimplicialObject.δ_naturality]
+                apply add_neg_cancel⟩).f 0 ≫
+            ((ChainComplex.single₀ C).map f.right).f 0 := by
+            rw [ChainComplex.single₀_map_f_zero]
+            congr 1
+            exact (h0 X).symm
 
 @[simp]
 lemma ε_app_f_zero [Limits.HasZeroObject C] (X : SimplicialObject.Augmented C) :
