@@ -104,9 +104,14 @@ def ι : M →ₗ[R] CliffordAlgebra Q :=
 @[simp]
 theorem ι_sq_scalar (m : M) : ι Q m * ι Q m = algebraMap R _ (Q m) := by
   rw [ι]
-  erw [LinearMap.comp_apply]
+  have hcomp :
+      ((RingQuot.mkAlgHom R (Rel Q)).toLinearMap ∘ₗ TensorAlgebra.ι R) m =
+        (RingQuot.mkAlgHom R (Rel Q)).toLinearMap ((TensorAlgebra.ι R) m) :=
+    rfl
+  refine (congrArg₂ (fun x y => x * y) hcomp hcomp).trans ?_
   rw [AlgHom.toLinearMap_apply]
-  erw [← map_mul (RingQuot.mkAlgHom R (Rel Q))]
+  refine (map_mul (RingQuot.mkAlgHom R (Rel Q)) ((TensorAlgebra.ι R) m)
+    ((TensorAlgebra.ι R) m)).symm.trans ?_
   rw [RingQuot.mkAlgHom_rel R (Rel.of m), AlgHom.commutes]
   rfl
 
