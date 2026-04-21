@@ -745,7 +745,8 @@ in the category of arrows. -/
 def mapOfIsColimit {cc : CokernelCofork f} (hf : IsColimit cc) (cc' : CokernelCofork f')
     (φ : Arrow.mk f ⟶ Arrow.mk f') : cc.pt ⟶ cc'.pt :=
   hf.desc (CokernelCofork.ofπ (φ.right ≫ cc'.π) (by
-    erw [← Arrow.w_assoc φ, condition, comp_zero]))
+    simpa using (Arrow.w_assoc φ cc'.π).symm.trans (by
+      rw [CokernelCofork.condition, comp_zero])))
 
 @[reassoc (attr := simp)]
 lemma π_mapOfIsColimit {cc : CokernelCofork f} (hf : IsColimit cc) (cc' : CokernelCofork f')
