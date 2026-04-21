@@ -266,9 +266,14 @@ lemma AffineIndependent.card_le_card_of_subset_affineSpan {s t : Finset V}
   rw [AffineSubspace.affineSpan_coe, direction_affineSpan, direction_affineSpan,
     ← @Subtype.range_coe _ (s : Set V), ← @Subtype.range_coe _ (t : Set V)] at direction_le
   have finrank_le := add_le_add_left (Submodule.finrank_mono direction_le) 1
-  -- We use `erw` to elide the difference between `↥s` and `↥(s : Set V)}`
-  erw [hs.finrank_vectorSpan_add_one] at finrank_le
-  simpa using finrank_le.trans <| finrank_vectorSpan_range_add_one_le _ _
+  have hs_finrank : finrank k (vectorSpan k (Set.range ((↑) : s → V))) + 1 = #s := by
+    simpa using hs.finrank_vectorSpan_add_one
+  have ht_finrank : finrank k (vectorSpan k (Set.range ((↑) : t → V))) + 1 ≤ #t := by
+    simpa using finrank_vectorSpan_range_add_one_le k ((↑) : t → V)
+  calc
+    #s = finrank k (vectorSpan k (Set.range ((↑) : s → V))) + 1 := hs_finrank.symm
+    _ ≤ finrank k (vectorSpan k (Set.range ((↑) : t → V))) + 1 := finrank_le
+    _ ≤ #t := ht_finrank
 
 open Finset in
 /-- If the affine span of an affine independent finset is strictly contained in the affine span of
@@ -286,9 +291,14 @@ lemma AffineIndependent.card_lt_card_of_affineSpan_lt_affineSpan {s t : Finset V
   rw [direction_affineSpan, direction_affineSpan,
     ← @Subtype.range_coe _ (s : Set V), ← @Subtype.range_coe _ (t : Set V)] at dir_lt
   have finrank_lt := add_lt_add_left (Submodule.finrank_lt_finrank_of_lt dir_lt) 1
-  -- We use `erw` to elide the difference between `↥s` and `↥(s : Set V)}`
-  erw [hs.finrank_vectorSpan_add_one] at finrank_lt
-  simpa using finrank_lt.trans_le <| finrank_vectorSpan_range_add_one_le _ _
+  have hs_finrank : finrank k (vectorSpan k (Set.range ((↑) : s → V))) + 1 = #s := by
+    simpa using hs.finrank_vectorSpan_add_one
+  have ht_finrank : finrank k (vectorSpan k (Set.range ((↑) : t → V))) + 1 ≤ #t := by
+    simpa using finrank_vectorSpan_range_add_one_le k ((↑) : t → V)
+  calc
+    #s = finrank k (vectorSpan k (Set.range ((↑) : s → V))) + 1 := hs_finrank.symm
+    _ < finrank k (vectorSpan k (Set.range ((↑) : t → V))) + 1 := finrank_lt
+    _ ≤ #t := ht_finrank
 
 /-- If the `vectorSpan` of a finite subset of an affinely independent
 family lies in a submodule with dimension one less than its
