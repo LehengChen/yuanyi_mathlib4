@@ -225,7 +225,8 @@ theorem map_of_image (h : f '' I = J) : I.map f = J := by
     ```
     works, but still feels awkward. There are missing `simp` lemmas here.`
     -/
-    erw [h]
+    rw [LieIdeal.toLieSubalgebra_toSubmodule]
+    exact h.subset
   · rw [← SetLike.coe_subset_coe, ← h]; exact LieSubmodule.subset_lieSpan
 
 /-- Note that this is not a special case of `LieSubmodule.subsingleton_of_bot`. Indeed, given
@@ -402,8 +403,10 @@ theorem map_sup_ker_eq_map : LieIdeal.map f (I ⊔ f.ker) = LieIdeal.map f I := 
   apply LieSubmodule.lieSpan_mono
   rintro x ⟨y, hy₁, hy₂⟩
   rw [← hy₂]
-  erw [LieSubmodule.mem_sup] at hy₁
-  obtain ⟨z₁, hz₁, z₂, hz₂, hy⟩ := hy₁
+  have hy₁' : y ∈ I ⊔ f.ker := by
+    simpa [LieIdeal.toLieSubalgebra_toSubmodule] using hy₁
+  rw [LieSubmodule.mem_sup] at hy₁'
+  obtain ⟨z₁, hz₁, z₂, hz₂, hy⟩ := hy₁'
   rw [← hy]
   rw [map_add, f.coe_toLinearMap, LieHom.mem_ker.mp hz₂, add_zero]; exact ⟨z₁, hz₁, rfl⟩
 
