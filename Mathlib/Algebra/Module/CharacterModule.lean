@@ -200,17 +200,37 @@ noncomputable def ofSpanSingleton (a : A) : CharacterModule (ℤ ∙ a) :=
 
 lemma eq_zero_of_ofSpanSingleton_apply_self (a : A)
     (h : ofSpanSingleton a ⟨a, Submodule.mem_span_singleton_self a⟩ = 0) : a = 0 := by
-  erw [ofSpanSingleton, LinearMap.toAddMonoidHom_coe, LinearMap.comp_apply,
-     intSpanEquivQuotAddOrderOf_apply_self, Submodule.liftQSpanSingleton_apply,
-    AddMonoidHom.coe_toIntLinearMap, int.divByNat, LinearMap.toSpanSingleton_apply_one,
-    AddCircle.coe_eq_zero_iff] at h
-  rcases h with ⟨n, hn⟩
-  apply_fun Rat.den at hn
-  rw [zsmul_one, Rat.den_intCast, Rat.inv_natCast_den_of_pos] at hn
-  · split_ifs at hn
-    · cases hn
-    · rwa [eq_comm, AddMonoid.addOrderOf_eq_one_iff] at hn
-  · grind
+  let l : ℤ ⧸ Ideal.span {(addOrderOf a : ℤ)} →ₗ[ℤ] AddCircle (1 : ℚ) :=
+    Submodule.liftQSpanSingleton _
+      (CharacterModule.int.divByNat <|
+        if addOrderOf a = 0 then 2 else addOrderOf a).toIntLinearMap <| by
+        split_ifs with h
+        · rw [h, Nat.cast_zero, map_zero]
+        · apply CharacterModule.int.divByNat_self
+  have h0 : l (intSpanEquivQuotAddOrderOf a ⟨a, Submodule.mem_span_singleton_self a⟩) = 0 := by
+    simpa [ofSpanSingleton, l, LinearMap.comp_apply] using h
+  rw [intSpanEquivQuotAddOrderOf_apply_self] at h0
+  let n : ℕ := if addOrderOf a = 0 then 2 else addOrderOf a
+  have h1 : int.divByNat n 1 = 0 := by
+    simpa [n, l, Submodule.liftQSpanSingleton_apply] using h0
+  have h2 : (((((n : ℕ) : ℚ)⁻¹ : ℚ)) : AddCircle (1 : ℚ)) = 0 := by
+    calc
+      (((((n : ℕ) : ℚ)⁻¹ : ℚ)) : AddCircle (1 : ℚ)) =
+          (LinearMap.toSpanSingleton ℤ (AddCircle (1 : ℚ)) ((((n : ℕ) : ℚ)⁻¹ : ℚ) :
+            AddCircle (1 : ℚ))).toAddMonoidHom 1 := by
+              symm
+              simp [LinearMap.toAddMonoidHom_coe]
+      _ = int.divByNat n 1 := by rfl
+      _ = 0 := h1
+  rcases (AddCircle.coe_eq_zero_iff _).mp h2 with ⟨m, hm⟩
+  apply_fun Rat.den at hm
+  rw [zsmul_one, Rat.den_intCast, Rat.inv_natCast_den_of_pos] at hm
+  · dsimp [n] at hm
+    split_ifs at hm
+    · cases hm
+    · rwa [eq_comm, AddMonoid.addOrderOf_eq_one_iff] at hm
+  · dsimp [n]
+    split_ifs <;> grind
 
 lemma exists_character_apply_ne_zero_of_ne_zero {a : A} (ne_zero : a ≠ 0) :
     ∃ (c : CharacterModule A), c a ≠ 0 :=
