@@ -172,9 +172,12 @@ set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma fromFreeYonedaCoproduct_app_mk (m : M.Elements) :
     M.fromFreeYonedaCoproduct.app _ (M.freeYonedaCoproductMk m) = m.2 := by
-  dsimp [freeYonedaCoproductMk]
-  erw [M.ι_fromFreeYonedaCoproduct_apply m]
-  rw [m.fromFreeYoneda_app_apply]
+  calc
+    M.fromFreeYonedaCoproduct.app _ ((M.ιFreeYonedaCoproduct m).app _ (ModuleCat.freeMk (𝟙 _))) =
+        m.fromFreeYoneda.app _ (ModuleCat.freeMk (𝟙 _)) := by
+          exact M.ι_fromFreeYonedaCoproduct_apply m _ (ModuleCat.freeMk (𝟙 _))
+    _ = m.2 := by
+      rw [m.fromFreeYoneda_app_apply]
 
 instance : Epi M.fromFreeYonedaCoproduct :=
   epi_of_surjective (fun X m ↦ ⟨M.freeYonedaCoproductMk (M.elementsMk X m),
