@@ -410,8 +410,11 @@ theorem Dense.borel_eq_generateFrom_Ioc_mem_aux {α : Type*} [TopologicalSpace �
   · ext s
     constructor <;> rintro ⟨l, hl, u, hu, hlt, rfl⟩
     exacts [⟨u, hu, l, hl, hlt, Ico_toDual⟩, ⟨u, hu, l, hl, hlt, Ioc_toDual⟩]
-  · erw [Ioo_toDual]
-    exact he
+  · have hIoo : (Ioo y x : Set α) = OrderDual.toDual ⁻¹' (Ioo x y : Set αᵒᵈ) := by
+      exact (Ioo_ofDual (x := x) (y := y) :
+        (Ioo y x : Set α) = OrderDual.toDual ⁻¹' (Ioo x y : Set αᵒᵈ))
+    exact hIoo.trans <| by
+      simpa [Set.preimage_empty] using congrArg (Set.preimage OrderDual.toDual) he
 
 theorem Dense.borel_eq_generateFrom_Ioc_mem {α : Type*} [TopologicalSpace α] [LinearOrder α]
     [OrderTopology α] [SecondCountableTopology α] [DenselyOrdered α] [NoMaxOrder α] {s : Set α}
@@ -464,8 +467,12 @@ theorem ext_of_Ioc_finite {α : Type*} [TopologicalSpace α] {m : MeasurableSpac
     [IsFiniteMeasure μ] (hμν : μ univ = ν univ) (h : ∀ ⦃a b⦄, a < b → μ (Ioc a b) = ν (Ioc a b)) :
     μ = ν := by
   refine @ext_of_Ico_finite αᵒᵈ _ _ _ _ _ ‹_› μ ν _ hμν fun a b hab => ?_
-  erw [Ico_toDual (α := α)]
-  exact h hab
+  have hIco : Ico a b = OrderDual.ofDual ⁻¹' (Ioc b a : Set α) := by
+    exact (Ico_toDual (α := α) (a := OrderDual.ofDual a) (b := OrderDual.ofDual b) :
+      Ico a b = OrderDual.ofDual ⁻¹' (Ioc b a : Set α))
+  simpa [hIco] using
+    (show μ (OrderDual.ofDual ⁻¹' (Ioc b a : Set α)) = ν (OrderDual.ofDual ⁻¹' (Ioc b a : Set α))
+      from h hab)
 
 /-- Two measures which are finite on closed-open intervals are equal if they agree on all
 closed-open intervals. -/
@@ -498,8 +505,20 @@ theorem ext_of_Ioc' {α : Type*} [TopologicalSpace α] {m : MeasurableSpace α}
     [SecondCountableTopology α] [LinearOrder α] [OrderTopology α] [BorelSpace α] [NoMinOrder α]
     (μ ν : Measure α) (hμ : ∀ ⦃a b⦄, a < b → μ (Ioc a b) ≠ ∞)
     (h : ∀ ⦃a b⦄, a < b → μ (Ioc a b) = ν (Ioc a b)) : μ = ν := by
-  refine @ext_of_Ico' αᵒᵈ _ _ _ _ _ ‹_› _ μ ν ?_ ?_ <;> intro a b hab <;> erw [Ico_toDual (α := α)]
-  exacts [hμ hab, h hab]
+  refine @ext_of_Ico' αᵒᵈ _ _ _ _ _ ‹_› _ μ ν ?_ ?_
+  · intro a b hab
+    have hIco : Ico a b = OrderDual.ofDual ⁻¹' (Ioc b a : Set α) := by
+      exact (Ico_toDual (α := α) (a := OrderDual.ofDual a) (b := OrderDual.ofDual b) :
+        Ico a b = OrderDual.ofDual ⁻¹' (Ioc b a : Set α))
+    simpa [hIco] using
+      (show μ (OrderDual.ofDual ⁻¹' (Ioc b a : Set α)) ≠ ∞ from hμ hab)
+  · intro a b hab
+    have hIco : Ico a b = OrderDual.ofDual ⁻¹' (Ioc b a : Set α) := by
+      exact (Ico_toDual (α := α) (a := OrderDual.ofDual a) (b := OrderDual.ofDual b) :
+        Ico a b = OrderDual.ofDual ⁻¹' (Ioc b a : Set α))
+    simpa [hIco] using
+      (show μ (OrderDual.ofDual ⁻¹' (Ioc b a : Set α)) = ν (OrderDual.ofDual ⁻¹' (Ioc b a : Set α))
+        from h hab)
 
 /-- Two measures which are finite on closed-open intervals are equal if they agree on all
 closed-open intervals. -/
