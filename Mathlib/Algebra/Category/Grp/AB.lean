@@ -46,8 +46,27 @@ noncomputable instance :
       at hk
     rcases hS k hk with ⟨t, ht⟩
     use colimit.ι S.X₁ k t
-    erw [← ConcreteCategory.comp_apply, colimit.ι_map, ConcreteCategory.comp_apply, ht]
-    exact colimit.w_apply S.X₂ e₁ y)
+    have hι : colimit.ι S.X₁ k ≫ (S.map colim).f = S.f.app k ≫ colimit.ι S.X₂ k := by
+      change colimit.ι S.X₁ k ≫ colim.map S.f = S.f.app k ≫ colimit.ι S.X₂ k
+      exact colimit.ι_map (α := S.f) k
+    have hleft :
+        (AddCommGrpCat.Hom.hom (S.map colim).f) ((ConcreteCategory.hom (colimit.ι S.X₁ k)) t) =
+          (ConcreteCategory.hom (colimit.ι S.X₂ k)) ((AddCommGrpCat.Hom.hom (S.f.app k)) t) := by
+      change (ConcreteCategory.hom (S.map colim).f) ((ConcreteCategory.hom (colimit.ι S.X₁ k)) t) =
+        (ConcreteCategory.hom (colimit.ι S.X₂ k)) ((ConcreteCategory.hom (S.f.app k)) t)
+      have hleft' :
+          (ConcreteCategory.hom (colimit.ι S.X₁ k ≫ (S.map colim).f)) t =
+            (ConcreteCategory.hom (S.f.app k ≫ colimit.ι S.X₂ k)) t :=
+        congrArg (fun f : S.X₁.obj k ⟶ colimit S.X₂ ↦ ConcreteCategory.hom f t) hι
+      rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at hleft'
+      exact hleft'
+    have ht' : (AddCommGrpCat.Hom.hom (S.f.app k)) t = (ConcreteCategory.hom (S.X₂.map e₁)) y := by
+      change (AddCommGrpCat.Hom.hom (S.map ((evaluation J AddCommGrpCat).obj k)).f) t =
+        (ConcreteCategory.hom (S.X₂.map e₁)) y
+      exact ht
+    exact hleft.trans <|
+      (congrArg (ConcreteCategory.hom (colimit.ι S.X₂ k)) ht').trans
+        (colimit.w_apply S.X₂ e₁ y))
 
 noncomputable instance :
     PreservesFiniteLimits <| colim (J := J) (C := AddCommGrpCat.{u}) := by
