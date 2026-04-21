@@ -72,12 +72,24 @@ noncomputable def pushforwardCompCoyonedaFreeYonedaCorepresentableBy (X : C) :
       ((free R).obj (yoneda.obj (F.obj X))) where
   homEquiv {M} := freeYonedaEquiv.trans
     (freeYonedaEquiv (M := (pushforward φ).obj M)).symm
-  homEquiv_comp {M N} g f := freeYonedaEquiv.injective (by
+  homEquiv_comp {M N} g f := by
+    refine (freeYonedaEquiv (R := S) (X := X) (M := (pushforward φ).obj N)).injective ?_
     dsimp
-    erw [Equiv.apply_symm_apply, freeYonedaEquiv_comp]
-    conv_rhs => erw [freeYonedaEquiv_comp]
-    erw [Equiv.apply_symm_apply]
-    rfl)
+    have h :=
+      (freeYonedaEquiv (R := S) (X := X) (M := (pushforward φ).obj N)).apply_symm_apply
+        (freeYonedaEquiv (R := R) (X := F.obj X) (M := N) (f ≫ g))
+    have h' :
+        freeYonedaEquiv (R := S) (X := X)
+            ((((freeYonedaEquiv (R := R) (X := F.obj X)).trans
+              (freeYonedaEquiv (R := S) (X := X) (M := (pushforward φ).obj M)).symm) f) ≫
+                (pushforward φ).map g) =
+          freeYonedaEquiv (R := R) (X := F.obj X) (M := N) (f ≫ g) := by
+      rw [Equiv.trans_apply, freeYonedaEquiv_comp]
+      have hM := congrArg (ConcreteCategory.hom (((pushforward φ).map g).app (op X)))
+        ((freeYonedaEquiv (R := S) (X := X) (M := (pushforward φ).obj M)).apply_symm_apply
+          (freeYonedaEquiv (R := R) (X := F.obj X) (M := M) f))
+      exact hM.trans (by rfl)
+    exact h.trans h'.symm
 
 lemma pullbackObjIsDefined_free_yoneda (X : C) :
     pullbackObjIsDefined φ ((free S).obj (yoneda.obj X)) :=
