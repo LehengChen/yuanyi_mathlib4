@@ -77,8 +77,8 @@ lemma Sheaf.isPullback_square_op_map_yoneda_presheafToSheaf_yoneda_iff
     ext x
     dsimp
     rw [yonedaEquiv_naturality]
-    erw [Adjunction.homEquiv_naturality_left]
-    rfl
+    simpa using congrArg yonedaEquiv
+      ((sheafificationAdjunction J (Type v)).homEquiv_naturality_left _ x)
 
 namespace GrothendieckTopology
 
