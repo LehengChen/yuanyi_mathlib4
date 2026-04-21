@@ -145,10 +145,7 @@ lemma basicOpenToSpec_app_top :
     (basicOpenToSpec 𝒜 f).app ⊤ = (Scheme.ΓSpecIso _).hom ≫ awayToSection 𝒜 f ≫
       (basicOpen 𝒜 f).topIso.inv := by
   rw [basicOpenToSpec]
-  simp only [Scheme.Hom.comp_base, TopologicalSpace.Opens.map_comp_obj,
-    TopologicalSpace.Opens.map_top, Scheme.Hom.comp_app, Scheme.Opens.topIso_inv, eqToHom_op]
-  erw [Scheme.Hom.comp_app]
-  simp
+  simp [Scheme.Opens.toSpecΓ_appTop]
 
 /-- The structure map `Proj A ⟶ Spec A₀`. -/
 noncomputable
@@ -230,11 +227,22 @@ lemma awayMap_awayToSection :
   ext a
   apply Subtype.ext
   ext ⟨i, hi⟩
-  obtain ⟨⟨n, a, ⟨b, hb'⟩, i, rfl : _ = b⟩, rfl⟩ := mk_surjective a
+  obtain ⟨⟨n, a, ⟨b, hb'⟩, j, rfl : _ = b⟩, rfl⟩ := mk_surjective a
   simp only [homOfLE_leOfHom, CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply]
-  erw [ProjectiveSpectrum.Proj.awayToSection_apply]
-  rw [CommRingCat.hom_ofHom, val_awayMap_mk, Localization.mk_eq_mk', IsLocalization.map_mk',
-    ← Localization.mk_eq_mk']
+  have hc : ↑(⟨f ^ j, hb'⟩ : ↥(𝒜 n)) ∈ Submonoid.powers f := by
+    exact ⟨j, rfl⟩
+  let c : NumDenSameDeg 𝒜 (Submonoid.powers f) :=
+    { deg := n
+      num := a
+      den := ⟨f ^ j, hb'⟩
+      den_mem := hc }
+  have happly := by
+    exact ProjectiveSpectrum.Proj.awayToSection_apply (𝒜 := 𝒜) (f := x)
+      ((awayMap 𝒜 g_deg hx) (mk c)) ⟨i, hi⟩
+  change (((ProjectiveSpectrum.Proj.awayToSection 𝒜 x).1 ((awayMap 𝒜 g_deg hx) (mk c))).val
+      ⟨i, hi⟩).val = _
+  rw [happly]
+  rw [val_awayMap_mk, Localization.mk_eq_mk', IsLocalization.map_mk', ← Localization.mk_eq_mk']
   refine Localization.mk_eq_mk_iff.mpr ?_
   rw [Localization.r_iff_exists]
   use 1
