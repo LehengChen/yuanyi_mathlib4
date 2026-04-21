@@ -44,6 +44,13 @@ lemma homologySequenceδ_quotient_mapTriangle_obj
         (homologyFunctorFactors C (up ℤ) n₁).inv.app _ := by
   apply homologyFunctor_shiftMap
 
+namespace HomotopyCategory
+
+lemma shift_homologyFunctor (n : ℤ) :
+    (homologyFunctor C (up ℤ) 0).shift n = homologyFunctor C (up ℤ) n := rfl
+
+end HomotopyCategory
+
 namespace mappingCone
 
 variable (S : ShortComplex (CochainComplex C ℤ)) (hS : S.ShortExact)
@@ -95,10 +102,15 @@ lemma homologySequenceδ_triangleh (n₀ : ℤ) (n₁ : ℤ) (h : n₀ + 1 = n�
   ext ⟨A⟩ (x : A ⟶ _)
   obtain ⟨A', π, _, x', w, hx'⟩ :=
     (mappingCone S.f).eq_liftCycles_homologyπ_up_to_refinements x n₁ (by simpa using h)
-  erw [homologySequenceδ_quotient_mapTriangle_obj_assoc _ _ _ h]
+  have hδ :=
+    homologySequenceδ_quotient_mapTriangle_obj_assoc (triangle S.f) n₀ n₁ h
+      ((homologyFunctorFactors C (up ℤ) n₁).hom.app S.X₁)
+  have hδ' := by
+    simpa only [Functor.mapTriangle_obj, triangle_obj₁, triangle_mor₁, triangle_mor₂] using hδ
+  rw [hδ']
   dsimp
   rw [comp_id, Iso.inv_hom_id_app_assoc, Iso.inv_hom_id_app]
-  erw [comp_id]
+  simp
   rw [← cancel_epi π, reassoc_of% hx', reassoc_of% hx',
     HomologicalComplex.homologyπ_naturality_assoc,
     HomologicalComplex.liftCycles_comp_cyclesMap_assoc]
@@ -117,14 +129,16 @@ lemma homologySequenceδ_triangleh (n₀ : ℤ) (n₁ : ℤ) (h : n₀ + 1 = n�
     (by simp only [neg_comp, neg_eq_iff_add_eq_zero, w.2]) (n₁ + 1) (by simp)]
   /- We simplify the LHS. -/
   dsimp [Functor.shiftMap, homologyFunctor_shift]
-  rw [HomologicalComplex.homologyπ_naturality_assoc,
+  rw [assoc, HomologicalComplex.homologyπ_naturality_assoc,
     HomologicalComplex.liftCycles_comp_cyclesMap_assoc,
-    S.X₁.liftCycles_shift_homologyπ_assoc _ _ _ _ n₁ (by lia) (n₁ + 1) (by simp),
-    Iso.inv_hom_id_app]
+    S.X₁.liftCycles_shift_homologyπ_assoc _ _ _ _ n₁ (by lia) (n₁ + 1) (by simp)]
   dsimp [homologyFunctor_shift]
   simp only [hab, add_comp, assoc, inl_v_triangle_mor₃_f_assoc,
     shiftFunctorObjXIso, neg_comp, Iso.inv_hom_id, comp_neg, comp_id,
     inr_f_triangle_mor₃_f_assoc, zero_comp, comp_zero, add_zero]
+  simp only [Iso.inv_hom_id_app]
+  simpa using Category.comp_id
+    (HomologicalComplex.liftCycles S.X₁ (-a) (n₁ + 1) _ _ ≫ HomologicalComplex.homologyπ S.X₁ n₁)
 
 open ComposableArrows
 
@@ -143,16 +157,32 @@ lemma quasiIso_descShortComplex : QuasiIso (descShortComplex S) where
         ((homologyFunctorFactors C (up ℤ) _).hom.app _)
         ((homologyFunctorFactors C (up ℤ) _).hom.naturality S.f)
         (by
-          erw [(homologyFunctorFactors C (up ℤ) n).hom.naturality_assoc]
+          have hnat :=
+            (homologyFunctorFactors C (up ℤ) n).hom.naturality_assoc (inr S.f)
+              (HomologicalComplex.homologyMap (descShortComplex S) n)
           -- Disable `Fin.reduceFinMk`, otherwise `Precomp.obj_succ` does not fire. (https://github.com/leanprover-community/mathlib4/issues/27382)
           dsimp [-Fin.reduceFinMk]
-          rw [← HomologicalComplex.homologyMap_comp, inr_descShortComplex])
+          have hshift :
+              ((homologyFunctor C (up ℤ) 0).shift n).map ((quotient C (up ℤ)).map (inr S.f)) =
+                (homologyFunctor C (up ℤ) n).map ((quotient C (up ℤ)).map (inr S.f)) := by
+            rfl
+          rw [hshift]
+          have hmap :
+              (HomologicalComplex.homologyFunctor C (up ℤ) n).map (inr S.f) =
+                HomologicalComplex.homologyMap (inr S.f) n := rfl
+          rw [hmap] at hnat
+          simpa only [Functor.comp_map, ← HomologicalComplex.homologyMap_comp,
+            inr_descShortComplex] using hnat)
         (by
           -- Disable `Fin.reduceFinMk`, otherwise `Precomp.obj_succ` does not fire. (https://github.com/leanprover-community/mathlib4/issues/27382)
           dsimp [-Fin.reduceFinMk]
-          erw [homologySequenceδ_triangleh hS]
-          simp only [Functor.comp_obj, HomologicalComplex.homologyFunctor_obj, assoc,
-            Iso.inv_hom_id_app, comp_id])
+          have hδ :=
+            congrArg
+              (fun k => k ≫ (homologyFunctorFactors C (up ℤ) (n + 1)).hom.app S.X₁)
+              (homologySequenceδ_triangleh hS n (n + 1) rfl)
+          simpa only [triangleh, Functor.mapTriangle_obj, triangle_obj₁, triangle_mor₁,
+            triangle_mor₂, Functor.comp_obj, HomologicalComplex.homologyFunctor_obj, assoc,
+            Iso.inv_hom_id_app, comp_id] using hδ)
         ((homologyFunctorFactors C (up ℤ) _).hom.naturality S.f)
     have : IsIso ((homologyFunctorFactors C (up ℤ) n).hom.app (mappingCone S.f) ≫
         HomologicalComplex.homologyMap (descShortComplex S) n) := by
