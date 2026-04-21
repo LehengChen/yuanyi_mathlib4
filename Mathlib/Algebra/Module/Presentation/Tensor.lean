@@ -69,22 +69,37 @@ set_option backward.isDefEq.respectTransparency false in
 /-- The tensor product of two modules admits a presentation by generators and relations. -/
 noncomputable def isPresentationCoreTensor :
     Solution.IsPresentationCore.{w} (solution₁.tensor solution₂) where
-  desc s := uncurry _ _ _ _ (h₁.desc
-    { var := fun g₁ ↦ h₂.desc
-        { var := fun g₂ ↦ s.var ⟨g₁, g₂⟩
-          linearCombination_var_relation := fun r₂ ↦ by
-            erw [← Finsupp.linearCombination_embDomain A
-              (Function.Embedding.sectR g₁ relations₂.G)]
-            exact s.linearCombination_var_relation (.inr ⟨g₁, r₂⟩) }
-      linearCombination_var_relation := fun r₁ ↦ h₂.postcomp_injective (by
-        ext g₂
-        dsimp
-        erw [Finsupp.apply_linearCombination A (LinearMap.applyₗ (solution₂.var g₂))]
-        have := s.linearCombination_var_relation (.inl ⟨r₁, g₂⟩)
-        erw [Finsupp.linearCombination_embDomain] at this
-        convert this
-        ext g₁
-        simp) })
+  desc s := by
+    let t : relations₁.G → relations₂.Solution _ := fun g₁ =>
+      { var := fun g₂ ↦ s.var ⟨g₁, g₂⟩
+        linearCombination_var_relation := fun r₂ ↦ by
+          rw [← s.linearCombination_var_relation (.inr ⟨g₁, r₂⟩)]
+          symm
+          apply Finsupp.linearCombination_embDomain }
+    exact uncurry _ _ _ _ (h₁.desc
+      { var := fun g₁ ↦ h₂.desc (t g₁)
+        linearCombination_var_relation := fun r₁ ↦ h₂.postcomp_injective (by
+          ext g₂
+          dsimp [t]
+          calc
+            ((Finsupp.linearCombination A fun g₁ ↦ h₂.desc (t g₁))
+                (relations₁.relation r₁))
+                (solution₂.var g₂) =
+              (Finsupp.linearCombination A
+                ((LinearMap.applyₗ (solution₂.var g₂)) ∘ fun g₁ ↦ h₂.desc (t g₁)))
+                (relations₁.relation r₁) :=
+              Finsupp.apply_linearCombination A (LinearMap.applyₗ (solution₂.var g₂))
+                (fun g₁ ↦ h₂.desc (t g₁)) (relations₁.relation r₁)
+            _ = (Finsupp.linearCombination A (fun g₁ ↦ s.var ⟨g₁, g₂⟩))
+                (relations₁.relation r₁) := by
+                  refine congrArg (fun v ↦ (Finsupp.linearCombination A v)
+                    (relations₁.relation r₁)) ?_
+                  ext g₁
+                  simp [Function.comp, t]
+            _ = 0 := by
+              rw [← s.linearCombination_var_relation (.inl ⟨r₁, g₂⟩)]
+              symm
+              apply Finsupp.linearCombination_embDomain) })
   postcomp_desc _ := by aesop
   postcomp_injective h := curry_injective (h₁.postcomp_injective (by
     ext g₁ : 2
