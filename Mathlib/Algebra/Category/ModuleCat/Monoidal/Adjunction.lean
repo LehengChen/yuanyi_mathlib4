@@ -58,20 +58,97 @@ noncomputable instance : (extendScalars f).Monoidal :=
         ext m
         dsimp
         rw [MonoidalCategory.leftUnitor_inv_apply]
-        erw [AlgebraTensorModule.distribBaseChange_tmul,
-          MonoidalCategory.whiskerRight_apply,
-          AlgebraTensorModule.rid_tmul]
-        rw [one_smul]
-        rfl)
+        change (1 : S) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m) =
+          (((AlgebraTensorModule.rid R S S).toModuleIso.hom ▷ (extendScalars f).obj M)
+            (((AlgebraTensorModule.distribBaseChange R S (𝟙_ (ModuleCat R)) M).toModuleIso.hom)
+              ((1 : S) ⊗ₜ[R] ((1 : R) ⊗ₜ[R] m))))
+        have hdistrib :
+            (ConcreteCategory.hom
+                (AlgebraTensorModule.distribBaseChange R S ↑(𝟙_ (ModuleCat R)) ↑M).toModuleIso.hom)
+              ((1 : S) ⊗ₜ[R] ((1 : R) ⊗ₜ[R] m)) =
+              ((((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m)) := by
+          exact AlgebraTensorModule.distribBaseChange_tmul
+            (R := R) (A := S) (n := (1 : R)) (q := m) (a := (1 : S))
+        have hwhisker :
+            (ConcreteCategory.hom
+                ((AlgebraTensorModule.rid R S S).toModuleIso.hom ▷ (extendScalars f).obj M))
+              ((((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m)) =
+              ((ConcreteCategory.hom (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+                (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m) := by
+          exact MonoidalCategory.whiskerRight_apply
+            ((AlgebraTensorModule.rid R S S).toModuleIso.hom) ((extendScalars f).obj M)
+            (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R) ((1 : S) ⊗ₜ[R] m)
+        have hrid :
+            (ConcreteCategory.hom (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+              (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R) = (1 : S) := by
+          exact by
+            change (AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] (1 : R)) = (1 : S)
+            rw [AlgebraTensorModule.rid_tmul, one_smul]
+        calc
+          (1 : S) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m)
+              = ((ConcreteCategory.hom (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+                  (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m) := by
+                  rw [hrid]
+          _ = (ConcreteCategory.hom
+                ((AlgebraTensorModule.rid R S S).toModuleIso.hom ▷ (extendScalars f).obj M))
+                ((((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m)) := by
+                  rw [hwhisker]
+          _ = (((AlgebraTensorModule.rid R S S).toModuleIso.hom ▷ (extendScalars f).obj M)
+                (((AlgebraTensorModule.distribBaseChange R S (𝟙_ (ModuleCat R)) M).toModuleIso.hom)
+                  ((1 : S) ⊗ₜ[R] ((1 : R) ⊗ₜ[R] m)))) := by
+                  exact congrArg
+                    (ConcreteCategory.hom
+                      ((AlgebraTensorModule.rid R S S).toModuleIso.hom ▷ (extendScalars f).obj M))
+                    hdistrib.symm
+        )
       (oplax_right_unitality := fun M ↦ by
         ext m
         dsimp
         rw [MonoidalCategory.rightUnitor_inv_apply]
-        erw [AlgebraTensorModule.distribBaseChange_tmul,
-          MonoidalCategory.whiskerLeft_apply,
-          AlgebraTensorModule.rid_tmul]
-        rw [one_smul]
-        rfl))
+        change ((1 : S) ⊗ₜ[R] m) ⊗ₜ[S] (1 : S) =
+          (((extendScalars f).obj M ◁ (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+            (((AlgebraTensorModule.distribBaseChange R S M (𝟙_ (ModuleCat R))).toModuleIso.hom)
+              ((1 : S) ⊗ₜ[R] (m ⊗ₜ[R] (1 : R)))))
+        have hdistrib :
+            (ConcreteCategory.hom
+                (AlgebraTensorModule.distribBaseChange R S ↑M ↑(𝟙_ (ModuleCat R))).toModuleIso.hom)
+              ((1 : S) ⊗ₜ[R] (m ⊗ₜ[R] (1 : R))) =
+              (((1 : S) ⊗ₜ[R] m) ⊗ₜ[S] (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) := by
+          exact AlgebraTensorModule.distribBaseChange_tmul
+            (R := R) (A := S) (n := m) (q := (1 : R)) (a := (1 : S))
+        have hwhisker :
+            (ConcreteCategory.hom
+                ((extendScalars f).obj M ◁ (AlgebraTensorModule.rid R S S).toModuleIso.hom))
+              (((1 : S) ⊗ₜ[R] m) ⊗ₜ[S] (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) =
+              ((1 : S) ⊗ₜ[R] m) ⊗ₜ[S]
+                ((ConcreteCategory.hom (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+                  (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) := by
+          exact MonoidalCategory.whiskerLeft_apply
+            ((extendScalars f).obj M) ((AlgebraTensorModule.rid R S S).toModuleIso.hom)
+            ((1 : S) ⊗ₜ[R] m) ((((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R))
+        have hrid :
+            (ConcreteCategory.hom (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+              (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R) = (1 : S) := by
+          exact by
+            change (AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] (1 : R)) = (1 : S)
+            rw [AlgebraTensorModule.rid_tmul, one_smul]
+        calc
+          ((1 : S) ⊗ₜ[R] m) ⊗ₜ[S] (1 : S)
+              = ((1 : S) ⊗ₜ[R] m) ⊗ₜ[S]
+                  ((ConcreteCategory.hom (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+                    (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) := by
+                    rw [hrid]
+          _ = (ConcreteCategory.hom
+                ((extendScalars f).obj M ◁ (AlgebraTensorModule.rid R S S).toModuleIso.hom))
+                (((1 : S) ⊗ₜ[R] m) ⊗ₜ[S] (((1 : S) ⊗ₜ[R] (1 : R)) : S ⊗[R] R)) := by
+                  rw [hwhisker]
+          _ = (((extendScalars f).obj M ◁ (AlgebraTensorModule.rid R S S).toModuleIso.hom)
+                (((AlgebraTensorModule.distribBaseChange R S M (𝟙_ (ModuleCat R))).toModuleIso.hom)
+                  ((1 : S) ⊗ₜ[R] (m ⊗ₜ[R] (1 : R))))) := by
+                  exact congrArg
+                    (ConcreteCategory.hom
+                      ((extendScalars f).obj M ◁ (AlgebraTensorModule.rid R S S).toModuleIso.hom))
+                    hdistrib.symm))
 
 lemma extendScalars_ε :
     letI := f.toAlgebra
@@ -108,8 +185,9 @@ lemma restrictScalars_η (r : R) :
   letI := f.toAlgebra
   dsimp [Adjunction.rightAdjointLaxMonoidal_ε]
   rw [extendRestrictScalarsAdj_homEquiv_apply, extendScalars_η]
-  erw [AlgebraTensorModule.rid_tmul]
-  rw [RingHom.smul_toAlgebra, mul_one]
+  exact by
+    change (AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] r) = f r
+    rw [AlgebraTensorModule.rid_tmul, RingHom.smul_toAlgebra, mul_one]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
