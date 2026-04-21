@@ -69,11 +69,15 @@ theorem tendsto_rpow_abs_mul_exp_neg_mul_sq_cocompact {a : ℝ} (ha : 0 < a) (s 
     Tendsto (fun x : ℝ => |x| ^ s * rexp (-a * x ^ 2)) (cocompact ℝ) (𝓝 0) := by
   conv in rexp _ => rw [← sq_abs]
   rw [cocompact_eq_atBot_atTop, ← comap_abs_atTop]
-  erw [tendsto_comap'_iff (m := fun y => y ^ s * rexp (-a * y ^ 2))
-      (mem_atTop_sets.mpr ⟨0, fun b hb => ⟨b, abs_of_nonneg hb⟩⟩)]
-  exact
-    (rpow_mul_exp_neg_mul_sq_isLittleO_exp_neg ha s).tendsto_zero_of_tendsto
-      (tendsto_exp_atBot.comp <| tendsto_id.const_mul_atTop_of_neg (neg_lt_zero.mpr one_half_pos))
+  have h_abs :
+      Tendsto ((fun y => y ^ s * rexp (-a * y ^ 2)) ∘ abs) (comap abs atTop) (𝓝 0) :=
+    (tendsto_comap'_iff (m := fun y => y ^ s * rexp (-a * y ^ 2))
+      (f := atTop) (g := 𝓝 0) (i := abs)
+      (mem_atTop_sets.mpr ⟨0, fun b hb => ⟨b, abs_of_nonneg hb⟩⟩)).2
+        ((rpow_mul_exp_neg_mul_sq_isLittleO_exp_neg ha s).tendsto_zero_of_tendsto
+          (tendsto_exp_atBot.comp <|
+            tendsto_id.const_mul_atTop_of_neg (neg_lt_zero.mpr one_half_pos)))
+  simpa only [Function.comp] using h_abs
 
 theorem isLittleO_exp_neg_mul_sq_cocompact {a : ℂ} (ha : 0 < a.re) (s : ℝ) :
     (fun x : ℝ => Complex.exp (-a * x ^ 2)) =o[cocompact ℝ] fun x : ℝ => |x| ^ s := by
