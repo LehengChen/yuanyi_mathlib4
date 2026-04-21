@@ -107,9 +107,24 @@ def evaluationJointlyReflectsColimits {F : J ⥤ K ⥤ C} (c : Cocone F)
       naturality := fun X Y f =>
         (t X).hom_ext fun j => by
           rw [(t X).fac_assoc _ j]
-          erw [← (c.ι.app j).naturality_assoc f]
-          erw [(t Y).fac ⟨s.pt.obj _, whiskerRight s.ι _⟩ j]
-          simp }
+          have h₁ :
+              (((evaluation K C).obj X).mapCocone c).ι.app j ≫ c.pt.map f ≫
+                  (t Y).desc ⟨s.pt.obj Y, whiskerRight s.ι ((evaluation K C).obj Y)⟩ =
+                (F.obj j).map f ≫ (c.ι.app j).app Y ≫
+                  (t Y).desc ⟨s.pt.obj Y, whiskerRight s.ι ((evaluation K C).obj Y)⟩ := by
+            exact
+              ((c.ι.app j).naturality_assoc f
+                ((t Y).desc ⟨s.pt.obj Y, whiskerRight s.ι ((evaluation K C).obj Y)⟩)).symm
+          rw [h₁]
+          calc
+            (F.obj j).map f ≫ (c.ι.app j).app Y ≫
+                (t Y).desc ⟨s.pt.obj Y, whiskerRight s.ι ((evaluation K C).obj Y)⟩ =
+              (F.obj j).map f ≫ (whiskerRight s.ι ((evaluation K C).obj Y)).app j := by
+                simpa [Category.assoc] using
+                  congrArg (fun k => (F.obj j).map f ≫ k)
+                    ((t Y).fac ⟨s.pt.obj Y, whiskerRight s.ι ((evaluation K C).obj Y)⟩ j)
+            _ = (whiskerRight s.ι ((evaluation K C).obj X)).app j ≫ s.pt.map f := by
+                simp }
   fac s j := by ext k; exact (t k).fac _ j
   uniq s m w := by
     ext x
