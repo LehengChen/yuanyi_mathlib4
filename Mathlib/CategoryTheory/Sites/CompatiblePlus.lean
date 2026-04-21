@@ -81,7 +81,13 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
       dsimp [plusObj, plusMap]
       simp only [Functor.map_comp, Category.assoc]
       slice_rhs 1 2 =>
-        erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).fac]
+        rw [show
+          F.map (colimit.ι (J.diagram P X.unop) W) ≫
+              ((isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).coconePointUniqueUpToIso
+                  (colimit.isColimit (J.diagram P X.unop ⋙ F))).hom =
+            colimit.ι (J.diagram P X.unop ⋙ F) W by
+          simpa [preservesColimitIso] using
+            (ι_preservesColimitIso_hom (G := F) (F := J.diagram P X.unop) W)]
       slice_lhs 1 3 =>
         simp only [← F.map_comp]
         dsimp [colimMap, IsColimit.map, colimit.pre]
@@ -92,18 +98,24 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
         rw [F.map_comp]
       simp only [Category.assoc]
       slice_lhs 2 3 =>
-        erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P Y.unop))).fac]
-      dsimp
-      simp only [HasColimit.isoOfNatIso_ι_hom_assoc, GrothendieckTopology.diagramPullback_app,
-        colimit.ι_pre, HasColimit.isoOfNatIso_ι_hom, ι_colimMap_assoc]
+        rw [show
+          F.map (colimit.ι (J.diagram P Y.unop) (op ((unop W).pullback f.unop))) ≫
+              ((isColimitOfPreserves F (colimit.isColimit (J.diagram P Y.unop))).coconePointUniqueUpToIso
+                  (colimit.isColimit (J.diagram P Y.unop ⋙ F))).hom =
+            colimit.ι (J.diagram P Y.unop ⋙ F) (op ((unop W).pullback f.unop)) by
+          simpa [preservesColimitIso] using
+            (ι_preservesColimitIso_hom (G := F) (F := J.diagram P Y.unop)
+              (op ((unop W).pullback f.unop)))]
+      rw [HasColimit.isoOfNatIso_ι_hom]
+      rw [HasColimit.isoOfNatIso_ι_hom_assoc]
+      simp only [GrothendieckTopology.diagramPullback_app, colimit.ι_pre, ι_colimMap_assoc]
       simp only [← Category.assoc]
-      dsimp
       congr 1
-      ext
+      dsimp only [diagram]
+      ext a
       dsimp
-      simp only [Category.assoc]
-      rw [Multiequalizer.lift_ι, diagramCompIso_hom_ι, diagramCompIso_hom_ι, ← F.map_comp,
-        Multiequalizer.lift_ι])
+      simp only [Multiequalizer.lift_ι, diagramCompIso_hom_ι, Category.assoc]
+      rw [diagramCompIso_hom_ι, ← F.map_comp, Multiequalizer.lift_ι])
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
@@ -111,9 +123,14 @@ theorem ι_plusCompIso_hom (X) (W) :
     F.map (colimit.ι _ W) ≫ (J.plusCompIso F P).hom.app X =
       (J.diagramCompIso F P X.unop).hom.app W ≫ colimit.ι _ W := by
   delta diagramCompIso plusCompIso
-  simp only [Iso.trans_hom, NatIso.ofComponents_hom_app, ←
-    Category.assoc]
-  erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P (unop X)))).fac]
+  simp only [Iso.trans_hom, NatIso.ofComponents_hom_app, ← Category.assoc]
+  rw [show
+    F.map (colimit.ι (J.diagram P X.unop) W) ≫
+        ((isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).coconePointUniqueUpToIso
+            (colimit.isColimit (J.diagram P X.unop ⋙ F))).hom =
+      colimit.ι (J.diagram P X.unop ⋙ F) W by
+    simpa [preservesColimitIso] using
+      (ι_preservesColimitIso_hom (G := F) (F := J.diagram P X.unop) W)]
   simp
 
 set_option backward.isDefEq.respectTransparency false in
