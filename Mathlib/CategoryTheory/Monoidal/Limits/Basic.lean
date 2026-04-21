@@ -79,16 +79,32 @@ instance : (lim (J := J) (C := C)).LaxMonoidal :=
       dsimp
       simp only [tensorHom_def, id_whiskerLeft, Category.assoc,
         Iso.inv_hom_id, Category.comp_id, ← comp_whiskerRight_assoc]
-      erw [limit.lift_π]
-      rw [id_whiskerRight, Category.id_comp]))
+      simpa [id_whiskerRight, Category.id_comp] using
+        (congrArg (fun f => f ▷ limit F ≫ (λ_ (limit F)).hom ≫ limit.π F j)
+          (show
+            limit.lift ((Functor.const J).obj (𝟙_ C))
+                ({ pt := 𝟙_ C, π := { app := fun _ => 𝟙 _ } } :
+                  Cone ((Functor.const J).obj (𝟙_ C))) ≫
+              limit.π (𝟙_ (J ⥤ C)) j =
+                ({ pt := 𝟙_ C, π := { app := fun _ => 𝟙 _ } } :
+                  Cone ((Functor.const J).obj (𝟙_ C))).π.app j from
+            limit.lift_π _ _)).symm))
     (right_unitality := fun F ↦ limit.hom_ext (fun j ↦ by
       dsimp
       simp only [id_tensorHom, limit.lift_map, Category.assoc, limit.lift_π]
       dsimp
       simp only [tensorHom_def, ← whisker_exchange, whiskerRight_id, Category.assoc, Iso.inv_hom_id,
         Category.comp_id, ← whiskerLeft_comp_assoc]
-      erw [limit.lift_π]
-      rw [whiskerLeft_id, Category.id_comp]))
+      simpa [whiskerLeft_id, Category.id_comp] using
+        (congrArg (fun f => limit F ◁ f ≫ (ρ_ (limit F)).hom ≫ limit.π F j)
+          (show
+            limit.lift ((Functor.const J).obj (𝟙_ C))
+                ({ pt := 𝟙_ C, π := { app := fun _ => 𝟙 _ } } :
+                  Cone ((Functor.const J).obj (𝟙_ C))) ≫
+              limit.π (𝟙_ (J ⥤ C)) j =
+                ({ pt := 𝟙_ C, π := { app := fun _ => 𝟙 _ } } :
+                  Cone ((Functor.const J).obj (𝟙_ C))).π.app j from
+            limit.lift_π _ _)).symm))
 
 @[reassoc (attr := simp)]
 lemma lim_ε_π (j : J) : ε (lim (J := J) (C := C)) ≫ limit.π _ j = 𝟙 _ :=
