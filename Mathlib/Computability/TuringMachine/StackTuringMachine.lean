@@ -541,13 +541,23 @@ theorem tr_respects_aux₂ [DecidableEq K] {k : K} {q : TM1.Stmt (Γ' K Γ) (Λ'
           TM1.stepAux q v' ((Tape.move Dir.right)^[(S' k).length] (Tape.mk' ∅ (addBottom L'))) := by
   simp only [Function.update_self]; cases o with simp only [stWrite, stVar, trStAct, TM1.stepAux]
   | push f =>
-    have := Tape.write_move_right_n fun a : Γ' K Γ ↦ (a.1, update a.2 k (some (f v)))
     refine
-      ⟨_, fun k' ↦ ?_, by
-        -- Porting note: `rw [...]` to `erw [...]; rfl`.
-        -- https://github.com/leanprover-community/mathlib4/issues/5164
+      ⟨L.modifyNth (fun a ↦ update a k (some (f v))) (S k).length, fun k' ↦ ?_, by
+        have := Tape.write_move_right_n fun a : Γ' K Γ ↦ (a.1, update a.2 k (some (f v)))
+        have hmodify :
+            ListBlank.modifyNth (fun a ↦ (a.1, update a.2 k (some (f v)))) (S k).length
+                (addBottom L) =
+              addBottom (L.modifyNth (fun a ↦ update a k (some (f v))) (S k).length) := by
+          simpa using
+            (addBottom_modifyNth (f := fun a ↦ update a k (some (f v))) (L := L)
+              (n := (S k).length))
         rw [Tape.move_right_n_head, List.length, Tape.mk'_nth_nat, this]
-        erw [addBottom_modifyNth fun a ↦ update a k (some (f v))]
+        refine
+          (congrArg
+              (fun R ↦
+                TM1.stepAux q v
+                  (Tape.move Dir.right ((Tape.move Dir.right)^[(S k).length] (Tape.mk' ∅ R))))
+              hmodify).trans ?_
         rw [Nat.add_one, iterate_succ']
         rfl⟩
     refine ListBlank.ext fun i ↦ ?_
@@ -584,12 +594,22 @@ theorem tr_respects_aux₂ [DecidableEq K] {k : K} {q : TM1.Stmt (Γ' K Γ) (Λ'
       rw [← e, Function.update_eq_self]
       exact ⟨L, hL, by rw [addBottom_head_fst, cond]⟩
     · refine
-        ⟨_, fun k' ↦ ?_, by
-          erw [List.length_cons, Tape.move_right_n_head, Tape.mk'_nth_nat, addBottom_nth_succ_fst,
+        ⟨L.modifyNth (fun a ↦ update a k none) tl.length, fun k' ↦ ?_, by
+          have hmodify :
+              ListBlank.modifyNth (fun a ↦ (a.1, update a.2 k none)) tl.length (addBottom L) =
+                addBottom (L.modifyNth (fun a ↦ update a k none) tl.length) := by
+            simpa using
+              (addBottom_modifyNth (f := fun a ↦ update a k none) (L := L) (n := tl.length))
+          rw [List.length_cons, Tape.move_right_n_head, Tape.mk'_nth_nat, addBottom_nth_succ_fst,
             cond_false, iterate_succ', Function.comp, Tape.move_right_left, Tape.move_right_n_head,
-            Tape.mk'_nth_nat, Tape.write_move_right_n fun a : Γ' K Γ ↦ (a.1, update a.2 k none),
-            addBottom_modifyNth fun a ↦ update a k none, addBottom_nth_snd,
-            stk_nth_val _ (hL k), e,
+            Tape.mk'_nth_nat, Tape.write_move_right_n fun a : Γ' K Γ ↦ (a.1, update a.2 k none)]
+          refine
+            (congrArg
+                (fun R ↦
+                  TM1.stepAux q (f v (((addBottom L).nth tl.length).2 k))
+                    ((Tape.move Dir.right)^[tl.length] (Tape.mk' ∅ R)))
+                hmodify).trans ?_
+          rw [addBottom_nth_snd, stk_nth_val _ (hL k), e,
             show (List.cons hd tl).reverse[tl.length]? = some hd by
               rw [List.reverse_cons, ← List.length_reverse, List.getElem?_concat_length],
             List.head?, List.tail]⟩
