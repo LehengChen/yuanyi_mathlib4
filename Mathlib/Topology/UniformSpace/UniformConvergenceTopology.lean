@@ -1059,14 +1059,16 @@ protected def uniformEquivProdArrow [UniformSpace γ] :
     (UniformOnFun.ofFun 𝔖).prodCongr (UniformOnFun.ofFun 𝔖)).toUniformEquivOfIsUniformInducing <| by
       constructor
       rw [uniformity_prod, comap_inf, comap_comap, comap_comap]
-      have H := @UniformOnFun.inf_eq α (β × γ) 𝔖
-        (UniformSpace.comap Prod.fst ‹_›) (UniformSpace.comap Prod.snd ‹_›)
-      apply_fun (fun u ↦ @uniformity (α →ᵤ[𝔖] β × γ) u) at H
-      convert H.symm using 1
-      rw [UniformOnFun.comap_eq, UniformOnFun.comap_eq]
-      erw [inf_uniformity]
-      rw [uniformity_comap, uniformity_comap]
-      rfl
+      have h := (@UniformOnFun.inf_eq α (β × γ) 𝔖
+        (UniformSpace.comap Prod.fst ‹_›) (UniformSpace.comap Prod.snd ‹_›)).symm
+      rw [UniformOnFun.comap_eq, UniformOnFun.comap_eq] at h
+      have h' :
+          @uniformity (α →ᵤ[𝔖] β × γ)
+              (UniformSpace.comap (fun x ↦ Prod.fst ∘ x) (uniformSpace α β 𝔖) ⊓
+                UniformSpace.comap (fun x ↦ Prod.snd ∘ x) (uniformSpace α γ 𝔖)) =
+            @uniformity (α →ᵤ[𝔖] β × γ) (uniformSpace α (β × γ) 𝔖) := by
+        exact congrArg (fun u => @uniformity (α →ᵤ[𝔖] β × γ) u) h
+      simpa [inf_uniformity, uniformity_comap] using h'
 -- the relevant diagram commutes by definition
 
 set_option backward.isDefEq.respectTransparency false in
@@ -1085,7 +1087,13 @@ protected def uniformEquivPiComm : (α →ᵤ[𝔖] ((i : ι) → δ i)) ≃ᵤ 
       _ _ (Equiv.piComm _) <| by
     constructor
     change comap (Prod.map Function.swap Function.swap) _ = _
-    erw [← uniformity_comap]
+    have hswap :
+        comap (Prod.map Function.swap Function.swap) (𝓤 ((i : ι) → α →ᵤ[𝔖] δ i)) =
+          𝓤[UniformSpace.comap Function.swap
+            (inferInstance : UniformSpace ((i : ι) → α →ᵤ[𝔖] δ i))] := by
+      simpa using
+        (uniformity_comap (f := Function.swap) (β := (i : ι) → α →ᵤ[𝔖] δ i)).symm
+    rw [hswap]
     congr
     rw [Pi.uniformSpace, UniformSpace.ofCoreEq_toCore, Pi.uniformSpace,
       UniformSpace.ofCoreEq_toCore, UniformSpace.comap_iInf, UniformOnFun.iInf_eq]
