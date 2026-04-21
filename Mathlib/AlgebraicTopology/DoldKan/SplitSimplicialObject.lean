@@ -65,7 +65,9 @@ theorem decomposition_id (Δ : SimplexCategoryᵒᵖ) :
   apply s.hom_ext'
   intro A
   dsimp
-  erw [comp_id, comp_sum, Finset.sum_eq_single A, cofan_inj_πSummand_eq_id_assoc]
+  rw [Preadditive.comp_sum, Finset.sum_eq_single A]
+  · rw [s.cofan_inj_πSummand_eq_id_assoc]
+    exact comp_id ((s.cofan Δ).inj A)
   · intro B _ h₂
     rw [s.cofan_inj_πSummand_eq_zero_assoc _ _ h₂, zero_comp]
   · simp
@@ -240,8 +242,32 @@ noncomputable def nondegComplexFunctor : Split C ⥤ ChainComplex C ℕ where
     { f := Φ.f
       comm' := fun i j _ => by
         dsimp
-        erw [← cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋i⦌)),
-          ((alternatingFaceMapComplex C).map Φ.F).comm_assoc i j]
+        have hnat :
+            Φ.f i ≫ (S₂.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫
+                K[S₂.X].d i j ≫ S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) =
+              (S₁.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫
+                Φ.F.app (op ⦋i⦌) ≫ K[S₂.X].d i j ≫
+                  S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) := by
+          simpa using
+            (cofan_inj_naturality_symm_assoc (Φ := Φ)
+              (A := Splitting.IndexSet.id (op ⦋i⦌))
+              (h := K[S₂.X].d i j ≫
+                S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)))).symm
+        rw [hnat]
+        have hcomm :
+            (S₁.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫
+                Φ.F.app (op ⦋i⦌) ≫ K[S₂.X].d i j ≫
+                  S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) =
+              (S₁.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫
+                K[S₁.X].d i j ≫ Φ.F.app (op ⦋j⦌) ≫
+                  S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) := by
+          simpa only [assoc] using
+            congrArg
+              (fun f =>
+                (S₁.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫ f)
+              (((alternatingFaceMapComplex C).map Φ.F).comm_assoc i j
+                (S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌))))
+        rw [hcomm]
         simp only [assoc]
         congr 2
         apply S₁.s.hom_ext'
@@ -268,7 +294,8 @@ noncomputable def toKaroubiNondegComplexFunctorIsoN₁ :
     ext n
     dsimp
     simp only [assoc, PInfty_f_idem_assoc]
-    erw [← Split.cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋n⦌))]
+    rw (transparency := .default)
+      [← Split.cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋n⦌))]
     rw [PInfty_f_naturality]
 
 end Split
