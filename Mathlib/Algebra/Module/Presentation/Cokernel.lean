@@ -87,12 +87,23 @@ def cokernelSolution :
   var g := Submodule.mkQ _ (pres₂.var g)
   linearCombination_var_relation := by
     intro x
-    erw [← Finsupp.apply_linearCombination]
-    obtain (r | i) := x
-    · erw [pres₂.linearCombination_var_relation]
-      dsimp
-    · erw [data.π_lift]
-      simp
+    calc
+      (Finsupp.linearCombination A (fun g ↦ f.range.mkQ (pres₂.var g)))
+          ((pres₂.cokernelRelations data).relation x) =
+        f.range.mkQ
+          ((Finsupp.linearCombination A pres₂.var)
+            ((pres₂.cokernelRelations data).relation x)) := by
+            simpa using
+              (Finsupp.apply_linearCombination A f.range.mkQ pres₂.var
+                ((pres₂.cokernelRelations data).relation x)).symm
+      _ = 0 := by
+        obtain (r | i) := x
+        · simp [pres₂.linearCombination_var_relation]
+        · dsimp
+          have hπ : (Finsupp.linearCombination A pres₂.var) (data.lift i) = f (g₁ i) :=
+            data.π_lift i
+          rw [hπ]
+          simp
 
 variable (hg₁ : Submodule.span A (Set.range g₁) = ⊤)
 
