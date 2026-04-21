@@ -377,13 +377,14 @@ theorem liftR_map_last [lawful : LawfulMvFunctor F]
     apply eq_of_drop_last_eq
     · dsimp
       simp only [prod_map_id, TypeVec.id_comp]
-      erw [toSubtype_of_subtype_assoc, TypeVec.id_comp]
-      clear liftR_map_last q lawful F x R f g hh h b c
-      ext (i x) : 2
-      induction i with
-      | fz => rfl
-      | fs _ ih =>
-        apply ih
+      conv in (toSubtype fun i ↦ α.RelLast' R i.fs) => change toSubtype α.repeatEq
+      have hsub :
+          subtypeVal α.repeatEq ⊚ toSubtype α.repeatEq ⊚ dropFun c ⊚ diagSub =
+            subtypeVal α.repeatEq ⊚ diagSub := by
+        exact Eq.trans (by rfl)
+          (congrArg (fun x => subtypeVal α.repeatEq ⊚ x)
+            (toSubtype_of_subtype_assoc (p := α.repeatEq) (f := diagSub)))
+      rw [hsub, diag_sub_val]
     simp only [lastFun_from_append1_drop_last, lastFun_toSubtype, lastFun_appendFun,
       lastFun_subtypeVal, Function.id_comp, lastFun_comp, lastFun_prod]
     ext1
@@ -496,7 +497,7 @@ theorem Cofix.dest_corec' {α : TypeVec.{u} n} {β : Type u}
     Cofix.dest (Cofix.corec' g x) =
       appendFun id (Sum.elim _root_.id (Cofix.corec' g)) <$$> g x := by
   rw [Cofix.corec', Cofix.dest_corec]; dsimp
-  congr!; ext (i | i) <;> erw [corec_roll] <;> dsimp [Cofix.corec']
+  congr!; ext (i | i) <;> dsimp [Cofix.corec']
   · mv_bisim i with R a b x Ha Hb
     rw [Ha, Hb, Cofix.dest_corec]
     dsimp [Function.comp_def]
@@ -505,9 +506,6 @@ theorem Cofix.dest_corec' {α : TypeVec.{u} n} {β : Type u}
     dsimp [Function.comp_def]
     intros
     exact ⟨_, rfl, rfl⟩
-  · congr 1 with y
-    erw [appendFun_id_id]
-    simp [MvFunctor.id_map, Sum.elim]
 
 theorem Cofix.dest_corec₁ {α : TypeVec n} {β : Type u}
     (g : ∀ {X}, (Cofix F α → X) → (β → X) → β → F (α.append1 X)) (x : β)
