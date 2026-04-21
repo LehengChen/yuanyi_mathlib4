@@ -262,8 +262,16 @@ lemma shiftFunctorAdd'_assoc (a₁ a₂ a₃ a₁₂ a₂₃ a₁₂₃ : A)
   dsimp [shiftFunctorAdd, shiftFunctor]
   simp only [obj_μ_inv_app, Discrete.addMonoidal_associator, eqToIso.hom, eqToHom_map,
     eqToHom_app]
-  erw [δ_μ_app_assoc, Category.assoc]
-  rfl
+  have hassoc :
+      ((shiftMonoidalFunctor C A).obj { as := a₁ + a₂ + a₃ }).obj X =
+        ((shiftMonoidalFunctor C A).obj { as := a₁ + (a₂ + a₃) }).obj X := by
+    simp [add_assoc]
+  simpa [Category.assoc, MonoidalCategoryStruct.tensorObj] using
+    (δ_μ_app_assoc (shiftMonoidalFunctor C A) { as := a₁ + a₂ } { as := a₃ } X
+      (h := eqToHom hassoc ≫
+        (OplaxMonoidal.δ (shiftMonoidalFunctor C A) { as := a₁ } { as := a₂ + a₃ }).app X ≫
+          (OplaxMonoidal.δ (shiftMonoidalFunctor C A) { as := a₂ } { as := a₃ }).app
+            (((shiftMonoidalFunctor C A).obj { as := a₁ }).obj X)))
 
 lemma shiftFunctorAdd_assoc (a₁ a₂ a₃ : A) :
     shiftFunctorAdd C (a₁ + a₂) a₃ ≪≫
@@ -625,9 +633,11 @@ set_option backward.isDefEq.respectTransparency false in
 /-- When shifts are indexed by an additive commutative monoid, then shifts commute. -/
 theorem shiftComm' (i j : A) :
     f⟦i⟧'⟦j⟧' = (shiftComm _ _ _).hom ≫ f⟦j⟧'⟦i⟧' ≫ (shiftComm _ _ _).hom := by
-  erw [← shiftComm_symm Y i j, ← ((shiftFunctorComm C i j).hom.naturality_assoc f)]
-  dsimp
-  simp only [Iso.hom_inv_id_app, Functor.comp_obj, Category.comp_id]
+  have hcomm := (shiftFunctorComm C i j).hom.naturality_assoc f (shiftComm Y i j).inv
+  rw [← shiftComm_symm Y i j]
+  dsimp [shiftComm] at hcomm ⊢
+  simpa only [Functor.comp_obj, Functor.comp_map, Category.comp_id, Iso.hom_inv_id_app]
+    using hcomm
 
 @[reassoc]
 theorem shiftComm_hom_comp (i j : A) :
@@ -771,7 +781,14 @@ def hasShift :
         simp only [Functor.comp_obj, Functor.map_comp, map_add_hom_app,
           Category.assoc, Iso.inv_hom_id_app_assoc, NatTrans.naturality_assoc, Functor.comp_map,
           Iso.inv_hom_id_app, Category.comp_id]
-        erw [(i m₃).hom.naturality]
+        have hi :
+            F.map ((s m₃).map ((add hF s i m₁ m₂).hom.app X)) ≫
+                (i m₃).hom.app ((s m₂).obj ((s m₁).obj X)) =
+              (i m₃).hom.app ((s (m₁ + m₂)).obj X) ≫
+                (F ⋙ shiftFunctor D m₃).map ((add hF s i m₁ m₂).hom.app X) := by
+          simpa only [Functor.comp_obj] using
+            (i m₃).hom.naturality ((add hF s i m₁ m₂).hom.app X)
+        rw [hi]
         rw [Functor.comp_map, map_add_hom_app,
           Functor.map_comp, Functor.map_comp, Iso.inv_hom_id_app_assoc,
           ← Functor.map_comp_assoc _ ((i (m₁ + m₂)).inv.app X), Iso.inv_hom_id_app,
@@ -785,7 +802,12 @@ def hasShift :
           Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp, Iso.inv_hom_id_app,
           Category.comp_id, map_comp, eqToHom_map]
         congr 1
-        erw [(i n).hom.naturality]
+        have hi :
+            F.map ((s n).map ((zero hF s i).inv.app X)) ≫ (i n).hom.app ((s 0).obj X) =
+              (i n).hom.app X ≫ (shiftFunctor D n).map (F.map ((zero hF s i).inv.app X)) := by
+          simpa only [Functor.comp_obj, Functor.comp_map] using
+            (i n).hom.naturality ((zero hF s i).inv.app X)
+        rw [hi]
         simp)
       add_zero_hom_app := fun n X => hF.map_injective (by
         have := dcongr_arg (fun a => (i a).hom.app X) (add_zero n)
