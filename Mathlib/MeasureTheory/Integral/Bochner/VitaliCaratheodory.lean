@@ -367,9 +367,23 @@ theorem exists_upperSemicontinuous_le_lintegral_le (f : α → ℝ≥0) (int_f :
     ∃ fs : α →ₛ ℝ≥0, (∀ x, fs x ≤ f x) ∧ (∫⁻ x, f x ∂μ) ≤ (∫⁻ x, fs x ∂μ) + ε / 2 := by
     have := ENNReal.lt_add_right int_f (ENNReal.half_pos ε0).ne'
     conv_rhs at this => rw [lintegral_eq_nnreal (fun x => (f x : ℝ≥0∞)) μ]
-    erw [ENNReal.biSup_add] at this <;> [skip; exact ⟨0, fun x => by simp⟩]
-    simp only [lt_iSup_iff] at this
-    rcases this with ⟨fs, fs_le_f, int_fs⟩
+    have hbiSup :
+        (⨆ φ, ⨆ (_ : ∀ x, φ x ≤ f x), (SimpleFunc.map ENNReal.ofNNReal φ).lintegral μ) + ε / 2 =
+          ⨆ i ∈ {fs : α →ₛ ℝ≥0 | ∀ x, ↑(fs x) ≤ (f x : ℝ≥0∞)},
+            (SimpleFunc.map ENNReal.ofNNReal i).lintegral μ + ε / 2 := by
+      simpa using
+        (ENNReal.biSup_add (a := ε / 2)
+          (s := {fs : α →ₛ ℝ≥0 | ∀ x, ↑(fs x) ≤ (f x : ℝ≥0∞)})
+          (by exact ⟨0, fun x => by simp⟩)
+          fun fs => (SimpleFunc.map ENNReal.ofNNReal fs).lintegral μ)
+    have hlt :
+        ∫⁻ x, f x ∂μ <
+          (⨆ φ, ⨆ (_ : ∀ x, φ x ≤ f x), (SimpleFunc.map ENNReal.ofNNReal φ).lintegral μ) +
+            ε / 2 := by
+      simpa only [ENNReal.coe_le_coe] using this
+    rw [hbiSup] at hlt
+    simp only [lt_iSup_iff] at hlt
+    rcases hlt with ⟨fs, fs_le_f, int_fs⟩
     refine ⟨fs, fun x => by simpa only [ENNReal.coe_le_coe] using fs_le_f x, ?_⟩
     convert int_fs.le
     rw [← SimpleFunc.lintegral_eq_lintegral]
