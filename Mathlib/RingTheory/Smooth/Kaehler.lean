@@ -120,10 +120,25 @@ lemma retractionOfSectionOfKerSqZero_tmul_D (s : S) (t : P) :
   haveI := isScalarTower_of_section_of_ker_sqZero g hf' hg
   simp only [retractionOfSectionOfKerSqZero, LinearMap.coe_restrictScalars,
     LinearMap.liftBaseChange_tmul, SetLike.val_smul_of_tower]
-  -- The issue is a mismatch between `RingHom.ker (algebraMap P S)` and
-  -- `RingHom.ker (IsScalarTower.toAlgHom R P S)`, but `rw` and `simp` can't rewrite it away...
-  erw [Derivation.liftKaehlerDifferential_comp_D]
-  exact mul_sub (g s) t (g (algebraMap P S t))
+  have hval :
+      ↑((derivationOfSectionOfKerSqZero
+        (IsScalarTower.toAlgHom R P S) hf' g hg).liftKaehlerDifferential ((D R P) t)) =
+        t - g (algebraMap P S t) := by
+    exact congrArg Subtype.val <|
+      (Derivation.liftKaehlerDifferential_comp_D
+        (D' := derivationOfSectionOfKerSqZero (IsScalarTower.toAlgHom R P S) hf' g hg) t)
+  have hsmul :
+      s • ↑((derivationOfSectionOfKerSqZero
+        (IsScalarTower.toAlgHom R P S) hf' g hg).liftKaehlerDifferential ((D R P) t)) =
+        s • (t - g (algebraMap P S t)) :=
+    congrArg (fun x : P => s • x) hval
+  have hs : algebraMap S P s = g s := rfl
+  calc
+    s • ↑((derivationOfSectionOfKerSqZero
+      (IsScalarTower.toAlgHom R P S) hf' g hg).liftKaehlerDifferential ((D R P) t)) =
+        s • (t - g (algebraMap P S t)) := hsmul
+    _ = g s * t - g s * g (algebraMap P S t) := by
+      rw [Algebra.smul_def, hs, mul_sub]
 
 lemma retractionOfSectionOfKerSqZero_comp_kerToTensor :
     (retractionOfSectionOfKerSqZero g hf' hg).comp (kerToTensor R P S) = LinearMap.id := by
