@@ -65,15 +65,18 @@ noncomputable def colimitCocone : Cocone F where
   pt := mkOfSMul (coconePointSMul F)
   ι :=
     { app := fun j => homMk (colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j) (fun r => by
-        dsimp
-        -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-        erw [mkOfSMul_smul]
-        simp)
+        let α : F ⋙ forget₂ _ AddCommGrpCat ⟶ F ⋙ forget₂ _ AddCommGrpCat :=
+          { app := fun j => (F.obj j).smul r
+            naturality := fun _ _ f => ModuleCat.smul_naturality (F.map f) r }
+        change colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫ (coconePointSMul F) r =
+          α.app j ≫ colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j
+        rw [show (coconePointSMul F) r = colimMap α by rfl]
+        exact ι_colimMap α j)
       naturality := fun i j f => by
         apply (forget₂ _ AddCommGrpCat).map_injective
         simp only [Functor.map_comp, forget₂_map_homMk]
         dsimp
-        erw [colimit.w (F ⋙ forget₂ _ AddCommGrpCat), comp_id] }
+        simpa using (colimit.w (F ⋙ forget₂ _ AddCommGrpCat) f) }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The cocone for `F` constructed from the colimit of
@@ -84,12 +87,25 @@ noncomputable def isColimitColimitCocone : IsColimit (colimitCocone F) where
     intro j
     dsimp
     rw [colimit.ι_desc_assoc]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [mkOfSMul_smul]
-    dsimp
-    simp only [ι_colimMap_assoc, Functor.comp_obj, forget₂_obj, colimit.ι_desc,
-      Functor.mapCocone_pt, Functor.mapCocone_ι_app, forget₂_map]
-    exact smul_naturality (s.ι.app j) r)
+    let α : F ⋙ forget₂ _ AddCommGrpCat ⟶ F ⋙ forget₂ _ AddCommGrpCat :=
+      { app := fun j => (F.obj j).smul r
+        naturality := fun _ _ f => ModuleCat.smul_naturality (F.map f) r }
+    change ((forget₂ (ModuleCat R) AddCommGrpCat).mapCocone s).ι.app j ≫ s.pt.smul r =
+      colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫ (coconePointSMul F) r ≫
+        colimit.desc (F ⋙ forget₂ _ AddCommGrpCat) ((forget₂ _ AddCommGrpCat).mapCocone s)
+    have hsmul :
+        ((forget₂ (ModuleCat R) AddCommGrpCat).mapCocone s).ι.app j ≫ s.pt.smul r =
+          α.app j ≫ ((forget₂ (ModuleCat R) AddCommGrpCat).mapCocone s).ι.app j := by
+      simpa [α] using smul_naturality (s.ι.app j) r
+    have hcolim :
+        colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫ (coconePointSMul F) r ≫
+            colimit.desc (F ⋙ forget₂ _ AddCommGrpCat) ((forget₂ _ AddCommGrpCat).mapCocone s) =
+          α.app j ≫ ((forget₂ (ModuleCat R) AddCommGrpCat).mapCocone s).ι.app j := by
+      change (colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫ colimMap α) ≫
+          colimit.desc (F ⋙ forget₂ _ AddCommGrpCat) ((forget₂ _ AddCommGrpCat).mapCocone s) =
+        α.app j ≫ ((forget₂ (ModuleCat R) AddCommGrpCat).mapCocone s).ι.app j
+      rw [ι_colimMap, Category.assoc, colimit.ι_desc]
+    exact hsmul.trans hcolim.symm)
   fac s j := by
     apply (forget₂ _ AddCommGrpCat).map_injective
     exact colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j
@@ -97,7 +113,11 @@ noncomputable def isColimitColimitCocone : IsColimit (colimitCocone F) where
     apply (forget₂ _ AddCommGrpCat).map_injective
     apply colimit.hom_ext
     intro j
-    erw [colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j]
+    change colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫
+        (forget₂ (ModuleCat R) AddCommGrpCat).map m =
+      colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j ≫
+        colimit.desc (F ⋙ forget₂ _ AddCommGrpCat) ((forget₂ _ AddCommGrpCat).mapCocone s)
+    rw [colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j]
     dsimp
     rw [← hm]
     rfl
