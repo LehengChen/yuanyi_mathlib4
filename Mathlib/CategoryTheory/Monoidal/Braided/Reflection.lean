@@ -114,13 +114,15 @@ theorem isIso_tfae : List.TFAE
     rw [this, map_comp]
     infer_instance
   tfae_have 4 → 1
-  | _, _, _ => by
+  | _, c, d => by
     -- It is enough to show that the unit is a split monomorphism, and the retraction is given
     -- by `adjRetraction` above.
     let _ : Reflective R := { L := L, adj := adj }
     have : IsIso adj.toMonad.μ := μ_iso_of_reflective (R := R)
-    erw [← adj.toMonad.isSplitMono_iff_isIso_unit]
-    exact ⟨⟨adjRetraction adj _ _, adjRetraction_is_retraction adj _ _⟩⟩
+    have hsplit : IsSplitMono (adj.toMonad.η.app ((ihom d).obj (R.obj c))) := by
+      refine ⟨⟨adjRetraction adj c d, ?_⟩⟩
+      simpa using adjRetraction_is_retraction adj c d
+    simpa using (adj.toMonad.isSplitMono_iff_isIso_unit ((ihom d).obj (R.obj c))).mp hsplit
   tfae_have 1 → 3
   | h, d, d' => by
     rw [isIso_iff_isIso_coyoneda_map]
