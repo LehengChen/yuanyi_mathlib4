@@ -70,8 +70,11 @@ lemma _root_.PresheafOfModules.Sheafify.app_eq_of_isLocallyInjective
     · exact Presheaf.equalizerSieve_mem J φ _ _ hm₀
   · intro Z g hg
     rw [← NatTrans.naturality_apply (D := Ab), ← NatTrans.naturality_apply (D := Ab)]
-    erw [M₀.map_smul, M₀.map_smul, hg.1, hg.2]
-    rfl
+    have hm : M₀.map g.op m₀ = M₀.map g.op m₀' := by
+      exact hg.2
+    have hsmul : M₀.map g.op (r₀ • m₀) = M₀.map g.op (r₀' • m₀') := by
+      rw [M₀.map_smul, M₀.map_smul, hg.1, hm]
+    exact congrArg (φ.app (Opposite.op Z)) hsmul
 
 set_option backward.isDefEq.respectTransparency false in
 lemma isCompatible_map_smul_aux {Y Z : C} (f : Y ⟶ X) (g : Z ⟶ Y)
@@ -85,7 +88,7 @@ lemma isCompatible_map_smul_aux {Y Z : C} (f : Y ⟶ X) (g : Z ⟶ Y)
   · rw [hr₀', R.map_comp, RingCat.comp_apply, ← hr₀, ← RingCat.comp_apply, NatTrans.naturality,
       RingCat.comp_apply]
   · rw [hm₀', A.map_comp, AddCommGrpCat.coe_comp, Function.comp_apply, ← hm₀]
-    erw [NatTrans.naturality_apply φ]
+    exact NatTrans.naturality_apply φ g.op m₀
 
 variable (hr₀ : (r₀.map (whiskerRight α (forget _))).IsAmalgamation r)
   (hm₀ : (m₀.map (whiskerRight φ (forget _))).IsAmalgamation m)
@@ -108,15 +111,26 @@ lemma isCompatible_map_smul : ((r₀.smul m₀).map (whiskerRight φ (forget _))
       RingCat.comp_apply]
   have hb₀ : (φ.app (Opposite.op Z)) b₀ = (A.map (f₁.op ≫ g₁.op)) m := by
     dsimp [b₀]
-    erw [NatTrans.naturality_apply φ, hb₁, Functor.map_comp, ConcreteCategory.comp_apply]
+    calc
+      (φ.app (Opposite.op Z)) (M₀.map g₁.op b₁) = (A.map g₁.op) ((φ.app (Opposite.op Y₁)) b₁) :=
+        NatTrans.naturality_apply φ g₁.op b₁
+      _ = (A.map g₁.op) ((A.map f₁.op) m) := by rw [hb₁]
+      _ = (A.map (f₁.op ≫ g₁.op)) m := by rw [Functor.map_comp, ConcreteCategory.comp_apply]
   have ha₀' : (α.app (Opposite.op Z)) a₀ = (R.map (f₂.op ≫ g₂.op)) r := by
     rw [ha₀, ← op_comp, fac, op_comp]
   have hb₀' : (φ.app (Opposite.op Z)) b₀ = (A.map (f₂.op ≫ g₂.op)) m := by
     rw [hb₀, ← op_comp, fac, op_comp]
   dsimp
-  erw [← NatTrans.naturality_apply φ, ← NatTrans.naturality_apply φ]
-  exact (isCompatible_map_smul_aux α φ hA r m f₁ g₁ a₁ a₀ b₁ b₀ ha₁ ha₀ hb₁ hb₀).trans
-    (isCompatible_map_smul_aux α φ hA r m f₂ g₂ a₂ a₀ b₂ b₀ ha₂ ha₀' hb₂ hb₀').symm
+  calc
+    (A.map g₁.op) ((φ.app (Opposite.op Y₁)) (r₀.smul m₀ f₁ h₁)) =
+        (φ.app (Opposite.op Z)) (M₀.map g₁.op (r₀.smul m₀ f₁ h₁)) :=
+      (NatTrans.naturality_apply φ g₁.op (r₀.smul m₀ f₁ h₁)).symm
+    _ = (φ.app (Opposite.op Z)) (a₀ • b₀) :=
+      isCompatible_map_smul_aux α φ hA r m f₁ g₁ a₁ a₀ b₁ b₀ ha₁ ha₀ hb₁ hb₀
+    _ = (φ.app (Opposite.op Z)) (M₀.map g₂.op (r₀.smul m₀ f₂ h₂)) := by
+      exact (isCompatible_map_smul_aux α φ hA r m f₂ g₂ a₂ a₀ b₂ b₀ ha₂ ha₀' hb₂ hb₀').symm
+    _ = (A.map g₂.op) ((φ.app (Opposite.op Y₂)) (r₀.smul m₀ f₂ h₂)) :=
+      NatTrans.naturality_apply φ g₂.op (r₀.smul m₀ f₂ h₂)
 
 end
 
@@ -164,16 +178,27 @@ def SMulCandidate.mk' (S : Sieve X.unop) (hS : S ∈ J X.unop)
     rintro Z g hg
     dsimp at hg
     rw [← ConcreteCategory.comp_apply, ← A.obj.map_comp, ← NatTrans.naturality_apply (D := Ab)]
-    erw [M₀.map_smul] -- Mismatch between `M₀.map` and `M₀.presheaf.map`
-    refine (ha _ hg).trans (app_eq_of_isLocallyInjective α φ A.isSeparated _ _ _ _ ?_ ?_)
-    · rw [← RingCat.comp_apply, NatTrans.naturality, RingCat.comp_apply, ha₀]
+    have hr : (α.app (Opposite.op Z)) (r₀ (g ≫ f.unop) hg) =
+        (α.app (Opposite.op Z)) ((R₀.map g.op) a₀) := by
+      rw [← RingCat.comp_apply, NatTrans.naturality, RingCat.comp_apply, ha₀]
       apply (hr₀ _ hg).symm.trans
       simp
-    · erw [NatTrans.naturality_apply φ, hb₀]
-      apply (hm₀ _ hg).symm.trans
-      dsimp
-      rw [Functor.map_comp]
-      rfl
+    have hm : (φ.app (Opposite.op Z)) (m₀ (g ≫ f.unop) hg) =
+        (φ.app (Opposite.op Z)) ((M₀.map g.op) b₀) := by
+      calc
+        (φ.app (Opposite.op Z)) (m₀ (g ≫ f.unop) hg) = (A.obj.map (f ≫ g.op)) m := by
+          exact (hm₀ _ hg).symm
+        _ = (A.obj.map g.op) ((A.obj.map f) m) := by
+          rw [Functor.map_comp, ConcreteCategory.comp_apply]
+        _ = (A.obj.map g.op) ((φ.app Y) b₀) := by rw [← hb₀]
+        _ = (φ.app (Opposite.op Z)) ((M₀.map g.op) b₀) := by
+          exact (NatTrans.naturality_apply φ g.op b₀).symm
+    calc
+      (A.obj.map (f ≫ g.op)) a = (φ.app (Opposite.op Z)) (r₀.smul m₀ (g ≫ f.unop) hg) := ha _ hg
+      _ = (φ.app (Opposite.op Z)) ((R₀.map g.op) a₀ • (M₀.map g.op) b₀) := by
+        exact app_eq_of_isLocallyInjective α φ A.isSeparated _ _ _ _ hr hm
+      _ = (φ.app (Opposite.op Z)) (M₀.map g.op (a₀ • b₀)) := by rw [M₀.map_smul]
+      _ = (φ.app (Opposite.op Z)) ((M₀.presheaf.map g.op) (a₀ • b₀)) := by rfl
 
 instance : Nonempty (SMulCandidate α φ r m) := ⟨by
   let S := (Presheaf.imageSieve α r ⊓ Presheaf.imageSieve φ m)
@@ -396,8 +421,16 @@ noncomputable def sheafifyMap (fac : (toPresheaf R₀).map τ₀ ≫ φ' = φ �
     suffices τ.hom = (toPresheaf _).map f by simpa only [this] using (f.app X).hom.map_smul r m
     apply ((J.W_of_isLocallyBijective φ).homEquiv _ A'.property).injective
     dsimp [f]
-    erw [comp_toPresheaf_map_sheafifyHomEquiv'_symm_hom]
-    rw [← fac, Functor.map_comp, toPresheaf_map_toSheafify])
+    symm
+    calc
+      φ ≫
+          (toPresheaf R.obj).map
+            ((sheafifyHomEquiv' α φ (by exact A'.property)).symm
+              (τ₀ ≫ toSheafify α φ')) =
+          (toPresheaf R₀).map (τ₀ ≫ toSheafify α φ') :=
+        comp_toPresheaf_map_sheafifyHomEquiv'_symm_hom
+          (α := α) (φ := φ) (hF := by exact A'.property) (f := τ₀ ≫ toSheafify α φ')
+      _ = φ ≫ τ.hom := by rw [← fac, Functor.map_comp, toPresheaf_map_toSheafify])
 
 end
 
