@@ -110,9 +110,9 @@ lemma isRightDerivabilityStructure_iff [Φ.HasRightResolutions] (e : Φ.functor 
     dsimp [Lifting.iso]
     rw [F.map_id, id_comp, ← F.map_comp, Iso.inv_hom_id_app, F.map_id, comp_id,
       ← Functor.map_comp_assoc]
-    erw [show (CatCommSq.iso Φ.functor W₁.Q W₂.Q (localizedFunctor Φ W₁.Q W₂.Q)).hom =
-      (Lifting.iso W₁.Q W₁ _ _).inv by rfl, Iso.inv_hom_id_app]
-    simp
+    rw [show (CatCommSq.iso Φ.functor W₁.Q W₂.Q (localizedFunctor Φ W₁.Q W₂.Q)).hom =
+      (Lifting.iso W₁.Q W₁ _ _).inv by rfl]
+    simp [Lifting.iso]
   rw [← TwoSquare.GuitartExact.vComp'_iff_of_equivalences e'.hom E₁ E₂ e''' e₁ e₂, this]
 
 instance guitartExact_of_isRightDerivabilityStructure' [h : Φ.IsRightDerivabilityStructure]
