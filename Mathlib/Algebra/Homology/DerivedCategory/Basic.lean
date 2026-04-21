@@ -261,8 +261,7 @@ lemma singleFunctorsPostcompQIso_hom_hom (n : ℤ) :
   dsimp [singleFunctorsPostcompQIso, HomotopyCategory.singleFunctorsPostcompQuotientIso,
     quotientCompQhIso, HomologicalComplexUpToQuasiIso.quotientCompQhIso]
   rw [CategoryTheory.Functor.map_id, Category.id_comp]
-  erw [Category.id_comp]
-  rfl
+  exact Category.id_comp _
 
 set_option backward.isDefEq.respectTransparency false in
 lemma singleFunctorsPostcompQIso_inv_hom (n : ℤ) :
