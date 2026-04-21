@@ -252,6 +252,7 @@ noncomputable def homEquiv {N : ModuleCat.{w} cR.pt} :
         rw [hφ]
         change (ConcreteCategory.hom (ψ.app U)) (r • m) = r • (ConcreteCategory.hom (ψ.app U)) m
         exact (ψ.app U).hom.map_smul r m}
+        rfl}
   left_inv φ := (forget₂ _ AddCommGrpCat).map_injective (by
     ext : 1
     exact (homEquiv' hcR hcM).left_inv ((forget₂ _ AddCommGrpCat).map φ).hom)

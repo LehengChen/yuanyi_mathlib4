@@ -62,6 +62,7 @@ noncomputable instance : (extendScalars f).Monoidal :=
             ((AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] (1 : ↑(𝟙_ (ModuleCat R))))) ⊗ₜ[S]
               ((1 : S) ⊗ₜ[R] m)
         rw [AlgebraTensorModule.rid_tmul, one_smul])
+        rfl)
       (oplax_right_unitality := fun M ↦ by
         ext m
         dsimp
@@ -70,6 +71,7 @@ noncomputable instance : (extendScalars f).Monoidal :=
             (((1 : S) ⊗ₜ[R] m) ⊗ₜ[S]
               ((AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] (1 : ↑(𝟙_ (ModuleCat R))))))
         rw [AlgebraTensorModule.rid_tmul, one_smul]))
+        rfl))
 
 lemma extendScalars_ε :
     letI := f.toAlgebra
