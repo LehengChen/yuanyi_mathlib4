@@ -58,20 +58,18 @@ noncomputable instance : (extendScalars f).Monoidal :=
         ext m
         dsimp
         rw [MonoidalCategory.leftUnitor_inv_apply]
-        erw [AlgebraTensorModule.distribBaseChange_tmul,
-          MonoidalCategory.whiskerRight_apply,
-          AlgebraTensorModule.rid_tmul]
-        rw [one_smul]
-        rfl)
+        change (1 : S) ⊗ₜ[S] ((1 : S) ⊗ₜ[R] m) =
+            ((AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] (1 : ↑(𝟙_ (ModuleCat R))))) ⊗ₜ[S]
+              ((1 : S) ⊗ₜ[R] m)
+        rw [AlgebraTensorModule.rid_tmul, one_smul])
       (oplax_right_unitality := fun M ↦ by
         ext m
         dsimp
         rw [MonoidalCategory.rightUnitor_inv_apply]
-        erw [AlgebraTensorModule.distribBaseChange_tmul,
-          MonoidalCategory.whiskerLeft_apply,
-          AlgebraTensorModule.rid_tmul]
-        rw [one_smul]
-        rfl))
+        change (((1 : S) ⊗ₜ[R] m) ⊗ₜ[S] (1 : S)) =
+            (((1 : S) ⊗ₜ[R] m) ⊗ₜ[S]
+              ((AlgebraTensorModule.rid R S S) ((1 : S) ⊗ₜ[R] (1 : ↑(𝟙_ (ModuleCat R))))))
+        rw [AlgebraTensorModule.rid_tmul, one_smul]))
 
 lemma extendScalars_ε :
     letI := f.toAlgebra
@@ -108,7 +106,7 @@ lemma restrictScalars_η (r : R) :
   letI := f.toAlgebra
   dsimp [Adjunction.rightAdjointLaxMonoidal_ε]
   rw [extendRestrictScalarsAdj_homEquiv_apply, extendScalars_η]
-  erw [AlgebraTensorModule.rid_tmul]
+  change r • (1 : S) = f r
   rw [RingHom.smul_toAlgebra, mul_one]
 
 set_option backward.isDefEq.respectTransparency false in
