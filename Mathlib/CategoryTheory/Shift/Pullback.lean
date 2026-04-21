@@ -97,7 +97,17 @@ lemma pullbackShiftFunctorZero'_inv_app :
   rw [pullbackShiftFunctorZero_inv_app]
   simp only [Functor.id_obj, pullbackShiftIso, eqToIso.inv, eqToHom_app, shiftFunctorZero',
     Iso.trans_inv, NatTrans.comp_app, eqToIso_refl, Iso.refl_inv, NatTrans.id_app, assoc]
-  erw [comp_id]
+  rw [cancel_epi ((shiftFunctorZero C B).inv.app X)]
+  have hobj :
+      (shiftFunctor C (0 : B)).obj X = (shiftFunctor (PullbackShift C φ) (0 : A)).obj X := by
+    change ((shiftMonoidalFunctor C B).obj { as := (0 : B) }).obj X =
+      (((Discrete.addMonoidalFunctor φ) ⋙ shiftMonoidalFunctor C B).obj { as := (0 : A) }).obj X
+    simp [Functor.comp_obj, shiftMonoidalFunctor, φ.map_zero]
+  let f : (shiftFunctor C (0 : B)).obj X ⟶ (shiftFunctor (PullbackShift C φ) (0 : A)).obj X :=
+    eqToHom hobj
+  change f = f ≫ 𝟙 ((shiftFunctor (PullbackShift C φ) (0 : A)).obj X)
+  symm
+  simp
 
 set_option backward.isDefEq.respectTransparency false in
 lemma pullbackShiftFunctorZero'_hom_app :
@@ -116,8 +126,18 @@ lemma pullbackShiftFunctorAdd'_inv_app :
   subst h₁ h₂ h
   obtain rfl : b₃ = φ a₁ + φ a₂ := by rw [h₃, φ.map_add]
   simp only [Functor.comp_obj, NatTrans.naturality_assoc]
-  erw [Functor.map_id, id_comp, id_comp, shiftFunctorAdd'_eq_shiftFunctorAdd,
-    shiftFunctorAdd'_eq_shiftFunctorAdd]
+  have h₁' : (pullbackShiftIso C φ a₁ (φ a₁) rfl).hom.app X = 𝟙 _ := by
+    rfl
+  have h₂' :
+      (pullbackShiftIso C φ a₂ (φ a₂) rfl).hom.app ((shiftFunctor (PullbackShift C φ) a₁).obj X) =
+        𝟙 _ := by
+    rfl
+  rw [h₂', h₁', shiftFunctorAdd'_eq_shiftFunctorAdd, shiftFunctorAdd'_eq_shiftFunctorAdd]
+  change (shiftFunctorAdd (PullbackShift C φ) a₁ a₂).inv.app X =
+    𝟙 _ ≫ (shiftFunctor C (φ a₂)).map (𝟙 ((shiftFunctor C (φ a₁)).obj X)) ≫
+      (shiftFunctorAdd C (φ a₁) (φ a₂)).inv.app X ≫
+        (pullbackShiftIso C φ (a₁ + a₂) (φ a₁ + φ a₂) h₃).inv.app X
+  simp only [Functor.comp_obj, Functor.map_id, id_comp]
   change _ ≫ _ = _
   congr 1
   rw [Discrete.addMonoidalFunctor_μ]
