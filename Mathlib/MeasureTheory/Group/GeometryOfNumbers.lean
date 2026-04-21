@@ -107,10 +107,16 @@ theorem exists_ne_zero_mem_lattice_of_measure_mul_two_pow_le_measure [NormedAddC
   -- it follows that `s` contains a nonzero point of `L`.
   have h_zero : 0 ∈ K := K.zero_mem_of_symmetric h_symm
   suffices Set.Nonempty (⋂ n, Z n) by
-    erw [← Set.iInter_inter, K.iInter_smul_eq_self h_zero] at this
-    · obtain ⟨x, hx⟩ := this
-      exact ⟨⟨x, by simp_all⟩, by aesop⟩
-    · exact (exists_seq_strictAnti_tendsto (0 : ℝ≥0)).choose_spec.2.2
+    obtain ⟨x, hx⟩ := this
+    have hxS : x ∈ ⋂ n, (1 + (u n : ℝ)) • (K : Set E) := by
+      refine Set.mem_iInter.mpr fun n => ?_
+      simpa [S] using (Set.mem_iInter.mp hx n).1
+    have hxL : x ∈ (L : Set E) \ {0} := (Set.mem_iInter.mp hx 0).2
+    rw [K.iInter_smul_eq_self h_zero
+      (exists_seq_strictAnti_tendsto (0 : ℝ≥0)).choose_spec.2.2] at hxS
+    refine ⟨⟨x, hxL.1⟩, ?_, ?_⟩
+    · simpa using hxL.2
+    · simpa [K] using hxS
   have h_clos : IsClosed ((L : Set E) \ {0}) := by
     rsuffices ⟨U, hU⟩ : ∃ U : Set E, IsOpen U ∧ U ∩ L = {0}
     · rw [sdiff_eq_sdiff_iff_inf_eq_inf (z := U).mpr (by simp [Set.inter_comm .. ▸ hU.2, zero_mem])]
