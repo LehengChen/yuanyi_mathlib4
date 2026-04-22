@@ -154,7 +154,7 @@ theorem leftDistributor_hom {J : Type} [Fintype J] (X : C) (f : J → C) :
   classical
   ext
   dsimp [leftDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
+  refine (biproduct.lift_π (fun k => X ◁ biproduct.π f k) _).trans ?_
   simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
     Finset.sum_dite_eq', Finset.mem_univ, ite_true, eqToHom_refl, Category.comp_id]
 
@@ -223,7 +223,7 @@ theorem rightDistributor_hom {J : Type} [Fintype J] (f : J → C) (X : C) :
   classical
   ext
   dsimp [rightDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
+  refine (biproduct.lift_π (fun k => biproduct.π f k ▷ X) _).trans ?_
   simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
     Finset.sum_dite_eq', Finset.mem_univ, eqToHom_refl, Category.comp_id, ite_true]
 
