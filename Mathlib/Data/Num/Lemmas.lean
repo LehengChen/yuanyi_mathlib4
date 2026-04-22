@@ -219,10 +219,13 @@ theorem bit1_succ : ∀ n : Num, n.bit1.succ = n.succ.bit0
 theorem ofNat'_succ : ∀ {n}, ofNat' (n + 1) = ofNat' n + 1 :=
   @(Nat.binaryRec (by simp [zero_add]) fun b n ih => by
     cases b
-    · erw [ofNat'_bit true n, ofNat'_bit]
+    · have h : Nat.bit false n + 1 = Nat.bit true n := by
+        simp [Nat.bit]
+      rw [h, ofNat'_bit true n, ofNat'_bit false n]
       simp only [← bit1_of_bit1, ← bit0_of_bit0, cond]
-    · rw [show n.bit true + 1 = (n + 1).bit false by simp [Nat.bit, mul_add],
-        ofNat'_bit, ofNat'_bit, ih]
+    · have h : Nat.bit true n + 1 = Nat.bit false (n + 1) := by
+        simp [Nat.bit, mul_add]
+      rw [h, ofNat'_bit true n, ofNat'_bit false (n + 1), ih]
       simp only [cond, add_one, bit1_succ])
 
 @[simp]
