@@ -79,9 +79,10 @@ theorem Hom.ext {X Y : PresheafedSpace C} (α β : Hom X Y) (w : α.base = β.ba
   dsimp at w
   subst w
   dsimp at h
-  erw [whiskerRight_id', comp_id] at h
+  rw [whiskerRight_id'] at h
   subst h
-  rfl
+  congr 1
+  exact (comp_id c).symm
 
 -- TODO including `injections` would make tidy work earlier.
 theorem hext {X Y : PresheafedSpace C} (α β : Hom X Y) (w : α.base = β.base) (h : α.c ≍ β.c) :
@@ -241,7 +242,7 @@ def sheafIsoOfIso (H : X ≅ Y) : Y.2 ≅ H.hom.base _* X.2 where
       ((forget C).congr_map H.inv_hom_id.symm)) U)).op
     rw [id_c, NatTrans.id_app, id_comp, eqToHom_map, comp_c_app] at eq₁
     rw [eqToHom_op, eqToHom_map] at eq₂
-    erw [eq₂, reassoc_of% eq₁]
+    rw (transparency := .default) [eq₂, reassoc_of% eq₁]
     simp
 
 instance base_isIso_of_iso (f : X ⟶ Y) [IsIso f] : IsIso f.base :=
@@ -328,8 +329,12 @@ theorem ofRestrict_top_c (X : PresheafedSpace C) :
        issue when `apply NatIso.isIso_of_isIso_app`. -/
   ext
   dsimp [ofRestrict]
-  erw [eqToHom_map, eqToHom_app]
-  simp
+  rename_i U
+  rw [eqToHom_app, ← eqToHom_map]
+  case w.p =>
+    simp
+  case w =>
+    exact congrArg (fun f => X.presheaf.map f) (Subsingleton.elim _ _)
 
 /-- The map to the restriction of a presheafed space along the canonical inclusion from the top
 subspace.
@@ -348,14 +353,16 @@ def restrictTopIso (X : PresheafedSpace C) : X.restrict (Opens.isOpenEmbedding �
   hom_inv_id := by
     ext
     · rfl
-    · erw [comp_c, toRestrictTop_c, whiskerRight_id',
+    · rename_i U
+      rw (transparency := .default) [comp_c, toRestrictTop_c, whiskerRight_id',
         comp_id, ofRestrict_top_c, eqToHom_map, eqToHom_trans, eqToHom_refl]
       rfl
   inv_hom_id := by
     ext
     · rfl
-    · erw [comp_c, ofRestrict_top_c, toRestrictTop_c, eqToHom_map, whiskerRight_id', comp_id,
-        eqToHom_trans, eqToHom_refl]
+    · rename_i U
+      rw (transparency := .default) [comp_c, ofRestrict_top_c, toRestrictTop_c, eqToHom_map,
+        whiskerRight_id', comp_id, eqToHom_trans, eqToHom_refl]
       rfl
 
 end Restrict
