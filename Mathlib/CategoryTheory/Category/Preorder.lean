@@ -15,7 +15,7 @@ public import Mathlib.Data.ULift
 # Preorders as categories
 
 We install a category instance on any preorder. This is not to be confused with the category _of_
-preorders, defined in `Order.Category.Preorder`.
+preorders, defined in `Preord`.
 
 We show that monotone functions between preorders correspond to functors of the associated
 categories.
