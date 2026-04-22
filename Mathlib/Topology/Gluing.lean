@@ -190,12 +190,65 @@ theorem ι_eq_iff_rel (i j : D.J) (x : D.U i) (y : D.U j) :
       (ConcreteCategory.bijective_of_isIso (sigmaIsoSigma.{u, u} _).inv).2 x
     unfold InvImage MultispanIndex.fstSigmaMap MultispanIndex.sndSigmaMap
     rw [sigmaIsoSigma_inv_apply]
-    -- `rw [← ConcreteCategory.comp_apply]` succeeds but rewrites the wrong expression
-    erw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, colimit.ι_desc_assoc,
-      ← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, colimit.ι_desc_assoc]
-      -- previous line now `erw` after https://github.com/leanprover-community/mathlib4/pull/13170
-    erw [sigmaIsoSigma_hom_ι_apply, sigmaIsoSigma_hom_ι_apply]
-    exact ⟨y, ⟨rfl, rfl⟩⟩
+    have hfst :
+        (ConcreteCategory.hom (sigmaIsoSigma D.U).hom)
+            ((ConcreteCategory.hom
+                (D.diagram.fstSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.U))
+                  (colimit.isColimit (Discrete.functor D.V))))
+              ((ConcreteCategory.hom (Sigma.ι D.V (i, j))) y)) =
+          Sigma.mk i (D.f i j y) := by
+      have hcomp :
+          Sigma.ι D.V (i, j) ≫
+              D.diagram.fstSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.U))
+                (colimit.isColimit (Discrete.functor D.V)) =
+            D.f i j ≫ Sigma.ι D.U i := by
+        simpa only [CategoryTheory.GlueData.diagram_fst] using
+          (CategoryTheory.Limits.MultispanIndex.inj_fstSigmaMapOfIsColimit
+            (I := D.diagram) (d := colimit.cocone (Discrete.functor D.U))
+            (hc := colimit.isColimit (Discrete.functor D.V)) (i := (i, j)))
+      simpa only [CategoryTheory.comp_apply] using
+        (calc
+          ((Sigma.ι D.V (i, j) ≫
+                  D.diagram.fstSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.U))
+                    (colimit.isColimit (Discrete.functor D.V)) ≫
+                  (sigmaIsoSigma D.U).hom) y) =
+              ((D.f i j ≫ Sigma.ι D.U i ≫ (sigmaIsoSigma D.U).hom) y) := by
+                exact congrArg (fun k => (k ≫ (sigmaIsoSigma D.U).hom) y) hcomp
+          _ = Sigma.mk i (D.f i j y) := by
+            simpa only [CategoryTheory.comp_apply] using
+              sigmaIsoSigma_hom_ι_apply D.U i (D.f i j y))
+    have hsnd :
+        (ConcreteCategory.hom (sigmaIsoSigma D.U).hom)
+            ((ConcreteCategory.hom
+                (D.diagram.sndSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.U))
+                  (colimit.isColimit (Discrete.functor D.V))))
+              ((ConcreteCategory.hom (Sigma.ι D.V (i, j))) y)) =
+          Sigma.mk j (D.f j i (D.t i j y)) := by
+      have hcomp :
+          Sigma.ι D.V (i, j) ≫
+              D.diagram.sndSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.U))
+                (colimit.isColimit (Discrete.functor D.V)) =
+            D.t i j ≫ D.f j i ≫ Sigma.ι D.U j := by
+        simpa only [CategoryTheory.GlueData.diagram_snd] using
+          (CategoryTheory.Limits.MultispanIndex.inj_sndSigmaMapOfIsColimit
+            (I := D.diagram) (d := colimit.cocone (Discrete.functor D.U))
+            (hc := colimit.isColimit (Discrete.functor D.V)) (i := (i, j)))
+      simpa only [CategoryTheory.comp_apply] using
+        (calc
+          ((Sigma.ι D.V (i, j) ≫
+                  D.diagram.sndSigmaMapOfIsColimit (colimit.cocone (Discrete.functor D.U))
+                    (colimit.isColimit (Discrete.functor D.V)) ≫
+                  (sigmaIsoSigma D.U).hom) y) =
+              ((D.t i j ≫ D.f j i ≫ Sigma.ι D.U j ≫ (sigmaIsoSigma D.U).hom) y) := by
+                exact congrArg (fun k => (k ≫ (sigmaIsoSigma D.U).hom) y) hcomp
+          _ = Sigma.mk j (D.f j i (D.t i j y)) := by
+            simpa only [CategoryTheory.comp_apply] using
+              sigmaIsoSigma_hom_ι_apply D.U j (D.f j i (D.t i j y)))
+    simp only [MultispanShape.prod_L, GlueData.diagram_left, MultispanShape.prod_R,
+      GlueData.diagram_right] at hfst hsnd ⊢
+    exact hfst.symm ▸ hsnd.symm ▸
+      (show D.Rel (Sigma.mk i (D.f i j y)) (Sigma.mk j (D.f j i (D.t i j y))) from
+        ⟨y, ⟨rfl, rfl⟩⟩)
   · rintro ⟨z, e₁, e₂⟩
     dsimp only at *
     -- Porting note: there were `subst e₁` and `subst e₂`, instead of the `rw`
