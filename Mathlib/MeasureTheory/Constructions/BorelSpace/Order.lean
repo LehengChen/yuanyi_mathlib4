@@ -410,8 +410,11 @@ theorem Dense.borel_eq_generateFrom_Ioc_mem_aux {α : Type*} [TopologicalSpace �
   · ext s
     constructor <;> rintro ⟨l, hl, u, hu, hlt, rfl⟩
     exacts [⟨u, hu, l, hl, hlt, Ico_toDual⟩, ⟨u, hu, l, hl, hlt, Ioc_toDual⟩]
-  · erw [Ioo_toDual]
-    exact he
+  · have hI : Ioo x y = OrderDual.ofDual ⁻¹' Ioo (OrderDual.ofDual y) (OrderDual.ofDual x) := by
+      ext z
+      simp
+    rw [hI] at he
+    simpa only using he
 
 theorem Dense.borel_eq_generateFrom_Ioc_mem {α : Type*} [TopologicalSpace α] [LinearOrder α]
     [OrderTopology α] [SecondCountableTopology α] [DenselyOrdered α] [NoMaxOrder α] {s : Set α}
@@ -464,7 +467,10 @@ theorem ext_of_Ioc_finite {α : Type*} [TopologicalSpace α] {m : MeasurableSpac
     [IsFiniteMeasure μ] (hμν : μ univ = ν univ) (h : ∀ ⦃a b⦄, a < b → μ (Ioc a b) = ν (Ioc a b)) :
     μ = ν := by
   refine @ext_of_Ico_finite αᵒᵈ _ _ _ _ _ ‹_› μ ν _ hμν fun a b hab => ?_
-  erw [Ico_toDual (α := α)]
+  have hI : Ico a b = OrderDual.ofDual ⁻¹' Ioc (OrderDual.ofDual b) (OrderDual.ofDual a) := by
+    ext x
+    simp
+  rw [hI]
   exact h hab
 
 /-- Two measures which are finite on closed-open intervals are equal if they agree on all
@@ -498,8 +504,17 @@ theorem ext_of_Ioc' {α : Type*} [TopologicalSpace α] {m : MeasurableSpace α}
     [SecondCountableTopology α] [LinearOrder α] [OrderTopology α] [BorelSpace α] [NoMinOrder α]
     (μ ν : Measure α) (hμ : ∀ ⦃a b⦄, a < b → μ (Ioc a b) ≠ ∞)
     (h : ∀ ⦃a b⦄, a < b → μ (Ioc a b) = ν (Ioc a b)) : μ = ν := by
-  refine @ext_of_Ico' αᵒᵈ _ _ _ _ _ ‹_› _ μ ν ?_ ?_ <;> intro a b hab <;> erw [Ico_toDual (α := α)]
-  exacts [hμ hab, h hab]
+  refine @ext_of_Ico' αᵒᵈ _ _ _ _ _ ‹_› _ μ ν ?_ ?_ <;> intro a b hab
+  · have hI : Ico a b = OrderDual.ofDual ⁻¹' Ioc (OrderDual.ofDual b) (OrderDual.ofDual a) := by
+      ext x
+      simp
+    rw [hI]
+    exact hμ hab
+  · have hI : Ico a b = OrderDual.ofDual ⁻¹' Ioc (OrderDual.ofDual b) (OrderDual.ofDual a) := by
+      ext x
+      simp
+    rw [hI]
+    exact h hab
 
 /-- Two measures which are finite on closed-open intervals are equal if they agree on all
 closed-open intervals. -/
