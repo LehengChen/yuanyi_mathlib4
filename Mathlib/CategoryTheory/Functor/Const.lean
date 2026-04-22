@@ -64,16 +64,18 @@ def opObjUnop (X : Cᵒᵖ) : (const Jᵒᵖ).obj (unop X) ≅ ((const J).obj X)
 
 -- Lean needs some help with universes here.
 @[simp]
-theorem opObjUnop_hom_app (X : Cᵒᵖ) (j : Jᵒᵖ) : (opObjUnop.{v₁, v₂} X).hom.app j = 𝟙 _ :=
+theorem opObjUnop_hom_app (X : Cᵒᵖ) :
+    (opObjUnop.{v₁, v₂} X).hom.app = fun (_ : Jᵒᵖ) => 𝟙 _ :=
   rfl
 
 @[simp]
-theorem opObjUnop_inv_app (X : Cᵒᵖ) (j : Jᵒᵖ) : (opObjUnop.{v₁, v₂} X).inv.app j = 𝟙 _ :=
+theorem opObjUnop_inv_app (X : Cᵒᵖ) :
+    (opObjUnop.{v₁, v₂} X).inv.app = fun (_ : Jᵒᵖ) => 𝟙 _ :=
   rfl
 
 @[simp]
-theorem unop_functor_op_obj_map (X : Cᵒᵖ) {j₁ j₂ : J} (f : j₁ ⟶ j₂) :
-    (unop ((Functor.op (const J)).obj X)).map f = 𝟙 (unop X) :=
+theorem unop_functor_op_obj_map (X : Cᵒᵖ) {j₁ j₂ : J} :
+    (unop ((Functor.op (const J)).obj X)).map (X := j₁) (Y := j₂) = fun _ => 𝟙 (unop X) :=
   rfl
 
 end const

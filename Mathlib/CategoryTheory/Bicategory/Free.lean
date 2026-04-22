@@ -318,8 +318,16 @@ def liftHom₂ : ∀ {a b : FreeBicategory B} {f g : a ⟶ b}, Hom₂ f g → (l
   | _, _, _, _, Hom₂.whisker_right h η => liftHom₂ η ▷ liftHom F h
 
 attribute [local simp] whisker_exchange in
-theorem liftHom₂_congr {a b : FreeBicategory B} {f g : a ⟶ b} {η θ : Hom₂ f g} (H : Rel η θ) :
-    liftHom₂ F η = liftHom₂ F θ := by induction H <;> (dsimp [liftHom₂]; cat_disch)
+theorem liftHom₂_congr {a b : FreeBicategory B} {f g : a ⟶ b} {η θ : Hom₂ f g}
+    (H : η.mk = θ.mk) : liftHom₂ F η = liftHom₂ F θ := by
+  have hRel :
+      ∀ {a b : FreeBicategory B} {f g : a ⟶ b} {η θ : Hom₂ f g},
+        Rel η θ → liftHom₂ F η = liftHom₂ F θ := by
+    intro a b f g η θ H
+    induction H <;> (dsimp [liftHom₂]; cat_disch)
+  let desc : (f ⟶ g) → (liftHom F f ⟶ liftHom F g) :=
+    Quot.lift (liftHom₂ F) fun _ _ H => hRel H
+  exact congrArg desc H
 
 /-- A prefunctor from a quiver `B` to a bicategory `C` can be lifted to a pseudofunctor from
 `free_bicategory B` to `C`.
@@ -330,7 +338,7 @@ def lift : FreeBicategory B ⥤ᵖ C where
   map := liftHom F
   mapId _ := Iso.refl _
   mapComp _ _ := Iso.refl _
-  map₂ := Quot.lift (liftHom₂ F) fun _ _ H => liftHom₂_congr F H
+  map₂ := Quot.lift (liftHom₂ F) fun _ _ H => liftHom₂_congr F (Quot.sound H)
   -- Porting note: We'd really prefer not to be doing this by hand.
   -- in mathlib3 `tidy` did these inductions for us.
   map₂_comp := by

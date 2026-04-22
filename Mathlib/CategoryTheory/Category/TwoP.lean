@@ -73,8 +73,10 @@ noncomputable instance hasForgetToBipointed : HasForget₂ TwoP Bipointed :=
   inferInstanceAs <| HasForget₂ (InducedCategory _ toBipointed) _
 
 @[ext]
-lemma hom_ext {X Y : TwoP} {f g : X ⟶ Y} (h : f.hom = g.hom) : f = g :=
-  InducedCategory.hom_ext h
+lemma hom_ext {X Y : TwoP} {f g : X ⟶ Y} (h : ∀ x, f.hom x = g.hom x) : f = g := by
+  apply InducedCategory.hom_ext
+  ext x
+  exact h x
 
 /-- Swaps the pointed elements of a two-pointed type. `TwoPointing.swap` as a functor. -/
 @[simps]
@@ -111,8 +113,8 @@ noncomputable def pointedToTwoPFst : Pointed.{u} ⥤ TwoP where
   obj X := ⟨Option X, ⟨X.point, none⟩, some_ne_none _⟩
   map f := ⟨Option.map f.toFun, congr_arg _ f.map_point, rfl⟩
   map_comp f g := by
-    ext : 3
-    exact (Option.map_comp_map f.1 g.1).symm
+    ext x : 3
+    exact congr_fun (Option.map_comp_map f.1 g.1).symm x
 
 /-- The functor from `Pointed` to `TwoP` which adds a first point. -/
 @[simps]
@@ -120,8 +122,8 @@ noncomputable def pointedToTwoPSnd : Pointed.{u} ⥤ TwoP where
   obj X := ⟨Option X, ⟨none, X.point⟩, (some_ne_none _).symm⟩
   map f := ⟨Option.map f.toFun, rfl, congr_arg _ f.map_point⟩
   map_comp f g := by
-    ext : 3
-    exact (Option.map_comp_map f.1 g.1).symm
+    ext x : 3
+    exact congr_fun (Option.map_comp_map f.1 g.1).symm x
 
 @[simp]
 theorem pointedToTwoPFst_comp_swap : pointedToTwoPFst ⋙ TwoP.swap = pointedToTwoPSnd :=

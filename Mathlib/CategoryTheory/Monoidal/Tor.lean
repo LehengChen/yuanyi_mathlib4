@@ -52,14 +52,16 @@ def Tor' (n : ℕ) : C ⥤ C ⥤ C :=
     { obj := fun X => Functor.leftDerived ((tensoringRight C).obj X) n
       map := fun f => NatTrans.leftDerived ((tensoringRight C).map f) n }
 
-/-- The higher `Tor` groups for `X` and `Y` are zero if `Y` is projective. -/
-lemma isZero_Tor_succ_of_projective (X Y : C) [Projective Y] (n : ℕ) :
-    IsZero (((Tor C (n + 1)).obj X).obj Y) := by
+/-- The positive degree `Tor` groups for `X` and `Y` are zero if `Y` is projective. -/
+lemma isZero_Tor_succ_of_projective (X Y : C) [Projective Y] {n : ℕ} (hn : n ≠ 0) :
+    IsZero (((Tor C n).obj X).obj Y) := by
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
   apply Functor.isZero_leftDerived_obj_projective_succ
 
-/-- The higher `Tor'` groups for `X` and `Y` are zero if `X` is projective. -/
-lemma isZero_Tor'_succ_of_projective (X Y : C) [Projective X] (n : ℕ) :
-    IsZero (((Tor' C (n + 1)).obj X).obj Y) := by
+/-- The positive degree `Tor'` groups for `X` and `Y` are zero if `X` is projective. -/
+lemma isZero_Tor'_succ_of_projective (X Y : C) [Projective X] {n : ℕ} (hn : n ≠ 0) :
+    IsZero (((Tor' C n).obj X).obj Y) := by
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
   apply Functor.isZero_leftDerived_obj_projective_succ
 
 end CategoryTheory

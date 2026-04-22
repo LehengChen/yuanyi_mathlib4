@@ -147,8 +147,8 @@ def mapId' {b : B} (f : b ⟶ b) (hf : f = 𝟙 b := by cat_disch) :
     𝟙 (F.obj b) ⟶ F.map f :=
   F.mapId _ ≫ F.map₂ (eqToHom (by rw [hf]))
 
-lemma mapId'_eq_mapId (b : B) :
-    F.mapId' (𝟙 b) rfl = F.mapId b := by
+lemma mapId'_eq_mapId (b : B) {hf : (𝟙 b : b ⟶ b) = 𝟙 b} :
+    F.mapId' (𝟙 b) hf = F.mapId b := by
   simp [mapId']
 
 /-- More flexible variant of `mapComp`. (See `Bicategory.Functor.Strict`
@@ -158,8 +158,9 @@ def mapComp' {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) (fg : 
     F.map f ≫ F.map g ⟶ F.map fg :=
   F.mapComp f g ≫ F.map₂ (eqToHom (by rw [h]))
 
-lemma mapComp'_eq_mapComp {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) :
-    F.mapComp' f g _ rfl = F.mapComp f g := by
+lemma mapComp'_eq_mapComp {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂)
+    {h : f ≫ g = f ≫ g} :
+    F.mapComp' f g (f ≫ g) h = F.mapComp f g := by
   simp [mapComp']
 
 set_option backward.isDefEq.respectTransparency false in

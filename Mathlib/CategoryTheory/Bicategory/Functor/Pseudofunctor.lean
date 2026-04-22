@@ -250,8 +250,8 @@ def mapId' {b : B} (f : b ⟶ b) (hf : f = 𝟙 b := by cat_disch) :
     F.map f ≅ 𝟙 (F.obj b) :=
   F.map₂Iso (eqToIso (by rw [hf])) ≪≫ F.mapId _
 
-lemma mapId'_eq_mapId (b : B) :
-    F.mapId' (𝟙 b) rfl = F.mapId b := by
+lemma mapId'_eq_mapId (b : B) (hf : (𝟙 b : b ⟶ b) = 𝟙 b := rfl) :
+    F.mapId' (𝟙 b) hf = F.mapId b := by
   simp [mapId']
 
 @[simp]
@@ -271,8 +271,9 @@ def mapComp' {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) (fg : 
     F.map fg ≅ F.map f ≫ F.map g :=
   F.map₂Iso (eqToIso (by rw [h])) ≪≫ F.mapComp f g
 
-lemma mapComp'_eq_mapComp {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) :
-    F.mapComp' f g _ rfl = F.mapComp f g := by
+lemma mapComp'_eq_mapComp {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂)
+    (h : f ≫ g = f ≫ g := rfl) :
+    F.mapComp' f g (f ≫ g) h = F.mapComp f g := by
   simp [mapComp']
 
 @[simp]

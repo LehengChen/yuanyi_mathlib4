@@ -100,7 +100,8 @@ lemma comp_const : (ι F S) ⋙ forget F = (const (F.obj ⟨op S⟩)).obj S :=
   Functor.ext_of_iso (compIso F S) (fun _ ↦ rfl) (fun _ => rfl)
 
 set_option backward.isDefEq.respectTransparency false in
-noncomputable instance : (Fiber.inducedFunctor (comp_const F S)).Full where
+noncomputable instance {h : (ι F S) ⋙ forget F = (const (F.obj ⟨op S⟩)).obj S} :
+    (Fiber.inducedFunctor h).Full where
   map_surjective {X Y} f := by
     have hf : (fiberInclusion.map f).base = 𝟙 S := by
       simpa using (IsHomLift.fac (forget F) (𝟙 S) (fiberInclusion.map f)).symm
@@ -109,14 +110,16 @@ noncomputable instance : (Fiber.inducedFunctor (comp_const F S)).Full where
     ext <;> simp [hf, ← Cat.Hom₂.comp_app]
 
 set_option backward.isDefEq.respectTransparency false in
-instance : (Fiber.inducedFunctor (comp_const F S)).Faithful where
+instance {h : (ι F S) ⋙ forget F = (const (F.obj ⟨op S⟩)).obj S} :
+    (Fiber.inducedFunctor h).Faithful where
   map_injective {a b} := by
     intro f g heq
     replace heq := fiberInclusion.congr_map heq
     simpa [cancel_mono, ← Cat.Hom.toNatIso_hom,
       ← Cat.Hom.toNatIso_inv] using ((Hom.ext_iff _ _).mp heq).2
 
-noncomputable instance : (Fiber.inducedFunctor (comp_const F S)).EssSurj := by
+noncomputable instance {h : (ι F S) ⋙ forget F = (const (F.obj ⟨op S⟩)).obj S} :
+    (Fiber.inducedFunctor h).EssSurj := by
   apply essSurj_of_surj
   intro Y
   have hYS : (fiberInclusion.obj Y).base = S := by simpa using Y.2
@@ -124,7 +127,8 @@ noncomputable instance : (Fiber.inducedFunctor (comp_const F S)).EssSurj := by
   apply fiberInclusion_obj_inj
   ext <;> simp [hYS]
 
-noncomputable instance : (Fiber.inducedFunctor (comp_const F S)).IsEquivalence where
+noncomputable instance {h : (ι F S) ⋙ forget F = (const (F.obj ⟨op S⟩)).obj S} :
+    (Fiber.inducedFunctor h).IsEquivalence where
 
 /-- `HasFibers` instance for `∫ᶜ F`, where the fiber over `S` is `F.obj ⟨op S⟩`. -/
 noncomputable instance : HasFibers (forget F) where

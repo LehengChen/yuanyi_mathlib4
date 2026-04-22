@@ -108,9 +108,9 @@ variable {B B' : C} {α : Type*} (X : α → C) (π : (a : α) → (X a ⟶ B))
 
 theorem effectiveEpiFamilyStructCompIso_aux
     {W : C} (e : (a : α) → X a ⟶ W)
-    (h : ∀ {Z : C} (a₁ a₂ : α) (g₁ : Z ⟶ X a₁) (g₂ : Z ⟶ X a₂),
-      g₁ ≫ π a₁ ≫ i = g₂ ≫ π a₂ ≫ i → g₁ ≫ e a₁ = g₂ ≫ e a₂)
-    {Z : C} (a₁ a₂ : α) (g₁ : Z ⟶ X a₁) (g₂ : Z ⟶ X a₂) (hg : g₁ ≫ π a₁ = g₂ ≫ π a₂) :
+    {Z : C} (a₁ a₂ : α) (g₁ : Z ⟶ X a₁) (g₂ : Z ⟶ X a₂)
+    (h : g₁ ≫ π a₁ ≫ i = g₂ ≫ π a₂ ≫ i → g₁ ≫ e a₁ = g₂ ≫ e a₂)
+    (hg : g₁ ≫ π a₁ = g₂ ≫ π a₂) :
     g₁ ≫ e a₁ = g₂ ≫ e a₂ := by
   grind
 
@@ -119,12 +119,15 @@ variable [EffectiveEpiFamily X π] [IsIso i]
 /-- An effective epi family followed by an iso is an effective epi family. -/
 noncomputable
 def effectiveEpiFamilyStructCompIso : EffectiveEpiFamilyStruct X (fun a ↦ π a ≫ i) where
-  desc e h := inv i ≫ EffectiveEpiFamily.desc X π e (effectiveEpiFamilyStructCompIso_aux X π i e h)
+  desc e h := inv i ≫ EffectiveEpiFamily.desc X π e fun a₁ a₂ g₁ g₂ hg =>
+    effectiveEpiFamilyStructCompIso_aux X π i e a₁ a₂ g₁ g₂ (h a₁ a₂ g₁ g₂) hg
   fac _ _ _ := by simp
   uniq e h m hm := by
     simp only [Category.assoc] at hm
     simp [← EffectiveEpiFamily.uniq X π e
-      (effectiveEpiFamilyStructCompIso_aux X π i e h) (i ≫ m) hm]
+      (fun a₁ a₂ g₁ g₂ hg =>
+        effectiveEpiFamilyStructCompIso_aux X π i e a₁ a₂ g₁ g₂ (h a₁ a₂ g₁ g₂) hg)
+      (i ≫ m) hm]
 
 instance : EffectiveEpiFamily X (fun a ↦ π a ≫ i) := ⟨⟨effectiveEpiFamilyStructCompIso X π i⟩⟩
 

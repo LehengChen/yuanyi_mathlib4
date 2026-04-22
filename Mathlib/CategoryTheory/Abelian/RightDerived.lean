@@ -156,21 +156,19 @@ lemma Functor.isZero_rightDerived_obj_injective_succ
   exact ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- We can compute a right derived functor on a morphism using a descent of that morphism
-to a cochain map between chosen injective resolutions.
+/-- We can compute a right derived functor on a morphism using a cochain map between
+chosen injective resolutions that is compatible with that morphism in degree `0`.
 -/
 theorem Functor.rightDerived_map_eq (F : C ⥤ D) [F.Additive] (n : ℕ) {X Y : C} (f : X ⟶ Y)
     {P : InjectiveResolution X} {Q : InjectiveResolution Y} (g : P.cocomplex ⟶ Q.cocomplex)
-    (w : P.ι ≫ g = (CochainComplex.single₀ C).map f ≫ Q.ι) :
+    (w : P.ι.f 0 ≫ g.f 0 = f ≫ Q.ι.f 0) :
     (F.rightDerived n).map f =
       (P.isoRightDerivedObj F n).hom ≫
         (F.mapHomologicalComplex _ ⋙ HomologicalComplex.homologyFunctor _ _ n).map g ≫
           (Q.isoRightDerivedObj F n).inv := by
   rw [← cancel_mono (Q.isoRightDerivedObj F n).hom,
-    InjectiveResolution.isoRightDerivedObj_hom_naturality f P Q g _ F n,
+    InjectiveResolution.isoRightDerivedObj_hom_naturality f P Q g w F n,
     assoc, assoc, Iso.inv_hom_id, comp_id]
-  rw [← HomologicalComplex.comp_f, w, HomologicalComplex.comp_f,
-    CochainComplex.single₀_map_f_zero]
 
 /-- The natural transformation
 `F.rightDerivedToHomotopyCategory ⟶ G.rightDerivedToHomotopyCategory` induced by

@@ -59,16 +59,18 @@ lemma sigma_inj (i : C) (x : F i) :
 lemma isColimit_mk (c : CofanTypes.{w} F)
     (h₁ : ∀ (x : c.pt), ∃ (i : C) (y : F i), c.inj i y = x)
     (h₂ : ∀ (i : C), Function.Injective (c.inj i))
-    (h₃ : ∀ (i j : C) (x : F i) (y : F j), c.inj i x = c.inj j y → i = j) :
+    (h₃ : ∀ (i j : C) (x : F i) (y : F j), i ≠ j → c.inj i x ≠ c.inj j y) :
     Functor.CoconeTypes.IsColimit c where
   bijective := by
     constructor
     · intro x y h
       obtain ⟨⟨i⟩, x, rfl⟩ := (Discrete.functor F).ιColimitType_jointly_surjective x
       obtain ⟨⟨j⟩, y, rfl⟩ := (Discrete.functor F).ιColimitType_jointly_surjective y
-      obtain rfl := h₃ _ _ _ _ h
-      obtain rfl := h₂ _ h
-      rfl
+      by_cases hij : i = j
+      · obtain rfl := hij
+        obtain rfl := h₂ _ h
+        rfl
+      · exact (h₃ _ _ _ _ hij h).elim
     · intro x
       obtain ⟨i, y, rfl⟩ := h₁ x
       exact ⟨(Discrete.functor F).ιColimitType ⟨i⟩ y, rfl⟩
@@ -78,7 +80,7 @@ variable (F) in
 lemma isColimit_sigma : Functor.CoconeTypes.IsColimit (sigma F) :=
   isColimit_mk _ (by aesop)
     (fun _ _ _ h ↦ by rw [Sigma.ext_iff] at h; simpa using h)
-    (fun _ _ _ _ h ↦ congr_arg Sigma.fst h)
+    (fun _ _ _ _ hne h ↦ hne (congr_arg Sigma.fst h))
 
 variable (F) in
 /-- Given a cofan of a functor to types, this is a canonical map
