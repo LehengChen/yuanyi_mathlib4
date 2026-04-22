@@ -228,7 +228,7 @@ def isLimitChangeEmptyCone {c₁ : Cone F₁} (hl : IsLimit c₁) (c₂ : Cone F
     · simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
     · simp
 
-/-- Replacing an empty cone in `IsLimit` by another with the same cone point
+/-- Replacing an empty cone in `IsLimit` by another with an isomorphic cone point
     is an equivalence. -/
 def isLimitEmptyConeEquiv (c₁ : Cone F₁) (c₂ : Cone F₂) (h : c₁.pt ≅ c₂.pt) :
     IsLimit c₁ ≃ IsLimit c₂ where
@@ -257,7 +257,7 @@ def isColimitChangeEmptyCocone {c₁ : Cocone F₁} (hl : IsColimit c₁) (c₂ 
     · simp only [Iso.inv_hom_id_assoc]
     · simp
 
-/-- Replacing an empty cocone in `IsColimit` by another with the same cocone point
+/-- Replacing an empty cocone in `IsColimit` by another with an isomorphic cocone point
     is an equivalence. -/
 def isColimitEmptyCoconeEquiv (c₁ : Cocone F₁) (c₂ : Cocone F₂) (h : c₁.pt ≅ c₂.pt) :
     IsColimit c₁ ≃ IsColimit c₂ where
@@ -420,7 +420,7 @@ def coconeOfDiagramInitial {X : J} (hX : IsInitial X) (F : J ⥤ C)
           hX.hom_ext (hX.to i ≫ f) (hX.to j)] }
 
 /-- From a functor `F : J ⥤ C`, given an initial object of `J` and that the morphisms in the
-diagram are isomorphisms, show the cone `coconeOfDiagramInitial` is a colimit. -/
+diagram are isomorphisms, show the cocone `coconeOfDiagramInitial` is a colimit. -/
 def colimitOfDiagramInitial {X : J} (hX : IsInitial X) (F : J ⥤ C)
     [∀ (i j : J) (f : i ⟶ j), IsIso (F.map f)] : IsColimit (coconeOfDiagramInitial hX F) where
   desc S := S.ι.app _
