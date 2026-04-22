@@ -174,12 +174,20 @@ theorem normalize_naturality {a b c : B} (p : Path a b) {f g : Hom b c} (η : f 
   | _ => simp
 
 -- Not `@[simp]` because it is not in `simp`-normal form.
-theorem normalizeAux_nil_comp {a b c : B} (f : Hom a b) (g : Hom b c) :
-    normalizeAux nil (f.comp g) = (normalizeAux nil f).comp (normalizeAux nil g) := by
-  induction g generalizing a with
+theorem normalizeAux_comp {a : B} :
+    ∀ {b c : B} (p : Path a b) (f : Hom b c),
+      normalizeAux p f = p.comp (normalizeAux nil f) := by
+  intro b c p f
+  induction f generalizing a with
   | id => rfl
   | of => rfl
-  | comp g _ ihf ihg => erw [ihg (f.comp g), ihf f, ihg g, comp_assoc]
+  | comp f g ihf ihg =>
+    dsimp
+    rw [ihf p, ihg (p.comp (normalizeAux nil f)), ihg (normalizeAux nil f), comp_assoc]
+
+theorem normalizeAux_nil_comp {a b c : B} (f : Hom a b) (g : Hom b c) :
+    normalizeAux nil (f.comp g) = (normalizeAux nil f).comp (normalizeAux nil g) := by
+  exact normalizeAux_comp (normalizeAux nil f) g
 
 /-- The normalization pseudofunctor for the free bicategory on a quiver `B`. -/
 def normalize (B : Type u) [Quiver.{v} B] :
@@ -196,9 +204,9 @@ def normalizeUnitIso (a b : FreeBicategory B) :
   NatIso.ofComponents (fun f => (λ_ f).symm ≪≫ normalizeIso nil f)
     (by
       intro f g η
-      erw [leftUnitor_inv_naturality_assoc, assoc]
-      congr 1
-      exact normalize_naturality nil η)
+      dsimp
+      rw [leftUnitor_inv_naturality_assoc, assoc]
+      exact congrArg ((λ_ f).inv ≫ ·) (normalize_naturality nil η))
 
 /-- Normalization as an equivalence of categories. -/
 def normalizeEquiv (a b : B) : Hom a b ≌ Discrete (Path.{v} a b) :=
