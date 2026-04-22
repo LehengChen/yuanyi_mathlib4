@@ -53,8 +53,10 @@ example {B : C} {α : Type*} (X : α → C) (π : (a : α) → (X a ⟶ B)) [Eff
 
 set_option backward.isDefEq.respectTransparency false in
 /--
-This is an auxiliary lemma used twice in the definition of  `EffectiveEpiFamilyOfEffectiveEpiDesc`.
-It is the `h` hypothesis of `EffectiveEpi.desc` and `EffectiveEpi.fac`.
+This is an auxiliary lemma used twice in the definition of
+`effectiveEpiFamilyStructOfEffectiveEpiDesc`.
+It provides the compatibility hypothesis used in `EffectiveEpi.desc` and
+`EffectiveEpi.fac`.
 -/
 theorem effectiveEpiFamilyStructOfEffectiveEpiDesc_aux {B : C} {α : Type*} {X : α → C}
     {π : (a : α) → X a ⟶ B} [HasCoproduct X]
