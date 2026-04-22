@@ -77,8 +77,8 @@ lemma Sheaf.isPullback_square_op_map_yoneda_presheafToSheaf_yoneda_iff
     ext x
     dsimp
     rw [yonedaEquiv_naturality]
-    erw [Adjunction.homEquiv_naturality_left]
-    rfl
+    congr
+    exact Adjunction.homEquiv_naturality_left _ _ _
 
 namespace GrothendieckTopology
 
