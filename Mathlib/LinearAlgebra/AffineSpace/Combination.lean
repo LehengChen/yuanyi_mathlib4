@@ -954,12 +954,20 @@ theorem affineSpan_eq_affineSpan_lineMap_units [Nontrivial k] {s : Set P} {p : P
   conv_rhs =>
     rw [this]
   apply le_antisymm
-    <;> intro q hq
-    <;> erw [mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V _ (⟨p, hp⟩ : s) q] at hq ⊢
-    <;> obtain ⟨t, μ, rfl⟩ := hq
-    <;> use t
-    <;> [use fun x => μ x * ↑(w x); use fun x => μ x * ↑(w x)⁻¹]
-    <;> simp [smul_smul]
+  · intro q hq
+    rw [mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V
+      (fun q : s => AffineMap.lineMap p ↑q (w q : k)) (⟨p, hp⟩ : s) q] at hq
+    rw [mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V ((↑) : s → P) (⟨p, hp⟩ : s) q]
+    obtain ⟨t, μ, rfl⟩ := hq
+    refine ⟨t, fun x => μ x * ↑(w x), ?_⟩
+    simp [smul_smul]
+  · intro q hq
+    rw [mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V ((↑) : s → P) (⟨p, hp⟩ : s) q] at hq
+    rw [mem_affineSpan_iff_eq_weightedVSubOfPoint_vadd k V
+      (fun q : s => AffineMap.lineMap p ↑q (w q : k)) (⟨p, hp⟩ : s) q]
+    obtain ⟨t, μ, rfl⟩ := hq
+    refine ⟨t, fun x => μ x * ↑(w x)⁻¹, ?_⟩
+    simp [smul_smul]
 
 end AffineSpace'
 
