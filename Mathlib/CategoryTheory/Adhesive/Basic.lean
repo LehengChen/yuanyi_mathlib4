@@ -185,7 +185,11 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
     dsimp
     refine ⟨h.desc (BinaryCofan.mk (c.inr ≫ s.inr) s.inl), h.fac _ ⟨WalkingPair.right⟩, ?_, ?_⟩
     · apply BinaryCofan.IsColimit.hom_ext hc
-      · rw [← H.w_assoc]; erw [h.fac _ ⟨WalkingPair.right⟩]; exact s.condition
+      · have hfac : iY ≫ h.desc (BinaryCofan.mk (c.inr ≫ s.inr) s.inl) = s.inl := by
+          simpa only [pair_obj_left, Functor.const_obj_obj, pair_obj_right] using
+            h.fac (BinaryCofan.mk (c.inr ≫ s.inr) s.inl) ⟨WalkingPair.right⟩
+        rw [← H.w_assoc, hfac]
+        exact s.condition
       · rw [← Category.assoc]; exact h.fac _ ⟨WalkingPair.left⟩
     · intro m e₁ e₂
       apply BinaryCofan.IsColimit.hom_ext h
@@ -197,20 +201,27 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
     · exact fun s => H.isColimit.desc (PushoutCocone.mk s.inr _ <|
         (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm)
     · intro s
-      rw [Category.assoc]
-      erw [H.isColimit.fac _ WalkingSpan.right]
-      erw [hc.fac]
-      rfl
+      have hfac :
+          fE ≫
+              H.isColimit.desc
+                (PushoutCocone.mk s.inr (hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl))
+                  ((hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm)) =
+            hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl) := by
+        simpa only [pair_obj_right, Functor.const_obj_obj, Category.assoc] using
+          H.isColimit.fac
+            (PushoutCocone.mk s.inr (hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl))
+              ((hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm))
+            WalkingSpan.right
+      rw [Category.assoc, hfac]
+      exact hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.right⟩
     · intro s; exact H.isColimit.fac _ WalkingSpan.left
     · intro s m e₁ e₂
       apply PushoutCocone.IsColimit.hom_ext H.isColimit
       · symm; exact (H.isColimit.fac _ WalkingSpan.left).trans e₂.symm
       · rw [H.isColimit.fac _ WalkingSpan.right]
         apply BinaryCofan.IsColimit.hom_ext hc
-        · erw [hc.fac]
-          erw [← H.w_assoc]
-          rw [e₂]
-          rfl
+        · rw [PushoutCocone.ι_app_right, IsPushout.cocone_inr, ← H.w_assoc, e₂]
+          exact (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm
         · refine ((Category.assoc _ _ _).symm.trans e₁).trans ?_; symm; exact hc.fac _ _
 
 set_option backward.isDefEq.respectTransparency false in
@@ -243,7 +254,8 @@ theorem IsPushout.isVanKampen_inl {W E X Z : C} (c : BinaryCofan W E) [FinitaryE
           rw [Category.assoc, pullback.lift_fst, ← H.w, ← w.w]; exact hf.paste_horiz hc₄
         · apply IsPullback.of_right _ e₂ (IsPullback.of_hasPullback _ _)
           rw [Category.assoc, pullback.lift_fst]; exact hc₃
-    rw [← Category.id_comp αZ, ← show cmp ≫ pullback.snd _ _ = αY from pullback.lift_snd _ _ _]
+    have hcmp : cmp ≫ pullback.snd _ _ = αY := pullback.lift_snd _ _ _
+    rw [← Category.id_comp αZ, ← hcmp]
     apply IsPullback.paste_vert _ (IsPullback.of_hasPullback αZ i)
     have : cmp = (hc₂.coconePointUniqueUpToIso hc₄).hom := by
       apply BinaryCofan.IsColimit.hom_ext hc₂
