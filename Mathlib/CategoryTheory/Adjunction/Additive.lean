@@ -103,7 +103,8 @@ lemma homAddEquiv_symm_neg (X : C) (Y : D) (f : X ⟶ G.obj Y) :
 open Opposite in
 /-- If we have an adjunction `adj : F ⊣ G` of functors between preadditive categories,
 and if `F` is additive, then the hom set equivalence upgrades to an isomorphism between
-`G ⋙ preadditiveYoneda` and `preadditiveYoneda ⋙ F`, once we throw in the necessary
+`G ⋙ preadditiveYoneda` and `preadditiveYoneda ⋙ (whiskeringLeft _ _ _).obj F.op`, once we
+throw in the necessary
 universe lifting functors.
 Note that `F` is additive if and only if `G` is, by `Adjunction.right_adjoint_additive` and
 `Adjunction.left_adjoint_additive`.
