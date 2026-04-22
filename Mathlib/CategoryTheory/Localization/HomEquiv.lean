@@ -17,7 +17,7 @@ class of morphisms `W : MorphismProperty C`, we define a bijection
 between the types of morphisms in the two localized categories.
 
 More generally, given a localizer morphism `Φ : LocalizerMorphism W₁ W₂`, we define a map
-`Φ.homMap L₁ L₂ : (L₁.obj X ⟶ L₁.obj Y) ⟶ (L₂.obj (Φ.functor.obj X) ⟶ L₂.obj (Φ.functor.obj Y))`.
+`Φ.homMap L₁ L₂ : (L₁.obj X ⟶ L₁.obj Y) → (L₂.obj (Φ.functor.obj X) ⟶ L₂.obj (Φ.functor.obj Y))`.
 The definition `Localization.homEquiv` is obtained by applying the construction
 to the identity localizer morphism.
 
@@ -44,7 +44,7 @@ variable {W₁ : MorphismProperty C₁} {W₂ : MorphismProperty C₂} {W₃ : M
 
 /-- If `Φ : LocalizerMorphism W₁ W₂` is a morphism of localizers, `L₁` and `L₂`
 are localization functors for `W₁` and `W₂`, then this is the induced map
-`(L₁.obj X ⟶ L₁.obj Y) ⟶ (L₂.obj (Φ.functor.obj X) ⟶ L₂.obj (Φ.functor.obj Y))`
+`(L₁.obj X ⟶ L₁.obj Y) → (L₂.obj (Φ.functor.obj X) ⟶ L₂.obj (Φ.functor.obj Y))`
 for all objects `X` and `Y`. -/
 noncomputable def homMap (f : L₁.obj X ⟶ L₁.obj Y) :
     L₂.obj (Φ.functor.obj X) ⟶ L₂.obj (Φ.functor.obj Y) :=
