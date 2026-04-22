@@ -289,7 +289,7 @@ namespace Modification
 
 variable (Γ : Modification η θ)
 
-/-- The modification between the underlying strong transformations of oplax functors -/
+/-- The modification between the underlying oplax transformations of oplax functors. -/
 @[simps]
 def toOplax : OplaxTrans.Modification η.toOplax θ.toOplax where
   app a := Γ.app a
