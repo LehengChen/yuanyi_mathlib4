@@ -82,7 +82,7 @@ end
 include h in
 /-- If `homRel : HomRel C` satisfies `homRel.FactorsThroughLocalization W` and
 that the class of morphisms `W` induces a class of morphisms `W'` on the quotient category,
-then the localizer morphism given by the functor `Quotient.functor HomRel : C ⥤ Quotient homRel`
+then the localizer morphism given by the functor `Quotient.functor homRel : C ⥤ Quotient homRel`
 induces equivalences on localized categories. -/
 lemma isLocalizedEquivalence :
     (LocalizerMorphism.ofEq hW).IsLocalizedEquivalence :=
