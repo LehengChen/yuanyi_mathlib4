@@ -376,12 +376,13 @@ theorem homotopicFrom (i : N) {p q : Ω^ N X x} :
   refine Nonempty.map fun H ↦ ⟨⟨homotopyFrom i H, ?_, ?_⟩, ?_⟩
   pick_goal 3
   · rintro t y ⟨j, jH⟩
-    erw [homotopyFrom_apply]
+    simp only [ContinuousMap.toFun_eq_coe, homotopyFrom_apply, Prod.map_apply, id_eq,
+      funSplitAt_apply, Function.uncurry_apply_pair, ContinuousMap.coe_mk, coe_coe]
     obtain rfl | h := eq_or_ne j i
-    · simp only [Prod.map_apply, id_eq, funSplitAt_apply, Function.uncurry_apply_pair]
-      rw [H.eq_fst]
-      exacts [congr_arg p ((Cube.splitAt j).left_inv _), jH]
-    · rw [p.2 _ ⟨j, jH⟩]; apply boundary; exact ⟨⟨j, h⟩, jH⟩
+    · rw [H.eq_fst _ jH]
+      simp only [ne_eq, Path.coe_toContinuousMap]
+      exact congr_arg p ((Cube.splitAt j).left_inv y)
+    · exact (boundary (H (t, y i)) _ ⟨⟨j, h⟩, jH⟩).trans (p.2 _ ⟨j, jH⟩).symm
   all_goals
     intro
     apply (homotopyFrom_apply _ _ _).trans
