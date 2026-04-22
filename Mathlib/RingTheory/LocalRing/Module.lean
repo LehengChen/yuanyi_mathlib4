@@ -209,9 +209,15 @@ lemma exists_basis_of_basis_baseChange [Module.FinitePresentation R M]
       exact Subtype.val_injective
     · apply hi'.injective
       rw [LinearMap.baseChange_eq_ltensor]
-      erw [← LinearMap.comp_apply (i.lTensor k), ← LinearMap.lTensor_comp]
-      rw [(LinearMap.exact_subtype_ker_map i).linearMap_comp_eq_zero]
-      simp only [LinearMap.lTensor_zero, LinearMap.zero_apply, map_zero]
+      have h :
+          (LinearMap.lTensor (R ⧸ 𝔪) i)
+              ((LinearMap.lTensor (R ⧸ 𝔪) (LinearMap.ker i).subtype) x) =
+            (LinearMap.lTensor (R ⧸ 𝔪) i)
+              ((LinearMap.lTensor (R ⧸ 𝔪) (LinearMap.ker i).subtype) 0) := by
+        rw [← LinearMap.comp_apply (LinearMap.lTensor (R ⧸ 𝔪) i), ← LinearMap.lTensor_comp]
+        rw [(LinearMap.exact_subtype_ker_map i).linearMap_comp_eq_zero]
+        simp only [LinearMap.lTensor_zero, LinearMap.zero_apply, map_zero]
+      exact h
   use Basis.ofRepr iequiv.symm
   intro j
   simp [iequiv, i]
