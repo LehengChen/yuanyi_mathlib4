@@ -175,13 +175,35 @@ def sup {A : C} : MonoOver A ⥤ MonoOver A ⥤ MonoOver A :=
 /-- A morphism version of `le_sup_left`. -/
 def leSupLeft {A : C} (f g : MonoOver A) : f ⟶ (sup.obj f).obj g := by
   refine homMk (coprod.inl ≫ factorThruImage _) ?_
-  erw [Category.assoc, image.fac, coprod.inl_desc]
+  let α := coprod.desc f.arrow g.arrow
+  suffices ((sup.obj f).obj g).arrow = image.ι α by
+    rw [this]
+    calc
+      (coprod.inl ≫ factorThruImage α) ≫ image.ι α
+          = coprod.inl ≫ (factorThruImage α ≫ image.ι α) := by
+            rw [Category.assoc]
+      _ = coprod.inl ≫ α := by
+        exact congrArg (fun t => coprod.inl ≫ t) (image.fac α)
+      _ = f.arrow := by
+        exact coprod.inl_desc _ _
+  dsimp [sup, α]
   rfl
 
 /-- A morphism version of `le_sup_right`. -/
 def leSupRight {A : C} (f g : MonoOver A) : g ⟶ (sup.obj f).obj g := by
   refine homMk (coprod.inr ≫ factorThruImage _) ?_
-  erw [Category.assoc, image.fac, coprod.inr_desc]
+  let α := coprod.desc f.arrow g.arrow
+  suffices ((sup.obj f).obj g).arrow = image.ι α by
+    rw [this]
+    calc
+      (coprod.inr ≫ factorThruImage α) ≫ image.ι α
+          = coprod.inr ≫ (factorThruImage α ≫ image.ι α) := by
+            rw [Category.assoc]
+      _ = coprod.inr ≫ α := by
+        exact congrArg (fun t => coprod.inr ≫ t) (image.fac α)
+      _ = g.arrow := by
+        exact coprod.inr_desc _ _
+  dsimp [sup, α]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
@@ -466,10 +488,22 @@ theorem inf_pullback {X Y : C} (g : X ⟶ Y) (f₁ f₂) :
   revert f₁
   apply Quotient.ind'
   intro f₁
-  erw [inf_def, inf_def, inf_eq_map_pullback', inf_eq_map_pullback', ← pullback_comp, ←
-    map_pullback pullback.condition (pullbackIsPullback f₁.arrow g), ← pullback_comp,
-    pullback.condition]
-  rfl
+  calc
+    (pullback g).obj (Quotient.mk'' f₁ ⊓ f₂)
+        = (pullback g).obj ((map f₁.arrow).obj ((pullback f₁.arrow).obj f₂)) := by
+            exact congrArg ((pullback g).obj) (inf_eq_map_pullback' f₁ f₂)
+    _ = (map (pullback.snd f₁.arrow g)).obj
+          ((pullback (pullback.fst f₁.arrow g)).obj ((pullback f₁.arrow).obj f₂)) := by
+            exact (map_pullback pullback.condition (pullbackIsPullback f₁.arrow g) _).symm
+    _ = (map (pullback.snd f₁.arrow g)).obj
+          ((pullback (pullback.snd f₁.arrow g ≫ g)).obj f₂) := by
+            rw [← pullback_comp, pullback.condition]
+    _ = (map ((MonoOver.pullback g).obj f₁).arrow).obj
+          ((pullback ((MonoOver.pullback g).obj f₁).arrow).obj ((pullback g).obj f₂)) := by
+            simp [MonoOver.pullback_obj_arrow, pullback_comp]
+    _ = (pullback g).obj (Quotient.mk'' f₁) ⊓ (pullback g).obj f₂ := by
+            simpa using
+              (inf_eq_map_pullback' ((MonoOver.pullback g).obj f₁) ((pullback g).obj f₂)).symm
 
 /-- `⊓` commutes with map. -/
 theorem inf_map {X Y : C} (g : Y ⟶ X) [Mono g] (f₁ f₂) :
@@ -477,9 +511,15 @@ theorem inf_map {X Y : C} (g : Y ⟶ X) [Mono g] (f₁ f₂) :
   revert f₁
   apply Quotient.ind'
   intro f₁
-  erw [inf_def, inf_def, inf_eq_map_pullback', inf_eq_map_pullback', ← map_comp]
-  dsimp
-  rw [pullback_comp, pullback_map_self]
+  calc
+    (map g).obj (Quotient.mk'' f₁ ⊓ f₂)
+        = (map g).obj ((map f₁.arrow).obj ((pullback f₁.arrow).obj f₂)) := by
+            exact congrArg ((map g).obj) (inf_eq_map_pullback' f₁ f₂)
+    _ = (map (f₁.arrow ≫ g)).obj ((pullback f₁.arrow).obj f₂) := by
+            rw [← map_comp]
+    _ = (map g).obj (Quotient.mk'' f₁) ⊓ (map g).obj f₂ := by
+            simpa [MonoOver.map_obj_arrow, pullback_comp, pullback_map_self] using
+              (inf_eq_map_pullback' ((MonoOver.map g).obj f₁) ((map g).obj f₂)).symm
 
 end SemilatticeInfTop
 
@@ -590,12 +630,19 @@ set_option backward.isDefEq.respectTransparency false in
 instance widePullbackι_mono {A : C} (s : Set (Subobject A)) : Mono (widePullbackι s) :=
   ⟨fun u v h =>
     limit.hom_ext fun j => by
-      cases j
-      · exact h
-      · apply (cancel_mono ((equivShrink (Subobject A)).symm _).arrow).1
-        rw [assoc, assoc]
-        erw [limit.w (wideCospan s) (WidePullbackShape.Hom.term _)]
-        exact h⟩
+      cases j with
+      | none => exact h
+      | some j =>
+          apply (cancel_mono ((equivShrink (Subobject A)).symm j).arrow).1
+          have hw := limit.w (wideCospan s) (WidePullbackShape.Hom.term j)
+          calc
+            (u ≫ limit.π (wideCospan s) (some j)) ≫ ((equivShrink (Subobject A)).symm j).arrow
+                = u ≫ limit.π (wideCospan s) none := by
+                    simpa [Category.assoc] using congrArg (fun t => u ≫ t) hw
+            _ = v ≫ limit.π (wideCospan s) none := h
+            _ = (v ≫ limit.π (wideCospan s) (some j)) ≫
+                  ((equivShrink (Subobject A)).symm j).arrow := by
+                    simpa [Category.assoc] using (congrArg (fun t => v ≫ t) hw).symm⟩
 
 /-- When `[WellPowered C]` and `[HasWidePullbacks C]`, `Subobject A` has arbitrary infimums.
 -/
