@@ -261,9 +261,10 @@ Y' ⟶ Y
 Z' ⟶ Z
 ```
 if the morphisms `g'` and `g` both have chosen pullbacks, then we get an induced morphism
-`pullbackMap f g f' g' comm₁ comm₂` from the chosen pullback of
+`pullbackMap f g f' g' γ₁ γ₂ γ₃ comm₁ comm₂` from the chosen pullback of
 `f' : Y' ⟶ X'` along `g'` to the chosen pullback of `f : Y ⟶ X` along `g`.
-Here `comm₁` and `comm₂` are the commutativity conditions of the squares in the diagram above.
+Here `γ₁`, `γ₂`, and `γ₃` are the morphisms in the diagram above, and `comm₁` and `comm₂`
+are the commutativity conditions of its two squares.
 -/
 def pullbackMap {Y' Z' X' : C} (f' : Y' ⟶ X') (g' : Z' ⟶ X') [ChosenPullbacksAlong g']
     (γ₁ : Y' ⟶ Y) (γ₂ : Z' ⟶ Z) (γ₃ : X' ⟶ X)
@@ -317,8 +318,8 @@ def pullbackCone : PullbackCone f g :=
 
 /-- The canonical pullback cone is a limit cone.
 Note: this limit cone is computable as lifts are constructed from the data contained in the
-`ChosenPullbackAlong` instance, contrary to `IsPullback.isLimit`, which constructs lifting data from
-`CategoryTheory.Square.IsPullback` (a `Prop`). -/
+`ChosenPullbacksAlong` instance, contrary to `CategoryTheory.IsPullback.isLimit`, which constructs
+lifting data from `CategoryTheory.IsPullback` (a `Prop`). -/
 def isLimitPullbackCone :
     IsLimit (pullbackCone f g) :=
   PullbackCone.IsLimit.mk condition (fun s ↦ lift s.fst s.snd s.condition)
@@ -330,7 +331,7 @@ theorem isPullback : IsPullback (fst f g) (snd f g) f g where
 
 set_option backward.isDefEq.respectTransparency false in
 attribute [local simp] condition in
-/-- If `g` has a chosen pullback, then `Over.ChosenPullbacksAlong.fst f g` has a chosen pullback. -/
+/-- If `g` has a chosen pullback, then `ChosenPullbacksAlong.fst f g` has a chosen pullback. -/
 @[implicit_reducible]
 def chosenPullbacksAlongFst : ChosenPullbacksAlong (fst f g) where
   pullback.obj W := Over.mk (pullbackMap _ _ _ _ W.hom (𝟙 _) (𝟙 _))
