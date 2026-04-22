@@ -443,12 +443,12 @@ theorem unitsSMul_neg (u : ℤˣ) (w : NormalWord d) :
       apply NormalWord.ext
       · -- This used to `simp [this]` before https://github.com/leanprover/lean4/pull/2644
         dsimp
-        conv_lhs => erw [IsComplement.equiv_mul_left]
+        conv_lhs => rw [IsComplement.equiv_mul_left]
         rw [map_mul, Submonoid.coe_mul, toSubgroupEquiv_neg_apply, this]
         simp
       · -- The next two lines were not needed before https://github.com/leanprover/lean4/pull/2644
         dsimp
-        conv_lhs => erw [IsComplement.equiv_mul_left]
+        rw [IsComplement.equiv_mul_left]
         simp [Units.ext_iff, (d.compl (-u)).equiv_snd_eq_inv_mul, this,
           -SetLike.coe_sort_coe]
 
@@ -482,11 +482,9 @@ theorem unitsSMul_one_group_smul (g : A) (w : NormalWord d) :
       mul_one, smul_cons]
     -- This used to be the end of the proof before https://github.com/leanprover/lean4/pull/2644
     congr 1
-    · conv_lhs => erw [IsComplement.equiv_mul_left]
-      simp_rw [toSubgroup_one]
-      simp only [SetLike.coe_sort_coe, map_mul, Subgroup.coe_mul]
-    conv_lhs => erw [IsComplement.equiv_mul_left]
-    rfl
+    · have hmul := congrArg (fun x => (φ x.1 : G)) ((d.compl 1).equiv_mul_left g w.head)
+      simpa [toSubgroup_one, SetLike.coe_sort_coe, map_mul, Subgroup.coe_mul] using hmul
+    exact congrArg (fun x => (↑x.2 * w.head⁻¹) • w) ((d.compl 1).equiv_mul_left g w.head)
 
 noncomputable instance : MulAction (HNNExtension G A B φ) (NormalWord d) :=
   MulAction.ofEndHom <| (MulAction.toEndHom (M := Equiv.Perm (NormalWord d))).comp
@@ -525,31 +523,66 @@ theorem prod_unitsSMul (u : ℤˣ) (w : NormalWord d) :
     (unitsSMul φ u w).prod φ = (t ^ (u : ℤ) * w.prod φ : HNNExtension G A B φ) := by
   rw [unitsSMul]
   split_ifs with hcan
-  · cases w using consRecOn
-    · simp [Cancels] at hcan
-    · cases hcan.2
-      simp only [unitsSMulWithCancel, id_eq, consRecOn_cons, prod_group_smul, prod_cons, zpow_neg]
-      rcases Int.units_eq_one_or u with (rfl | rfl)
-      · simp [equiv_eq_conj, mul_assoc]
-      · -- Before https://github.com/leanprover/lean4/pull/2644, this proof was just
-        -- simp [equiv_symm_eq_conj, mul_assoc].
-        simp only [toSubgroup_neg_one, toSubgroupEquiv_neg_one, Units.val_neg, Units.val_one,
-          Int.reduceNeg, zpow_neg, zpow_one, inv_inv]
-        erw [equiv_symm_eq_conj, mul_assoc, mul_assoc]
+  · cases w using consRecOn with
+    | ofGroup =>
+        simp [Cancels] at hcan
+    | cons g u' w h1 h2 ih =>
+        cases hcan.2
+        clear ih
+        simp only [unitsSMulWithCancel, id_eq, consRecOn_cons, prod_group_smul, prod_cons, zpow_neg]
+        rcases Int.units_eq_one_or u with (rfl | rfl)
+        · simp [equiv_eq_conj, mul_assoc]
+        · -- Before https://github.com/leanprover/lean4/pull/2644, this proof was just
+          -- simp [equiv_symm_eq_conj, mul_assoc].
+          simp only [toSubgroup_neg_one, toSubgroupEquiv_neg_one, Units.val_neg, Units.val_one,
+            Int.reduceNeg, zpow_neg, zpow_one, inv_inv]
+          have hg : g ∈ B := by
+            simpa [Cancels, toSubgroup_neg_one] using hcan.1
+          calc
+            of ↑(φ.symm ⟨g, hg⟩) * ReducedWord.prod φ w.toReducedWord
+              = (t⁻¹ * of g * t) * ReducedWord.prod φ w.toReducedWord := by
+                  rw [equiv_symm_eq_conj]
+            _ = t⁻¹ * (of g * (t * ReducedWord.prod φ w.toReducedWord)) := by
+              simp [mul_assoc]
   · simp only [unitsSMulGroup, SetLike.coe_sort_coe, prod_cons, prod_group_smul, map_mul, map_inv]
     rcases Int.units_eq_one_or u with (rfl | rfl)
     · -- Before https://github.com/leanprover/lean4/pull/2644, this proof was just
       -- simp [equiv_eq_conj, mul_assoc, (d.compl _).equiv_snd_eq_inv_mul].
       simp only [toSubgroup_neg_one, toSubgroup_one, toSubgroupEquiv_one, equiv_eq_conj, mul_assoc,
         Units.val_one, zpow_one, inv_mul_cancel_left, mul_right_inj]
-      erw [(d.compl 1).equiv_snd_eq_inv_mul]
-      simp [mul_assoc]
+      have hsnd :
+          (of ((((d.compl 1).equiv w.head).2 : d.set 1) : G) : HNNExtension G A B φ) =
+            of (((((d.compl 1).equiv w.head).1 : toSubgroup A B 1) : G)⁻¹ * w.head) :=
+        congrArg (fun x => (of x : HNNExtension G A B φ)) ((d.compl 1).equiv_snd_eq_inv_mul w.head)
+      calc
+        of ↑((d.compl 1).equiv w.head).1 *
+            (of ↑((d.compl 1).equiv w.head).2 *
+              ((of w.head)⁻¹ * ReducedWord.prod φ w.toReducedWord))
+          = of ↑((d.compl 1).equiv w.head).1 *
+              (of ((↑((d.compl 1).equiv w.head).1)⁻¹ * w.head) *
+                ((of w.head)⁻¹ * ReducedWord.prod φ w.toReducedWord)) := by
+                  rw [hsnd]
+        _ = ReducedWord.prod φ w.toReducedWord := by
+          simp [mul_assoc]
     · -- Before https://github.com/leanprover/lean4/pull/2644, this proof was just
       -- simp [equiv_symm_eq_conj, mul_assoc, (d.compl _).equiv_snd_eq_inv_mul]
       simp only [toSubgroup_neg_one, toSubgroupEquiv_neg_one, Units.val_neg, Units.val_one,
         Int.reduceNeg, zpow_neg, zpow_one, mul_assoc]
-      erw [equiv_symm_eq_conj, (d.compl (-1)).equiv_snd_eq_inv_mul]
-      simp [mul_assoc]
+      have hsnd :
+          (of ((((d.compl (-1)).equiv w.head).2 : d.set (-1)) : G) : HNNExtension G A B φ) =
+            of (((((d.compl (-1)).equiv w.head).1 : toSubgroup A B (-1)) : G)⁻¹ * w.head) :=
+        congrArg (fun x => (of x : HNNExtension G A B φ))
+          ((d.compl (-1)).equiv_snd_eq_inv_mul w.head)
+      calc
+        of ↑(φ.symm ((d.compl (-1)).equiv w.head).1) *
+            (t⁻¹ * (of ↑((d.compl (-1)).equiv w.head).2 *
+              ((of w.head)⁻¹ * ReducedWord.prod φ w.toReducedWord)))
+          = of ↑(φ.symm ((d.compl (-1)).equiv w.head).1) *
+              (t⁻¹ * (of ((↑((d.compl (-1)).equiv w.head).1)⁻¹ * w.head) *
+                ((of w.head)⁻¹ * ReducedWord.prod φ w.toReducedWord))) := by
+                  rw [hsnd]
+        _ = t⁻¹ * ReducedWord.prod φ w.toReducedWord := by
+          simp [equiv_symm_eq_conj, mul_assoc]
 
 @[simp]
 theorem prod_empty : (empty : NormalWord d).prod φ = 1 := by
@@ -662,7 +695,9 @@ theorem exists_normalWord_prod_eq
         simp at this
       rw [List.map_cons, mul_smul, of_smul_eq_smul, NormalWord.group_smul_def,
         t_pow_smul_eq_unitsSMul, unitsSMul]
-      erw [dif_neg this]
+      have hnot : ¬ Cancels a.1 { w' with head := a.2 * w'.head } := by
+        simpa [NormalWord.group_smul_def] using this
+      rw [dif_neg hnot]
       rw [← hw'2]
       simp [mul_assoc, unitsSMulGroup]
 
