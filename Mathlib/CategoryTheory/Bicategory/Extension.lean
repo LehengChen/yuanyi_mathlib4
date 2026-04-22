@@ -204,7 +204,7 @@ def alongId (g : c ⟶ a) : LeftLift (𝟙 a) g := .mk _ (ρ_ g).inv
 
 instance : Inhabited (LeftLift (𝟙 a) g) := ⟨alongId g⟩
 
-/-- Construct a left lift along `g : c ⟶ a` from a left lift along `𝟙 c ≫ g`. -/
+/-- Construct a left lift of `g : c ⟶ a` from a left lift of `𝟙 c ≫ g`. -/
 @[simps!]
 def ofIdComp (t : LeftLift f (𝟙 c ≫ g)) : LeftLift f g :=
   mk (lift t) ((λ_ _).inv ≫ unit t)
