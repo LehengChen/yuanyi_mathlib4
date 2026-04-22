@@ -31,7 +31,7 @@ open MonoidalCategory
 
 variable (V : Type v) [Category.{w} V] [MonoidalCategory V]
 
-/-- Category of `V`-enriched categories for a monoidal category `V`. -/
+/-- Bundled `V`-enriched categories for a monoidal category `V`. -/
 def EnrichedCat := Bundled (EnrichedCategory.{w, v, u} V)
 
 namespace EnrichedCat
