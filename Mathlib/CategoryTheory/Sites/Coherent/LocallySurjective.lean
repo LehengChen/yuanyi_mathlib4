@@ -82,10 +82,15 @@ lemma extensiveTopology.surjective_of_isLocallySurjective_sheaf_of_types [Finita
     Functor.mapCone_π_app, Cone.whisker_π, Cocone.op_π, Functor.whiskerLeft_app, NatTrans.op_app,
     Cofan.mk_ι_app]
   rw [← (h' a).choose_spec]
-  erw [← NatTrans.naturality_apply (φ := f)]
-  change f.app _ ((i.hom ≫ F.map (π a).op) y) = _
-  erw [IsLimit.map_π]
-  rfl
+  have hnat := (NatTrans.naturality_apply (φ := f) ((π a).op) (i.hom y)).symm
+  have hπ :=
+    congrFun
+      (congrArg ConcreteCategory.hom
+        (IsLimit.conePointsIsoOfNatIso_hom_comp ht (isLimitOfPreserves F ht')
+          (Discrete.natIso fun _ ↦ Iso.refl (F.obj ⟨_⟩)) ⟨a⟩))
+      y
+  simp only [Types.hom_eq_coe] at hπ
+  exact hnat.trans (congrArg (f.app (op (Y a))) hπ)
 
 lemma extensiveTopology.presheafIsLocallySurjective_iff [FinitaryPreExtensive C] {F G : Cᵒᵖ ⥤ D}
     (f : F ⟶ G) [PreservesFiniteProducts F] [PreservesFiniteProducts G]
