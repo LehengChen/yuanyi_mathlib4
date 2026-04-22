@@ -123,12 +123,11 @@ noncomputable def isoRestrict : X ≅ Y.restrict H.base_open :=
       cases U
       dsimp only [IsOpenMap.functor, Functor.op, Opens.map]
       congr 2
-      erw [Set.preimage_image_eq _ H.base_open.injective]
-      rfl
+      exact Set.preimage_image_eq _ H.base_open.injective
     · intro U V i
       dsimp
-      simp only [NatTrans.naturality_assoc, TopCat.Presheaf.pushforward_obj_obj,
-        TopCat.Presheaf.pushforward_obj_map, Quiver.Hom.unop_op, Category.assoc]
+      rw [f.c.naturality_assoc]
+      simp only [TopCat.Presheaf.pushforward_obj_map, Category.assoc]
       rw [← X.presheaf.map_comp, ← X.presheaf.map_comp]
       congr 1
 
@@ -139,10 +138,19 @@ theorem isoRestrict_hom_ofRestrict : (isoRestrict f).hom ≫ Y.ofRestrict _ = f 
   refine PresheafedSpace.Hom.ext _ _ rfl <| NatTrans.ext <| funext fun x => ?_
   simp only [eqToHom_refl,
     Functor.whiskerRight_id']
-  erw [Category.comp_id, comp_c_app, f.c.naturality_assoc, ← X.presheaf.map_comp]
-  trans f.c.app x ≫ X.presheaf.map (𝟙 _)
-  · congr 1
-  · simp
+  delta isoRestrict
+  simp
+  calc
+    _ = f.c.app x := by
+          have h :
+              ((Opens.map f.base).map (H.base_open.isOpenMap.adjunction.counit.app (unop x))).op ≫
+                  eqToHom (by
+                    simp [Opens.map, Set.preimage_image_eq _ H.base_open.injective]) =
+                𝟙 _ := by
+            rfl
+          convert congrArg (fun k => f.c.app x ≫ X.presheaf.map k) h using 1
+          · rw [← X.presheaf.map_comp]
+          · simp
 
 @[reassoc (attr := simp)]
 theorem isoRestrict_inv_ofRestrict : (isoRestrict f).inv ≫ f = Y.ofRestrict _ := by
@@ -215,7 +223,8 @@ theorem app_invApp (U : Opens Y) :
       Y.presheaf.map
         ((homOfLE (Set.image_preimage_subset f.base U.1)).op :
           op U ⟶ op (opensFunctor f |>.obj ((Opens.map f.base).obj U))) := by
-  erw [← Category.assoc]; rw [IsIso.comp_inv_eq, f.c.naturality]; congr
+  rw [invApp, ← Category.assoc, IsIso.comp_inv_eq, f.c.naturality]
+  congr
 
 set_option backward.isDefEq.respectTransparency false in
 /-- A variant of `app_inv_app` that gives an `eqToHom` instead of `homOfLe`. -/
@@ -383,31 +392,88 @@ def pullbackConeOfLeftLift : s.pt ⟶ (pullbackConeOfLeft f g).pt where
                 rw [Set.preimage_image_eq _
                     (TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).injective]
                 rfl))
-      naturality := fun U V i => by
-        erw [s.snd.c.naturality_assoc]
-        rw [Category.assoc]
-        erw [← s.pt.presheaf.map_comp, ← s.pt.presheaf.map_comp]
-        congr 1 }
-
-set_option backward.isDefEq.respectTransparency false in
--- this lemma is not a `simp` lemma, because it is an implementation detail
-theorem pullbackConeOfLeftLift_fst :
-    pullbackConeOfLeftLift f g s ≫ (pullbackConeOfLeft f g).fst = s.fst := by
-  -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `NatTrans.ext`
-  refine PresheafedSpace.Hom.ext _ _ ?_ <| NatTrans.ext <| funext fun x => ?_
-  · change pullback.lift _ _ _ ≫ pullback.fst _ _ = _
-    simp
-  · induction x with | op x => ?_
-    change ((_ ≫ _) ≫ _ ≫ _) ≫ _ = _
-    simp_rw [Category.assoc]
-    erw [← s.pt.presheaf.map_comp]
-    erw [s.snd.c.naturality_assoc]
-    have := congr_app s.condition (op (opensFunctor f |>.obj x))
-    dsimp only [comp_c_app, unop_op] at this
-    rw [← IsIso.comp_inv_eq] at this
-    replace this := reassoc_of% this
-    erw [← this, hf.invApp_app_assoc, s.fst.c.naturality_assoc]
-    simp [eqToHom_map]
+      naturality := by
+        intro U V i
+        induction U with
+        | op U =>
+            induction V with
+            | op V =>
+                delta pullbackConeOfLeft
+                simp only [PullbackCone.mk_pt, restrict_carrier, restrict_presheaf,
+                  TopCat.Presheaf.pushforward_obj_obj, Functor.comp_obj]
+                calc
+                  _ = _ := by
+                    simpa only [TopCat.Presheaf.pushforward_obj_map, Category.assoc,
+                      Quiver.Hom.unop_op, Functor.op_map, Functor.op_obj] using
+                      (s.snd.c.naturality_assoc
+                        (((TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).functor.map
+                            i.unop).op)
+                        (s.pt.presheaf.map
+                          (eqToHom
+                            (by
+                              dsimp only [Opens.map, IsOpenMap.functor, Functor.op]
+                              congr 2
+                              let s' : PullbackCone f.base g.base :=
+                                PullbackCone.mk s.fst.base s.snd.base
+                                  (congr_arg Hom.base s.condition)
+                              have : _ = s.snd.base := limit.lift_π s' WalkingCospan.right
+                              conv_lhs =>
+                                rw [← this]
+                                dsimp [s']
+                                rw [Function.comp_def, ← Set.preimage_preimage]
+                              rw [Set.preimage_image_eq _
+                                (TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).injective]
+                              ))))
+                  _ = _ := by
+                    have hcomp :
+                        ((Opens.map s.snd.base).map
+                            ((TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).functor.map
+                              i.unop)).op ≫
+                          eqToHom
+                            (by
+                              dsimp only [Opens.map, IsOpenMap.functor, Functor.op]
+                              congr 2
+                              let s' : PullbackCone f.base g.base :=
+                                PullbackCone.mk s.fst.base s.snd.base
+                                  (congr_arg Hom.base s.condition)
+                              have : _ = s.snd.base := limit.lift_π s' WalkingCospan.right
+                              conv_lhs =>
+                                rw [← this]
+                                dsimp [s']
+                                rw [Function.comp_def, ← Set.preimage_preimage]
+                              rw [Set.preimage_image_eq _
+                                (TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).injective]
+                              ) =
+                        eqToHom
+                            (by
+                              dsimp only [Opens.map, IsOpenMap.functor, Functor.op]
+                              congr 2
+                              let s' : PullbackCone f.base g.base :=
+                                PullbackCone.mk s.fst.base s.snd.base
+                                  (congr_arg Hom.base s.condition)
+                              have : _ = s.snd.base := limit.lift_π s' WalkingCospan.right
+                              conv_lhs =>
+                                rw [← this]
+                                dsimp [s']
+                                rw [Function.comp_def, ← Set.preimage_preimage]
+                              rw [Set.preimage_image_eq _
+                                (TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).injective]
+                              ) ≫
+                          ((Opens.map
+                              (pullback.lift s.fst.base s.snd.base (congr_arg Hom.base s.condition))).map
+                            i.unop).op := by
+                      rfl
+                    have hmap :=
+                      congrArg
+                        (fun k =>
+                          s.snd.c.app
+                              (op
+                                ((TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).functor.obj
+                                  U)) ≫
+                            s.pt.presheaf.map k)
+                        hcomp
+                    simpa [Category.assoc, TopCat.Presheaf.pushforward_obj_map] using hmap
+      }
 
 set_option backward.isDefEq.respectTransparency false in
 -- this lemma is not a `simp` lemma, because it is an implementation detail
@@ -417,18 +483,48 @@ theorem pullbackConeOfLeftLift_snd :
   refine PresheafedSpace.Hom.ext _ _ ?_ <| NatTrans.ext <| funext fun x => ?_
   · change pullback.lift _ _ _ ≫ pullback.snd _ _ = _
     simp
-  · change (_ ≫ _ ≫ _) ≫ _ = _
-    simp_rw [Category.assoc]
-    erw [s.snd.c.naturality_assoc]
-    erw [← s.pt.presheaf.map_comp, ← s.pt.presheaf.map_comp]
-    trans s.snd.c.app x ≫ s.pt.presheaf.map (𝟙 _)
-    · congr 1
-    · simp
+  · induction x with
+    | op x =>
+        simp [pullbackConeOfLeft, pullbackConeOfLeftLift]
+        have h :
+            ((Opens.map s.snd.base).map
+                ((TopCat.snd_isOpenEmbedding_of_left hf.base_open g.base).isOpenMap.adjunction.counit.app
+                  x)).op ≫
+                eqToHom
+                  (by
+                    apply unop_injective
+                    let s' : PullbackCone f.base g.base :=
+                      PullbackCone.mk s.fst.base s.snd.base (congr_arg Hom.base s.condition)
+                    have hs : limit.lift (cospan f.base g.base) s' ≫
+                        limit.π (cospan f.base g.base) WalkingCospan.right = s.snd.base :=
+                      limit.lift_π s' WalkingCospan.right
+                    ext y
+                    constructor
+                    · rintro ⟨z, hz, hyz⟩
+                      simpa [hyz] using hz
+                    · intro hy
+                      refine ⟨pullback.lift s.fst.base s.snd.base (congr_arg Hom.base s.condition) y, ?_, ?_⟩
+                      · simpa [s'] using (ConcreteCategory.congr_hom hs y).symm ▸ hy
+                      · exact ConcreteCategory.congr_hom hs y) =
+              𝟙 _ := by
+          rfl
+        convert congrArg (fun k => s.snd.c.app (op x) ≫ s.pt.presheaf.map k) h using 1
+        · rw [← s.pt.presheaf.map_comp]
+        · simp
+
+set_option backward.isDefEq.respectTransparency false in
+-- this lemma is not a `simp` lemma, because it is an implementation detail
+theorem pullbackConeOfLeftLift_fst :
+    pullbackConeOfLeftLift f g s ≫ (pullbackConeOfLeft f g).fst = s.fst := by
+  apply (cancel_mono f).1
+  have h :
+      (pullbackConeOfLeft f g).fst ≫ f = (pullbackConeOfLeft f g).snd ≫ g := by
+    simpa [pullbackConeOfLeft] using pullback_cone_of_left_condition f g
+  rw [Category.assoc, h, ← Category.assoc, pullbackConeOfLeftLift_snd, s.condition]
 
 set_option backward.isDefEq.respectTransparency false in
 instance pullbackConeSndIsOpenImmersion : IsOpenImmersion (pullbackConeOfLeft f g).snd := by
-  erw [CategoryTheory.Limits.PullbackCone.mk_snd]
-  infer_instance
+  simpa [pullbackConeOfLeft] using (inferInstance : IsOpenImmersion (Y.ofRestrict _))
 
 /-- The constructed pullback cone is indeed the pullback. -/
 def pullbackConeOfLeftIsLimit : IsLimit (pullbackConeOfLeft f g) := by
@@ -1123,11 +1219,15 @@ theorem pullback_snd_isIso_of_range_subset (H' : Set.range g.base ⊆ Set.range 
     (F := LocallyRingedSpace.forgetToSheafedSpace)
   apply +allowSynthFailures Functor.ReflectsIsomorphisms.reflects
     (F := SheafedSpace.forgetToPresheafedSpace)
-  erw [← PreservesPullback.iso_hom_snd
-      (LocallyRingedSpace.forgetToSheafedSpace ⋙ SheafedSpace.forgetToPresheafedSpace) f g]
-  -- Porting note: was `inferInstance`
-  exact IsIso.comp_isIso' inferInstance <|
-    PresheafedSpace.IsOpenImmersion.pullback_snd_isIso_of_range_subset _ _ H'
+  convert
+      (IsIso.comp_isIso'
+        (f := (PreservesPullback.iso
+          (LocallyRingedSpace.forgetToSheafedSpace ⋙ SheafedSpace.forgetToPresheafedSpace) f g).hom)
+        inferInstance
+        (PresheafedSpace.IsOpenImmersion.pullback_snd_isIso_of_range_subset _ _ H')) using 1
+  symm
+  exact PreservesPullback.iso_hom_snd
+    (LocallyRingedSpace.forgetToSheafedSpace ⋙ SheafedSpace.forgetToPresheafedSpace) f g
 
 /-- The universal property of open immersions:
 For an open immersion `f : X ⟶ Z`, given any morphism of schemes `g : Y ⟶ Z` whose topological
