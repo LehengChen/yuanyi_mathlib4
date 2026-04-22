@@ -107,10 +107,10 @@ lemma shiftFunctorAdd'_op_hom_app (X : Cᵒᵖ) (a₁ a₂ a₃ : ℤ) (h : a₁
         ((shiftFunctorAdd' C b₁ b₂ b₃ (by lia)).inv.app X.unop).op ≫
         (shiftFunctorOpIso C _ _ h₂).inv.app _ ≫
         (shiftFunctor Cᵒᵖ a₂).map ((shiftFunctorOpIso C _ _ h₁).inv.app X) := by
-  erw [@pullbackShiftFunctorAdd'_hom_app (OppositeShift C ℤ) _ _ _ _ _ _ _ X
-    a₁ a₂ a₃ h b₁ b₂ b₃ (by dsimp; lia) (by dsimp; lia) (by dsimp; lia)]
-  rw [oppositeShiftFunctorAdd'_hom_app]
-  rfl
+  exact by
+    simpa [oppositeShiftFunctorAdd'_hom_app] using
+      (@pullbackShiftFunctorAdd'_hom_app (OppositeShift C ℤ) _ _ _ _ _ _ _ X
+        a₁ a₂ a₃ h b₁ b₂ b₃ (by dsimp; lia) (by dsimp; lia) (by dsimp; lia))
 
 set_option backward.isDefEq.respectTransparency false in
 lemma shiftFunctorAdd'_op_inv_app (X : Cᵒᵖ) (a₁ a₂ a₃ : ℤ) (h : a₁ + a₂ = a₃)
@@ -123,8 +123,8 @@ lemma shiftFunctorAdd'_op_inv_app (X : Cᵒᵖ) (a₁ a₂ a₃ : ℤ) (h : a₁
   rw [← cancel_epi ((shiftFunctorAdd' Cᵒᵖ a₁ a₂ a₃ h).hom.app X), Iso.hom_inv_id_app,
     shiftFunctorAdd'_op_hom_app X a₁ a₂ a₃ h b₁ b₂ b₃ h₁ h₂ h₃,
     assoc, assoc, assoc, ← Functor.map_comp_assoc, Iso.inv_hom_id_app]
-  erw [Functor.map_id, id_comp, Iso.inv_hom_id_app_assoc]
-  rw [← op_comp_assoc, Iso.hom_inv_id_app, op_id, id_comp, Iso.hom_inv_id_app]
+  apply Quiver.Hom.unop_inj
+  simp [shiftFunctorOpIso]
 
 lemma shiftFunctor_op_map {K L : Cᵒᵖ} (φ : K ⟶ L) (n m : ℤ) (hnm : n + m = 0 := by lia) :
     (shiftFunctor Cᵒᵖ n).map φ =
@@ -148,10 +148,45 @@ def opShiftFunctorEquivalence (n : ℤ) : Cᵒᵖ ≌ Cᵒᵖ where
     NatIso.op (shiftFunctorCompIsoId C n (-n) n.add_right_neg).symm
   functor_unitIso_comp X := Quiver.Hom.unop_inj (by
     dsimp [shiftFunctorOpIso]
-    erw [comp_id, Functor.map_id, comp_id]
-    change (shiftFunctorCompIsoId C n (-n) (add_neg_cancel n)).inv.app (X.unop⟦-n⟧) ≫
-      ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop)⟦-n⟧' = 𝟙 _
-    rw [shift_shiftFunctorCompIsoId_neg_add_cancel_hom_app n X.unop, Iso.inv_hom_id_app])
+    rw [Functor.map_comp, unop_comp]
+    have htail :
+        𝟙
+            (Opposite.unop
+              ((shiftFunctor Cᵒᵖ n).obj
+                (Opposite.op ((shiftFunctor C n).obj (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)))))) ≫
+          ((shiftFunctor Cᵒᵖ n).map ((shiftFunctor C n).map (𝟙 ((shiftFunctor Cᵒᵖ n).obj X)).unop).op).unop ≫
+            ((shiftFunctor Cᵒᵖ n).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop).op).unop =
+          (shiftFunctor C (-n)).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop) := by
+      have hcomp :
+          ((shiftFunctor Cᵒᵖ n).map ((shiftFunctor C n).map (𝟙 ((shiftFunctor Cᵒᵖ n).obj X)).unop).op).unop ≫
+              ((shiftFunctor Cᵒᵖ n).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop).op).unop =
+            (shiftFunctor C (-n)).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop) := by
+        have hcomp' :
+            ((shiftFunctor Cᵒᵖ n).map ((shiftFunctor C n).map (𝟙 ((shiftFunctor Cᵒᵖ n).obj X)).unop).op).unop ≫
+                ((shiftFunctor Cᵒᵖ n).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop).op).unop =
+              𝟙 _ ≫ ((shiftFunctor Cᵒᵖ n).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop).op).unop := by
+          simp
+        have hcomp'' :
+            𝟙 _ ≫ ((shiftFunctor Cᵒᵖ n).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop).op).unop =
+              (shiftFunctor C (-n)).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop) := by
+          simp
+          apply Quiver.Hom.op_inj
+          rfl
+        exact hcomp'.trans hcomp''
+      simpa [Category.assoc] using hcomp
+    have hmain :
+        (shiftFunctorCompIsoId C n (-n) (add_neg_cancel n)).inv.app (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)) ≫
+          (shiftFunctor C (-n)).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop) = 𝟙 _ := by
+      have hshift := shift_shiftFunctorCompIsoId_neg_add_cancel_hom_app n X.unop
+      have hcomp :
+          (shiftFunctorCompIsoId C n (-n) (add_neg_cancel n)).inv.app (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)) ≫
+            (shiftFunctor C (-n)).map ((shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app X.unop) =
+          (shiftFunctorCompIsoId C n (-n) (add_neg_cancel n)).inv.app (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)) ≫
+            (shiftFunctorCompIsoId C n (-n) (add_neg_cancel n)).hom.app (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)) :=
+        congrArg ((shiftFunctorCompIsoId C n (-n) (add_neg_cancel n)).inv.app
+          (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)) ≫ ·) hshift
+      rw [hcomp, Iso.inv_hom_id_app]
+    simpa [Category.assoc, htail] using hmain)
 
 @[reassoc]
 lemma opShiftFunctorEquivalence_unitIso_hom_app (X : Cᵒᵖ) (n m : ℤ) (hnm : n + m = 0 := by lia) :
@@ -246,14 +281,35 @@ lemma opShiftFunctorEquivalence_add_unitIso_hom_app_eq
   simp only [shiftFunctorAdd'_op_inv_app _ n m p (by lia) _ _ _ (add_neg_cancel n)
     (add_neg_cancel m) (add_neg_cancel p), shiftFunctor_op_map _ m (-m),
     Category.assoc, Iso.inv_hom_id_app_assoc]
-  erw [Functor.map_id, Functor.map_id, Functor.map_id, Functor.map_id,
-    id_comp, id_comp, id_comp, comp_id, comp_id]
-  dsimp
-  rw [comp_id, shiftFunctorCompIsoId_add'_hom_app _ _ _ _ _ _
-    (neg_add_cancel m) (neg_add_cancel n) (neg_add_cancel p) h]
-  dsimp
-  rw [Category.assoc, Category.assoc]
-  rfl
+  apply Quiver.Hom.unop_inj
+  have hm : (shiftFunctor C n).map ((shiftFunctor C m).map (𝟙 ((shiftFunctor Cᵒᵖ p).obj X)).unop) = 𝟙 _ := by
+    simp
+  have hnm : (shiftFunctor C n).map
+      ((shiftFunctor C m).map ((shiftFunctor C (-m)).map (𝟙 (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X))))) = 𝟙 _ := by
+    simp
+  have hmn : (shiftFunctor C n).map
+      ((shiftFunctor C m).map (𝟙 ((shiftFunctor Cᵒᵖ m).obj ((shiftFunctor Cᵒᵖ n).obj X))).unop) = 𝟙 _ := by
+    simp
+  have hn : (shiftFunctor C n).map (𝟙 ((shiftFunctor Cᵒᵖ n).obj X)).unop = 𝟙 _ := by
+    simp
+  simp [shiftFunctorOpIso, shiftFunctorCompIsoId_add'_hom_app _ _ _ _ _ _
+    (neg_add_cancel m) (neg_add_cancel n) (neg_add_cancel p) h, hm, hnm, hmn, hn,
+    Category.assoc]
+  let A := (shiftFunctor C n).map
+    ((shiftFunctor C m).map ((shiftFunctorAdd' C (-n) (-m) (-p) (by omega)).hom.app (Opposite.unop X)))
+  let G := (shiftFunctor C n).map
+    ((shiftFunctorCompIsoId C (-m) m (neg_add_cancel m)).hom.app ((shiftFunctor C (-n)).obj (Opposite.unop X)))
+  let G' := (shiftFunctor C n).map
+    ((shiftFunctorCompIsoId C (-m) m (neg_add_cancel m)).hom.app (Opposite.unop ((shiftFunctor Cᵒᵖ n).obj X)))
+  let H := (shiftFunctorCompIsoId C (-n) n (neg_add_cancel n)).hom.app (Opposite.unop X)
+  have hgg : G = G' := by
+    rfl
+  have hall : G ≫ H = 𝟙 _ ≫ G' ≫ H := by
+    rw [hgg]
+    suffices G' ≫ H = 𝟙 _ ≫ G' ≫ H by
+      simpa using this
+    simp
+  exact congrArg (fun k => A ≫ k) hall
 
 set_option backward.isDefEq.respectTransparency false in
 lemma opShiftFunctorEquivalence_add_unitIso_inv_app_eq
