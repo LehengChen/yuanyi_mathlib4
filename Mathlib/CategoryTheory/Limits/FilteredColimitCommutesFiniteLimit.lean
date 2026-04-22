@@ -370,7 +370,7 @@ variable {K : Type u₂} [Category.{v₂} K]
 variable [HasLimitsOfShape J C] [HasColimitsOfShape K C]
 variable [PreservesLimitsOfShape J (colim : (K ⥤ C) ⥤ _)]
 
-/-- A curried version of the fact that filtered colimits commute with finite limits. -/
+/-- A curried version of the isomorphism `colimit (limit F) ≅ limit (colimit F.flip)`. -/
 noncomputable def colimitLimitIso (F : J ⥤ K ⥤ C) : colimit (limit F) ≅ limit (colimit F.flip) :=
   (isLimitOfPreserves colim (limit.isLimit _)).conePointUniqueUpToIso (limit.isLimit _) ≪≫
     HasLimit.isoOfNatIso (colimitFlipIsoCompColim _).symm
