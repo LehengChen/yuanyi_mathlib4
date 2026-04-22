@@ -10,7 +10,7 @@ public import Mathlib.CategoryTheory.Monoidal.Transport
 
 /-!
 
-# Transport a symmetric monoidal structure along an equivalence of categories
+# Transport braided and symmetric monoidal structures along an equivalence of categories
 -/
 
 @[expose] public section
