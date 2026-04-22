@@ -101,8 +101,8 @@ instance finite_colimitType {J : Type} [SmallCategory J] [FinCategory J]
     (K : J ⥤ Type*) [∀ j, Finite (K.obj j)] : Finite K.ColimitType :=
   Quot.finite _
 
-/-- Any functor from a finite category to `Type*` that only involves finite objects,
-has a finite colimit. -/
+/-- If `c` is a colimit cocone for a functor from a finite category to `Type*` that only
+involves finite objects, then `c.pt` is finite. -/
 lemma finite_of_isColimit {J : Type} [SmallCategory J] [FinCategory J]
     {K : J ⥤ Type*} [∀ j, Finite (K.obj j)] {c : Cocone K} (hc : IsColimit c) :
     Finite c.pt :=
