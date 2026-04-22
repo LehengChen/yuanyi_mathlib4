@@ -205,14 +205,25 @@ noncomputable def isLimit : IsLimit (cone f) where
       rw [cone_π_app_comp_Pi_π_neg f _ _ h]
       simp only [dite_eq_ite, Functor.ofOpSequence_obj, limit.lift_π_assoc, Fan.mk_pt,
         Discrete.functor_obj_eq_as, Fan.mk_π_app, Category.assoc]
-      slice_lhs 2 4 => erw [← functorMap_commSq f h]
+      have hcomm :
+          (Functor.ofOpSequence (functorMap f)).map (homOfLE (by lia : n ≤ m + 1)).op ≫
+            Pi.π (fun i ↦ if i < n then M i else N i) m ≫
+              eqToHom (functorObj_eq_neg (by lia : ¬(m < n))) =
+            Pi.π (fun i ↦ if i < m + 1 then M i else N i) m ≫
+              eqToHom (functorObj_eq_pos (by lia : m < m + 1)) ≫ f m := by
+        exact functorMap_commSq f h
+      slice_lhs 2 4 => rw [← hcomm]
       simp
   uniq s m h := by
     apply Pi.hom_ext
     intro n
     simp only [Functor.ofOpSequence_obj, dite_eq_ite, limit.lift_π, Fan.mk_pt,
       Fan.mk_π_app, ← h ⟨n + 1⟩, Category.assoc]
-    slice_rhs 2 3 => erw [cone_π_app_comp_Pi_π_pos f (n + 1) _ (by lia)]
+    have hπ :
+        (cone f).π.app ⟨n + 1⟩ ≫ Pi.π (fun i ↦ if i < n + 1 then M i else N i) n =
+          Pi.π M n ≫ eqToHom (functorObj_eq_pos (by lia : n < n + 1)).symm := by
+      exact cone_π_app_comp_Pi_π_pos f (n + 1) n (by lia)
+    slice_rhs 2 3 => rw [hπ]
     simp
 
 section
