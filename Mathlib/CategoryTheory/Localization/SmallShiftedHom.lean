@@ -211,9 +211,11 @@ lemma equiv_shift {a : M} [HasSmallLocalizedShiftedHom.{w} W M X Y]
     equiv W L (f.shift n a' h) = (L.commShiftIso n).hom.app X ≫ (equiv W L f)⟦n⟧' ≫
       (shiftFunctorAdd' D a n a' h).inv.app (L.obj Y) := by
   dsimp [equiv]
-  erw [equiv_shift']
-  simp only [Functor.comp_obj, assoc, Iso.inv_hom_id_app, comp_id, Functor.map_comp]
-  rfl
+  exact (congrArg (fun k => k ≫ (L.commShiftIso a').hom.app Y)
+      (equiv_shift' (W := W) (L := L) (f := f) (n := n) (a' := a') (h := h))).trans
+    (by
+      simp only [Functor.comp_obj, assoc, Iso.inv_hom_id_app, comp_id, Functor.map_comp]
+      rfl)
 
 set_option backward.isDefEq.respectTransparency false in
 lemma equiv_comp [HasSmallLocalizedShiftedHom.{w} W M X Y]
@@ -222,10 +224,12 @@ lemma equiv_comp [HasSmallLocalizedShiftedHom.{w} W M X Y]
     (f : SmallShiftedHom.{w} W X Y a) (g : SmallShiftedHom.{w} W Y Z b) (h : b + a = c) :
     equiv W L (f.comp g h) = (equiv W L f).comp (equiv W L g) h := by
   dsimp [comp, equiv, ShiftedHom.comp]
-  erw [SmallHom.equiv_comp]
-  simp only [equiv_shift', Functor.comp_obj, assoc, Iso.inv_hom_id_app,
-    comp_id, Functor.map_comp]
-  rfl
+  exact (congrArg (fun k => k ≫ (L.commShiftIso c).hom.app Z)
+      (SmallHom.equiv_comp (W := W) (L := L) (α := f) (β := g.shift a c h))).trans
+    (by
+      simp only [equiv_shift', Functor.comp_obj, assoc, Iso.inv_hom_id_app,
+        comp_id, Functor.map_comp]
+      rfl)
 
 end
 
@@ -244,10 +248,13 @@ lemma equiv_mk₀ [HasSmallLocalizedShiftedHom.{w} W M X Y]
       ShiftedHom.mk₀ m₀ hm₀ (L.map f) := by
   subst hm₀
   dsimp [equiv, mk₀]
-  erw [SmallHom.equiv_mk, Functor.map_comp]
-  dsimp [equiv, mk₀, ShiftedHom.mk₀, shiftFunctorZero']
-  simp only [comp_id, L.commShiftIso_zero, Functor.CommShift.isoZero_hom_app, assoc,
-    ← Functor.map_comp_assoc, Iso.inv_hom_id_app, Functor.id_obj, Functor.map_id, id_comp]
+  exact (congrArg (fun k => k ≫ (L.commShiftIso (0 : M)).hom.app Y)
+      (SmallHom.equiv_mk (W := W) (L := L) (f := ShiftedHom.mk₀ (0 : M) rfl f))).trans
+    (by
+      dsimp [equiv, mk₀, ShiftedHom.mk₀, shiftFunctorZero']
+      simp only [Functor.map_comp, comp_id, L.commShiftIso_zero,
+        Functor.CommShift.isoZero_hom_app, assoc, ← Functor.map_comp_assoc,
+        Iso.inv_hom_id_app, Functor.id_obj, Functor.map_id, id_comp])
 
 @[simp]
 lemma equiv_mk₀Inv [HasSmallLocalizedShiftedHom.{w} W M Y X] [W.RespectsIso]
