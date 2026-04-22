@@ -37,22 +37,20 @@ class Balanced : Prop where
 
 end
 
-theorem isIso_of_mono_of_epi [Balanced Cᵒᵖ] {X Y : C} (f : X ⟶ Y) [Mono f] [Epi f] :
-    IsIso f := by
-  rw [← isIso_op_iff]
-  exact Balanced.isIso_of_mono_of_epi f.op
+theorem isIso_of_mono_of_epi [Balanced C] {X Y : C} (f : X ⟶ Y) [Mono f] [Epi f] : IsIso f :=
+  Balanced.isIso_of_mono_of_epi _
 
-theorem isIso_iff_mono_and_epi [Balanced Cᵒᵖ] {X Y : C} (f : X ⟶ Y) :
-    IsIso f ↔ Mono f ∧ Epi f :=
+theorem isIso_iff_mono_and_epi [Balanced C] {X Y : C} (f : X ⟶ Y) : IsIso f ↔ Mono f ∧ Epi f :=
   ⟨fun _ => ⟨inferInstance, inferInstance⟩, fun ⟨_, _⟩ => isIso_of_mono_of_epi _⟩
 
 section
 
+attribute [local instance] isIso_of_mono_of_epi
+
 instance balanced_opposite [Balanced C] : Balanced Cᵒᵖ :=
-  { isIso_of_mono_of_epi := fun f _ _ => by
-      haveI : IsIso f.unop := Balanced.isIso_of_mono_of_epi f.unop
+  { isIso_of_mono_of_epi := fun f fmono fepi => by
       rw [← Quiver.Hom.op_unop f]
-      infer_instance }
+      exact isIso_of_op _ }
 
 end
 

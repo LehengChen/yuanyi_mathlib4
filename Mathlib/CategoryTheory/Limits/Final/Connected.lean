@@ -25,34 +25,30 @@ universe w v v' u u'
 namespace CategoryTheory
 
 variable {C : Type u} [Category.{v} C] {D : Type u'} [Category.{v'} D]
-  {T : Type w} [Subsingleton T]
+  {T : Type w} [Unique T]
 
-lemma isConnected_iff_final_of_unique (F : C ⥤ Discrete T) [Nonempty T] :
+lemma isConnected_iff_final_of_unique (F : C ⥤ Discrete T) :
     IsConnected C ↔ F.Final := by
-  obtain ⟨t⟩ := (inferInstance : Nonempty T)
   rw [← isConnected_iff_of_equivalence
-    (Discrete.structuredArrowEquivalenceOfUnique F t)]
+    (Discrete.structuredArrowEquivalenceOfUnique F default)]
   refine ⟨fun _ ↦ ⟨?_⟩, fun _ ↦ inferInstance⟩
   rintro ⟨d⟩
-  obtain rfl := Subsingleton.elim d t
+  obtain rfl := Subsingleton.elim d default
   infer_instance
 
-lemma isConnected_iff_initial_of_unique (F : C ⥤ Discrete T) [Nonempty T] :
+lemma isConnected_iff_initial_of_unique (F : C ⥤ Discrete T) :
     IsConnected C ↔ F.Initial := by
-  obtain ⟨t⟩ := (inferInstance : Nonempty T)
   rw [← isConnected_iff_of_equivalence
-    (Discrete.costructuredArrowEquivalenceOfUnique F t)]
+    (Discrete.costructuredArrowEquivalenceOfUnique F default)]
   refine ⟨fun _ ↦ ⟨?_⟩, fun _ ↦ inferInstance⟩
   rintro ⟨d⟩
-  obtain rfl := Subsingleton.elim d t
+  obtain rfl := Subsingleton.elim d default
   infer_instance
 
 instance (F : C ⥤ Discrete T) [IsConnected C] : F.Final := by
-  haveI : Nonempty T := Nonempty.map (fun X ↦ (F.obj X).as) (inferInstance : Nonempty C)
   rwa [← isConnected_iff_final_of_unique F]
 
 instance (F : C ⥤ Discrete T) [IsConnected C] : F.Initial := by
-  haveI : Nonempty T := Nonempty.map (fun X ↦ (F.obj X).as) (inferInstance : Nonempty C)
   rwa [← isConnected_iff_initial_of_unique F]
 
 instance final_fst [IsConnected D] : (Prod.fst C D).Final :=

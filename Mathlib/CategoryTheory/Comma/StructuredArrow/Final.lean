@@ -31,15 +31,17 @@ section Small
 variable {A : Type u₁} [SmallCategory A] {B : Type u₁} [SmallCategory B]
 variable {T : Type u₁} [SmallCategory T]
 
+attribute [local instance] Grothendieck.final_map
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The version of `final_of_final_costructuredArrowToOver` on small categories used to prove the
 full statement. -/
-private lemma final_of_final_costructuredArrowToOver_small (L : A ⥤ T) (R : B ⥤ T)
-    [Final (Grothendieck.pre (functor L) R)]
-    [Final (Grothendieck.map (whiskerLeft R (preFunctor L (𝟭 T))))]
-    [Final (Grothendieck.pre (functor (𝟭 T)) R)] : Final L := by
+private lemma final_of_final_costructuredArrowToOver_small (L : A ⥤ T) (R : B ⥤ T) [Final R]
+    [∀ b : B, Final (CostructuredArrow.toOver L (R.obj b))] : Final L := by
   rw [final_iff_isIso_colimit_pre]
   intro G
+  have : ∀ (b : B), Final ((whiskerLeft R (preFunctor L (𝟭 T))).app b).toFunctor := fun b =>
+    inferInstanceAs (Final (CostructuredArrow.toOver L (R.obj b)))
   let i : colimit (L ⋙ G) ≅ colimit G :=
     calc colimit (L ⋙ G) ≅ colimit <| grothendieckProj L ⋙ L ⋙ G :=
             colimitIsoColimitGrothendieck L (L ⋙ G)
@@ -76,7 +78,7 @@ theorem final_of_final_costructuredArrowToOver (L : A ⥤ T) (R : B ⥤ T) [Fina
   let sT : T ≌ AsSmall.{max u₁ u₂ u₃ v₁ v₂ v₃} T := AsSmall.equiv
   let L' := sA.inverse ⋙ L ⋙ sT.functor
   let R' := sB.inverse ⋙ R ⋙ sT.functor
-  haveI : ∀ b : _, (CostructuredArrow.toOver L' (R'.obj b)).Final := fun b => by
+  have (b : _) : (CostructuredArrow.toOver L' (R'.obj b)).Final := by
     dsimp only [L', R', CostructuredArrow.toOver] at hB ⊢
     let x := (sB.inverse ⋙ R ⋙ sT.functor).obj b
     let F'' : CostructuredArrow (sA.inverse ⋙ L ⋙ sT.functor) x ⥤ CostructuredArrow (𝟭 _) x :=
@@ -85,10 +87,6 @@ theorem final_of_final_costructuredArrowToOver (L : A ⥤ T) (R : B ⥤ T) [Fina
     apply final_of_natIso (F := F'')
     have hsT (X) : sT.counitInv.app X = 𝟙 _ := rfl
     exact NatIso.ofComponents (fun X => CostructuredArrow.isoMk (Iso.refl _) (by simp [F'', hsT]))
-  haveI : ∀ (b : _), Final ((whiskerLeft R' (preFunctor L' (𝟭 _))).app b).toFunctor :=
-    fun b => inferInstanceAs (Final (CostructuredArrow.toOver L' (R'.obj b)))
-  haveI : Final (Grothendieck.map (whiskerLeft R' (preFunctor L' (𝟭 _)))) :=
-    Grothendieck.final_map _
   have := final_of_final_costructuredArrowToOver_small L' R'
   apply final_of_natIso (F := (sA.functor ⋙ L' ⋙ sT.inverse))
   exact (sA.functor.associator (sA.inverse ⋙ L ⋙ sT.functor) sT.inverse).symm ≪≫
