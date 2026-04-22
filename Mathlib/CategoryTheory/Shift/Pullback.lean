@@ -96,8 +96,8 @@ lemma pullbackShiftFunctorZero'_inv_app :
       (pullbackShiftIso C φ 0 (φ 0) rfl).inv.app X := by
   rw [pullbackShiftFunctorZero_inv_app]
   simp only [Functor.id_obj, pullbackShiftIso, eqToIso.inv, eqToHom_app, shiftFunctorZero',
-    Iso.trans_inv, NatTrans.comp_app, eqToIso_refl, Iso.refl_inv, NatTrans.id_app, assoc]
-  erw [comp_id]
+    Iso.trans_inv, NatTrans.comp_app, assoc]
+  simp only [eqToHom_refl, comp_id]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma pullbackShiftFunctorZero'_hom_app :
@@ -115,15 +115,24 @@ lemma pullbackShiftFunctorAdd'_inv_app :
         (pullbackShiftIso C φ a₃ b₃ h₃).inv.app X := by
   subst h₁ h₂ h
   obtain rfl : b₃ = φ a₁ + φ a₂ := by rw [h₃, φ.map_add]
-  simp only [Functor.comp_obj, NatTrans.naturality_assoc]
-  erw [Functor.map_id, id_comp, id_comp, shiftFunctorAdd'_eq_shiftFunctorAdd,
+  have hcore :
+      (shiftFunctorAdd (PullbackShift C φ) a₁ a₂).inv.app X =
+        (shiftFunctorAdd C (φ a₁) (φ a₂)).inv.app X ≫
+          (pullbackShiftIso C φ (a₁ + a₂) (φ a₁ + φ a₂) h₃).inv.app X := by
+    dsimp [shiftFunctorAdd, pullbackShiftIso, shiftFunctor]
+    change _ ≫ _ = _
+    congr 1
+    rw [Discrete.addMonoidalFunctor_μ]
+    dsimp [Discrete.eqToHom]
+    congr 2
+    apply eqToHom_map
+  simp only [Functor.comp_obj, pullbackShiftIso, eqToIso.hom, eqToIso.inv, eqToHom_app,
     shiftFunctorAdd'_eq_shiftFunctorAdd]
-  change _ ≫ _ = _
-  congr 1
-  rw [Discrete.addMonoidalFunctor_μ]
-  dsimp [Discrete.eqToHom]
-  congr 2
-  apply eqToHom_map
+  simp only [eqToHom_map, eqToHom_trans_assoc]
+  (convert hcore using 1; simp only [pullbackShiftIso, eqToIso.inv, eqToHom_app])
+  case h.e'_3.h e =>
+    exact eq_of_heq (eqToHom_comp_heq ((shiftFunctorAdd C (φ a₁) (φ a₂)).inv.app X ≫ eqToHom _)
+      _)
 
 set_option backward.isDefEq.respectTransparency false in
 lemma pullbackShiftFunctorAdd'_hom_app :
