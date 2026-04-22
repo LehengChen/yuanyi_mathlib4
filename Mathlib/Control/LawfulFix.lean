@@ -176,12 +176,10 @@ def toUnitMono (f : Part α →o Part α) : (Unit → Part α) →o Unit → Par
   monotone' x y (h : x ≤ y) u := f.monotone <| h u
 
 theorem ωScottContinuous_toUnitMono (f : Part α → Part α) (hc : ωScottContinuous f) :
-    ωScottContinuous (toUnitMono ⟨f,hc.monotone⟩) := .of_map_ωSup_of_orderHom fun _ => by
-  ext ⟨⟩ : 1
-  dsimp [OmegaCompletePartialOrder.ωSup]
-  erw [hc.map_ωSup]
-  rw [Chain.map_comp]
-  rfl
+    ωScottContinuous (toUnitMono ⟨f,hc.monotone⟩) := by
+  refine ωScottContinuous.of_apply₂ ?_
+  intro u
+  exact hc.comp (ωScottContinuous.apply u)
 
 noncomputable instance lawfulFix : LawfulFix (Part α) :=
   ⟨fun {f : Part α → Part α} hc ↦ show Part.fix (toUnitMono ⟨f,hc.monotone⟩) () = _ by
@@ -261,7 +259,7 @@ instance lawfulFix' [LawfulFix <| (x : Sigma β) → γ x.1 x.2] :
     LawfulFix ((x y : _) → γ x y) where
   fix_eq {_f} hc := by
     dsimp [fix]
-    conv_lhs => erw [LawfulFix.fix_eq (uncurry_curry_ωScottContinuous hc)]
-    rfl
+    have hfix := LawfulFix.fix_eq (f := uncurry ∘ _f ∘ curry) (uncurry_curry_ωScottContinuous hc)
+    exact congrArg curry hfix
 
 end Pi
