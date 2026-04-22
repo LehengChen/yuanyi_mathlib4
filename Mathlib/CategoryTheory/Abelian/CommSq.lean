@@ -65,9 +65,9 @@ v    v
 X₃ ⟶ X₄
 ```
 the morphism `X₂ ⊞ X₃ ⟶ X₄` is an epimorphism. This lemma translates this
-as the existence of liftings up to refinements: a morphism `z : T ⟶ X₄`
-can be written as a sum of a morphism to `X₂` and a morphism to `X₃`,
-at least if we allow a precomposition with an epimorphism `π : T' ⟶ T`. -/
+as the existence of liftings up to refinements: a morphism `x₄ : T ⟶ X₄`
+can be written, after precomposing with an epimorphism `π : T' ⟶ T`, as
+the sum `x₂ ≫ r + x₃ ≫ b` of composites through `X₂` and `X₃`. -/
 lemma hom_eq_add_up_to_refinements (h : IsPushout t l r b) {T : C} (x₄ : T ⟶ X₄) :
     ∃ (T' : C) (π : T' ⟶ T) (_ : Epi π) (x₂ : T' ⟶ X₂) (x₃ : T' ⟶ X₃),
       π ≫ x₄ = x₂ ≫ r + x₃ ≫ b := by
