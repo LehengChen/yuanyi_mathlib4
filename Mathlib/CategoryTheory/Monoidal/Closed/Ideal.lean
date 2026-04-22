@@ -269,36 +269,130 @@ noncomputable def bijection (A B : C) (X : D) :
 set_option backward.isDefEq.respectTransparency false in
 theorem bijection_symm_apply_id (A B : C) :
     (bijection i A B _).symm (𝟙 _) = prodComparison _ _ _ := by
+  have hunit :
+      (reflectorAdjunction i).unit.app (A ⊗ B) ≫ prodComparison (reflector i ⋙ i) A B =
+        ((reflectorAdjunction i).unit.app A ⊗ₘ (reflectorAdjunction i).unit.app B) := by
+    apply hom_ext
+    · rw [Category.assoc, prodComparison_fst, tensorHom_fst]
+      simpa only [Functor.comp_map] using
+        ((reflectorAdjunction i).unit.naturality (fst A B)).symm
+    · rw [Category.assoc, prodComparison_snd, tensorHom_snd]
+      simpa only [Functor.comp_map] using
+        ((reflectorAdjunction i).unit.naturality (snd A B)).symm
   simp only [bijection, Equiv.trans_def, curriedTensor_obj_obj, Equiv.symm_trans_apply,
     Equiv.symm_symm, Functor.FullyFaithful.homEquiv_apply, Functor.map_id, Iso.homCongr_symm,
     Iso.symm_symm_eq, Iso.refl_symm, Iso.homCongr_apply, Iso.refl_hom, Category.comp_id,
     unitCompPartialBijective_symm_apply, Functor.id_obj, Functor.comp_obj, Iso.symm_inv]
-  -- Porting note: added
-  erw [homEquiv_symm_apply_eq, homEquiv_symm_apply_eq, homEquiv_apply_eq, homEquiv_apply_eq]
+  conv_lhs =>
+    enter [2, 2]
+    change uncurry
+      ((reflectorAdjunction i).unit.app A ≫
+        curry
+          ((β_ B (i.obj ((reflector i).obj A))).hom ≫
+            uncurry
+              ((reflectorAdjunction i).unit.app B ≫
+                curry (prodComparisonIso i ((reflector i).obj A) ((reflector i).obj B)).inv)))
   rw [uncurry_natural_left, uncurry_curry, uncurry_natural_left, uncurry_curry,
-    ← BraidedCategory.braiding_naturality_left_assoc, SymmetricCategory.symmetry_assoc,
-    ← MonoidalCategory.whisker_exchange_assoc, ← tensorHom_def'_assoc,
-    Adjunction.homEquiv_symm_apply, ← Adjunction.eq_unit_comp_map_iff, Iso.comp_inv_eq,
-    Category.assoc, prodComparisonIso_hom i ((reflector i).obj A) ((reflector i).obj B)]
-  apply hom_ext
-  · rw [tensorHom_fst, Category.assoc, Category.assoc, prodComparison_fst, ← i.map_comp,
-    prodComparison_fst]
-    apply (reflectorAdjunction i).unit.naturality
-  · rw [tensorHom_snd, Category.assoc, Category.assoc, prodComparison_snd, ← i.map_comp,
-    prodComparison_snd]
-    apply (reflectorAdjunction i).unit.naturality
+    ← BraidedCategory.braiding_naturality_left_assoc]
+  change ((reflectorAdjunction i).homEquiv (A ⊗ B) ((reflector i).obj A ⊗ (reflector i).obj B)).symm
+      ((reflectorAdjunction i).unit.app A ▷ B ≫
+        (β_ (i.obj ((reflector i).obj A)) B).hom ≫
+          (β_ B (i.obj ((reflector i).obj A))).hom ≫
+            i.obj ((reflector i).obj A) ◁ (reflectorAdjunction i).unit.app B ≫
+              (prodComparisonIso i ((reflector i).obj A) ((reflector i).obj B)).inv) =
+    prodComparison (reflector i) A B
+  rw [SymmetricCategory.symmetry_assoc]
+  rw [← Adjunction.eq_homEquiv_apply (reflectorAdjunction i)
+    (prodComparison (reflector i) A B)
+    ((reflectorAdjunction i).unit.app A ▷ B ≫
+      i.obj ((reflector i).obj A) ◁ (reflectorAdjunction i).unit.app B ≫
+        (prodComparisonIso i ((reflector i).obj A) ((reflector i).obj B)).inv)]
+  rw [Adjunction.homEquiv_unit]
+  have hpc :
+      (reflectorAdjunction i).unit.app A ▷ B ≫
+          i.obj ((reflector i).obj A) ◁ (reflectorAdjunction i).unit.app B ≫
+            (prodComparisonIso i ((reflector i).obj A) ((reflector i).obj B)).inv ≫
+              (prodComparisonIso i ((reflector i).obj A) ((reflector i).obj B)).hom =
+        (reflectorAdjunction i).unit.app A ▷ B ≫
+          i.obj ((reflector i).obj A) ◁ (reflectorAdjunction i).unit.app B := by
+    rw [Iso.inv_hom_id, Category.comp_id]
+  refine (cancel_mono (prodComparisonIso i ((reflector i).obj A) ((reflector i).obj B)).hom).1 ?_
+  rw [Category.assoc, Category.assoc, hpc, Category.assoc, prodComparisonIso_hom,
+    ← prodComparison_comp]
+  simpa [tensorHom_def] using hunit.symm
 
 set_option backward.isDefEq.respectTransparency false in
 theorem bijection_natural (A B : C) (X X' : D) (f : (reflector i).obj (A ⊗ B) ⟶ X) (g : X ⟶ X') :
     bijection i _ _ _ (f ≫ g) = bijection i _ _ _ f ≫ g := by
   dsimp [bijection]
-  -- Porting note: added
-  erw [homEquiv_symm_apply_eq, homEquiv_symm_apply_eq, homEquiv_apply_eq, homEquiv_apply_eq,
-    homEquiv_symm_apply_eq, homEquiv_symm_apply_eq, homEquiv_apply_eq, homEquiv_apply_eq]
   apply i.map_injective
   rw [Functor.FullyFaithful.map_preimage, i.map_comp,
     Adjunction.homEquiv_unit, Adjunction.homEquiv_unit]
   simp only [Category.comp_id, Functor.map_comp, Functor.FullyFaithful.map_preimage, Category.assoc]
+  conv_lhs =>
+    enter [2]
+    change uncurry
+      ((unitCompPartialBijective B (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+        (((ihom.adjunction (i.obj ((reflector i).obj A))).homEquiv B (i.obj X'))
+          ((β_ B (i.obj ((reflector i).obj A))).inv ≫
+            ((ihom.adjunction B).homEquiv (i.obj ((reflector i).obj A)) (i.obj X')).symm
+              ((unitCompPartialBijective A (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+                (((ihom.adjunction B).homEquiv A (i.obj X'))
+                  ((β_ A B).inv ≫
+                    (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f ≫ i.map g))))))
+  conv_lhs =>
+    enter [2, 1, 2]
+    change curry
+      ((β_ B (i.obj ((reflector i).obj A))).inv ≫
+        ((ihom.adjunction B).homEquiv (i.obj ((reflector i).obj A)) (i.obj X')).symm
+          ((unitCompPartialBijective A (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+            (((ihom.adjunction B).homEquiv A (i.obj X'))
+              ((β_ A B).inv ≫
+                (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f ≫ i.map g))))
+  conv_lhs =>
+    enter [2, 1, 2, 1, 2]
+    change uncurry
+      ((unitCompPartialBijective A (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+        (((ihom.adjunction B).homEquiv A (i.obj X'))
+          ((β_ A B).inv ≫
+            (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f ≫ i.map g)))
+  conv_lhs =>
+    enter [2, 1, 2, 1, 2, 1, 2]
+    change curry
+      ((β_ A B).inv ≫
+        (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f ≫ i.map g)
+  conv_rhs =>
+    enter [2, 1]
+    change uncurry
+      ((unitCompPartialBijective B (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+        (((ihom.adjunction (i.obj ((reflector i).obj A))).homEquiv B (i.obj X))
+          ((β_ B (i.obj ((reflector i).obj A))).inv ≫
+            ((ihom.adjunction B).homEquiv (i.obj ((reflector i).obj A)) (i.obj X)).symm
+              ((unitCompPartialBijective A (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+                (((ihom.adjunction B).homEquiv A (i.obj X))
+                  ((β_ A B).inv ≫
+                    (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f))))))
+  conv_rhs =>
+    enter [2, 1, 1, 2]
+    change curry
+      ((β_ B (i.obj ((reflector i).obj A))).inv ≫
+        ((ihom.adjunction B).homEquiv (i.obj ((reflector i).obj A)) (i.obj X)).symm
+          ((unitCompPartialBijective A (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+            (((ihom.adjunction B).homEquiv A (i.obj X))
+              ((β_ A B).inv ≫
+                (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f))))
+  conv_rhs =>
+    enter [2, 1, 1, 2, 1, 2]
+    change uncurry
+      ((unitCompPartialBijective A (ExponentialIdeal.exp_closed (i.obj_mem_essImage _) _))
+        (((ihom.adjunction B).homEquiv A (i.obj X))
+          ((β_ A B).inv ≫
+            (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f)))
+  conv_rhs =>
+    enter [2, 1, 1, 2, 1, 2, 1, 2]
+    change curry
+      ((β_ A B).inv ≫
+        (reflectorAdjunction i).unit.app (A ⊗ B) ≫ i.map f)
   rw [← Category.assoc, ← Category.assoc, curry_natural_right _ (i.map g),
     unitCompPartialBijective_natural, uncurry_natural_right, ← Category.assoc, curry_natural_right,
     unitCompPartialBijective_natural, uncurry_natural_right, Category.assoc]
