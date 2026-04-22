@@ -90,13 +90,13 @@ instance : PreGaloisCategory (Action FintypeCat G) where
       (isColimitMapCoconeBinaryCofanEquiv (forget _) i _).symm
       (Types.isCoprodOfMono ((forget _).map i))⟩⟩
 
-/-- The forgetful functor from finite `G`-sets to sets is a `FiberFunctor`. -/
+/-- The forgetful functor from finite `G`-sets to finite sets is a `FiberFunctor`. -/
 noncomputable instance : FiberFunctor (Action.forget FintypeCat G) where
   preservesFiniteCoproducts := ⟨fun _ ↦ inferInstance⟩
   preservesQuotientsByFiniteGroups _ _ _ := inferInstance
   reflectsIsos := ⟨fun f (_ : IsIso f.hom) => inferInstance⟩
 
-/-- The forgetful functor from finite `G`-sets to sets is a `FiberFunctor`. -/
+/-- The forgetful functor from finite `G`-sets to finite sets is a `FiberFunctor`. -/
 noncomputable instance : FiberFunctor (forget₂ (Action FintypeCat G) FintypeCat) :=
   inferInstanceAs <| FiberFunctor (Action.forget FintypeCat G)
 
