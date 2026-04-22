@@ -83,19 +83,14 @@ noncomputable def isColimitOfMulticoequalizerDiagram
   apply _root_.Nonempty.some
   rw [Types.isColimit_iff_coconeTypesIsColimit,
     Functor.CoconeTypes.isMulticoequalizer_iff]
-  refine ⟨fun i₁ i₂ ⟨x₁, h₁⟩ ⟨x₂, h₂⟩ h ↦ ?_, fun ⟨x, hx⟩ ↦ ?_⟩
-  · dsimp at i₁ i₂ h₁ h₂
-    obtain rfl : x₁ = x₂ := by simpa using h
-    have eq₁ := e.ιColimitType_map (WalkingMultispan.Hom.fst (J := .prod ι) ⟨i₁, i₂⟩)
-      ⟨x₁, by dsimp; rw [c.eq_inf]; exact ⟨h₁, h₂⟩⟩
-    have eq₂ := e.ιColimitType_map (WalkingMultispan.Hom.snd (J := .prod ι) ⟨i₁, i₂⟩)
-      ⟨x₁, by dsimp; rw [c.eq_inf]; exact ⟨h₁, h₂⟩⟩
-    dsimp [e] at eq₁ eq₂
-    rw [eq₁, eq₂]
-  · simp only [MulticoequalizerDiagram.multicofork_pt, ← c.iSup_eq,
-      Set.iSup_eq_iUnion, Set.mem_iUnion] at hx
-    obtain ⟨i, hi⟩ := hx
-    exact ⟨i, ⟨x, hi⟩, rfl⟩
+  refine ⟨fun i₁ i₂ ⟨x₁, h₁⟩ ⟨x₂, h₂⟩ h ↦ ?_, ?_⟩
+  · obtain rfl : x₁ = x₂ := by simpa using h
+    exact (e.ιColimitType_map (WalkingMultispan.Hom.fst (J := .prod ι) ⟨i₁, i₂⟩)
+      ⟨x₁, by simpa [c.eq_inf] using ⟨h₁, h₂⟩⟩).trans
+      (e.ιColimitType_map (WalkingMultispan.Hom.snd (J := .prod ι) ⟨i₁, i₂⟩)
+      ⟨x₁, by simpa [c.eq_inf] using ⟨h₁, h₂⟩⟩).symm
+  · rintro ⟨x, hx⟩
+    simpa [MulticoequalizerDiagram.multicofork_pt, ← c.iSup_eq, Set.iSup_eq_iUnion] using hx
 
 /-- Let `X : Type u`, `A : Set X`, `U : ι → Set X` and `V : ι → ι → Set X` such
 that `MulticoequalizerDiagram A U V` holds, then in the category of types,

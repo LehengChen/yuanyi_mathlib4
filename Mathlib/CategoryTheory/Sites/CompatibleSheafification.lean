@@ -113,12 +113,7 @@ set_option backward.isDefEq.respectTransparency false in
 @[simp, reassoc]
 theorem whiskerRight_toSheafify_sheafifyCompIso_hom :
     whiskerRight (J.toSheafify _) _ ≫ (J.sheafifyCompIso F P).hom = J.toSheafify _ := by
-  dsimp [sheafifyCompIso]
-  erw [whiskerRight_comp, Category.assoc]
-  slice_lhs 2 3 => rw [plusCompIso_whiskerRight]
-  rw [Category.assoc, ← J.plusMap_comp, whiskerRight_toPlus_comp_plusCompIso_hom, ←
-    Category.assoc, whiskerRight_toPlus_comp_plusCompIso_hom]
-  rfl
+  simp [sheafifyCompIso, toSheafify, ← J.plusMap_comp]
 
 @[simp, reassoc]
 theorem toSheafify_comp_sheafifyCompIso_inv :

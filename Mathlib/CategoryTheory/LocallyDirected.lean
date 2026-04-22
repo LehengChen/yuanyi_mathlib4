@@ -59,15 +59,11 @@ instance (F : Discrete J ⥤ Type*) : F.IsLocallyDirected := by
 instance (F : WidePushoutShape J ⥤ Type*) [∀ i, Mono (F.map (.init i))] :
     F.IsLocallyDirected := by
   constructor
-  rintro i j k (_ | i) (_ | j)
-  · simp only [WidePushoutShape.hom_id, FunctorToTypes.map_id_apply, forall_eq']
-    exact fun x ↦ ⟨_, 𝟙 _, 𝟙 _, x, by simp⟩
-  · simp only [WidePushoutShape.hom_id, FunctorToTypes.map_id_apply, forall_comm, forall_eq]
-    exact fun x ↦ ⟨_, .init _, 𝟙 _, x, by simp⟩
-  · simp only [WidePushoutShape.hom_id, FunctorToTypes.map_id_apply, forall_eq']
-    exact fun x ↦ ⟨_, 𝟙 _, .init _, x, by simp⟩
-  · simp only [((CategoryTheory.mono_iff_injective (F.map (.init i))).mp inferInstance).eq_iff,
-      forall_eq']
-    exact fun x ↦ ⟨_, 𝟙 _, 𝟙 _, x, by simp⟩
+  rintro i j k (_ | i) (_ | j) xi xj h
+  · exact ⟨_, 𝟙 _, 𝟙 _, xi, by simpa using h⟩
+  · exact ⟨_, .init _, 𝟙 _, xj, by simpa using h.symm⟩
+  · exact ⟨_, 𝟙 _, .init _, xi, by simpa using h⟩
+  · exact ⟨_, 𝟙 _, 𝟙 _, xi,
+      by simp [CategoryTheory.injective_of_mono (F.map (.init i)) h]⟩
 
 end CategoryTheory

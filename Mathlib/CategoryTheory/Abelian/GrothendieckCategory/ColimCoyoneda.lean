@@ -6,6 +6,7 @@ Authors: Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.Subobject
+public import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Connected
 public import Mathlib.CategoryTheory.Limits.FunctorCategory.EpiMono
 public import Mathlib.CategoryTheory.MorphismProperty.Limits
 
@@ -180,21 +181,14 @@ include hc
 
 set_option backward.isDefEq.respectTransparency false in
 lemma isIso_f [IsFiltered J] : IsIso (f z) := by
-  refine ((MorphismProperty.isomorphisms C).arrow_mk_iso_iff ?_).1
-    (MorphismProperty.of_isPullback
-      ((IsPullback.of_hasPullback c.ι ((Functor.const _).map z)).map colim) ?_)
-  · refine Arrow.isoMk (Iso.refl _)
-      (IsColimit.coconePointUniqueUpToIso (colimit.isColimit _) (isColimitConstCocone J X)) ?_
-    dsimp
-    ext j
-    rw [Category.id_comp, ι_colimMap_assoc, colimit.comp_coconePointUniqueUpToIso_hom,
-      constCocone_ι, NatTrans.id_app, Category.comp_id]
-    apply hf
-  · refine ((MorphismProperty.isomorphisms C).arrow_mk_iso_iff ?_).2
-      ((inferInstance : IsIso (𝟙 c.pt)))
-    exact Arrow.isoMk (IsColimit.coconePointUniqueUpToIso (colimit.isColimit Y) hc)
-      (IsColimit.coconePointUniqueUpToIso (colimit.isColimit _)
-        (isColimitConstCocone J c.pt))
+  let t : Cocone (pullback c.ι ((Functor.const J).map z)) :=
+    Cocone.mk _ (pullback.snd c.ι ((Functor.const J).map z))
+  have ht : IsColimit t := hc.pullbackOfHasExactColimitsOfShape z
+  rw [show f z = ((colimit.isColimit _).coconePointUniqueUpToIso ht).hom by
+    simpa [f, t] using
+      (IsColimit.coconePointUniqueUpToIso_hom_desc
+        (P := colimit.isColimit _) (Q := ht) (r := t)).symm]
+  infer_instance
 
 lemma epi_f [IsFiltered J] : Epi (f z) := by
   have := isIso_f hc z

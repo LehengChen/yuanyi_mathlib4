@@ -161,12 +161,7 @@ theorem fac : W.Q ⋙ lift G hG = G :=
       rw [composePath_toPath])
 
 theorem uniq (G₁ G₂ : W.Localization ⥤ D) (h : W.Q ⋙ G₁ = W.Q ⋙ G₂) : G₁ = G₂ := by
-  suffices h' : Quotient.functor _ ⋙ G₁ = Quotient.functor _ ⋙ G₂ by
-    refine Functor.ext ?_ ?_
-    · rintro ⟨⟨X⟩⟩
-      apply Functor.congr_obj h
-    · rintro ⟨⟨X⟩⟩ ⟨⟨Y⟩⟩ ⟨f⟩
-      apply Functor.congr_hom h'
+  apply Quotient.lift_unique'
   refine Paths.ext_functor ?_ ?_
   · ext X
     cases X
@@ -210,20 +205,15 @@ theorem morphismProperty_eq_top (P : MorphismProperty W.Localization)
   · intro
     let G : _ ⥤ W.Localization := Quotient.functor _
     haveI : G.Full := Quotient.full_functor _
-    suffices ∀ (X₁ X₂ : Paths (LocQuiver W)) (f : X₁ ⟶ X₂), P (G.map f) by
-      rcases X with ⟨⟨X⟩⟩
-      rcases Y with ⟨⟨Y⟩⟩
-      simpa only [Functor.map_preimage] using this _ _ (G.preimage f)
-    intro X₁ X₂ p
-    induction p with
-    | nil => simpa only [Functor.map_id] using hP₁ (𝟙 X₁.obj)
-    | @cons X₂ X₃ p g hp =>
-      let p' : X₁ ⟶ X₂ := p
-      rw [show p'.cons g = p' ≫ Quiver.Hom.toPath g by rfl, G.map_comp]
-      refine P.comp_mem _ _ hp ?_
-      rcases g with (g | ⟨g, hg⟩)
-      · apply hP₁
-      · apply hP₂
+    have hPG : P.inverseImage G = ⊤ := by
+      apply Paths.morphismProperty_eq_top
+      · rintro ⟨X⟩
+        simpa only [MorphismProperty.inverseImage_iff, Functor.map_id] using hP₁ (𝟙 X)
+      · rintro _ _ _ p (g | ⟨g, hg⟩) hp
+        · simpa [MorphismProperty.inverseImage_iff] using P.comp_mem _ _ hp (hP₁ g)
+        · simpa [MorphismProperty.inverseImage_iff] using P.comp_mem _ _ hp (hP₂ g hg)
+    simpa [MorphismProperty.inverseImage_iff, Functor.map_preimage] using
+      MorphismProperty.of_eq_top hPG (G.preimage f)
 
 @[deprecated (since := "2025-10-21")] alias morphismProperty_is_top := morphismProperty_eq_top
 
@@ -263,15 +253,11 @@ can be obtained from a natural transformation `W.Q ⋙ F₁ ⟶ W.Q ⋙ F₂`. -
 def natTransExtension {F₁ F₂ : W.Localization ⥤ D} (τ : W.Q ⋙ F₁ ⟶ W.Q ⋙ F₂) : F₁ ⟶ F₂ where
   app := NatTransExtension.app τ
   naturality := by
-    suffices MorphismProperty.naturalityProperty (NatTransExtension.app τ) = ⊤ by
-      intro X Y f
-      simpa only [← this] using MorphismProperty.top_apply f
-    refine morphismProperty_eq_top'
+    apply MorphismProperty.of_eq_top
+    exact morphismProperty_eq_top'
       (MorphismProperty.naturalityProperty (NatTransExtension.app τ))
-      ?_ (MorphismProperty.naturalityProperty.stableUnderInverse _)
-    intro X Y f
-    dsimp
-    simpa only [NatTransExtension.app_eq] using τ.naturality f
+      (fun X Y f => by simpa [MorphismProperty.naturalityProperty] using τ.naturality f)
+      (MorphismProperty.naturalityProperty.stableUnderInverse _)
 
 @[simp]
 theorem whiskerLeft_natTransExtension {F G : W.Localization ⥤ D} (τ : W.Q ⋙ F ⟶ W.Q ⋙ G) :
@@ -306,22 +292,13 @@ set_option backward.isDefEq.respectTransparency false in
 def inverse : W.FunctorsInverting D ⥤ W.Localization ⥤ D where
   obj G := lift G.obj G.property
   map τ := natTransExtension (eqToHom (by rw [fac]) ≫ τ.hom ≫ eqToHom (by rw [fac]))
-  map_id G :=
-    natTrans_hcomp_injective
-      (by
-        rw [natTransExtension_hcomp]
-        ext X
-        simp only [NatTrans.comp_app, eqToHom_app, eqToHom_refl, comp_id, id_comp,
-          NatTrans.hcomp_id_app, NatTrans.id_app, Functor.map_id]
-        rfl)
-  map_comp τ₁ τ₂ :=
-    natTrans_hcomp_injective
-      (by
-        ext X
-        simp only [natTransExtension_hcomp, NatTrans.comp_app, eqToHom_app, eqToHom_refl,
-          id_comp, comp_id, NatTrans.hcomp_app, NatTrans.id_app, Functor.map_id,
-          natTransExtension_app, NatTransExtension.app_eq]
-        rfl)
+  map_id G := by
+    apply natTrans_hcomp_injective
+    ext X
+    simp
+  map_comp τ₁ τ₂ := by
+    apply natTrans_hcomp_injective
+    simp
 
 /-- The unit isomorphism of the equivalence of categories `whiskeringLeftEquivalence W D`. -/
 @[simps!]

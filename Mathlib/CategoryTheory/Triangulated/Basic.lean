@@ -194,13 +194,9 @@ def Triangle.isoMk (A B : Triangle C)
     (comm₃ : A.mor₃ ≫ iso₁.hom⟦1⟧' = iso₃.hom ≫ B.mor₃ := by cat_disch) : A ≅ B where
   hom := Triangle.homMk _ _ iso₁.hom iso₂.hom iso₃.hom comm₁ comm₂ comm₃
   inv := Triangle.homMk _ _ iso₁.inv iso₂.inv iso₃.inv
-    (by simp only [← cancel_mono iso₂.hom, assoc, Iso.inv_hom_id, comp_id,
-      comm₁, Iso.inv_hom_id_assoc])
-    (by simp only [← cancel_mono iso₃.hom, assoc, Iso.inv_hom_id, comp_id,
-      comm₂, Iso.inv_hom_id_assoc])
-    (by simp only [← cancel_mono (iso₁.hom⟦(1 : ℤ)⟧'), Category.assoc, comm₃,
-      Iso.inv_hom_id_assoc, ← Functor.map_comp, Iso.inv_hom_id,
-      Functor.map_id, Category.comp_id])
+    (by rw [Iso.eq_inv_comp, ← assoc, ← comm₁, Iso.comp_inv_eq])
+    (by rw [Iso.eq_inv_comp, ← assoc, ← comm₂, Iso.comp_inv_eq])
+    (by rw [Iso.eq_inv_comp, ← assoc, ← comm₃]; simp)
 
 lemma Triangle.isIso_of_isIsos {A B : Triangle C} (f : A ⟶ B)
     (h₁ : IsIso f.hom₁) (h₂ : IsIso f.hom₂) (h₃ : IsIso f.hom₃) : IsIso f := by

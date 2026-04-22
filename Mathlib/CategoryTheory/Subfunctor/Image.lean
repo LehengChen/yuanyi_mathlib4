@@ -84,12 +84,8 @@ lemma toRange_app_val {i : C} (x : F'.obj i) :
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma range_toRange : range (toRange p) = ⊤ := by
-  ext i ⟨x, hx⟩
-  dsimp at hx ⊢
-  simp only [Set.mem_range, Set.mem_univ, iff_true]
-  simp only [Set.mem_range] at hx
-  obtain ⟨y, rfl⟩ := hx
-  exact ⟨y, rfl⟩
+  ext i x
+  simpa [range, toRange] using Set.rangeFactorization_surjective x
 
 lemma epi_iff_range_eq_top :
     Epi p ↔ range p = ⊤ := by
@@ -101,15 +97,11 @@ lemma range_eq_top [Epi p] : range p = ⊤ := by rwa [← epi_iff_range_eq_top]
 instance : Epi (toRange p) := by simp [epi_iff_range_eq_top]
 
 instance [Mono p] : IsIso (toRange p) := by
-  have := mono_of_mono_fac (toRange_ι p)
+  have : Mono (toRange p) := mono_of_mono_fac (toRange_ι p)
   rw [NatTrans.isIso_iff_isIso_app]
   intro i
-  rw [isIso_iff_bijective]
-  constructor
-  · rw [← mono_iff_injective]
-    infer_instance
-  · rw [← epi_iff_surjective]
-    infer_instance
+  have : IsSplitEpi ((toRange p).app i) := isSplitEpi_of_epi _
+  exact isIso_of_mono_of_isSplitEpi _
 
 lemma range_comp_le (f : F ⟶ F') (g : F' ⟶ F'') :
     range (f ≫ g) ≤ range g := fun _ _ _ ↦ by aesop
@@ -182,12 +174,8 @@ lemma preimage_eq_top_iff (G : Subfunctor F) (p : F' ⟶ F) :
 @[simp]
 lemma preimage_image_of_epi (G : Subfunctor F) (p : F' ⟶ F) [hp : Epi p] :
     (G.preimage p).image p = G := by
-  apply le_antisymm
-  · rw [image_le_iff]
-  · intro i x hx
-    simp only [NatTrans.epi_iff_epi_app, epi_iff_surjective] at hp
-    obtain ⟨y, rfl⟩ := hp _ x
-    exact ⟨y, hx, rfl⟩
+  ext i x
+  simp [preimage, image, (surjective_of_epi (p.app i)).image_preimage]
 
 end preimage
 

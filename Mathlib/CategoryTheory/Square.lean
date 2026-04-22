@@ -139,14 +139,10 @@ def isoMk {sq₁ sq₂ : Square C} (e₁ : sq₁.X₁ ≅ sq₂.X₁) (e₂ : sq
       τ₂ := e₂.inv
       τ₃ := e₃.inv
       τ₄ := e₄.inv
-      comm₁₂ := by simp only [← cancel_mono e₂.hom, assoc, Iso.inv_hom_id,
-                      comp_id, comm₁₂, Iso.inv_hom_id_assoc]
-      comm₁₃ := by simp only [← cancel_mono e₃.hom, assoc, Iso.inv_hom_id,
-                      comp_id, comm₁₃, Iso.inv_hom_id_assoc]
-      comm₂₄ := by simp only [← cancel_mono e₄.hom, assoc, Iso.inv_hom_id,
-                      comp_id, comm₂₄, Iso.inv_hom_id_assoc]
-      comm₃₄ := by simp only [← cancel_mono e₄.hom, assoc, Iso.inv_hom_id,
-                      comp_id, comm₃₄, Iso.inv_hom_id_assoc] }
+      comm₁₂ := (CommSq.vert_inv ⟨comm₁₂⟩).w
+      comm₁₃ := (CommSq.vert_inv ⟨comm₁₃⟩).w
+      comm₂₄ := (CommSq.vert_inv ⟨comm₂₄⟩).w
+      comm₃₄ := (CommSq.vert_inv ⟨comm₃₄⟩).w }
 
 /-- Flipping a square by switching the top-right and the bottom-left objects. -/
 @[simps]

@@ -141,24 +141,17 @@ instance [ObjectProperty.EssentiallySmall.{w} P] [LocallySmall.{w} C] :
   exists_small_le' := by
     obtain ⟨Q, _, h₁, h₂⟩ := ObjectProperty.EssentiallySmall.exists_small_le.{w} P
     let α := Σ (X : Subtype Q), { p : X.1 ⟶ X.1 // p ≫ p = p }
-    let g {X Y : C} (h : Retract Y X) (hX : Q X) : α := ⟨⟨X, hX⟩, h.r ≫ h.i, by simp⟩
-    let R (a : α) : Prop := ∃ (X Y : C) (h : Retract Y X) (hX : Q X), g h hX = a
-    choose X Y h hX using fun (a : Subtype R) ↦ a.2
+    let R (a : α) : Prop := ∃ (Y : C) (h : Retract Y a.1.1), h.r ≫ h.i = a.2.1
+    choose Y h hp using fun (a : Subtype R) ↦ a.2
     refine ⟨.ofObj Y, inferInstance, (monotone_retractClosure h₂).trans ?_⟩
     rw [retractClosure_isoClosure]
     rintro y ⟨x, hx, ⟨r⟩⟩
-    obtain ⟨a, h₁, h₂⟩ : ∃ (a : Subtype R) (h₁ : Q (X a)), g (h a) h₁ = g r hx := by
-      obtain ⟨_, hr⟩ := hX ⟨⟨⟨_, hx⟩, r.r ≫ r.i, by simp⟩, ⟨_, _, r, hx, rfl⟩⟩
-      exact ⟨_, _, hr⟩
-    obtain rfl : x = X a := Subtype.ext_iff.1 (congr_arg Sigma.fst h₂.symm)
-    have hri : (h a).r ≫ (h a).i = r.r ≫ r.i := by
-      rw [Sigma.ext_iff, heq_eq_eq] at h₂
-      exact Subtype.ext_iff.1 h₂.2
+    let a : Subtype R := ⟨⟨⟨x, hx⟩, ⟨r.r ≫ r.i, by simp⟩⟩, ⟨y, r, rfl⟩⟩
     exact ⟨_, ⟨a.1, a.2⟩, ⟨{
       hom := r.i ≫ (h a).r
       inv := (h a).i ≫ r.r
-      hom_inv_id := by simp [reassoc_of% hri]
-      inv_hom_id := by simp [← reassoc_of% hri]
+      hom_inv_id := by simp [a, reassoc_of% (hp a)]
+      inv_hom_id := by simp [a, ← reassoc_of% (hp a)]
     }⟩⟩
 
 end CategoryTheory.ObjectProperty

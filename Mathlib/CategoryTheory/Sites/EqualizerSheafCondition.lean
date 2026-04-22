@@ -154,19 +154,13 @@ theorem equalizer_sheaf_condition :
     ← Equiv.forall_congr_right (firstObjEqFamily P (S : Presieve X)).toEquiv.symm]
   simp_rw [← compatible_iff]
   simp only [inv_hom_id_apply, Iso.toEquiv_symm_fun]
-  apply forall₂_congr
-  intro x _
-  apply existsUnique_congr
-  intro t
-  rw [← Iso.toEquiv_symm_fun]
-  rw [Equiv.eq_symm_apply]
-  constructor
-  · intro q
-    funext Y f hf
-    simpa [firstObjEqFamily, forkMap] using q _ _
-  · intro q Y f hf
-    rw [← q]
-    simp [firstObjEqFamily, forkMap]
+  refine forall₂_congr fun x _ ↦ existsUnique_congr fun t ↦ ?_
+  rw [← Iso.toEquiv_symm_fun, Equiv.eq_symm_apply]
+  simp only [Presieve.FamilyOfElements.IsAmalgamation, firstObjEqFamily, forkMap, Iso.toEquiv_fun,
+    Types.pi_lift_π_apply]
+  change (∀ (Y : C) (f : Y ⟶ X) (hf : S.arrows f), P.map f.op t = x f hf) ↔
+    (fun Y f hf ↦ P.map f.op t) = x
+  simp [funext_iff]
 
 end Sieve
 
@@ -240,18 +234,13 @@ theorem sheaf_condition : R.IsSheafFor P ↔ Nonempty (IsLimit (Fork.ofι _ (w P
   rw [Types.type_equalizer_iff_unique,
     ← Equiv.forall_congr_right (firstObjEqFamily P R).toEquiv.symm]
   simp_rw [← compatible_iff, ← Iso.toEquiv_fun, Equiv.apply_symm_apply]
-  apply forall₂_congr
-  intro x _
-  apply existsUnique_congr
-  intro t
+  refine forall₂_congr fun x _ ↦ existsUnique_congr fun t ↦ ?_
   rw [Equiv.eq_symm_apply]
-  constructor
-  · intro q
-    funext Y f hf
-    simpa [forkMap] using q _ _
-  · intro q Y f hf
-    rw [← q]
-    simp [forkMap]
+  simp only [Presieve.FamilyOfElements.IsAmalgamation, firstObjEqFamily, forkMap, Iso.toEquiv_fun,
+    Types.pi_lift_π_apply]
+  change (∀ (Y : C) (f : Y ⟶ X) (hf : R f), P.map f.op t = x f hf) ↔
+    (fun Y f hf ↦ P.map f.op t) = x
+  simp [funext_iff]
 
 namespace Arrows
 
@@ -357,18 +346,9 @@ theorem sheaf_condition : (Presieve.ofArrows X π).IsSheafFor P ↔
   rw [← Equiv.forall_congr_right ((equivShrink _).trans (Types.Small.productIso _).toEquiv.symm)]
   simp_rw [← compatible_iff_of_small, ← Iso.toEquiv_fun, Equiv.trans_apply, Equiv.apply_symm_apply,
     Equiv.symm_apply_apply]
-  apply forall₂_congr
-  intro x _
-  apply existsUnique_congr
-  intro t
+  refine forall₂_congr fun x _ ↦ existsUnique_congr fun t ↦ ?_
   rw [Equiv.eq_symm_apply, ← Equiv.symm_apply_eq]
-  constructor
-  · intro q
-    funext i
-    simpa [forkMap] using q i
-  · intro q i
-    rw [← q]
-    simp [forkMap]
+  simp [forkMap, funext_iff]
 
 end Arrows
 

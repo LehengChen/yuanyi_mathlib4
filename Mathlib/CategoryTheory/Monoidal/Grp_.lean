@@ -597,12 +597,8 @@ open scoped Obj
 /-- The image of an additive group object under a monoidal functor is an additive group object. -/]
 abbrev grpObjObj {G : C} [GrpObj G] : GrpObj (F.obj G) where
   inv := F.map ι
-  left_inv := by
-    simp [← Functor.map_id, Functor.Monoidal.lift_μ_assoc,
-      Functor.Monoidal.toUnit_ε_assoc, ← Functor.map_comp]
-  right_inv := by
-    simp [← Functor.map_id, Functor.Monoidal.lift_μ_assoc,
-      Functor.Monoidal.toUnit_ε_assoc, ← Functor.map_comp]
+  left_inv := by simp [← Functor.map_comp, ← Functor.map_id]
+  right_inv := by simp [← Functor.map_comp, ← Functor.map_id]
 
 scoped[CategoryTheory.Obj] attribute [instance] CategoryTheory.Functor.grpObjObj
   CategoryTheory.Functor.addGrpObjObj

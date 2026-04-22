@@ -600,16 +600,12 @@ noncomputable def mapPreimage {X Y : C} (f : G.obj X ⟶ G.obj Y) :
 lemma mapPreimage_map_of_fac {X Y Z : C} (f : G.obj X ⟶ G.obj Y)
     (p : Z ⟶ X) (g : Z ⟶ Y) (fac : G.map p ≫ f = G.map g) :
     mapPreimage K G F f ≫ F.obj.map p.op = F.obj.map g.op :=
-  Presheaf.IsSheaf.hom_ext F.property
-    ⟨_, J.pullback_stable p (imageSieve_mem J K G f)⟩ _ _ (by
-      rintro ⟨W₀, a, ha⟩
-      dsimp at ha ⊢
-      rw [Category.assoc, ← Functor.map_comp, ← op_comp, mapPreimage]
-      rw [F.2.amalgamate_map ⟨_, imageSieve_mem J K G f⟩
-        (fun ⟨W₀, a, ha⟩ ↦ F.obj.map ha.choose.op) _ ⟨W₀, a ≫ p, ha⟩,
-        ← Functor.map_comp, ← op_comp]
-      apply map_eq_of_eq K G
-      rw [ha.choose_spec, Functor.map_comp_assoc, Functor.map_comp, fac])
+  F.property.hom_ext ⟨_, J.pullback_stable p (imageSieve_mem J K G f)⟩ _ _ fun I => by
+    rw [Category.assoc, ← Functor.map_comp, ← op_comp, mapPreimage,
+      F.2.amalgamate_map ⟨_, imageSieve_mem J K G f⟩ (fun I ↦ F.obj.map I.hf.choose.op)
+        _ ⟨I.Y, I.f ≫ p, I.hf⟩, ← Functor.map_comp, ← op_comp]
+    apply map_eq_of_eq K G
+    rw [I.hf.choose_spec, Functor.map_comp_assoc, Functor.map_comp, fac]
 
 lemma mapPreimage_of_eq {X Y : C} (f : G.obj X ⟶ G.obj Y)
     (g : X ⟶ Y) (h : G.map g = f) :
@@ -630,19 +626,15 @@ lemma mapPreimage_id (X : C) :
 lemma mapPreimage_comp {X Y Z : C} (f : G.obj X ⟶ G.obj Y)
     (g : G.obj Y ⟶ G.obj Z) :
     mapPreimage K G F (f ≫ g) = mapPreimage K G F g ≫ mapPreimage K G F f :=
-  Presheaf.IsSheaf.hom_ext F.property
-    ⟨_, imageSieve_mem J K G f⟩ _ _ (by
-      rintro ⟨T₀, a, ⟨b, fac₁⟩⟩
-      apply Presheaf.IsSheaf.hom_ext F.property
-        ⟨_, J.pullback_stable b (imageSieve_mem J K G g)⟩
-      rintro ⟨U₀, c, ⟨d, fac₂⟩⟩
-      dsimp
-      simp only [Category.assoc, ← Functor.map_comp, ← op_comp]
-      rw [mapPreimage_map_of_fac K G F (f ≫ g) (c ≫ a) d,
-        mapPreimage_map_of_fac K G F f (c ≫ a) (c ≫ b),
-        mapPreimage_map_of_fac K G F g (c ≫ b) d]
-      all_goals
-        simp only [Functor.map_comp, Category.assoc, fac₁, fac₂])
+  F.property.hom_ext ⟨_, imageSieve_mem J K G f⟩ _ _ fun ⟨T₀, a, ⟨b, fac₁⟩⟩ => by
+    exact F.property.hom_ext ⟨_, J.pullback_stable b (imageSieve_mem J K G g)⟩ _ _
+      fun ⟨U₀, c, ⟨d, fac₂⟩⟩ => by
+        dsimp
+        simp only [Category.assoc, ← Functor.map_comp, ← op_comp]
+        rw [mapPreimage_map_of_fac K G F (f ≫ g) (c ≫ a) d,
+          mapPreimage_map_of_fac K G F f (c ≫ a) (c ≫ b),
+          mapPreimage_map_of_fac K G F g (c ≫ b) d] <;>
+          simp only [Functor.map_comp, Category.assoc, fac₁, fac₂]
 
 @[reassoc]
 lemma mapPreimage_comp_map {X Y Z : C} (f : G.obj X ⟶ G.obj Y)

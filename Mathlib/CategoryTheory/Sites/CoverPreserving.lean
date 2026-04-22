@@ -109,36 +109,23 @@ theorem CompatiblePreserving.apply_map {Y : C} {f : Y ⟶ Z} (hf : T f) :
 
 end
 
-open Limits.WalkingCospan
-
 set_option backward.isDefEq.respectTransparency false in
 theorem compatiblePreservingOfFlat {C : Type u₁} [Category.{v₁} C] {D : Type u₂} [Category.{v₂} D]
     (K : GrothendieckTopology D) (G : C ⥤ D) [RepresentablyFlat G] : CompatiblePreserving K G := by
   constructor
   intro ℱ Z T x hx Y₁ Y₂ X f₁ f₂ g₁ g₂ hg₁ hg₂ e
-  -- First, `f₁` and `f₂` form a cone over `cospan g₁ g₂ ⋙ u`.
-  let c : Cone (cospan g₁ g₂ ⋙ G) :=
-    (Cone.postcompose (diagramIsoCospan (cospan g₁ g₂ ⋙ G)).inv).obj (PullbackCone.mk f₁ f₂ e)
-  /-
-    This can then be viewed as a cospan of structured arrows, and we may obtain an arbitrary cone
-    over it since `StructuredArrow W u` is cofiltered.
-    Then, it suffices to prove that it is compatible when restricted onto `u(c'.X.right)`.
-    -/
-  let c' := IsCofiltered.cone (c.toStructuredArrow ⋙ StructuredArrow.pre _ _ _)
-  have eq₁ : f₁ = (c'.pt.hom ≫ G.map (c'.π.app left).right) ≫ eqToHom (by simp) := by simp [c]
-  have eq₂ : f₂ = (c'.pt.hom ≫ G.map (c'.π.app right).right) ≫ eqToHom (by simp) := by simp [c]
-  conv_lhs => rw [eq₁]
-  conv_rhs => rw [eq₂]
-  simp only [c, op_comp, Functor.map_comp, types_comp_apply, eqToHom_op, eqToHom_map]
-  apply congr_arg -- Porting note: was `congr 1` which for some reason doesn't do anything here
-  -- despite goal being of the form f a = f b, with f=`ℱ.val.map (Quiver.Hom.op c'.pt.hom)`
-  /-
-    Since everything now falls in the image of `u`,
-    the result follows from the compatibility of `x` in the image of `u`.
-    -/
-  injection c'.π.naturality WalkingCospan.Hom.inl with _ e₁
-  injection c'.π.naturality WalkingCospan.Hom.inr with _ e₂
-  exact hx (c'.π.app left).right (c'.π.app right).right hg₁ hg₂ (e₁.symm.trans e₂)
+  let A : StructuredArrow X G := StructuredArrow.mk f₁
+  let B : StructuredArrow X G := StructuredArrow.mk f₂
+  let E : StructuredArrow X G := StructuredArrow.mk (f₁ ≫ G.map g₁)
+  let h₁ : A ⟶ E := StructuredArrow.mkPostcomp f₁ g₁
+  let h₂ : B ⟶ E := StructuredArrow.homMk g₂ (by simpa using e.symm)
+  obtain ⟨W, p₁, p₂, hp⟩ := IsCofiltered.cospan h₁ h₂
+  change ℱ.obj.map A.hom.op (x g₁ hg₁) = ℱ.obj.map B.hom.op (x g₂ hg₂)
+  rw [← StructuredArrow.w p₁, ← StructuredArrow.w p₂]
+  simp only [op_comp, Functor.map_comp, types_comp_apply]
+  exact congr_arg (ℱ.obj.map W.hom.op) <|
+    hx p₁.right p₂.right hg₁ hg₂ (by
+      simpa [h₁, h₂] using congr_arg (fun f => f.right) hp)
 
 theorem compatiblePreservingOfDownwardsClosed (F : C ⥤ D) [F.Full] [F.Faithful]
     (hF : ∀ {c : C} {d : D} (_ : d ⟶ F.obj c), Σ c', F.obj c' ≅ d) : CompatiblePreserving K F := by

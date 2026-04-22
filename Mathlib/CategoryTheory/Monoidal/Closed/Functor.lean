@@ -120,12 +120,8 @@ theorem expComparison_whiskerLeft {A A' : C} (f : A' ⟶ A) :
   unfold TwoSquare.whiskerLeft TwoSquare.whiskerRight
   congr 1
   apply congr_arg
-  ext B
-  simp only [Functor.comp_obj, curriedTensor_obj_obj, prodComparisonNatIso_inv,
-    NatTrans.comp_app, Functor.whiskerLeft_app, curriedTensor_map_app, NatIso.isIso_inv_app,
-    Functor.whiskerRight_app, IsIso.eq_inv_comp, prodComparisonNatTrans_app]
-  rw [← prodComparison_inv_natural_whiskerRight F f]
-  simp
+  simpa [prodComparisonBifunctorNatIso_inv, prodComparisonBifunctorNatTrans_app] using
+    (prodComparisonBifunctorNatIso F).inv.naturality f
 
 /-- The functor `F` is Cartesian closed (i.e. preserves exponentials) if each natural transformation
 `expComparison F A` is an isomorphism

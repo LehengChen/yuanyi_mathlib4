@@ -81,16 +81,12 @@ theorem isIdempotentComplete_iff_hasEqualizer_of_id_and_idempotent :
                 rw [← hm]
                 simp only [assoc, h₁]
                 exact (comp_id m).symm }⟩
-  · intro h
-    refine ⟨?_⟩
-    intro X p hp
+  · refine fun h => ⟨fun X p hp => ?_⟩
     haveI : HasEqualizer (𝟙 X) p := h X p hp
-    refine ⟨equalizer (𝟙 X) p, equalizer.ι (𝟙 X) p,
-      equalizer.lift p (show p ≫ 𝟙 X = p ≫ p by rw [hp, comp_id]), ?_, equalizer.lift_ι _ _⟩
-    ext
-    simp only [assoc, limit.lift_π, Fork.ofι_pt,
-      Fork.ofι_π_app, id_comp]
-    rw [← equalizer.condition, comp_id]
+    let s := splitMonoOfIdempotentEqualizer C hp
+    exact ⟨_, _, s.retraction, s.id, by
+      dsimp [s, splitMonoOfIdempotentEqualizer]
+      exact equalizer.lift_ι _ _⟩
 
 variable {C} in
 /-- In a preadditive category, when `p : X ⟶ X` is idempotent,

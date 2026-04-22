@@ -175,14 +175,10 @@ lemma presheafIsFinite_of_epi [PresheafIsFinite F] {F' : Cᵒᵖ ⥤ Type w} (f 
     PresheafIsFinite F' :=
   ((presheafIsGeneratedBy_of_isFinite F).of_epi f).isFinite
 
-set_option backward.isDefEq.respectTransparency false in
 lemma yoneda_obj_isGeneratedBy (X : C) :
     PresheafIsGeneratedBy (yoneda.obj X) (fun (_ : Unit) ↦ 𝟙 X) := by
-  simp only [Subfunctor.isGeneratedBy_iff]
-  ext U u
-  simp only [yoneda_obj_obj, Subfunctor.iSup_obj, Set.mem_iUnion,
-    exists_const, Subfunctor.top_obj, Set.top_eq_univ, Set.mem_univ, iff_true]
-  exact ⟨u.op, by simp⟩
+  simpa [Subfunctor.isGeneratedBy_iff, iSup_const] using
+    (Subfunctor.range_eq_ofSection (𝟙 (yoneda.obj X))).symm.trans (Subfunctor.range_eq_top _)
 
 instance (X : C) : PresheafIsFinite (yoneda.obj X) :=
   (yoneda_obj_isGeneratedBy X).isFinite

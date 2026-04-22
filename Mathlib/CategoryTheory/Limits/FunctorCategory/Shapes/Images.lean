@@ -36,17 +36,13 @@ def monoFactorisation {F G : C ⥤ Type u} (f : F ⟶ G) : MonoFactorisation f w
 property of images -/
 noncomputable def monoFactorisationIsImage {F G : C ⥤ Type u} (f : F ⟶ G) :
     IsImage <| monoFactorisation f where
-  lift H := {
-    app X := fun ⟨x, hx⟩ ↦ H.e.app _ hx.choose
-    naturality X Y g := by
-      ext
-      apply injective_of_mono (H.m.app Y)
-      simp [FunctorToTypes.naturality]
-      grind }
+  lift H := Subfunctor.homOfLe (by
+    simpa only [H.fac] using Subfunctor.range_comp_le H.e H.m) ≫ inv (Subfunctor.toRange H.m)
   lift_fac H := by
-    ext
-    simp
-    grind
+    dsimp [monoFactorisation]
+    have hι : inv (Subfunctor.toRange H.m) ≫ H.m = (Subfunctor.range H.m).ι := by
+      rw [← cancel_epi (Subfunctor.toRange H.m)]; simp
+    rw [Category.assoc, hι, Subfunctor.homOfLe_ι]
 
 instance : HasImages (C ⥤ Type*) where
   has_image f := { exists_image := ⟨ { F := _, isImage := monoFactorisationIsImage f } ⟩ }

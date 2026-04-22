@@ -136,13 +136,9 @@ between sheaf categories.
 instance (priority := high) hasSheafCompose_of_preservesMulticospan (F : A ⥤ B)
     [∀ (X : C) (S : J.Cover X) (P : Cᵒᵖ ⥤ A), PreservesLimit (S.index P).multicospan F] :
     J.HasSheafCompose F where
-  isSheaf P hP := by
-    rw [Presheaf.isSheaf_iff_multifork] at hP ⊢
-    intro X S
-    obtain ⟨h⟩ := hP X S
-    replace h := isLimitOfPreserves F h
-    replace h := Limits.IsLimit.ofIsoLimit h (S.mapMultifork F P)
-    exact ⟨Limits.IsLimit.postcomposeHomEquiv (S.multicospanComp F P) _ h⟩
+  isSheaf P hP := (Presheaf.isSheaf_iff_multifork J (P ⋙ F)).2 fun _ S =>
+    (PreservesLimit.preserves (F := F) (hP.isLimitMultifork S)).map fun h =>
+      (IsLimit.postcomposeHomEquiv (S.multicospanComp F P) _).1 (h.ofIsoLimit (S.mapMultifork F P))
 
 /--
 Composing a sheaf with a functor preserving limits of the same size as the hom sets in `C` yields a

@@ -49,19 +49,14 @@ set_option backward.isDefEq.respectTransparency false in
 points, then the fan constructed from `combPairHoms` is a limit cone. -/
 def combPairIsLimit : IsLimit (Fan.mk bc.pt (combPairHoms c₁ c₂ bc)) :=
   mkFanLimit _
-    (fun s ↦ Fan.IsLimit.lift h <| fun i ↦ by
-      cases i
-      · exact Fan.IsLimit.lift h₁ (fun a ↦ s.proj (.inl a))
-      · exact Fan.IsLimit.lift h₂ (fun a ↦ s.proj (.inr a)))
-    (fun s w ↦ by
-      cases w <;>
-      · simp only [fan_mk_proj, combPairHoms]
-        erw [← Category.assoc, h.fac]
-        simp only [pair_obj_left, mk_pt, mk_π_app, IsLimit.fac])
-    (fun s m hm ↦ Fan.IsLimit.hom_ext h _ _ <| fun w ↦ by
-      cases w
-      · refine Fan.IsLimit.hom_ext h₁ _ _ (fun a ↦ by aesop)
-      · refine Fan.IsLimit.hom_ext h₂ _ _ (fun a ↦ by aesop))
+    (fun s ↦ (BinaryFan.IsLimit.lift' (W := s.pt) h
+      (Fan.IsLimit.lift h₁ (fun a ↦ s.proj (Sum.inl a)))
+      (Fan.IsLimit.lift h₂ (fun a ↦ s.proj (Sum.inr a)))).1)
+    (uniq := fun s m hm ↦ BinaryFan.IsLimit.hom_ext h
+      (Fan.IsLimit.hom_ext h₁ _ _
+        (fun a ↦ by simpa [combPairHoms, Category.assoc] using hm (Sum.inl a)))
+      (Fan.IsLimit.hom_ext h₂ _ _
+        (fun a ↦ by simpa [combPairHoms, Category.assoc] using hm (Sum.inr a))))
 
 end Fan
 
@@ -85,19 +80,14 @@ set_option backward.isDefEq.respectTransparency false in
 points, then the cofan constructed from `combPairHoms` is a colimit cocone. -/
 def combPairIsColimit : IsColimit (Cofan.mk bc.pt (combPairHoms c₁ c₂ bc)) :=
   mkCofanColimit _
-    (fun s ↦ Cofan.IsColimit.desc h <| fun i ↦ by
-      cases i
-      · exact Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (.inl a))
-      · exact Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (.inr a)))
-    (fun s w ↦ by
-      cases w <;>
-      · simp only [cofan_mk_inj, combPairHoms, Category.assoc]
-        erw [h.fac]
-        simp only [Cofan.mk_ι_app, Cofan.IsColimit.fac])
-    (fun s m hm ↦ Cofan.IsColimit.hom_ext h _ _ <| fun w ↦ by
-      cases w
-      · refine Cofan.IsColimit.hom_ext h₁ _ _ (fun a ↦ by aesop)
-      · refine Cofan.IsColimit.hom_ext h₂ _ _ (fun a ↦ by aesop))
+    (fun s ↦ (BinaryCofan.IsColimit.desc' (W := s.pt) h
+      (Cofan.IsColimit.desc h₁ (fun a ↦ s.inj (Sum.inl a)))
+      (Cofan.IsColimit.desc h₂ (fun a ↦ s.inj (Sum.inr a)))).1)
+    (uniq := fun s m hm ↦ BinaryCofan.IsColimit.hom_ext h
+      (Cofan.IsColimit.hom_ext h₁ _ _
+        (fun a ↦ by simpa [combPairHoms, Category.assoc] using hm (Sum.inl a)))
+      (Cofan.IsColimit.hom_ext h₂ _ _
+        (fun a ↦ by simpa [combPairHoms, Category.assoc] using hm (Sum.inr a))))
 
 end Cofan
 

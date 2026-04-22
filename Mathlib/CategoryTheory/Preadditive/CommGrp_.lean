@@ -66,19 +66,13 @@ set_option backward.privateInPublic.warn false in
 @[simps!]
 def commGrpEquivalenceAux : CommGrp.forget C ⋙ toCommGrp C ≅
       𝟭 (CommGrp C) := by
-  refine NatIso.ofComponents (fun _ => CommGrp.mkIso (Iso.refl _) ?_ ?_) ?_
+  refine NatIso.ofComponents (fun G => CommGrp.mkIso (Iso.refl _) ?_ ?_) ?_
   · exact ((IsZero.iff_id_eq_zero _).2 (Subsingleton.elim _ _)).eq_of_src _ _
   · simp only [Functor.comp_obj, CommGrp.forget_obj, toCommGrp_obj_X, Functor.id_obj,
       mul_def, Iso.refl_hom, Category.comp_id, tensorHom_id, id_whiskerRight, Category.id_comp]
     apply monoidal_hom_ext
-    · simp only [comp_add, lift_fst, lift_snd, add_zero]
-      convert (MonObj.lift_comp_one_right _ 0).symm
-      · simp
-      · infer_instance
-    · simp only [comp_add, lift_fst, lift_snd, zero_add]
-      convert (MonObj.lift_comp_one_left 0 _).symm
-      · simp
-      · infer_instance
+    · simpa [comp_add] using (MonObj.lift_comp_one_right (𝟙 G.X) (0 : G.X ⟶ 𝟙_ C)).symm
+    · simpa [comp_add] using (MonObj.lift_comp_one_left (0 : G.X ⟶ 𝟙_ C) (𝟙 G.X)).symm
   · cat_disch
 
 /-- An additive category is equivalent to its category of commutative group objects. -/

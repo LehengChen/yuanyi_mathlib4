@@ -172,21 +172,16 @@ lemma le_kernel_of_isoModSerre_isInvertedBy (F : C ⥤ D) [F.PreservesZeroMorphi
     (hF : P.isoModSerre.IsInvertedBy F) :
     P ≤ F.kernel := by
   intro X hX
-  let f : 0 ⟶ X := 0
-  have := hF _ ((P.isoModSerre_iff_of_mono f).2
-    ((P.prop_iff_of_iso cokernelZeroIsoTarget).2 hX))
-  exact (asIso (F.map f)).isZero_iff.1 (F.map_isZero (isZero_zero C))
+  haveI := hF _ <| (P.isoModSerre_iff_of_mono (0 : 0 ⟶ X)).2 <|
+    by simpa using (P.epiModSerre_zero_iff (0 : C) X).2 hX
+  exact (asIso (F.map (0 : 0 ⟶ X))).isZero_iff.1 (F.map_isZero (isZero_zero C))
 
 lemma isoModSerre_isInvertedBy_iff (F : C ⥤ D)
     [PreservesFiniteLimits F] [PreservesFiniteColimits F] :
     P.isoModSerre.IsInvertedBy F ↔ P ≤ F.kernel := by
   refine ⟨P.le_kernel_of_isoModSerre_isInvertedBy F, fun hF X Y f ⟨h₁, h₂⟩ ↦ ?_⟩
-  have : Mono (F.map f) :=
-    (((ShortComplex.mk _ _ (kernel.condition f)).exact_of_f_is_kernel
-      (kernelIsKernel f)).map F).mono_g (((hF _ h₁).eq_of_src _ _))
-  have : Epi (F.map f) :=
-    (((ShortComplex.mk _ _ (cokernel.condition f)).exact_of_g_is_cokernel
-      (cokernelIsCokernel f)).map F).epi_f (((hF _ h₂).eq_of_tgt _ _))
+  haveI : Mono (F.map f) := Preadditive.mono_of_isZero_kernel _ <| IsZero.of_iso (hF _ h₁) (PreservesKernel.iso F f).symm
+  haveI : Epi (F.map f) := Preadditive.epi_of_isZero_cokernel _ <| IsZero.of_iso (hF _ h₂) (PreservesCokernel.iso F f).symm
   exact isIso_of_mono_of_epi (F.map f)
 
 instance : P.monoModSerre.IsStableUnderBaseChange where

@@ -421,13 +421,9 @@ lemma isLocal_reflectionObj :
     dsimp at h
     obtain ⟨k, u, hk⟩ := IsCardinalPresentable.exists_eq_of_isColimit' κ H.isColimit
       (f ≫ g₁) (f ≫ g₂) (by simpa)
-    have hg := iteration_map_succ_injectivity f hf
-      (g₁ ≫ H.F.map u) (g₂ ≫ H.F.map u) (by simpa using hk)
-    simp only [homOfLE_leOfHom, Category.assoc] at hg
-    have := H.incl.naturality (u ≫ homOfLE (Order.le_succ k))
-    simp only [Functor.const_obj_obj, Functor.const_obj_map, Category.comp_id] at this
-    simp only [← this, Functor.map_comp, Category.assoc]
-    rw [reassoc_of% hg]
+    simpa [homOfLE_leOfHom, Functor.map_comp, Category.assoc] using congrArg
+      (fun e ↦ e ≫ H.incl.app (Order.succ k))
+      (iteration_map_succ_injectivity f hf (g₁ ≫ H.F.map u) (g₂ ≫ H.F.map u) (by simpa using hk))
   · obtain ⟨j, g, rfl⟩ := IsCardinalPresentable.exists_hom_of_isColimit κ H.isColimit g
     obtain ⟨g', hg'⟩ := iteration_map_succ_surjectivity f hf g
     exact ⟨g' ≫ H.incl.app (Order.succ j), by simp [reassoc_of% hg']⟩

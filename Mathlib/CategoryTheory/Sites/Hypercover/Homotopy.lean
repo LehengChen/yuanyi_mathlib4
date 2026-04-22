@@ -78,28 +78,21 @@ to `E` is exact also the multifork associated to `F` is exact. -/
 def Homotopy.isLimitMultifork (f : E.Hom F) (g : F.Hom E) (hgf : Homotopy (g.comp f) (.id F))
     {G : Cᵒᵖ ⥤ A} (hE : IsLimit (E.multifork G)) :
     IsLimit (F.multifork G) := by
-  refine Multifork.IsLimit.mk _ ?_ ?_ ?_
-  · intro t
-    refine Multifork.IsLimit.lift hE (fun a ↦ t.ι (f.s₀ a) ≫ G.map (f.h₀ a).op) ?_
-    intro b
-    dsimp
-    simp only [Category.assoc, ← Functor.map_comp, ← op_comp]
-    rw [← f.w₁₁, ← f.w₁₂]
-    simp only [op_comp, Functor.map_comp]
-    exact t.condition_assoc ⟨(f.s₀ b.1.1, f.s₀ b.1.2), f.s₁ b.2⟩ _
+  refine Multifork.IsLimit.mk _ (fun t => f.mapMultiforkOfIsLimit G hE t) ?_ ?_
   · intro t i
-    simp only [multicospanIndex_left, multicospanShape_L, multifork_ι]
+    simp only [multicospanIndex_left, multifork_ι]
     have h1 := hgf.wl i
     have h2 := t.condition ⟨⟨_, _⟩, hgf.H i⟩
     dsimp at h1 h2
-    rw [← g.w₀, op_comp, Functor.map_comp, ← E.multifork_ι, Multifork.IsLimit.fac_assoc,
-      Category.assoc, ← Functor.map_comp, ← op_comp, ← h1, op_comp, Functor.map_comp,
+    rw [← g.w₀, op_comp, Functor.map_comp, ← E.multifork_ι,
+      Hom.mapMultiforkOfIsLimit_ι_assoc,
+      ← Functor.map_comp, ← op_comp, ← h1, op_comp, Functor.map_comp,
       reassoc_of% h2, ← Functor.map_comp, ← op_comp, hgf.wr i]
     simp
   · intro t m hm
     refine Multifork.IsLimit.hom_ext hE fun i ↦ ?_
-    rw [Multifork.IsLimit.fac, multifork_ι, ← f.w₀, op_comp, Functor.map_comp, ← F.multifork_ι,
-      reassoc_of% hm]
+    rw [Hom.mapMultiforkOfIsLimit_ι, multifork_ι, ← f.w₀, op_comp, Functor.map_comp,
+      ← F.multifork_ι, reassoc_of% hm]
 
 /-- `E` and `F` are homotopy equivalent, then the multifork associated
 to `E` is exact if and only if the multifork associated to `F` is exact. -/
@@ -219,13 +212,9 @@ noncomputable def cylinderHomotopy :
     rw [← pullback.condition_assoc]
     simp
   wr p := by
-    have : g.h₀ p.fst = pullback.lift (f.h₀ p.fst) (g.h₀ p.fst) (by simp) ≫
-        pullback.snd (F.f _) (F.f _) := by simp
-    dsimp only [cylinder_X, Hom.comp_s₀, cylinder_I₀, Function.comp_apply, cylinderHom_s₀,
-      Hom.comp_h₀, cylinderHom_h₀]
-    nth_rw 3 [this]
-    rw [pullback.condition_assoc]
-    simp
+    simpa [PreOneHypercover.toPullback] using
+      (pullback.condition_assoc (f := pullback.lift (f.h₀ p.fst) (g.h₀ p.fst) (by simp))
+        (g := F.toPullback p.snd) (h := pullback.snd _ _)).symm
 
 /-- Up to homotopy, the category of (pre-)`1`-hypercovers is cofiltered. -/
 lemma exists_nonempty_homotopy (f g : E.Hom F) :

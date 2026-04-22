@@ -144,13 +144,9 @@ def overMapCompPresheafHomIso {S' : C} (q : S' ⟶ S) :
     letI e := Cat.Hom.toNatIso (F.mapComp' (.toLoc q.op) (.toLoc T.unop.hom.op)
       (.toLoc ((Over.map q).obj T.unop).hom.op))
     exact (Iso.homFromEquiv (e.app M)).trans (Iso.homToEquiv (e.app N)))) (by
-      rintro ⟨T₁⟩ ⟨T₂⟩ ⟨f⟩
-      ext g
-      dsimp [pullHom]
-      simp only [Category.assoc, Functor.map_comp]
-      rw [F.mapComp'₀₁₃_inv_comp_mapComp'₀₂₃_hom_app_assoc _ _ _ _ _ _ rfl _ rfl,
-        F.mapComp'₀₂₃_inv_comp_mapComp'₀₁₃_hom_app _ _ _ _ _ _ _ _ (by
-          simp only [← Quiver.Hom.comp_toLoc, ← op_comp, Over.w_assoc])])
+      rintro ⟨T₁⟩ ⟨T₂⟩ ⟨f⟩; ext g
+      dsimp [pullHom]; simp only [Category.assoc, Functor.map_comp]; grind
+        [mapComp'₀₁₃_inv_comp_mapComp'₀₂₃_hom_app_assoc, mapComp'₀₂₃_inv_comp_mapComp'₀₁₃_hom_app])
 
 end
 

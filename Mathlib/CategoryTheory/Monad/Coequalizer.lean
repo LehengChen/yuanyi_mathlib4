@@ -66,15 +66,11 @@ theorem FreeCoequalizer.condition :
       FreeCoequalizer.bottomMap X ≫ FreeCoequalizer.π X :=
   Algebra.Hom.ext X.assoc.symm
 
-set_option backward.isDefEq.respectTransparency false in
 instance : IsReflexivePair (FreeCoequalizer.topMap X) (FreeCoequalizer.bottomMap X) := by
-  apply IsReflexivePair.mk' _ _ _
-  · apply (free T).map (T.η.app X.A)
-  · ext
-    dsimp
-    rw [← Functor.map_comp, X.unit, Functor.map_id]
-  · ext
-    apply Monad.right_unit
+  convert (inferInstance : IsReflexivePair
+      ((free T).map ((forget T).map (T.adj.counit.app X)))
+      (T.adj.counit.app ((free T).obj ((forget T).obj X)))) using 2 <;>
+    ext <;> simp [Monad.adj_counit]
 
 /-- Construct the Beck cofork in the category of algebras. This cofork is reflexive as well as a
 coequalizer.
@@ -93,16 +89,11 @@ def beckAlgebraCoequalizer : IsColimit (beckAlgebraCofork X) :=
       congr_arg Monad.Algebra.Hom.f s.condition
     have h₂ : (T : C ⥤ C).map s.π.f ≫ s.pt.a = T.μ.app X.A ≫ s.π.f := s.π.h
     refine ⟨⟨T.η.app _ ≫ s.π.f, ?_⟩, ?_, ?_⟩
-    · dsimp
-      rw [Functor.map_comp, Category.assoc, h₂, Monad.right_unit_assoc,
-        show X.a ≫ _ ≫ _ = _ from T.η.naturality_assoc _ _, h₁, Monad.left_unit_assoc]
+    · simpa [beckAlgebraCofork, Functor.map_comp, h₂, h₁, Monad.right_unit_assoc,
+        Monad.left_unit_assoc] using (T.η.naturality_assoc X.a s.π.f).symm
     · ext
       simpa [← T.η.naturality_assoc, T.left_unit_assoc] using T.η.app ((T : C ⥤ C).obj X.A) ≫= h₁
-    · intro m hm
-      ext
-      dsimp only
-      rw [← hm]
-      apply (X.unit_assoc _).symm
+    · exact fun {m} hm => Algebra.Hom.ext (by simpa [← hm] using (X.unit_assoc m.f).symm)
 
 /-- The Beck cofork is a split coequalizer. -/
 def beckSplitCoequalizer : IsSplitCoequalizer (T.map X.a) (T.μ.app _) X.a :=

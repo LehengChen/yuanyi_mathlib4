@@ -7,7 +7,6 @@ module
 
 public import Mathlib.CategoryTheory.Limits.ConcreteCategory.Basic
 public import Mathlib.Algebra.Category.ModuleCat.Basic
-public import Mathlib.Tactic.CategoryTheory.Elementwise
 
 /-!
 # Colimits in ModuleCat
@@ -66,17 +65,14 @@ lemma colimit_no_zero_smul_divisor
     [IsFiltered J] [HasColimit F]
     (r : R) (H : ∃ (j' : J), ∀ (j : J) (_ : j' ⟶ j), ∀ (c : F.obj j), r • c = 0 → c = 0)
     (x : ToType (colimit F)) (hx : r • x = 0) : x = 0 := by
-  classical
   obtain ⟨j, x, rfl⟩ := Concrete.colimit_exists_rep F x
   rw [← map_smul (colimit.ι F j).hom] at hx
   obtain ⟨j', i, h⟩ := Concrete.colimit_rep_eq_zero (hx := hx)
   obtain ⟨j'', H⟩ := H
-  simpa [elementwise_of% (colimit.w F), map_zero] using congr(colimit.ι F _
-    $(H (IsFiltered.sup {j, j', j''} { ⟨j, j', by simp, by simp, i⟩ })
-      (IsFiltered.toSup _ _ <| by simp)
-      (F.map (IsFiltered.toSup _ _ <| by simp) x)
-      (by rw [← IsFiltered.toSup_commutes (f := i) (mY := by simp) (mf := by simp), F.map_comp,
-        ModuleCat.comp_apply, ← map_smul, ← map_smul, h, map_zero])))
+  simpa [map_zero] using (Concrete.colimit_rep_eq_of_exists F x 0 ⟨IsFiltered.max j' j'',
+    i ≫ IsFiltered.leftToMax _ _, i ≫ IsFiltered.leftToMax _ _, by
+      simpa [map_zero] using H _ (IsFiltered.rightToMax _ _) _ <| by
+        simpa [F.map_comp, map_zero] using congrArg (F.map (IsFiltered.leftToMax j' j'')).hom h⟩)
 
 end module
 

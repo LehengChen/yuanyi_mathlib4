@@ -100,6 +100,7 @@ lemma leftAdjointCompIso_comp_id
   simp [leftAdjointCompIso_hom_app, leftAdjointIdIso_hom_app,
     ← Functor.map_comp_assoc, -Functor.map_comp]
 
+set_option linter.style.longLine false in
 lemma leftAdjointCompIso_id_comp
     {F₀₀' : C₀ ⥤ C₀} {F₀'₁ : C₀ ⥤ C₁} {G₀'₀ : C₀ ⥤ C₀} {G₁₀' : C₁ ⥤ C₀}
     (adj₀₀' : F₀₀' ⊣ G₀'₀) (adj₀'₁ : F₀'₁ ⊣ G₁₀')
@@ -107,13 +108,8 @@ lemma leftAdjointCompIso_id_comp
     (h : e₀₀'₁ = isoWhiskerLeft G₁₀' e₀'₀ ≪≫ rightUnitor G₁₀') :
     leftAdjointCompIso adj₀₀' adj₀'₁ adj₀'₁ e₀₀'₁ =
       isoWhiskerRight (leftAdjointIdIso adj₀₀' e₀'₀) F₀'₁ ≪≫ leftUnitor F₀'₁ := by
-  subst h
-  ext X₀
-  have h₁ := congr_map F₀'₁ (adj₀₀'.counit.naturality (adj₀'₁.unit.app X₀))
-  have h₂ := congr_map (F₀₀' ⋙ F₀'₁) (e₀'₀.inv.naturality (adj₀'₁.unit.app X₀))
-  simp only [id_obj, comp_obj, Functor.id_map, Functor.comp_map, Functor.map_comp] at h₁ h₂
-  simp [leftAdjointCompIso_hom_app, leftAdjointIdIso_hom_app,
-    reassoc_of% h₂, reassoc_of% h₁]
+  subst h; ext : 1; simp only [leftAdjointCompIso_hom, leftAdjointCompNatTrans, Iso.trans_inv, isoWhiskerLeft_inv, Iso.trans_hom, isoWhiskerRight_hom]
+  rw [← conjugateEquiv_symm_comp (adj₁ := adj₀'₁) (adj₂ := Adjunction.id.comp adj₀'₁) (adj₃ := adj₀₀'.comp adj₀'₁) (α := (rightUnitor G₁₀').inv) (β := whiskerLeft G₁₀' e₀'₀.inv), show (conjugateEquiv (Adjunction.id.comp adj₀'₁) (adj₀₀'.comp adj₀'₁)).symm (whiskerLeft G₁₀' e₀'₀.inv) = whiskerRight (leftAdjointIdIso adj₀₀' e₀'₀).hom F₀'₁ by simpa using Eq.symm <| congrArg ((conjugateEquiv (Adjunction.id.comp adj₀'₁) (adj₀₀'.comp adj₀'₁)).symm) (conjugateEquiv_whiskerRight Adjunction.id adj₀₀' adj₀'₁ (leftAdjointIdIso adj₀₀' e₀'₀).hom), show (conjugateEquiv adj₀'₁ (Adjunction.id.comp adj₀'₁)).symm (rightUnitor G₁₀').inv = (leftUnitor F₀'₁).hom by simpa using Eq.symm <| congrArg ((conjugateEquiv adj₀'₁ (Adjunction.id.comp adj₀'₁)).symm) (conjugateEquiv_leftUnitor_hom adj₀'₁)]
 
 section
 

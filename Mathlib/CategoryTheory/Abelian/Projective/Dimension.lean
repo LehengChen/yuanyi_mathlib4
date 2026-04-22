@@ -307,22 +307,15 @@ lemma projectiveDimension_eq_bot_iff (X : C) :
 
 lemma projectiveDimension_ne_top_iff (X : C) :
     projectiveDimension X ≠ ⊤ ↔ ∃ n, HasProjectiveDimensionLE X n := by
-  generalize hd : projectiveDimension X = d
-  induction d with
-  | bot =>
-    simp only [ne_eq, bot_ne_top, not_false_eq_true, true_iff]
-    exact ⟨0, by simp [← projectiveDimension_le_iff, hd]⟩
-  | coe d =>
-    induction d with
-    | top =>
-      by_contra!
-      simp only [WithBot.coe_top, ne_eq, not_true_eq_false, false_and, true_and, false_or] at this
-      obtain ⟨n, hn⟩ := this
-      rw [← projectiveDimension_le_iff, hd, WithBot.coe_top, top_le_iff] at hn
-      exact ENat.coe_ne_top _ ((WithBot.coe_eq_coe).1 hn)
-    | coe d =>
-      simp only [ne_eq, WithBot.coe_eq_top, ENat.coe_ne_top, not_false_eq_true, true_iff]
-      exact ⟨d, by simpa only [← projectiveDimension_le_iff] using hd.le⟩
+  refine (not_congr (WithBot.eq_top_iff_forall_ge :
+    projectiveDimension X = ⊤ ↔ ∀ n : ℕ, (n : WithBot ℕ∞) ≤ projectiveDimension X)).trans ?_
+  push Not
+  constructor
+  · rintro ⟨_ | n, hn⟩
+    · exact ⟨0, (projectiveDimension_le_iff X 0).1 hn.le⟩
+    · exact ⟨n, (projectiveDimension_le_iff X n).1 (ENat.WithBot.lt_add_one_iff.mp hn)⟩
+  · rintro ⟨n, hn⟩
+    exact ⟨n + 1, ENat.WithBot.lt_add_one_iff.mpr ((projectiveDimension_le_iff X n).2 hn)⟩
 
 lemma projectiveDimension_eq_zero_iff (X : C) :
     projectiveDimension X = 0 ↔ Projective X ∧ ¬ Limits.IsZero X := by

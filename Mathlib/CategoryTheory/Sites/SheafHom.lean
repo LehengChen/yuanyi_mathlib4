@@ -108,14 +108,10 @@ lemma PresheafHom.isAmalgamation_iff {X : C} (S : Sieve X)
   · intro h Y g hg
     rw [← h g hg, presheafHom_map_app_op_mk_id]
   · intro h Y g hg
-    dsimp
-    ext ⟨W : Over Y⟩
+    apply NatTrans.ext; ext ⟨W : Over Y⟩
     refine (h W.left (W.hom ≫ g) (S.downward_closed hg _)).trans ?_
-    have H := hx (𝟙 _) W.hom (S.downward_closed hg W.hom) hg (by simp)
-    dsimp at H
-    simp only [FunctorToTypes.map_id_apply] at H
-    rw [H, presheafHom_map_app_op_mk_id]
-    rfl
+    rw [Presieve.FamilyOfElements.comp_of_compatible S hx hg W.hom]
+    simpa using presheafHom_map_app_op_mk_id W.hom (x g hg)
 
 section
 

@@ -61,12 +61,8 @@ variable [HasCoproductsOfShape ι C] [Preadditive C] [HasZeroObject C]
 
 lemma isSeparator_coproduct_separatingFamily {X : C} (hX : IsSeparator X) :
     IsSeparator (∐ (fun i ↦ separatingFamily c (fun (_ : Unit) ↦ X) ⟨⟨⟩, i⟩)) := by
-  let φ (i : ι) := separatingFamily c (fun (_ : Unit) ↦ X) ⟨⟨⟩, i⟩
-  refine isSeparator_of_isColimit_cofan
-    (isSeparating_separatingFamily c (X := fun (_ : Unit) ↦ X) (by simpa using hX))
-      (c := Cofan.mk (∐ φ) (fun ⟨_, i⟩ ↦ Sigma.ι φ i)) ?_
-  exact IsColimit.ofWhiskerEquivalence
-    (Discrete.equivalence (Equiv.punitProd.{0} ι).symm) (coproductIsCoproduct φ)
+  exact ((isSeparating_separatingFamily c (X := fun (_ : Unit) ↦ X) (by simpa using hX)).of_le <| by
+    rintro _ ⟨⟨⟩, i⟩; exact ObjectProperty.ofObj_apply _ i).isSeparator_coproduct
 
 instance [HasSeparator C] : HasSeparator (HomologicalComplex C c) :=
   ⟨_, isSeparator_coproduct_separatingFamily c (isSeparator_separator C)⟩

@@ -172,11 +172,7 @@ def cocone : Cocone (diagram U) where
 `iInf U` provides a limit cone over `diagram U`.
 -/
 def coconeIsColimit : IsColimit (cocone U) where
-  desc s := homOfLE
-    (by
-      apply sSup_le
-      rintro _ ⟨j, rfl⟩
-      exact (s.ι.app (single j)).le)
+  desc s := homOfLE <| iSup_le fun j ↦ (s.ι.app (single j)).le
 
 end
 

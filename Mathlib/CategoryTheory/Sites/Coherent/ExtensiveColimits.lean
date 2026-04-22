@@ -36,13 +36,9 @@ lemma isSheaf_pointwiseColimit [PreservesFiniteProducts (colim (J := J) (C := A)
     (G : J ⥤ Sheaf (extensiveTopology C) A) :
     Presheaf.IsSheaf (extensiveTopology C) (pointwiseCocone (G ⋙ sheafToPresheaf _ A)).pt := by
   rw [Presheaf.isSheaf_iff_preservesFiniteProducts]
-  dsimp only [pointwiseCocone_pt]
   apply +allowSynthFailures comp_preservesFiniteProducts
-  have : ∀ (i : J), PreservesFiniteProducts ((G ⋙ sheafToPresheaf _ A).obj i) := fun i ↦ by
-    rw [← Presheaf.isSheaf_iff_preservesFiniteProducts]
-    exact (G.obj i).property
-  exact ⟨fun _ ↦ preservesLimitsOfShape_of_evaluation _ _ fun d ↦
-    inferInstanceAs (PreservesLimitsOfShape _ ((G ⋙ sheafToPresheaf _ _).obj d))⟩
+  exact ⟨fun n ↦ preservesLimitsOfShape_of_evaluation _ _ fun d ↦ by
+    simpa using PreservesFiniteProducts.preserves (F := (G.obj d).obj) n⟩
 
 instance [Preadditive A] : PreservesFiniteProducts (colim (J := J) (C := A)) where
   preserves _ := by

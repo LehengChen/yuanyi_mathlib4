@@ -31,10 +31,8 @@ lemma morphismProperty_eq_top
     (id : ∀ {v : V}, P (𝟙 ((of V).obj v)))
     (comp : ∀ {u v w : V}
       (p : (of V).obj u ⟶ (of V).obj v) (q : v ⟶ w), P p → P (p ≫ (of V).map q)) :
-    P = ⊤ := by
-  ext; constructor
-  · simp
-  · exact fun _ ↦ induction (fun f ↦ P f) id comp _
+    P = ⊤ :=
+  top_unique fun _ _ f _ ↦ induction (fun f ↦ P f) id comp f
 
 /-- A reformulation of `CategoryTheory.Paths.induction'` in terms of `MorphismProperty`. -/
 lemma morphismProperty_eq_top'
@@ -42,10 +40,8 @@ lemma morphismProperty_eq_top'
     (id : ∀ {v : V}, P (𝟙 ((of V).obj v)))
     (comp : ∀ {u v w : V}
       (p : u ⟶ v) (q : (of V).obj v ⟶ (of V).obj w), P q → P ((of V).map p ≫ q)) :
-    P = ⊤ := by
-  ext; constructor
-  · simp
-  · exact fun _ ↦ induction' (fun f ↦ P f) id comp _
+    P = ⊤ :=
+  top_unique fun _ _ f _ ↦ induction' (fun f ↦ P f) id comp f
 
 lemma morphismProperty_eq_top_of_isMultiplicative (P : MorphismProperty (Paths V))
     [P.IsMultiplicative]

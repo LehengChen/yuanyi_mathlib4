@@ -344,28 +344,16 @@ namespace Swap
 def equivalence : C ⊕ D ≌ D ⊕ C where
   functor := swap C D
   inverse := swap D C
-  unitIso := Functor.sumIsoExt
-    (calc inl_ C D ⋙ 𝟭 (C ⊕ D)
-        ≅ inl_ C D := rightUnitor _
-      _ ≅ inr_ D C ⋙ swap D C := (swapCompInr D C).symm
-      _ ≅ (inl_ C D ⋙ swap C D) ⋙ swap D C := isoWhiskerRight (swapCompInl C D).symm _
-      _ ≅ inl_ C D ⋙ swap C D ⋙ swap D C := associator _ _ _)
-    (calc inr_ C D ⋙ 𝟭 (C ⊕ D)
-        ≅ inr_ C D := rightUnitor _
-      _ ≅ inl_ D C ⋙ swap D C := (swapCompInl D C).symm
-      _ ≅ (inr_ C D ⋙ swap C D) ⋙ swap D C := isoWhiskerRight (swapCompInr C D).symm _
-      _ ≅ inr_ C D ⋙ swap C D ⋙ swap D C := associator _ _ _)
-  counitIso := Functor.sumIsoExt
-    (calc inl_ D C ⋙ swap D C ⋙ swap C D
-        ≅ (inl_ D C ⋙ swap D C) ⋙ swap C D := (associator _ _ _).symm
-      _ ≅ inr_ C D ⋙ swap C D := isoWhiskerRight (swapCompInl D C) _
-      _ ≅ inl_ D C := swapCompInr C D
-      _ ≅ inl_ D C ⋙ 𝟭 (D ⊕ C) := (rightUnitor _).symm)
-    (calc inr_ D C ⋙ swap D C ⋙ swap C D
-        ≅ (inr_ D C ⋙ swap D C) ⋙ swap C D := (associator _ _ _).symm
-      _ ≅ inl_ C D ⋙ swap C D := isoWhiskerRight (swapCompInr D C) _
-      _ ≅ inr_ D C := swapCompInl C D
-      _ ≅ inr_ D C ⋙ 𝟭 (D ⊕ C) := (rightUnitor _).symm)
+  unitIso := NatIso.ofComponents (fun
+    | .inl _ => Iso.refl _
+    | .inr _ => Iso.refl _) (by
+      intro X Y f
+      cases f <;> simp [swap_map_inl, swap_map_inr])
+  counitIso := NatIso.ofComponents (fun
+    | .inl _ => Iso.refl _
+    | .inr _ => Iso.refl _) (by
+      intro X Y f
+      cases f <;> simp [swap_map_inl, swap_map_inr])
 
 instance isEquivalence : (swap C D).IsEquivalence :=
   (by infer_instance : (equivalence C D).functor.IsEquivalence)

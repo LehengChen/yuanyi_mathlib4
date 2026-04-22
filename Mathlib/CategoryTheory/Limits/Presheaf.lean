@@ -764,14 +764,10 @@ noncomputable def coconeπOpCompShrinkYonedaFlip :
   pt := F
   ι.app u :=
     { app X := (coconeπOpCompShrinkYonedaObj F X).ι.app u
-      naturality {X Y} f := by
-        ext x
-        obtain ⟨x, rfl⟩ := shrinkYonedaObjObjEquiv.symm.surjective x
-        simp [shrinkYoneda_map_app_shrinkYonedaObjObjEquiv_symm.{w}] }
+      naturality {X Y} f := shrinkYoneda_map_app_coconeπOpCompShrinkYonedaObj_ι_app F f u.unop }
   ι.naturality u v g := by
     ext X x
-    obtain ⟨x, rfl⟩ := shrinkYonedaObjObjEquiv.symm.surjective x
-    simp [← shrinkYonedaObjObjEquiv_symm_comp.{w}]
+    exact congr_fun ((coconeπOpCompShrinkYonedaObj F X).ι.naturality g) x
 
 /-- If `F : C ⥤ Type w` and `C` is locally `w`-small, then `F` identifies to the colimit
 of `(CategoryOfElements.π F).op ⋙ shrinkYoneda.{w}.flip`. -/

@@ -170,13 +170,9 @@ def isLimitAux (t : PullbackCone f g) (lift : ∀ s : PullbackCone f g, s.pt ⟶
     (fac_right : ∀ s : PullbackCone f g, lift s ≫ t.snd = s.snd)
     (uniq : ∀ (s : PullbackCone f g) (m : s.pt ⟶ t.pt)
       (_ : ∀ j : WalkingCospan, m ≫ t.π.app j = s.π.app j), m = lift s) : IsLimit t :=
-  { lift
-    fac := fun s j => Option.casesOn j (by
-        rw [← s.w inl, ← t.w inl, ← Category.assoc]
-        congr
-        exact fac_left s)
-      fun j' => WalkingPair.casesOn j' (fac_left s) (fac_right s)
-    uniq := uniq }
+  IsLimit.mkConeMorphism (fun s =>
+    { hom := lift s, w := by rintro (_ | (_ | _)) <;> simp_all [← Category.assoc] })
+    fun s m => ConeMorphism.ext m _ <| uniq s m.hom m.w
 
 /-- This is another convenient method to verify that a pullback cone is a limit cone. It
 only asks for a proof of facts that carry any mathematical content, and allows access to the

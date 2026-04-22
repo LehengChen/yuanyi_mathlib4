@@ -36,19 +36,15 @@ noncomputable def jointlyReflectsLimit
     {c : Cone G} (hc : ∀ i, IsLimit ((F i).mapCone c))
     [HasLimit G] [∀ i, PreservesLimit G (F i)] :
     IsLimit c := by
-  suffices IsIso (limit.lift _ c) from
-    IsLimit.ofIsoLimit (limit.isLimit _)
-      (Cone.ext (asIso (limit.lift _ c) :)).symm
+  suffices IsIso ((limit.isLimit G).lift c) from (limit.isLimit G).ofPointIso
   rw [hF.isIso_iff]
   intro i
-  let H := isLimitOfPreserves (F i) (limit.isLimit G)
-  let e := IsLimit.conePointUniqueUpToIso (hc i) H
-  have : e.hom = (F i).map (limit.lift G c) :=
-    H.hom_ext (fun j ↦ by
-      simpa [← Functor.map_comp] using
-        IsLimit.conePointUniqueUpToIso_hom_comp (hc i) H j)
-  rw [← this]
-  infer_instance
+  let f := (Cone.functoriality G (F i)).map ((limit.isLimit G).liftConeMorphism c)
+  change IsIso ((Cone.forget (G ⋙ F i)).map f)
+  exact
+    letI : IsIso f :=
+      (hc i).hom_isIso (isLimitOfPreserves (F i) (limit.isLimit G)) f
+    inferInstance
 
 /-- If `Fᵢ : C ⥤ Dᵢ` is a conservative family of functors which also
 preserve the (existing) colimit of a functor `G : J ⥤ C`, then a cocone
@@ -60,18 +56,14 @@ noncomputable def jointlyReflectsColimit
     {c : Cocone G} (hc : ∀ i, IsColimit ((F i).mapCocone c))
     [HasColimit G] [∀ i, PreservesColimit G (F i)] :
     IsColimit c := by
-  suffices IsIso (colimit.desc _ c) from
-    IsColimit.ofIsoColimit (colimit.isColimit _)
-      (Cocone.ext (asIso (colimit.desc _ c) :))
+  suffices IsIso ((colimit.isColimit G).desc c) from (colimit.isColimit G).ofPointIso
   rw [hF.isIso_iff]
   intro i
-  let H := isColimitOfPreserves (F i) (colimit.isColimit G)
-  let e := IsColimit.coconePointUniqueUpToIso H (hc i)
-  have : e.hom = (F i).map (colimit.desc G c) :=
-    H.hom_ext (fun j ↦ by
-      simpa [← Functor.map_comp] using
-        IsColimit.comp_coconePointUniqueUpToIso_hom H (hc i) j)
-  rw [← this]
-  infer_instance
+  let f := (Cocone.functoriality G (F i)).map ((colimit.isColimit G).descCoconeMorphism c)
+  change IsIso ((Cocone.forget (G ⋙ F i)).map f)
+  exact
+    letI : IsIso f :=
+      (isColimitOfPreserves (F i) (colimit.isColimit G)).hom_isIso (hc i) f
+    inferInstance
 
 end CategoryTheory.JointlyReflectIsomorphisms

@@ -284,14 +284,10 @@ structure IsWide : Prop where
   wide : ∀ c, 𝟙 c ∈ S.arrows c c
 
 theorem isWide_iff_objs_eq_univ : S.IsWide ↔ S.objs = Set.univ := by
+  rw [Set.eq_univ_iff_forall]
   constructor
-  · rintro h
-    ext x; constructor <;> simp only [mem_univ, imp_true_iff, forall_true_left]
-    apply mem_objs_of_src S (h.wide x)
-  · rintro h
-    refine ⟨fun c => ?_⟩
-    obtain ⟨γ, γS⟩ := (le_of_eq h.symm : ⊤ ⊆ S.objs) (Set.mem_univ c)
-    exact id_mem_of_src S γS
+  · exact fun h c => mem_objs_of_src S (h.wide c)
+  · exact fun h => ⟨fun c => id_mem_of_nonempty_isotropy S c (h c)⟩
 
 theorem IsWide.id_mem {S : Subgroupoid C} (Sw : S.IsWide) (c : C) : 𝟙 c ∈ S.arrows c c :=
   Sw.wide c
@@ -309,12 +305,8 @@ theorem IsNormal.conj' {S : Subgroupoid C} (Sn : IsNormal S) :
 
 theorem IsNormal.conjugation_bij (Sn : IsNormal S) {c d} (p : c ⟶ d) :
     Set.BijOn (fun γ : c ⟶ c => Groupoid.inv p ≫ γ ≫ p) (S.arrows c c) (S.arrows d d) := by
-  refine ⟨fun γ γS => Sn.conj p γS, fun γ₁ _ γ₂ _ h => ?_, fun δ δS =>
-    ⟨p ≫ δ ≫ Groupoid.inv p, Sn.conj' p δS, ?_⟩⟩
-  · simpa only [inv_eq_inv, Category.assoc, IsIso.hom_inv_id, Category.comp_id,
-      IsIso.hom_inv_id_assoc] using p ≫= h =≫ inv p
-  · simp only [inv_eq_inv, Category.assoc, IsIso.inv_hom_id, Category.comp_id,
-      IsIso.inv_hom_id_assoc]
+  refine Set.InvOn.bijOn ?_ (fun γ γS => Sn.conj p γS) (fun δ δS => Sn.conj' p δS)
+  constructor <;> intro x hx <;> simp [inv_eq_inv, Category.assoc]
 
 theorem top_isNormal : IsNormal (⊤ : Subgroupoid C) :=
   { wide := fun _ => trivial
@@ -362,13 +354,9 @@ theorem generatedNormal_isNormal : (generatedNormal X).IsNormal :=
 theorem IsNormal.generatedNormal_le {S : Subgroupoid C} (Sn : S.IsNormal) :
     generatedNormal X ≤ S ↔ ∀ c d, X c d ⊆ S.arrows c d := by
   constructor
-  · rintro h c d
-    have h' := generated_le_generatedNormal X
-    rw [le_iff] at h h'
-    exact ((subset_generated X c d).trans (@h' c d)).trans (@h c d)
-  · rintro h
-    apply @sInf_le (Subgroupoid C) _
-    exact ⟨h, Sn⟩
+  · exact fun h c d => (subset_generated X c d).trans
+      ((le_iff _ _).mp ((generated_le_generatedNormal X).trans h))
+  · exact fun h => sInf_le ⟨h, Sn⟩
 
 end GeneratedSubgroupoid
 
@@ -507,22 +495,18 @@ theorem isNormal_map (hφ : Function.Injective φ.obj) (hφ' : im φ hφ = ⊤) 
     (map φ hφ S).IsNormal :=
   { wide := fun d => by
       obtain ⟨c, rfl⟩ := obj_surjective_of_im_eq_top φ hφ hφ' d
-      change Map.Arrows φ hφ S _ _ (𝟙 _); rw [← Functor.map_id]
-      constructor; exact Sn.wide c
+      simpa [Functor.map_id] using Map.Arrows.im (hφ := hφ) (S := S) (𝟙 c) (Sn.wide c)
     conj := fun {d d'} g δ hδ => by
       rw [mem_map_iff] at hδ
-      obtain ⟨c, c', γ, cd, cd', γS, hγ⟩ := hδ; subst_vars; cases hφ cd'
-      have : d' ∈ (im φ hφ).objs := by rw [hφ']; apply mem_top_objs
-      rw [mem_im_objs_iff] at this
-      obtain ⟨c', rfl⟩ := this
-      have : g ∈ (im φ hφ).arrows (φ.obj c) (φ.obj c') := by rw [hφ']; trivial
-      rw [mem_im_iff] at this
-      obtain ⟨b, b', f, hb, hb', _, hf⟩ := this; cases hφ hb; cases hφ hb'
-      change Map.Arrows φ hφ S (φ.obj c') (φ.obj c') _
-      simp only [eqToHom_refl, Category.comp_id, Category.id_comp, inv_eq_inv]
-      suffices Map.Arrows φ hφ S (φ.obj c') (φ.obj c') (φ.map <| Groupoid.inv f ≫ γ ≫ f) by
-        simp only [inv_eq_inv, Functor.map_comp, Functor.map_inv] at this; exact this
-      constructor; apply Sn.conj f γS }
+      obtain ⟨c, c₀, γ, rfl, cd₀, γS, rfl⟩ := hδ
+      cases hφ cd₀
+      obtain ⟨c', rfl⟩ := obj_surjective_of_im_eq_top φ hφ hφ' d'
+      obtain ⟨b, b', f, hb, hb', hf⟩ := (mem_im_iff φ hφ g).mp (by rw [hφ']; trivial)
+      cases hφ hb
+      cases hφ hb'
+      subst g
+      simpa [Functor.map_comp, Functor.map_inv] using
+        Map.Arrows.im (hφ := hφ) (S := S) (Groupoid.inv f ≫ γ ≫ f) (Sn.conj f γS) }
 
 end Hom
 

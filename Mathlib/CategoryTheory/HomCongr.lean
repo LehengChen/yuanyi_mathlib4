@@ -42,12 +42,8 @@ there is a natural bijection between `X ⟶ Y` and `X₁ ⟶ Y₁`. See also `Eq
 def homCongr {X Y X₁ Y₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁) : (X ⟶ Y) ≃ (X₁ ⟶ Y₁) where
   toFun f := α.inv ≫ f ≫ β.hom
   invFun f := α.hom ≫ f ≫ β.inv
-  left_inv f :=
-    show α.hom ≫ (α.inv ≫ f ≫ β.hom) ≫ β.inv = f by
-      rw [Category.assoc, Category.assoc, β.hom_inv_id, α.hom_inv_id_assoc, Category.comp_id]
-  right_inv f :=
-    show α.inv ≫ (α.hom ≫ f ≫ β.inv) ≫ β.hom = f by
-      rw [Category.assoc, Category.assoc, β.inv_hom_id, α.inv_hom_id_assoc, Category.comp_id]
+  left_inv f := by simp
+  right_inv f := by simp
 
 theorem homCongr_comp {X Y Z X₁ Y₁ Z₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁) (γ : Z ≅ Z₁) (f : X ⟶ Y)
     (g : Y ⟶ Z) : α.homCongr γ (f ≫ g) = α.homCongr β f ≫ β.homCongr γ g := by simp

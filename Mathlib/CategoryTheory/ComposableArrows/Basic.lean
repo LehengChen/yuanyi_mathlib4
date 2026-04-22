@@ -613,17 +613,12 @@ lemma hom_ext₂ {f g : ComposableArrows C 2} {φ φ' : f ⟶ g}
   hom_ext_succ h₀ (hom_ext₁ h₁ h₂)
 
 /-- Constructor for isomorphisms in `ComposableArrows C 2`. -/
-@[simps]
+@[simps!]
 def isoMk₂ {f g : ComposableArrows C 2}
     (app₀ : f.obj' 0 ≅ g.obj' 0) (app₁ : f.obj' 1 ≅ g.obj' 1) (app₂ : f.obj' 2 ≅ g.obj' 2)
     (w₀ : f.map' 0 1 ≫ app₁.hom = app₀.hom ≫ g.map' 0 1 := by cat_disch)
-    (w₁ : f.map' 1 2 ≫ app₂.hom = app₁.hom ≫ g.map' 1 2 := by cat_disch) : f ≅ g where
-  hom := homMk₂ app₀.hom app₁.hom app₂.hom w₀ w₁
-  inv := homMk₂ app₀.inv app₁.inv app₂.inv
-    (by rw [← cancel_epi app₀.hom, ← reassoc_of% w₀, app₁.hom_inv_id,
-      comp_id, app₀.hom_inv_id_assoc])
-    (by rw [← cancel_epi app₁.hom, ← reassoc_of% w₁, app₂.hom_inv_id,
-      comp_id, app₁.hom_inv_id_assoc])
+    (w₁ : f.map' 1 2 ≫ app₂.hom = app₁.hom ≫ g.map' 1 2 := by cat_disch) : f ≅ g :=
+  isoMkSucc app₀ (isoMk₁ app₁ app₂ w₁) w₀
 
 lemma isIso_iff₂ {F G : ComposableArrows C 2} (f : F ⟶ G) :
     IsIso f ↔ IsIso (f.app 0) ∧ IsIso (f.app 1) ∧ IsIso (f.app 2) := by
@@ -689,21 +684,14 @@ lemma hom_ext₃ {f g : ComposableArrows C 3} {φ φ' : f ⟶ g}
   hom_ext_succ h₀ (hom_ext₂ h₁ h₂ h₃)
 
 /-- Constructor for isomorphisms in `ComposableArrows C 3`. -/
-@[simps]
+@[simps!]
 def isoMk₃ {f g : ComposableArrows C 3}
     (app₀ : f.obj' 0 ≅ g.obj' 0) (app₁ : f.obj' 1 ≅ g.obj' 1) (app₂ : f.obj' 2 ≅ g.obj' 2)
     (app₃ : f.obj' 3 ≅ g.obj' 3)
     (w₀ : f.map' 0 1 ≫ app₁.hom = app₀.hom ≫ g.map' 0 1)
     (w₁ : f.map' 1 2 ≫ app₂.hom = app₁.hom ≫ g.map' 1 2)
-    (w₂ : f.map' 2 3 ≫ app₃.hom = app₂.hom ≫ g.map' 2 3) : f ≅ g where
-  hom := homMk₃ app₀.hom app₁.hom app₂.hom app₃.hom w₀ w₁ w₂
-  inv := homMk₃ app₀.inv app₁.inv app₂.inv app₃.inv
-    (by rw [← cancel_epi app₀.hom, ← reassoc_of% w₀, app₁.hom_inv_id,
-      comp_id, app₀.hom_inv_id_assoc])
-    (by rw [← cancel_epi app₁.hom, ← reassoc_of% w₁, app₂.hom_inv_id,
-      comp_id, app₁.hom_inv_id_assoc])
-    (by rw [← cancel_epi app₂.hom, ← reassoc_of% w₂, app₃.hom_inv_id,
-      comp_id, app₂.hom_inv_id_assoc])
+    (w₂ : f.map' 2 3 ≫ app₃.hom = app₂.hom ≫ g.map' 2 3) : f ≅ g :=
+  isoMkSucc app₀ (isoMk₂ app₁ app₂ app₃ w₁ w₂) w₀
 
 lemma ext₃ {f g : ComposableArrows C 3}
     (h₀ : f.obj' 0 = g.obj' 0) (h₁ : f.obj' 1 = g.obj' 1) (h₂ : f.obj' 2 = g.obj' 2)
@@ -766,7 +754,7 @@ lemma map'_inv_eq_inv_map' {n m : ℕ} (h : n + 1 ≤ m) {f g : ComposableArrows
   rw [← cancel_epi app.hom, ← reassoc_of% w, app'.hom_inv_id, comp_id, app.hom_inv_id_assoc]
 
 /-- Constructor for isomorphisms in `ComposableArrows C 4`. -/
-@[simps]
+@[simps!]
 def isoMk₄ {f g : ComposableArrows C 4}
     (app₀ : f.obj' 0 ≅ g.obj' 0) (app₁ : f.obj' 1 ≅ g.obj' 1) (app₂ : f.obj' 2 ≅ g.obj' 2)
     (app₃ : f.obj' 3 ≅ g.obj' 3) (app₄ : f.obj' 4 ≅ g.obj' 4)
@@ -774,13 +762,8 @@ def isoMk₄ {f g : ComposableArrows C 4}
     (w₁ : f.map' 1 2 ≫ app₂.hom = app₁.hom ≫ g.map' 1 2)
     (w₂ : f.map' 2 3 ≫ app₃.hom = app₂.hom ≫ g.map' 2 3)
     (w₃ : f.map' 3 4 ≫ app₄.hom = app₃.hom ≫ g.map' 3 4) :
-    f ≅ g where
-  hom := homMk₄ app₀.hom app₁.hom app₂.hom app₃.hom app₄.hom w₀ w₁ w₂ w₃
-  inv := homMk₄ app₀.inv app₁.inv app₂.inv app₃.inv app₄.inv
-    (by rw [map'_inv_eq_inv_map' (by valid) app₀ app₁ w₀])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₁ app₂ w₁])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₂ app₃ w₂])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₃ app₄ w₃])
+    f ≅ g :=
+  isoMkSucc app₀ (isoMk₃ app₁ app₂ app₃ app₄ w₁ w₂ w₃) w₀
 
 lemma ext₄ {f g : ComposableArrows C 4}
     (h₀ : f.obj' 0 = g.obj' 0) (h₁ : f.obj' 1 = g.obj' 1) (h₂ : f.obj' 2 = g.obj' 2)
@@ -845,7 +828,7 @@ lemma hom_ext₅ {f g : ComposableArrows C 5} {φ φ' : f ⟶ g}
   hom_ext_succ h₀ (hom_ext₄ h₁ h₂ h₃ h₄ h₅)
 
 /-- Constructor for isomorphisms in `ComposableArrows C 5`. -/
-@[simps]
+@[simps!]
 def isoMk₅ {f g : ComposableArrows C 5}
     (app₀ : f.obj' 0 ≅ g.obj' 0) (app₁ : f.obj' 1 ≅ g.obj' 1) (app₂ : f.obj' 2 ≅ g.obj' 2)
     (app₃ : f.obj' 3 ≅ g.obj' 3) (app₄ : f.obj' 4 ≅ g.obj' 4) (app₅ : f.obj' 5 ≅ g.obj' 5)
@@ -854,14 +837,8 @@ def isoMk₅ {f g : ComposableArrows C 5}
     (w₂ : f.map' 2 3 ≫ app₃.hom = app₂.hom ≫ g.map' 2 3)
     (w₃ : f.map' 3 4 ≫ app₄.hom = app₃.hom ≫ g.map' 3 4)
     (w₄ : f.map' 4 5 ≫ app₅.hom = app₄.hom ≫ g.map' 4 5) :
-    f ≅ g where
-  hom := homMk₅ app₀.hom app₁.hom app₂.hom app₃.hom app₄.hom app₅.hom w₀ w₁ w₂ w₃ w₄
-  inv := homMk₅ app₀.inv app₁.inv app₂.inv app₃.inv app₄.inv app₅.inv
-    (by rw [map'_inv_eq_inv_map' (by valid) app₀ app₁ w₀])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₁ app₂ w₁])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₂ app₃ w₂])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₃ app₄ w₃])
-    (by rw [map'_inv_eq_inv_map' (by valid) app₄ app₅ w₄])
+    f ≅ g :=
+  isoMkSucc app₀ (isoMk₄ app₁ app₂ app₃ app₄ app₅ w₁ w₂ w₃ w₄) w₀
 
 lemma ext₅ {f g : ComposableArrows C 5}
     (h₀ : f.obj' 0 = g.obj' 0) (h₁ : f.obj' 1 = g.obj' 1) (h₂ : f.obj' 2 = g.obj' 2)

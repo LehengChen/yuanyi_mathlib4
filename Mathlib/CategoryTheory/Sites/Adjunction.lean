@@ -89,16 +89,9 @@ lemma preservesSheafification_of_adjunction (adj : G ⊣ F) :
     rw [MorphismProperty.inverseImage_iff]
     dsimp
     intro R hR
-    rw [← ((adj.whiskerRight Cᵒᵖ).homEquiv P R).comp_bijective]
-    convert (((adj.whiskerRight Cᵒᵖ).homEquiv Q R).trans
-      (hf.homEquiv (R ⋙ F) ((sheafCompose J F).obj ⟨R, hR⟩).property)).bijective
-    ext g X
-    -- The rest of this proof was
-    -- `dsimp [Adjunction.whiskerRight, Adjunction.mkOfUnitCounit]; simp` before https://github.com/leanprover-community/mathlib4/pull/16317.
-    dsimp
-    rw [← NatTrans.comp_app]
-    congr
-    exact Adjunction.homEquiv_naturality_left _ _ _
+    simpa using
+      (((adj.whiskerRight Cᵒᵖ).map_comp_bijective_iff f R).2
+        ((hf.homEquiv (R ⋙ F) ((sheafCompose J F).obj ⟨R, hR⟩).property).bijective))
 
 instance [G.IsLeftAdjoint] : J.PreservesSheafification G :=
   preservesSheafification_of_adjunction J (Adjunction.ofIsLeftAdjoint G)

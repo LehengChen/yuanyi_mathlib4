@@ -76,32 +76,23 @@ lemma exists_lift_of_mono (X : C) (Y : Action FintypeCat.{u} (Aut F))
   obtain ⟨ι, hf, f, t, hc⟩ := has_decomp_connected_components' Y
   let i' (j : ι) : f j ⟶ (functorToAction F).obj X := Sigma.ι f j ≫ t.hom ≫ i
   choose gZ gf gu _ _ h using fun i ↦ exists_lift_of_mono_of_isConnected F X (f i) (i' i)
-  let is2 : (functorToAction F).obj (∐ gZ) ≅ ∐ fun i => (functorToAction F).obj (gZ i) :=
-    PreservesCoproduct.iso (functorToAction F) gZ
-  let u' : ∐ f ≅ ∐ fun i => (functorToAction F).obj (gZ i) := Sigma.mapIso gu
-  have heq : (functorToAction F).map (Sigma.desc gf) = (t.symm ≪≫ u' ≪≫ is2.symm).inv ≫ i := by
-    simp only [Iso.trans_inv, Iso.symm_inv, Category.assoc]
+  let u : Y ≅ (functorToAction F).obj (∐ gZ) := t.symm ≪≫ Sigma.mapIso gu ≪≫
+    (PreservesCoproduct.iso (functorToAction F) gZ).symm
+  have heq : (functorToAction F).map (Sigma.desc gf) = u.inv ≫ i := by
+    simp only [u, Iso.trans_inv, Iso.symm_inv, Category.assoc]
     rw [← Iso.inv_comp_eq]
-    refine Sigma.hom_ext _ _ (fun j ↦ ?_)
-    suffices (functorToAction F).map (gf j) = (gu j).inv ≫ i' j by
-      simpa [is2, u']
-    simp only [h, Iso.inv_hom_id_assoc]
-  refine ⟨∐ gZ, Sigma.desc gf, t.symm ≪≫ u' ≪≫ is2.symm, ?_, by simp [heq]⟩
-  · exact mono_of_mono_map (functorToAction F) (heq ▸ mono_comp _ _)
+    cat_disch
+  exact ⟨∐ gZ, Sigma.desc gf, u, mono_of_mono_map (functorToAction F) (heq ▸ mono_comp _ _),
+    by simp [heq]⟩
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The by a fiber functor `F : C ⥤ FintypeCat` induced functor `functorToAction F` to
 finite `Aut F`-sets is full. -/
 instance functorToAction_full : Functor.Full (functorToAction F) where
   map_surjective {X Y} f := by
-    let u : (functorToAction F).obj X ⟶ (functorToAction F).obj X ⨯ (functorToAction F).obj Y :=
-      prod.lift (𝟙 _) f
     let i : (functorToAction F).obj X ⟶ (functorToAction F).obj (X ⨯ Y) :=
-      u ≫ (PreservesLimitPair.iso (functorToAction F) X Y).inv
-    have : Mono i := by
-      have : Mono (u ≫ prod.fst) := prod.lift_fst (𝟙 _) f ▸ inferInstance
-      have : Mono u := mono_of_mono u prod.fst
-      apply mono_comp u _
+      prod.lift (𝟙 _) f ≫ (PreservesLimitPair.iso (functorToAction F) X Y).inv
+    have : Mono i := by infer_instance
     obtain ⟨Z, g, v, _, hvgi⟩ := exists_lift_of_mono F (Limits.prod X Y)
       ((functorToAction F).obj X) i
     let ψ : Z ⟶ X := g ≫ prod.fst
@@ -109,14 +100,14 @@ instance functorToAction_full : Functor.Full (functorToAction F) where
     have : IsIso ((functorToAction F).map ψ) := by
       simp only [map_comp, hgvi, Category.assoc, ψ]
       have : IsIso (i ≫ (functorToAction F).map prod.fst) := by
-        suffices h : IsIso (𝟙 ((functorToAction F).obj X)) by simpa [i, u]
+        suffices h : IsIso (𝟙 ((functorToAction F).obj X)) by simpa [i]
         infer_instance
       apply IsIso.comp_isIso
     have : IsIso ψ := isIso_of_reflects_iso ψ (functorToAction F)
     use inv ψ ≫ g ≫ prod.snd
     rw [← cancel_epi ((functorToAction F).map ψ)]
     ext (z : F.obj Z)
-    simp [-FintypeCat.comp_apply, -Action.comp_hom, i, u, ψ, hgvi]
+    simp [-FintypeCat.comp_apply, -Action.comp_hom, i, ψ, hgvi]
 
 end PreGaloisCategory
 

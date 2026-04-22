@@ -257,28 +257,21 @@ theorem IsPushout.isVanKampen_inl {W E X Z : C} (c : BinaryCofan W E) [FinitaryE
 theorem IsPushout.IsVanKampen.isPullback_of_mono_left [Mono f] {H : IsPushout f g h i}
     (H' : H.IsVanKampen) : IsPullback f g h i :=
   ((H' (𝟙 _) g g (𝟙 Y) (𝟙 _) f (𝟙 _) i (IsKernelPair.id_of_mono f)
-      (IsPullback.of_vert_isIso ⟨by simp⟩) H.1.flip ⟨rfl⟩ ⟨by simp⟩).mp
-    (IsPushout.of_horiz_isIso ⟨by simp⟩)).1.flip
+      IsPullback.of_id_snd H.1.flip ⟨rfl⟩ ⟨by simp⟩).mp IsPushout.of_id_fst).1.flip
 
 theorem IsPushout.IsVanKampen.isPullback_of_mono_right [Mono g] {H : IsPushout f g h i}
     (H' : H.IsVanKampen) : IsPullback f g h i :=
-  ((H' f (𝟙 _) (𝟙 _) f (𝟙 _) (𝟙 _) g h (IsPullback.of_vert_isIso ⟨by simp⟩)
-      (IsKernelPair.id_of_mono g) ⟨rfl⟩ H.1 ⟨by simp⟩).mp
-    (IsPushout.of_vert_isIso ⟨by simp⟩)).2
+  (H'.flip.isPullback_of_mono_left (f := g) (g := f) (h := i) (i := h)).flip
 
 theorem IsPushout.IsVanKampen.mono_of_mono_left [Mono f] {H : IsPushout f g h i}
     (H' : H.IsVanKampen) : Mono i :=
   IsKernelPair.mono_of_isIso_fst
     ((H' (𝟙 _) g g (𝟙 Y) (𝟙 _) f (𝟙 _) i (IsKernelPair.id_of_mono f)
-        (IsPullback.of_vert_isIso ⟨by simp⟩) H.1.flip ⟨rfl⟩ ⟨by simp⟩).mp
-      (IsPushout.of_horiz_isIso ⟨by simp⟩)).2
+        IsPullback.of_id_snd H.1.flip ⟨rfl⟩ ⟨by simp⟩).mp IsPushout.of_id_fst).2
 
 theorem IsPushout.IsVanKampen.mono_of_mono_right [Mono g] {H : IsPushout f g h i}
     (H' : H.IsVanKampen) : Mono h :=
-  IsKernelPair.mono_of_isIso_fst
-    ((H' f (𝟙 _) (𝟙 _) f (𝟙 _) (𝟙 _) g h (IsPullback.of_vert_isIso ⟨by simp⟩)
-        (IsKernelPair.id_of_mono g) ⟨rfl⟩ H.1 ⟨by simp⟩).mp
-      (IsPushout.of_vert_isIso ⟨by simp⟩)).1
+  H'.flip.mono_of_mono_left (f := g) (g := f) (h := i) (i := h)
 
 /-- A category is adhesive if it has pushouts and pullbacks along monomorphisms,
 and such pushouts are van Kampen. -/

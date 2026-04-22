@@ -48,15 +48,10 @@ variable [F.PreservesFiniteEffectiveEpiFamilies] [F.ReflectsFiniteEffectiveEpiFa
 set_option backward.isDefEq.respectTransparency false in
 instance : F.IsCoverDense (coherentTopology _) := by
   refine F.isCoverDense_of_generate_singleton_functor_π_mem _ fun B ↦ ⟨_, F.effectiveEpiOver B, ?_⟩
-  apply Coverage.Saturate.of
-  refine ⟨Unit, inferInstance, fun _ => F.effectiveEpiOverObj B,
-    fun _ => F.effectiveEpiOver B, ?_, ?_⟩
-  · funext; ext -- Do we want `Presieve.ext`?
-    refine ⟨fun ⟨⟩ ↦ ⟨()⟩, ?_⟩
-    rintro ⟨⟩
-    simp
-  · rw [← effectiveEpi_iff_effectiveEpiFamily]
-    infer_instance
+  exact coherentTopology.mem_sieves_of_hasEffectiveEpiFamily _ ⟨Unit, inferInstance,
+    fun _ => F.effectiveEpiOverObj B, fun _ => F.effectiveEpiOver B,
+    by rw [← effectiveEpi_iff_effectiveEpiFamily]; infer_instance,
+    fun _ => Sieve.le_generate _ _ _ (Presieve.singleton_self _)⟩
 
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_effectiveEpiFamily_iff_mem_induced (X : C) (S : Sieve X) :
@@ -155,12 +150,8 @@ variable [F.PreservesEffectiveEpis] [F.ReflectsEffectiveEpis] [F.Full] [F.Faithf
 set_option backward.isDefEq.respectTransparency false in
 instance : F.IsCoverDense (regularTopology _) := by
   refine F.isCoverDense_of_generate_singleton_functor_π_mem _ fun B ↦ ⟨_, F.effectiveEpiOver B, ?_⟩
-  apply Coverage.Saturate.of
-  refine ⟨F.effectiveEpiOverObj B, F.effectiveEpiOver B, ?_, inferInstance⟩
-  funext; ext -- Do we want `Presieve.ext`?
-  refine ⟨fun ⟨⟩ ↦ ⟨()⟩, ?_⟩
-  rintro ⟨⟩
-  simp
+  exact regularTopology.mem_sieves_of_hasEffectiveEpi _ ⟨_, F.effectiveEpiOver B, inferInstance,
+    Sieve.le_generate _ _ _ (Presieve.singleton_self _)⟩
 
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_effectiveEpi_iff_mem_induced (X : C) (S : Sieve X) :

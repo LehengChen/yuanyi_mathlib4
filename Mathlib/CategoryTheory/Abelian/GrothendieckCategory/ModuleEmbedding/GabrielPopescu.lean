@@ -98,13 +98,9 @@ theorem kernel_ι_d_comp_d {G : C} (hG : IsSeparator G) {A B : C} {M : ModuleCat
 theorem exists_d_comp_eq_d {G : C} (hG : IsSeparator G) {A} (B : C) [Injective B]
     {M : ModuleCat (End G)ᵐᵒᵖ} (g : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ A)) (hg : Mono g)
     (f : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ B)) : ∃ (l : A ⟶ B), d g ≫ l = d f := by
-  let l₁ : image (d g) ⟶ B := epiDesc (factorThruImage (d g)) (d f) (by
-    rw [← kernelFactorThruImage_hom_comp_ι, Category.assoc, kernel_ι_d_comp_d hG _ hg, comp_zero])
-  let l₂ : A ⟶ B := Injective.factorThru l₁ (Limits.image.ι (d g))
-  refine ⟨l₂, ?_⟩
-  simp only [l₂, l₁]
-  conv_lhs => congr; rw [← Limits.image.fac (d g)]
-  simp [-Limits.image.fac]
+  have h := ShortComplex.exact_kernel (d g)
+  exact ⟨h.descToInjective (d f) (kernel_ι_d_comp_d hG _ hg _), by
+    simpa using h.comp_descToInjective (d f) (kernel_ι_d_comp_d hG _ hg _)⟩
 
 end GabrielPopescuAux
 

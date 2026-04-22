@@ -66,13 +66,8 @@ def spanUnop {X Y Z : Cᵒᵖ} (f : X ⟶ Z) (g : Y ⟶ Z) :
 @[simps!]
 def opCospan {X Y Z : C} (f : X ⟶ Z) (g : Y ⟶ Z) :
     (cospan f g).op ≅ walkingCospanOpEquiv.functor ⋙ span f.op g.op :=
-  calc
-    (cospan f g).op ≅ 𝟭 _ ⋙ (cospan f g).op := .refl _
-    _ ≅ (walkingCospanOpEquiv.functor ⋙ walkingCospanOpEquiv.inverse) ⋙ (cospan f g).op :=
-      isoWhiskerRight walkingCospanOpEquiv.unitIso _
-    _ ≅ walkingCospanOpEquiv.functor ⋙ walkingCospanOpEquiv.inverse ⋙ (cospan f g).op :=
-      Functor.associator _ _ _
-    _ ≅ walkingCospanOpEquiv.functor ⋙ span f.op g.op := isoWhiskerLeft _ (spanOp f g).symm
+  (walkingCospanOpEquiv.funInvIdAssoc (cospan f g).op).symm ≪≫
+    isoWhiskerLeft walkingCospanOpEquiv.functor (spanOp f g).symm
 
 /-- The canonical isomorphism relating `Cospan f.op g.op` and `(Span f g).op` -/
 @[simps!]
@@ -98,13 +93,8 @@ def cospanUnop {X Y Z : Cᵒᵖ} (f : X ⟶ Y) (g : X ⟶ Z) :
 @[simps!]
 def opSpan {X Y Z : C} (f : X ⟶ Y) (g : X ⟶ Z) :
     (span f g).op ≅ walkingSpanOpEquiv.functor ⋙ cospan f.op g.op :=
-  calc
-    (span f g).op ≅ 𝟭 _ ⋙ (span f g).op := .refl _
-    _ ≅ (walkingSpanOpEquiv.functor ⋙ walkingSpanOpEquiv.inverse) ⋙ (span f g).op :=
-      isoWhiskerRight walkingSpanOpEquiv.unitIso _
-    _ ≅ walkingSpanOpEquiv.functor ⋙ walkingSpanOpEquiv.inverse ⋙ (span f g).op :=
-      Functor.associator _ _ _
-    _ ≅ walkingSpanOpEquiv.functor ⋙ cospan f.op g.op := isoWhiskerLeft _ (cospanOp f g).symm
+  (walkingSpanOpEquiv.funInvIdAssoc (span f g).op).symm ≪≫
+    isoWhiskerLeft walkingSpanOpEquiv.functor (cospanOp f g).symm
 
 namespace PushoutCocone
 
@@ -187,29 +177,19 @@ def unopOpIso {X Y Z : Cᵒᵖ} {f : X ⟶ Y} {g : X ⟶ Z} (c : PushoutCocone f
 in the opposite category is a limit cone. -/
 noncomputable -- just for performance; compilation takes several seconds
 def isColimitEquivIsLimitOp {X Y Z : C} {f : X ⟶ Y} {g : X ⟶ Z} (c : PushoutCocone f g) :
-    IsColimit c ≃ IsLimit c.op := by
-  apply equivOfSubsingletonOfSubsingleton
-  · intro h
-    exact (IsLimit.postcomposeHomEquiv _ _).invFun
-      ((IsLimit.whiskerEquivalenceEquiv walkingSpanOpEquiv.symm).toFun h.op)
-  · intro h
-    exact (IsColimit.equivIsoColimit c.opUnopIso).toFun
-      (((IsLimit.postcomposeHomEquiv _ _).invFun
-        ((IsLimit.whiskerEquivalenceEquiv _).toFun h)).unop)
+    IsColimit c ≃ IsLimit c.op :=
+  (CategoryTheory.Limits.isColimitEquivIsLimitOp (t := c)).trans
+    ((IsLimit.whiskerEquivalenceEquiv walkingSpanOpEquiv.symm).trans
+      (IsLimit.postcomposeHomEquiv (cospanOp f g).symm _).symm)
 
 /-- A pushout cone is a colimit cocone in `Cᵒᵖ` if and only if the corresponding pullback cone
 in `C` is a limit cone. -/
 noncomputable -- just for performance; compilation takes several seconds
 def isColimitEquivIsLimitUnop {X Y Z : Cᵒᵖ} {f : X ⟶ Y} {g : X ⟶ Z} (c : PushoutCocone f g) :
-    IsColimit c ≃ IsLimit c.unop := by
-  apply equivOfSubsingletonOfSubsingleton
-  · intro h
-    exact ((IsColimit.precomposeHomEquiv _ _).invFun
-      ((IsColimit.whiskerEquivalenceEquiv _).toFun h)).unop
-  · intro h
-    exact (IsColimit.equivIsoColimit c.unopOpIso).toFun
-      ((IsColimit.precomposeHomEquiv _ _).invFun
-      ((IsColimit.whiskerEquivalenceEquiv walkingCospanOpEquiv.symm).toFun h.op))
+    IsColimit c ≃ IsLimit c.unop :=
+  (IsColimit.whiskerEquivalenceEquiv walkingCospanOpEquiv).trans
+    ((IsColimit.precomposeHomEquiv (opCospan f.unop g.unop) _).symm.trans
+      (equivOfSubsingletonOfSubsingleton IsColimit.unop IsLimit.op))
 
 end PushoutCocone
 

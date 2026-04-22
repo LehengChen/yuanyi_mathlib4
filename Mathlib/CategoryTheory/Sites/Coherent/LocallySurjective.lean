@@ -46,16 +46,12 @@ lemma regularTopology.isLocallySurjective_iff [Preregular C] {F G : Cᵒᵖ ⥤ 
         (x : ToType (F.obj ⟨X'⟩)),
         f.app ⟨X'⟩ x = G.map ⟨φ⟩ y) := by
   constructor
-  · intro ⟨h⟩ X y
-    specialize h y
-    rw [regularTopology.mem_sieves_iff_hasEffectiveEpi] at h
-    obtain ⟨X', π, h, h'⟩ := h
-    exact ⟨X', π, h, h'⟩
-  · intro h
-    refine ⟨fun y ↦ ?_⟩
-    obtain ⟨X', π, h, h'⟩ := h _ y
-    rw [regularTopology.mem_sieves_iff_hasEffectiveEpi]
-    exact ⟨X', π, h, h'⟩
+  · intro h X y
+    simpa [Presheaf.imageSieve] using
+      (regularTopology.mem_sieves_iff_hasEffectiveEpi (Presheaf.imageSieve f y)).1 (h.1 y)
+  · exact fun h ↦ ⟨fun y ↦ by
+      apply (regularTopology.mem_sieves_iff_hasEffectiveEpi (Presheaf.imageSieve f y)).2
+      simpa [Presheaf.imageSieve] using h _ y⟩
 
 set_option backward.isDefEq.respectTransparency false in
 lemma extensiveTopology.surjective_of_isLocallySurjective_sheaf_of_types [FinitaryPreExtensive C]

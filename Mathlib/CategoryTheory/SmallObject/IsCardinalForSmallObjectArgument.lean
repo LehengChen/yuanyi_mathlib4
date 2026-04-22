@@ -11,7 +11,7 @@ public import Mathlib.CategoryTheory.SmallObject.TransfiniteCompositionLifting
 public import Mathlib.CategoryTheory.MorphismProperty.IsSmall
 public import Mathlib.AlgebraicTopology.RelativeCellComplex.Basic
 public import Mathlib.SetTheory.Cardinal.Regular
-public import Mathlib.CategoryTheory.MorphismProperty.Factorization
+public import Mathlib.CategoryTheory.MorphismProperty.RetractArgument
 
 /-!
 # Cardinals that are suitable for the small object argument
@@ -432,15 +432,11 @@ lemma πObj_naturality {f g : Arrow C} (φ : f ⟶ g) :
   let e₁ := asIso ((ιIteration I κ).app (Arrow.mk f.hom)).right
   let e₂ := asIso ((ιIteration I κ).app (Arrow.mk g.hom)).right
   change _ ≫ _ ≫ e₂.inv = (_ ≫ e₁.inv) ≫ _
-  have h₁ := ((iteration I κ).map φ).w =≫ e₂.inv
   have h₂ : φ.right ≫ e₂.hom = e₁.hom ≫ ((iteration I κ).map φ).right :=
     ((Functor.whiskerRight (ιIteration I κ) Arrow.rightFunc).naturality φ)
-  dsimp at h₁
-  rw [assoc] at h₁
-  apply h₁.trans
-  simp only [← cancel_mono e₂.hom, assoc, e₂.inv_hom_id, h₂, e₁.inv_hom_id_assoc]
-  rw [← assoc]
-  apply comp_id
+  rw [← cancel_mono e₂.hom]
+  simpa only [objMap, assoc, e₂.inv_hom_id, comp_id, h₂, e₁.inv_hom_id_assoc]
+    using ((iteration I κ).map φ).w
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The functorial factorization `ιObj I κ f ≫ πObj I κ f.hom = f`
@@ -468,15 +464,11 @@ of maps in `I`. -/
 lemma llp_rlp_of_isCardinalForSmallObjectArgument' :
     I.rlp.llp = (transfiniteCompositionsOfShape
       (coproducts.{w} I).pushouts κ.ord.ToType).retracts := by
-  refine le_antisymm ?_
+  refine le_antisymm (fun X Y f hf ↦ ?_)
     (retracts_transfiniteCompositionsOfShape_pushouts_coproducts_le_llp_rlp I κ.ord.ToType)
-  intro X Y f hf
-  have sq : CommSq (ιObj I κ f) f (πObj I κ f) (𝟙 _) := ⟨by simp⟩
   have := hf _ (rlp_πObj I κ f)
-  refine ⟨_, _, _, ?_, transfiniteCompositionsOfShape_ιObj I κ f⟩
-  exact
-    { i := Arrow.homMk (𝟙 _) sq.lift
-      r := Arrow.homMk (𝟙 _) (πObj I κ f) }
+  exact ⟨_, _, _, RetractArrow.ofLeftLiftingProperty (ιObj_πObj I κ f),
+    transfiniteCompositionsOfShape_ιObj I κ f⟩
 
 /-- If `κ` is a suitable cardinal for the small object argument for `I : MorphismProperty C`,
 then the class `I.rlp.llp` is exactly the class of morphisms that are retracts

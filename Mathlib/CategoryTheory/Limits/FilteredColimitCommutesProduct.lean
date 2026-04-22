@@ -134,30 +134,18 @@ theorem Types.isIso_colimitPointwiseProductToProductColimit (F : ∀ i, I i ⥤ 
     IsIso (colimitPointwiseProductToProductColimit F) := by
   -- We follow the proof in [Kashiwara2006], Prop. 3.1.11(ii)
   refine (isIso_iff_bijective _).2 ⟨fun y y' hy => ?_, fun x => ?_⟩
-  · obtain ⟨ky, yk₀, hyk₀⟩ := Types.jointly_surjective' y
-    obtain ⟨ky', yk₀', hyk₀'⟩ := Types.jointly_surjective' y'
-    let k := IsFiltered.max ky ky'
-    let yk : (pointwiseProduct F).obj k :=
-      (pointwiseProduct F).map (IsFiltered.leftToMax ky ky') yk₀
-    let yk' : (pointwiseProduct F).obj k :=
-      (pointwiseProduct F).map (IsFiltered.rightToMax ky ky') yk₀'
-    obtain rfl : y = colimit.ι (pointwiseProduct F) k yk := by
-      simp only [k, yk, Types.Colimit.w_apply, hyk₀]
-    obtain rfl : y' = colimit.ι (pointwiseProduct F) k yk' := by
-      simp only [k, yk', Types.Colimit.w_apply, hyk₀']
+  · obtain ⟨k, yk, yk', rfl, rfl⟩ :=
+      Types.FilteredColimit.jointly_surjective_of_isColimit₂
+        (colimit.isColimit (pointwiseProduct F)) y y'
     dsimp only [pointwiseProduct_obj] at yk yk'
     have hch : ∀ (s : α), ∃ (i' : I s) (hi' : k s ⟶ i'),
         (F s).map hi' (Pi.π (fun s => (F s).obj (k s)) s yk) =
-          (F s).map hi' (Pi.π (fun s => (F s).obj (k s)) s yk') := by
-      intro s
-      have hy₁ := congrFun (ι_colimitPointwiseProductToProductColimit_π F k s) yk
-      have hy₂ := congrFun (ι_colimitPointwiseProductToProductColimit_π F k s) yk'
-      dsimp only [pointwiseProduct_obj, types_comp_apply] at hy₁ hy₂
-      rw [← hy, hy₁, Types.FilteredColimit.colimit_eq_iff] at hy₂
-      obtain ⟨i₀, f₀, g₀, h₀⟩ := hy₂
-      refine ⟨IsFiltered.coeq f₀ g₀, f₀ ≫ IsFiltered.coeqHom f₀ g₀, ?_⟩
-      conv_rhs => rw [IsFiltered.coeq_condition]
-      simp [h₀]
+          (F s).map hi' (Pi.π (fun s => (F s).obj (k s)) s yk') := fun s => by
+      have hys := congrArg (fun z => Pi.π (fun s => colimit (F s)) s z) hy
+      exact (Types.FilteredColimit.isColimit_eq_iff' (colimit.isColimit (F s)) _ _).1 <| by
+        simpa [pointwiseProduct_obj] using
+          (congrFun (ι_colimitPointwiseProductToProductColimit_π F k s) yk).symm.trans
+            (hys.trans (congrFun (ι_colimitPointwiseProductToProductColimit_π F k s) yk'))
     choose k' f hk' using hch
     apply Types.colimit_sound' f f
     exact Types.limit_ext' _ _ _ (fun ⟨s⟩ => by simpa using hk' _)

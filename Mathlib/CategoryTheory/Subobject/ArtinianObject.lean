@@ -122,12 +122,8 @@ instance [HasZeroObject C] : (isArtinianObject (C := C)).ContainsZero where
 
 lemma isArtinianObject_of_mono (i : X ⟶ Y) [Mono i] [IsArtinianObject Y] :
     IsArtinianObject X := by
-  rw [isArtinianObject_iff_antitone_chain_condition]
-  intro f
-  obtain ⟨n, hn⟩ := antitone_chain_condition_of_isArtinianObject
-    ⟨fun n ↦ (Subobject.map i).obj (f n),
-      fun _ _ h ↦ (Subobject.map i).monotone (f.2 h)⟩
-  exact ⟨n, fun m hm ↦ Subobject.map_obj_injective i (hn m hm)⟩
+  simpa only [isArtinianObject, ObjectProperty.is_iff] using StrictMono.wellFoundedLT <|
+    (Subobject.map i).monotone.strictMono_of_injective (Subobject.map_obj_injective i)
 
 instance : (isArtinianObject (C := C)).IsClosedUnderSubobjects where
   prop_of_mono f _ hY := by

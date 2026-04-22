@@ -144,16 +144,11 @@ noncomputable def lanAdjunction : L.lan ⊣ (whiskeringLeft C D H).obj L :=
   Adjunction.mkOfHomEquiv
     { homEquiv := fun F G => homEquivOfIsLeftKanExtension _ (L.lanUnit.app F) G
       homEquiv_naturality_left_symm := fun {F₁ F₂ G} f α =>
-        hom_ext_of_isLeftKanExtension _ (L.lanUnit.app F₁) _ _ (by
-          ext X
-          dsimp [homEquivOfIsLeftKanExtension]
-          rw [descOfIsLeftKanExtension_fac_app, NatTrans.comp_app, ← assoc]
-          have h := congr_app (L.lanUnit.naturality f) X
-          dsimp at h ⊢
-          rw [← h, assoc, descOfIsLeftKanExtension_fac_app])
-      homEquiv_naturality_right := fun {F G₁ G₂} β f => by
-        dsimp [homEquivOfIsLeftKanExtension]
-        rw [assoc] }
+        hom_ext_of_isLeftKanExtension _ (L.lanUnit.app F₁) _ _
+          (by simpa [homEquivOfIsLeftKanExtension] using (congrArg (fun e => e ≫
+            L.whiskerLeft ((L.lan.obj F₂).descOfIsLeftKanExtension
+              (L.lanUnit.app F₂) G α)) (L.lanUnit.naturality f)))
+      homEquiv_naturality_right := fun {F G₁ G₂} β f => by cat_disch }
 
 set_option backward.isDefEq.respectTransparency false in
 variable (H) in
@@ -197,11 +192,7 @@ noncomputable def lanCompColimIso [HasColimitsOfShape C H] [HasColimitsOfShape D
   Iso.symm <| NatIso.ofComponents
     (fun G ↦ (colimitIsoOfIsLeftKanExtension _ (L.lanUnit.app G)).symm)
     (fun f ↦ colimit.hom_ext (fun i ↦ by
-      dsimp
-      rw [ι_colimMap_assoc, ι_colimitIsoOfIsLeftKanExtension_inv,
-        ι_colimitIsoOfIsLeftKanExtension_inv_assoc, ι_colimMap, ← assoc, ← assoc]
-      congr 1
-      exact congr_app (L.lanUnit.naturality f) i))
+      simpa using congrArg (· ≫ colimit.ι _ (L.obj i)) (congr_app (L.lanUnit.naturality f) i)))
 
 end HasLeftKanExtension
 
@@ -340,16 +331,11 @@ noncomputable def ranAdjunction : (whiskeringLeft C D H).obj L ⊣ L.ran :=
     { homEquiv := fun F G =>
         (homEquivOfIsRightKanExtension (α := L.ranCounit.app G) _ F).symm
       homEquiv_naturality_right := fun {F G₁ G₂} β f ↦
-        hom_ext_of_isRightKanExtension _ (L.ranCounit.app G₂) _ _ (by
-        ext X
-        dsimp [homEquivOfIsRightKanExtension]
-        rw [liftOfIsRightKanExtension_fac_app, NatTrans.comp_app, assoc]
-        have h := congr_app (L.ranCounit.naturality f) X
-        dsimp at h ⊢
-        rw [h, liftOfIsRightKanExtension_fac_app_assoc])
-      homEquiv_naturality_left_symm := fun {F₁ F₂ G} β f ↦ by
-        dsimp [homEquivOfIsRightKanExtension]
-        rw [assoc] }
+        hom_ext_of_isRightKanExtension _ (L.ranCounit.app G₂) _ _
+          (by simpa [homEquivOfIsRightKanExtension] using (congrArg (fun e =>
+            L.whiskerLeft ((L.ran.obj G₁).liftOfIsRightKanExtension
+              (L.ranCounit.app G₁) F β) ≫ e) (L.ranCounit.naturality f)).symm)
+      homEquiv_naturality_left_symm := fun {F₁ F₂ G} β f ↦ by cat_disch }
 
 set_option backward.isDefEq.respectTransparency false in
 variable (H) in
@@ -393,11 +379,7 @@ noncomputable def ranCompLimIso (L : C ⥤ D) [∀ (G : C ⥤ H), L.HasRightKanE
   NatIso.ofComponents
     (fun G ↦ limitIsoOfIsRightKanExtension _ (L.ranCounit.app G))
     (fun f ↦ limit.hom_ext (fun i ↦ by
-      dsimp
-      rw [assoc, assoc, limMap_π, limitIsoOfIsRightKanExtension_hom_π_assoc,
-        limitIsoOfIsRightKanExtension_hom_π, limMap_π_assoc]
-      congr 1
-      exact congr_app (L.ranCounit.naturality f) i))
+      simpa using congrArg (limit.π _ (L.obj i) ≫ ·) (congr_app (L.ranCounit.naturality f) i)))
 
 end
 

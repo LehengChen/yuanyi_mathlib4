@@ -167,12 +167,7 @@ That is, a lax braided functor `F : C ⥤ D` induces a functor `CommMon C ⥤ Co
 -/
 @[simps!]
 def mapCommMon : CommMon C ⥤ CommMon D where
-  obj A :=
-    { F.mapMon.obj A.toMon with
-      comm :=
-        { mul_comm := by
-            dsimp
-            rw [← Functor.LaxBraided.braided_assoc, ← Functor.map_comp, IsCommMonObj.mul_comm] } }
+  obj A := letI : MonObj (F.obj A.X) := (F.mapMon.obj A.toMon).mon; { X := F.obj A.X }
   map f := CommMon.homMk (F.mapMon.map f.hom)
 
 @[simp]

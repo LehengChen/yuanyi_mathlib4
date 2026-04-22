@@ -85,11 +85,7 @@ instance {J : Type} [Finite J] {C : Type u₁} {D : Type u₂} [Category.{v₁} 
   let L₂ := (whiskeringRight (Discrete J) C D).obj L
   let L₁ := Functor.pi (fun (_ : J) => L)
   have : CatCommSq E.functor L₁ L₂ E'.functor :=
-    ⟨(Functor.rightUnitor _).symm ≪≫ isoWhiskerLeft _ E'.counitIso.symm ≪≫
-      Functor.associator _ _ _≪≫ isoWhiskerLeft _ ((Functor.associator _ _ _).symm ≪≫
-      isoWhiskerRight (by exact Iso.refl _) _) ≪≫ (Functor.associator _ _ _).symm ≪≫
-      isoWhiskerRight ((Functor.associator _ _ _).symm ≪≫
-      isoWhiskerRight E.unitIso.symm L₁) _ ≪≫ isoWhiskerRight L₁.leftUnitor _⟩
+    (CatCommSq.hInvEquiv E L₁ L₂ E').symm ⟨Iso.refl _⟩
   refine Functor.IsLocalization.of_equivalences L₁
     (MorphismProperty.pi (fun _ => W)) L₂ _ E E' ?_ ?_
   · intro X Y f hf

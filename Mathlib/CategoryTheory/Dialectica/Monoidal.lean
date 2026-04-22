@@ -47,16 +47,11 @@ set_option backward.isDefEq.respectTransparency false in
   f := prod.map f.f g.f
   F := π(prod.map π₁ π₁ ≫ f.F, prod.map π₂ π₂ ≫ g.F)
   le := by
-    simp only [tensorObjImpl, Subobject.inf_pullback]
-    apply inf_le_inf <;> rw [← Subobject.pullback_comp, ← Subobject.pullback_comp]
-    · have := (Subobject.pullback (prod.map π₁ π₁ :
-        (X₁.src ⨯ Y₁.src) ⨯ X₂.tgt ⨯ Y₂.tgt ⟶ _)).monotone (Hom.le f)
-      rw [← Subobject.pullback_comp, ← Subobject.pullback_comp] at this
-      convert this using 3 <;> simp
-    · have := (Subobject.pullback (prod.map π₂ π₂ :
-        (X₁.src ⨯ Y₁.src) ⨯ X₂.tgt ⨯ Y₂.tgt ⟶ _)).monotone (Hom.le g)
-      rw [← Subobject.pullback_comp, ← Subobject.pullback_comp] at this
-      convert this using 3 <;> simp
+    simpa [tensorObjImpl, Subobject.inf_pullback, ← Subobject.pullback_comp] using inf_le_inf
+      ((Subobject.pullback (prod.map π₁ π₁ :
+        (X₁.src ⨯ Y₁.src) ⨯ X₂.tgt ⨯ Y₂.tgt ⟶ _)).monotone (Hom.le f))
+      ((Subobject.pullback (prod.map π₂ π₂ :
+        (X₁.src ⨯ Y₁.src) ⨯ X₂.tgt ⨯ Y₂.tgt ⟶ _)).monotone (Hom.le g))
 
 /-- The unit for the tensor `X ⊗ Y` in `Dial C`. -/
 @[simps] def tensorUnitImpl : Dial C := { src := ⊤_ _, tgt := ⊤_ _, rel := ⊤ }

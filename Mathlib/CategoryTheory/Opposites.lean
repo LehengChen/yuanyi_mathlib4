@@ -822,14 +822,10 @@ variable (D : Type u₂) [Category.{v₂} D]
 def opUnopEquiv : (C ⥤ D)ᵒᵖ ≌ Cᵒᵖ ⥤ Dᵒᵖ where
   functor := opHom _ _
   inverse := opInv _ _
-  unitIso :=
-    NatIso.ofComponents (fun F => F.unop.opUnopIso.op)
-      (by
-        intro F G f
-        dsimp [opUnopIso]
-        rw [show f = f.unop.op by simp, ← op_comp, ← op_comp]
-        congr 1
-        cat_disch)
+  unitIso := NatIso.ofComponents (fun F => F.unop.opUnopIso.op) (by
+    intro F G f
+    apply Quiver.Hom.unop_inj
+    cat_disch)
   counitIso := NatIso.ofComponents fun F => F.unopOpIso
 
 /-- The equivalence of functor categories induced by `leftOp` and `rightOp`.
@@ -842,14 +838,10 @@ def leftOpRightOpEquiv : (Cᵒᵖ ⥤ D)ᵒᵖ ≌ C ⥤ Dᵒᵖ where
   inverse :=
     { obj := fun F => op F.leftOp
       map := fun η => η.leftOp.op }
-  unitIso :=
-    NatIso.ofComponents (fun F => F.unop.rightOpLeftOpIso.op)
-      (by
-        intro F G η
-        dsimp
-        rw [show η = η.unop.op by simp, ← op_comp, ← op_comp]
-        congr 1
-        cat_disch)
+  unitIso := NatIso.ofComponents (fun F => F.unop.rightOpLeftOpIso.op) (by
+    intro F G η
+    apply Quiver.Hom.unop_inj
+    cat_disch)
   counitIso := NatIso.ofComponents fun F => F.leftOpRightOpIso
 
 instance {F : C ⥤ D} [EssSurj F] : EssSurj F.op where

@@ -263,14 +263,9 @@ lemma mem_homologicalKernel_trW_iff {X Y : C} (f : X ⟶ Y) :
   have h₃ := fun n => F.homologySequence_epi_shift_map_mor₁_iff _ hT n
   dsimp at h₁ h₂ h₃ ⊢
   simp only [mem_homologicalKernel_iff, h₁, ← h₂, ← h₃]
-  constructor
-  · intro h n
-    obtain ⟨m, rfl⟩ : ∃ (m : ℤ), n = m + 1 := ⟨n - 1, by simp⟩
-    have := (h (m + 1)).1
-    have := (h m).2
-    apply isIso_of_mono_of_epi
-  · intros
-    constructor <;> infer_instance
+  simpa [isIso_iff_mono_and_epi, forall_and, and_comm, and_left_comm, and_assoc] using
+    (and_congr_right fun _ => (Function.Surjective.forall (f := fun n : ℤ => n + 1)
+      (fun n ↦ ⟨n - 1, by simp⟩) (p := fun n ↦ Mono ((F.shift n).map f))).symm)
 
 open ComposableArrows
 

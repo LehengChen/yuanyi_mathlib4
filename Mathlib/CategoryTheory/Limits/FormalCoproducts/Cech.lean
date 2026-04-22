@@ -64,18 +64,13 @@ noncomputable def isLimitPowerFan : IsLimit (U.powerFan α) :=
     (fun s m hm ↦ by
       obtain ⟨f, φ⟩ := m
       obtain rfl : f = fun i a ↦ (s.proj a).f i := by
-        ext i
-        dsimp
-        ext a
+        funext i a
         exact congr_fun (congr_arg FormalCoproduct.Hom.f (hm a)) i
-      ext i
-      · rfl
-      · dsimp
-        ext a
-        specialize hm a
-        rw [hom_ext_iff] at hm
-        obtain ⟨_, hm⟩ := hm
-        simpa using hm i)
+      refine hom_ext rfl ?_
+      intro i
+      dsimp
+      ext a
+      simpa using ((hom_ext_iff _ _).1 (hm a)).2 i)
 
 end
 
@@ -99,13 +94,7 @@ set_option backward.isDefEq.respectTransparency false in
 lemma powerMap_comp {U V W : FormalCoproduct.{w} C} (f : U ⟶ V) (g : V ⟶ W) (α : Type t)
     [HasProductsOfShape α C] :
     powerMap (f ≫ g) α = powerMap f α ≫ powerMap g α := by
-  ext
-  · cat_disch
-  · dsimp
-    ext
-    simp only [Category.comp_id, Category.assoc, Pi.map_π, Function.comp_apply,
-      Pi.map_π_assoc]
-    apply Pi.map_π
+  ext <;> simp [powerMap, Pi.map_comp_map, Function.comp_def]
 
 attribute [local simp] powerMap_comp
 

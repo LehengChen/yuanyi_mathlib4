@@ -80,23 +80,17 @@ lemma has_decomp_quotients (X : Action FintypeCat G)
   obtain ⟨ι, hf, f, u, hc⟩ := has_decomp_connected_components' X
   letI (i : ι) : TopologicalSpace (f i).V := ⊥
   haveI (i : ι) : DiscreteTopology (f i).V := ⟨rfl⟩
-  have (i : ι) : ContinuousSMul G (f i).V := ContinuousSMul.mk <| by
+  have (i : ι) : ContinuousSMul G (f i).V := by
     let r : f i ⟶ X := Sigma.ι f i ≫ u.hom
-    let r'' (p : G × (f i).V) : G × X.V := (p.1, r.hom p.2)
-    let q (p : G × X.V) : X.V := (X.ρ p.1).hom p.2
-    let q' (p : G × (f i).V) : (f i).V := ((f i).ρ p.1).hom p.2
-    have heq : q ∘ r'' = r.hom ∘ q' := by
-      ext (p : G × (f i).V)
-      exact (ConcreteCategory.congr_hom (r.comm p.1) p.2).symm
     have hrinj : Function.Injective r.hom :=
       (ConcreteCategory.mono_iff_injective_of_preservesPullback r).mp <| mono_comp _ _
-    let t₁ : TopologicalSpace (G × (f i).V) := inferInstance
-    change @Continuous _ _ _ ⊥ q'
-    have : TopologicalSpace.induced r.hom inferInstance = ⊥ := by
+    have htop : Topology.IsInducing r.hom := by
+      refine ⟨?_⟩
+      change ⊥ = TopologicalSpace.induced r.hom inferInstance
+      symm
       rw [← le_bot_iff]
       exact fun s _ ↦ ⟨r.hom '' s, ⟨isOpen_discrete (r.hom '' s), Set.preimage_image_eq s hrinj⟩⟩
-    rw [← this, continuous_induced_rng, ← heq]
-    exact Continuous.comp continuous_smul (by fun_prop)
+    exact htop.continuousSMul continuous_id (fun {g x} ↦ ConcreteCategory.congr_hom (r.comm g) x)
   have (i : ι) : ∃ (U : OpenSubgroup (G)), (Nonempty ((f i) ≅ G ⧸ₐ U.toSubgroup)) := by
     obtain ⟨(x : (f i).V)⟩ := nonempty_fiber_of_isConnected (forget₂ _ _) (f i)
     let U : OpenSubgroup (G) := ⟨MulAction.stabilizer (G) x, stabilizer_isOpen (G) x⟩
@@ -240,13 +234,9 @@ lemma exists_lift_of_quotient_openSubgroup (V : OpenSubgroup (Aut F)) :
   have hUnormal : U.toSubgroup.Normal := stabilizer_normal_of_isGalois F A a
   have h1 (σ : Aut F) (σinU : σ ∈ U) : σ.hom.app A = 𝟙 (F.obj A) := by
     have hi : (Aut F ⧸ₐ MulAction.stabilizer (Aut F) a).ρ σ = 𝟙 _ := by
-      refine FintypeCat.hom_ext _ _ (fun x ↦ ?_)
-      induction x using Quotient.inductionOn with | _ τ
-      change ⟦σ * τ⟧ = ⟦τ⟧
-      apply Quotient.sound
-      apply (QuotientGroup.leftRel_apply).mpr
-      simp only [mul_inv_rev]
-      exact Subgroup.Normal.conj_mem hUnormal _ (Subgroup.inv_mem U.toSubgroup σinU) _
+      refine FintypeCat.hom_ext _ _ fun x ↦ Quotient.inductionOn x fun τ ↦ ?_
+      simpa using (QuotientGroup.eq.2 <| by
+        simpa [mul_inv_rev] using hUnormal.conj_mem σ⁻¹ (U.inv_mem σinU) _)
     simp [← cancel_mono u.hom.hom, show σ.hom.app A ≫ u.hom.hom = _ from u.hom.comm σ, hi]
   have h2 (σ : Aut F) (σinU : σ ∈ U) : ∀ X : I, σ.hom.app X = 𝟙 (F.obj X) := by
     intro ⟨X, hX⟩

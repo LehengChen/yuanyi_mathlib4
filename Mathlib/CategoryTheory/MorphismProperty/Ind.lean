@@ -207,18 +207,13 @@ lemma IsStableUnderComposition.ind_of_preIndSpreads
     let hc' : IsColimit c' :=
       IsColimit.extendIso _ <| isColimitOfPreserves _ (ht₁.underPost j₁)
     let s' : (Functor.const (Under j₁)).obj X ⟶ D' :=
-      { app k := s₁.app k.right ≫ pushout.inl _ _
-        naturality k l a := by
-          have h2 := s₁.naturality a.right
-          simp only [Functor.const_obj_obj, Functor.const_obj_map, Category.id_comp] at h2
-          simp [h2, D'] }
-    obtain ⟨j₃, v, hcomp', hq⟩ := IsFinitelyPresentable.exists_hom_of_isColimit_under
-        hc' p s' q <| fun k ↦ by
+      (CategoryTheory.Under.forget j₁).whiskerLeft s₁ ≫ Functor.whiskerRight
+        ((Under.post D₁).whiskerLeft (Under.mapPushoutAdj f').unit) (CategoryTheory.Under.forget _)
+    obtain ⟨j₃, v, hcomp', hq⟩ := exists_hom_of_isFinitelyPresentable hc' hp s' q <| fun k ↦ by
       simp [c', s', hcomp, reassoc_of% (h₁ k.right).right]
     refine ⟨D'.obj j₃, v, c'.ι.app j₃ ≫ t₂.app j₂, ?_, ?_⟩
     · rwa [reassoc_of% hq]
-    · rw [hcomp']
-      exact P.comp_mem _ _ (h₁ _).left (P.pushout_inl _ _ hf')
+    · simpa [hcomp', s'] using P.comp_mem _ _ (h₁ _).left (P.pushout_inl _ _ hf')
 
 /-- If `P` ind-spreads and all under categories are finitely accessible, `ind P`
 is multiplicative if `P` is. -/

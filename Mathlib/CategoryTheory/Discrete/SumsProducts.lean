@@ -75,14 +75,10 @@ instance prod : IsDiscrete (C × D) where
 
 /-- A product of discrete categories is discrete. -/
 instance sum : IsDiscrete (C ⊕ C') where
-  subsingleton x y :=
-    { allEq f g := by
-        cases f <;> cases g
-        · case inl x y f g => rw [((by assumption : IsDiscrete C).subsingleton x y).allEq f g]
-        · case inr x y f g => rw [((by assumption : IsDiscrete C').subsingleton x y).allEq f g] }
+  subsingleton x y := ⟨fun f g ↦ by
+    induction f using Sum.homInduction <;> cases g <;> congr <;> exact Subsingleton.elim _ _⟩
   eq_of_hom {x y} f := by
-    cases f with
-    | inl x y f => rw [(by assumption : IsDiscrete C).eq_of_hom f]
-    | inr x y f => rw [(by assumption : IsDiscrete C').eq_of_hom f]
+    induction f using Sum.homInduction <;>
+      obtain rfl := IsDiscrete.eq_of_hom (by assumption) <;> rfl
 
 end CategoryTheory.IsDiscrete

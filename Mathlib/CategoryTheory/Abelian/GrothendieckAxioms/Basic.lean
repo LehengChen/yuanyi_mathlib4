@@ -493,10 +493,9 @@ lemma CountableAB4.of_hasExactColimitsOfShape_nat_and_finite [HasCountableCoprod
   ofShape J := by
     by_cases h : Finite J
     · infer_instance
-    · have : Infinite J := ⟨h⟩
-      let _ := Encodable.ofCountable J
-      let _ := Denumerable.ofEncodableOfInfinite J
-      exact hasExactColimitsOfShape_of_final C (Discrete.equivalence (Denumerable.eqv J)).inverse
+    · haveI : Infinite J := ⟨h⟩
+      exact HasExactColimitsOfShape.of_domain_equivalence C
+        (Discrete.equivalence (Classical.choice (inferInstance : Nonempty (J ≃ ℕ)))).symm
 
 /--
 Checking exactness of limits of shape `Discrete ℕ` and `Discrete J` for finite `J` is enough for
@@ -509,10 +508,9 @@ lemma CountableAB4Star.of_hasExactLimitsOfShape_nat_and_finite [HasCountableProd
   ofShape J := by
     by_cases h : Finite J
     · infer_instance
-    · have : Infinite J := ⟨h⟩
-      let _ := Encodable.ofCountable J
-      let _ := Denumerable.ofEncodableOfInfinite J
-      exact hasExactLimitsOfShape_of_initial C (Discrete.equivalence (Denumerable.eqv J)).inverse
+    · haveI : Infinite J := ⟨h⟩
+      exact HasExactLimitsOfShape.of_domain_equivalence C
+        (Discrete.equivalence (Classical.choice (inferInstance : Nonempty (J ≃ ℕ)))).symm
 
 section EpiMono
 
@@ -536,8 +534,7 @@ category has finite biproducts and finite limits.
 -/
 lemma CountableAB4.of_hasExactColimitsOfShape_nat [HasFiniteLimits C] [HasCountableCoproducts C]
     [HasExactColimitsOfShape (Discrete ℕ) C] : CountableAB4 C := by
-  apply +allowSynthFailures CountableAB4.of_hasExactColimitsOfShape_nat_and_finite
-  exact fun _ ↦ inferInstance
+  exact @CountableAB4.of_hasExactColimitsOfShape_nat_and_finite _ _ _ _ (fun _ _ ↦ inferInstance) _
 
 /--
 Checking exact limits of shape `Discrete ℕ` is enough for countable AB4*, provided that the
@@ -545,8 +542,7 @@ category has finite biproducts and finite colimits.
 -/
 lemma CountableAB4Star.of_hasExactLimitsOfShape_nat [HasFiniteColimits C]
     [HasCountableProducts C] [HasExactLimitsOfShape (Discrete ℕ) C] : CountableAB4Star C := by
-  apply +allowSynthFailures CountableAB4Star.of_hasExactLimitsOfShape_nat_and_finite
-  exact fun _ ↦ inferInstance
+  exact @CountableAB4Star.of_hasExactLimitsOfShape_nat_and_finite _ _ _ _ (fun _ _ ↦ inferInstance) _
 
 end
 

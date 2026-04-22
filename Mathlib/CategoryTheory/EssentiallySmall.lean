@@ -285,25 +285,17 @@ theorem essentiallySmall_iff_of_thin {C : Type u} [Category.{v} C] [Quiver.IsThi
 instance [Small.{w} C] : Small.{w} (Discrete C) := small_map discreteEquiv
 
 instance [Small.{w} C] [LocallySmall.{w} C] :
-    Small.{w} (Arrow C) := by
-  let φ (f : Arrow C) : Σ (s t : C), s ⟶ t := ⟨_, _, f.hom⟩
-  refine small_of_injective (f := φ) ?_
-  rintro ⟨s, t, f⟩ ⟨s', t', f'⟩ h
-  obtain rfl : s = s' := congr_arg Sigma.fst h
-  simp only [Sigma.mk.injEq, heq_eq_eq, true_and, φ] at h
-  obtain rfl : t = t' := h.1
-  obtain rfl : f = f' := by simpa using h
-  rfl
+    Small.{w} (Arrow C) :=
+  small_of_surjective (f := fun f : Σ (s t : C), s ⟶ t ↦ Arrow.mk f.2.2)
+    (fun f ↦ by
+      obtain ⟨X, Y, g, rfl⟩ := f.mk_surjective
+      exact ⟨⟨X, Y, g⟩, rfl⟩)
 
 instance [Small.{w} C] [LocallySmall.{w} C]
     {D : Type u'} [Category.{v'} D] [Small.{w} D] [LocallySmall.{w} D] :
-    Small.{w} (C ⥤ D) := by
-  refine small_of_injective (f := fun F (f : Arrow C) ↦ Arrow.mk (F.map f.hom))
-    (fun F G h ↦ Functor.ext (fun X ↦ ?_) (fun X Y f ↦ ?_))
-  · exact congr_arg Comma.left (congr_fun h (Arrow.mk (𝟙 X)))
-  · have : Arrow.mk (F.map f) = Arrow.mk (G.map f) := congr_fun h (Arrow.mk f)
-    rw [Arrow.mk_eq_mk_iff] at this
-    tauto
+    Small.{w} (C ⥤ D) :=
+  small_of_injective (f := fun F (f : Arrow C) ↦ Arrow.mk (F.map f.hom))
+    (fun _ _ h ↦ Arrow.functor_ext (fun ⦃_ _⦄ f ↦ congr_fun h (Arrow.mk f)))
 
 instance {A : Type u'} [Category.{v'} A] [LocallySmall.{w} A] (C : Type w) [SmallCategory C] :
     LocallySmall.{w} (C ⥤ A) where

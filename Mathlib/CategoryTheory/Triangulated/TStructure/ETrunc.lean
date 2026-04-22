@@ -453,21 +453,11 @@ set_option backward.isDefEq.respectTransparency false in
 instance : IsIso (t.eTruncLTGELTSelfToLTGE a b) := by
   rw [NatTrans.isIso_iff_isIso_app]
   intro X
-  induction b using WithBotTop.rec with
-  | bot => simp [isIsoZero_iff_source_target_isZero]
-  | coe b =>
-    induction a using WithBotTop.rec with
-    | bot => simpa using inferInstanceAs (IsIso ((t.truncLT b).map ((t.truncLTι b).app X)))
-    | coe a =>
-      simp only [eTruncLT_obj_coe, eTruncGE_obj_coe, Functor.comp_obj, eTruncLTGELTSelfToLTGE_app,
-        eTruncLT_map_eq_truncLTι]
-      infer_instance
-    | top =>
-      simp only [eTruncLT_obj_coe, eTruncGE_obj_top, Functor.comp_obj, eTruncLTGELTSelfToLTGE_app,
-        eTruncLT_map_eq_truncLTι, zero_map, Functor.map_zero, isIsoZero_iff_source_target_isZero]
-      constructor
-      all_goals exact Functor.map_isZero _ (Functor.zero_obj _)
-  | top => simpa using inferInstanceAs (IsIso (𝟙 _))
+  induction b using WithBotTop.rec <;> induction a using WithBotTop.rec <;>
+    simp [isIsoZero_iff_source_target_isZero]
+  all_goals first
+    | infer_instance
+    | constructor <;> exact Functor.map_isZero _ (Functor.zero_obj _)
 
 variable (b : EInt) (X : C)
 
@@ -478,14 +468,10 @@ instance : IsIso (t.eTruncLTGELTSelfToGELT a b) := by
   induction a using WithBotTop.rec with
   | bot => simpa using inferInstanceAs (IsIso ((t.eTruncLTι b).app ((t.eTruncLT.obj b).obj X)))
   | coe a =>
-    induction b using WithBotTop.rec with
-    | bot => simpa [isIsoZero_iff_source_target_isZero] using
-        (t.eTruncGE.obj a).map_isZero (Functor.zero_obj _)
-    | coe b =>
-      simp only [eTruncLT_obj_coe, eTruncGE_obj_coe, Functor.comp_obj, eTruncLTGELTSelfToGELT_app,
-        eTruncLT_map_eq_truncLTι]
-      infer_instance
-    | top => simpa using inferInstanceAs (IsIso (𝟙 _))
+    induction b using WithBotTop.rec <;> simp [isIsoZero_iff_source_target_isZero]
+    all_goals first
+      | infer_instance
+      | exact (t.eTruncGE.obj a).map_isZero (Functor.zero_obj _)
   | top =>
     exact ⟨0, ((t.eTruncLT.obj b).map_isZero (by simp)).eq_of_src _ _,
       IsZero.eq_of_src (by simp) _ _⟩

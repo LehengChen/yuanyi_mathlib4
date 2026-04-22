@@ -412,25 +412,17 @@ theorem tensorRightHomEquiv_symm_coevaluation_comp_whiskerLeft {X Y : C} [HasLef
 
 @[simp]
 theorem tensorRightHomEquiv_symm_coevaluation_comp_whiskerRight {Y Y' Z : C} [ExactPairing Y Y']
-    (f : Y ⟶ Z) : (tensorRightHomEquiv _ Y _ _).symm (η_ Y Y' ≫ f ▷ Y') = (λ_ _).hom ≫ f :=
-  calc
-    _ = η_ Y Y' ▷ Y ⊗≫ (f ▷ (Y' ⊗ Y) ≫ Z ◁ ε_ Y Y') ⊗≫ 𝟙 _ := by
-      dsimp [tensorRightHomEquiv]; monoidal
-    _ = (η_ Y Y' ▷ Y ⊗≫ Y ◁ ε_ Y Y') ⊗≫ f := by
-      rw [← whisker_exchange]; monoidal
-    _ = _ := by
-      rw [evaluation_coevaluation'']; monoidal
+    (f : Y ⟶ Z) : (tensorRightHomEquiv _ Y _ _).symm (η_ Y Y' ≫ f ▷ Y') = (λ_ _).hom ≫ f := by
+  rw [Equiv.symm_apply_eq]
+  change η_ Y Y' ≫ f ▷ Y' = (ρ_ _).inv ≫ _ ◁ η_ Y Y' ≫ (α_ _ _ _).inv ≫ ((λ_ Y).hom ≫ f) ▷ Y'
+  monoidal
 
 @[simp]
 theorem tensorLeftHomEquiv_whiskerLeft_comp_evaluation {Y Z : C} [HasLeftDual Z] (f : Y ⟶ ᘁZ) :
-    (tensorLeftHomEquiv _ _ _ _) (Z ◁ f ≫ ε_ _ _) = f ≫ (ρ_ _).inv :=
-  calc
-    _ = 𝟙 _ ⊗≫ (η_ (ᘁZ : C) Z ▷ Y ≫ ((ᘁZ) ⊗ Z) ◁ f) ⊗≫ (ᘁZ) ◁ ε_ (ᘁZ) Z := by
-      dsimp [tensorLeftHomEquiv]; monoidal
-    _ = f ⊗≫ (η_ (ᘁZ) Z ▷ (ᘁZ) ⊗≫ (ᘁZ) ◁ ε_ (ᘁZ) Z) := by
-      rw [← whisker_exchange]; monoidal
-    _ = _ := by
-      rw [evaluation_coevaluation'']; monoidal
+    (tensorLeftHomEquiv _ _ _ _) (Z ◁ f ≫ ε_ _ _) = f ≫ (ρ_ _).inv := by
+  rw [← Equiv.eq_symm_apply]
+  change Z ◁ f ≫ ε_ (ᘁZ) Z = Z ◁ (f ≫ (ρ_ (ᘁZ)).inv) ≫ (α_ _ _ _).inv ≫ ε_ (ᘁZ) Z ▷ _ ≫ (λ_ _).hom
+  monoidal
 
 @[simp]
 theorem tensorLeftHomEquiv_whiskerRight_comp_evaluation {X Y : C} [HasLeftDual X] [HasLeftDual Y]
@@ -446,14 +438,10 @@ theorem tensorRightHomEquiv_whiskerLeft_comp_evaluation {X Y : C} [HasRightDual 
 
 @[simp]
 theorem tensorRightHomEquiv_whiskerRight_comp_evaluation {X Y : C} [HasRightDual X] (f : Y ⟶ Xᘁ) :
-    (tensorRightHomEquiv _ _ _ _) (f ▷ X ≫ ε_ X (Xᘁ)) = f ≫ (λ_ _).inv :=
-  calc
-    _ = 𝟙 _ ⊗≫ (Y ◁ η_ X Xᘁ ≫ f ▷ (X ⊗ Xᘁ)) ⊗≫ ε_ X Xᘁ ▷ Xᘁ := by
-      dsimp [tensorRightHomEquiv]; monoidal
-    _ = f ⊗≫ (Xᘁ ◁ η_ X Xᘁ ⊗≫ ε_ X Xᘁ ▷ Xᘁ) := by
-      rw [whisker_exchange]; monoidal
-    _ = _ := by
-      rw [coevaluation_evaluation'']; monoidal
+    (tensorRightHomEquiv _ _ _ _) (f ▷ X ≫ ε_ X (Xᘁ)) = f ≫ (λ_ _).inv := by
+  rw [← Equiv.eq_symm_apply]
+  change f ▷ X ≫ ε_ X (Xᘁ) = _ ▷ X ≫ (α_ _ _ _).hom ≫ _ ◁ ε_ X (Xᘁ) ≫ (ρ_ _).hom
+  monoidal
 
 -- Next four lemmas passing `fᘁ` or `ᘁf` through (co)evaluations.
 @[reassoc]

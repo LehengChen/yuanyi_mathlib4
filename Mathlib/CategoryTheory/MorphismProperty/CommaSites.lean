@@ -44,15 +44,11 @@ lemma exists_map_eq_of_presieve (K : Precoverage C) (H : K ≤ P.precoverage)
     {X : P.Over ⊤ S} {R : Presieve ((MorphismProperty.Over.forget P ⊤ S).obj X)}
     (hR : R ∈ (K.comap <| CategoryTheory.Over.forget S) _) :
     ∃ T : Presieve X, T.map (MorphismProperty.Over.forget P ⊤ S) = R := by
-  rw [Precoverage.mem_iff_exists_zeroHypercover] at hR
-  obtain ⟨𝒰, rfl⟩ := hR
-  let 𝒱 : PreZeroHypercover X :=
-    ⟨𝒰.I₀, fun i ↦ Over.mk _ (𝒰.X i).hom ?_, fun i ↦ Over.homMk (𝒰.f i).left (by simp) trivial⟩
-  · use 𝒱.presieve₀
-    rw [Presieve.map_ofArrows]
-    rfl
-  · rw [← CategoryTheory.Over.w (𝒰.f i)]
-    exact P.comp_mem _ _ (H _ 𝒰.mem₀ ⟨⟨i⟩⟩) X.prop
+  refine ⟨R.functorPullback (MorphismProperty.Over.forget P ⊤ S), le_antisymm (Presieve.map_functorPullback _) ?_⟩
+  intro Y f hf
+  let Y' : P.Over ⊤ S := Over.mk ⊤ Y.hom (by
+    rw [← CategoryTheory.Over.w f]; exact P.comp_mem _ _ (H _ hR (.of hf)) X.prop)
+  exact .of (u := (Over.homMk f.left (by simp [Y']) trivial : Y' ⟶ X)) hf
 
 variable (K : Precoverage C) [K.HasIsos] [K.IsStableUnderBaseChange] [K.IsStableUnderComposition]
   [K.HasPullbacks]
@@ -70,10 +66,6 @@ lemma toGrothendieck_comap_forget_eq_inducedTopology
     haveI := MorphismProperty.locallyCoverDense_forget_of_le (S := S) K H
     (K.comap (MorphismProperty.Over.forget P ⊤ _ ⋙ CategoryTheory.Over.forget S)).toGrothendieck =
       (MorphismProperty.Over.forget P ⊤ _).inducedTopology (K.toGrothendieck.over S) := by
-  have : (Over.forget P ⊤ S).LocallyCoverDense
-      (K.comap (CategoryTheory.Over.forget S)).toGrothendieck := by
-    rw [← over_toGrothendieck_eq_toGrothendieck_comap_forget]
-    exact MorphismProperty.locallyCoverDense_forget_of_le (S := S) K H
   rw [Precoverage.comap_comp]
   simp_rw [over_toGrothendieck_eq_toGrothendieck_comap_forget]
   apply Precoverage.toGrothendieck_comap_eq_inducedTopology

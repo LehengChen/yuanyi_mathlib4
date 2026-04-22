@@ -58,29 +58,23 @@ $\colim_k \lim_j F(j,k) → \lim_j \colim_k F(j, k)$.
 noncomputable def colimitLimitToLimitColimit :
     colimit (curry.obj (Prod.swap K J ⋙ F) ⋙ lim) ⟶ limit (curry.obj F ⋙ colim) :=
   limit.lift (curry.obj F ⋙ colim)
-    { pt := _
+    { pt := colimit (curry.obj (Prod.swap K J ⋙ F) ⋙ lim)
       π :=
         { app := fun j =>
-            colimit.desc (curry.obj (Prod.swap K J ⋙ F) ⋙ lim)
-              { pt := _
-                ι :=
-                  { app := fun k =>
-                      limit.π ((curry.obj (Prod.swap K J ⋙ F)).obj k) j ≫
-                        colimit.ι ((curry.obj F).obj j) k
-                    naturality := by
-                      intro k k' f
-                      simp only [Functor.comp_obj, lim_obj, colimit.cocone_x,
-                        Functor.const_obj_obj, Functor.comp_map, lim_map,
-                        curry_obj_obj_obj, Prod.swap_obj, limMap_π_assoc, curry_obj_map_app,
-                        Prod.swap_map, Functor.const_obj_map, Category.comp_id]
-                      rw [map_id_left_eq_curry_map, colimit.w] } }
+            colim.map
+              { app := fun k => limit.π ((curry.obj (Prod.swap K J ⋙ F)).obj k) j
+                naturality := by
+                  intro k k' f
+                  simpa only [Functor.comp_obj, lim_obj, Functor.comp_map, lim_map,
+                    curry_obj_obj_obj, Prod.swap_obj, curry_obj_map_app, Prod.swap_map,
+                    map_id_left_eq_curry_map]
+                    using (limMap_π ((curry.obj (Prod.swap K J ⋙ F)).map f) j) }
           naturality := by
             intro j j' f
             dsimp
             ext k
-            simp only [Functor.comp_obj, lim_obj, Category.id_comp, colimit.ι_desc,
-              colimit.ι_desc_assoc, Category.assoc, ι_colimMap,
-              curry_obj_obj_obj, curry_obj_map_app]
+            simp only [Functor.comp_obj, Category.id_comp, ι_colimMap_assoc,
+              curry_obj_obj_obj, curry_obj_map_app, ι_colimMap]
             rw [map_id_right_eq_curry_swap_map, limit.w_assoc] } }
 
 set_option backward.isDefEq.respectTransparency false in
@@ -100,7 +94,7 @@ theorem ι_colimitLimitToLimitColimit_π_apply [Small.{v} J] [Small.{v} K] (F : 
         (colimitLimitToLimitColimit F (colimit.ι (curry.obj (Prod.swap K J ⋙ F) ⋙ lim) k f)) =
       colimit.ι ((curry.obj F).obj j) k (limit.π ((curry.obj (Prod.swap K J ⋙ F)).obj k) j f) := by
   dsimp [colimitLimitToLimitColimit]
-  simp
+  simpa only [Types.Limit.lift_π_apply] using Types.Colimit.ι_map_apply _ k f
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The map `colimit_limit_to_limit_colimit` realized as a map of cones. -/

@@ -10,6 +10,7 @@ public import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
 public import Mathlib.CategoryTheory.Limits.Shapes.Preorder.Basic
 public import Mathlib.Order.SuccPred.Limit
 public import Mathlib.Order.Interval.Set.InitialSeg
+public import Mathlib.Order.LatticeIntervals
 
 /-!
 # An assumption for constructions by transfinite induction
@@ -81,14 +82,9 @@ lemma hasColimitsOfShape_of_initialSeg
       subst hi₀
       exact (hi.not_lt (s.lt_top (Classical.arbitrary _))).elim
     | succ i hi _ =>
-      obtain ⟨a, rfl⟩ := (s.mem_range_iff_rel (b := i)).2 (by
-        simpa only [← hi₀] using Order.lt_succ_of_not_isMax hi)
-      have : OrderTop α :=
-        { top := a
-          le_top b := by
-            rw [← s.le_iff_le]
-            exact Order.le_of_lt_succ (by simpa only [hi₀] using s.lt_top b) }
-      infer_instance
+      exact hasColimitsOfShape_of_equivalence
+        (s.orderIsoIio.trans (OrderIso.setCongr _ _ (by
+          simpa only [hi₀] using Order.Iio_succ_of_not_isMax hi))).equivalence.symm
     | isSuccLimit i hi =>
       subst hi₀
       exact hasColimitsOfShape_of_isSuccLimit' C s hi

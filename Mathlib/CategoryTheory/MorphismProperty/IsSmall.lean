@@ -50,14 +50,10 @@ lemma isSmall_iff_eq_ofHoms :
       W = ofHoms f := by
   constructor
   · intro
-    refine ⟨Shrink.{w} W.toSet, _, _, fun i ↦ ((equivShrink _).symm i).1.hom, ?_⟩
-    ext A B f
-    rw [ofHoms_iff]
-    constructor
-    · intro hf
-      exact ⟨equivShrink _ ⟨f, hf⟩, by simp⟩
-    · rintro ⟨i, hi⟩
-      simp only [← W.arrow_mk_mem_toSet_iff, hi, Arrow.mk_eq, Subtype.coe_prop]
+    refine ⟨Shrink.{w} W.toSet, _, _, fun i ↦ W.homFamily ((equivShrink _).symm i), ?_⟩
+    exact (ofHoms_homFamily W).symm.trans (by
+      ext A B f
+      rw [ofHoms_iff, ofHoms_iff, (equivShrink W.toSet).symm.surjective.exists])
   · rintro ⟨_, _, _, _, rfl⟩
     infer_instance
 

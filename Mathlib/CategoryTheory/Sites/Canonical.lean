@@ -64,17 +64,12 @@ def finestTopologySingle (P : Cᵒᵖ ⥤ Type v) : GrothendieckTopology C where
   pullback_stable' X Y S f hS Z g := by
     rw [← pullback_comp]
     apply hS
-  transitive' X S hS R hR Z g := by
+  transitive' X S hS R hR Z g :=
     -- This is the hard part of the construction, showing that the given set of sieves satisfies
     -- the transitivity axiom.
-    refine Presieve.isSheafFor_trans P (pullback g S) _ (hS Z g) ?_ ?_
-    · intro Y f _
-      rw [← pullback_comp]
-      apply (hS _ _).isSeparatedFor
-    · intro Y f hf
-      have := hR hf _ (𝟙 _)
-      rw [pullback_id, pullback_comp] at this
-      apply this
+    Presieve.isSheafFor_trans P (S.pullback g) _ (hS Z g)
+      (fun Y f _ => by simpa [Sieve.pullback_comp] using (hS Y (f ≫ g)).isSeparatedFor)
+      (fun Y f hf => by simpa [Sieve.pullback_id, Sieve.pullback_comp] using hR hf Y (𝟙 _))
 
 /-- Construct the finest (largest) Grothendieck topology for which all the given presheaves are
 sheaves. -/

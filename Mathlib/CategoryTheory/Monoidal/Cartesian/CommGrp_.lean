@@ -40,12 +40,7 @@ def CommGrpObj.ofRepresentableBy (F : Cᵒᵖ ⥤ CommGrpCat.{w})
 @[simps]
 def yonedaCommGrpGrpObj (G : CommGrp C) : (Grp C)ᵒᵖ ⥤ CommGrpCat where
   obj H := .of (unop H ⟶ G.toGrp)
-  map {H I} f := CommGrpCat.ofHom {
-    toFun := (f.unop ≫ ·)
-    map_one' := by ext; simp [Mon.Hom.hom_one]
-    map_mul' g h := by
-      ext
-      simpa using ((yonedaGrpObj G.X).map f.unop.hom.hom.op).hom.map_mul g.hom.hom h.hom.hom }
+  map {H I} f := CommGrpCat.ofHom ((yonedaGrpObj G.toGrp).map f).hom
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The yoneda embedding of `CommGrp C` into presheaves of groups. -/

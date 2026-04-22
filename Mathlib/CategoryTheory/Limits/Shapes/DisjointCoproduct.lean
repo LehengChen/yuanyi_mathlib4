@@ -249,12 +249,8 @@ general that `C` has strict initial objects, for instance consider the category 
 partial functions. -/
 theorem initialMonoClass_of_coproductsDisjoint [BinaryCoproductsDisjoint C] :
     InitialMonoClass C where
-  isInitial_mono_from X hI :=
-    .of_binaryCoproductDisjoint_left (CategoryTheory.CategoryStruct.id X)
-      { desc := fun s : BinaryCofan _ _ => s.inr
-        fac := fun _s j =>
-          Discrete.casesOn j fun j => WalkingPair.casesOn j (hI.hom_ext _ _) (id_comp _)
-        uniq := fun (_s : BinaryCofan _ _) _m w =>
-          (id_comp _).symm.trans (w ⟨WalkingPair.right⟩) }
+  isInitial_mono_from X hI := by
+    refine .of_binaryCoproductDisjoint_left (𝟙 X) ?_
+    exact ((BinaryCofan.isColimit_iff_isIso_inr hI _).2 (by dsimp; infer_instance)).some
 
 end CategoryTheory.Limits

@@ -167,17 +167,11 @@ section Small
 variable [LocallySmall.{t} C] [Small.{t} I]
 
 instance : Small.{t} (FunctorObjIndex f πX) := by
-  let φ (x : FunctorObjIndex f πX) :
-    Σ (i : Shrink.{t} I),
-      Shrink.{t} ((A ((equivShrink _).symm i) ⟶ X) ×
-        (B ((equivShrink _).symm i) ⟶ S)) :=
-        ⟨equivShrink _ x.i, equivShrink _
-          ⟨eqToHom (by simp) ≫ x.t, eqToHom (by simp) ≫ x.b⟩⟩
-  have hφ : Function.Injective φ := by
-    rintro ⟨i₁, t₁, b₁, _⟩ ⟨i₂, t₂, b₂, _⟩ h
-    obtain rfl : i₁ = i₂ := by simpa [φ] using congr_arg Sigma.fst h
-    simpa [cancel_epi, φ] using h
-  exact small_of_injective hφ
+  let φ (x : FunctorObjIndex f πX) : Σ i : I, (A i ⟶ X) × (B i ⟶ S) :=
+    ⟨x.i, (x.t, x.b)⟩
+  exact small_of_injective (f := φ) (by
+    rintro ⟨i, t, b, w⟩ ⟨i', t', b', w'⟩ h
+    grind)
 
 instance : Small.{t} (attachCellsιFunctorObj f πX).ι := by
   dsimp

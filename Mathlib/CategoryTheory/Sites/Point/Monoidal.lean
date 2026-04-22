@@ -46,17 +46,13 @@ noncomputable instance :
     simp [tensorHom_def, ← MonoidalCategory.whiskerLeft_comp, whisker_exchange_assoc]
   oplax_associativity P₁ P₂ P₃ := by
     ext X x
-    dsimp
-    conv_lhs =>
-      simp only [toPresheafFiber_presheafFiberDesc_assoc, tensorHom_def'_assoc,
-        ← comp_whiskerRight_assoc, toPresheafFiber_presheafFiberDesc]
-      rw [← tensorHom_def'_assoc, associator_naturality]
-    conv_rhs =>
-      simp only [toPresheafFiber_naturality_assoc, toPresheafFiber_presheafFiberDesc_assoc,
-        tensorHom_def_assoc, ← MonoidalCategory.whiskerLeft_comp,
-        toPresheafFiber_presheafFiberDesc]
-      rw [← tensorHom_def]
-      dsimp
+    simp only [toPresheafFiber_presheafFiberDesc_assoc, tensorHom_def'_assoc,
+      ← comp_whiskerRight_assoc, toPresheafFiber_presheafFiberDesc]
+    rw [← tensorHom_def'_assoc, associator_naturality]
+    simp only [toPresheafFiber_naturality_assoc, toPresheafFiber_presheafFiberDesc_assoc,
+      tensorHom_def_assoc, ← MonoidalCategory.whiskerLeft_comp, toPresheafFiber_presheafFiberDesc]
+    rw [← tensorHom_def]
+    rfl
   oplax_left_unitality _ := by
     ext
     simp [tensorHom_def', ← comp_whiskerRight]

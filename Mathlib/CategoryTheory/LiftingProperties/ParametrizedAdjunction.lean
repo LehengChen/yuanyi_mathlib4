@@ -161,13 +161,9 @@ noncomputable def liftStructEquiv (α : Arrow.mk sq₁₂.ι ⟶ Arrow.mk f₃) 
 include adj₂ in
 lemma hasLiftingProperty_iff :
     HasLiftingProperty sq₁₂.ι f₃ ↔ HasLiftingProperty f₂ sq₁₃.π := by
-  simp only [Arrow.hasLiftingProperty_iff]
-  constructor
-  · intro h β
-    obtain ⟨α, rfl⟩ := (adj₂.arrowHomEquiv sq₁₂ sq₁₃).surjective β
-    exact ⟨adj₂.liftStructEquiv sq₁₂ sq₁₃ α (h α).some⟩
-  · intro h α
-    exact ⟨(adj₂.liftStructEquiv sq₁₂ sq₁₃ α).symm (h _).some⟩
+  rw [Arrow.hasLiftingProperty_iff, Arrow.hasLiftingProperty_iff]
+  exact (adj₂.arrowHomEquiv sq₁₂ sq₁₃).forall_congr fun α ↦
+    (adj₂.liftStructEquiv sq₁₂ sq₁₃ α).nonempty_congr
 
 end ParametrizedAdjunction
 

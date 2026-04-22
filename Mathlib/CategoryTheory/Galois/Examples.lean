@@ -8,6 +8,7 @@ module
 public import Mathlib.CategoryTheory.Galois.Basic
 public import Mathlib.CategoryTheory.Action.Concrete
 public import Mathlib.CategoryTheory.Action.Limits
+public import Mathlib.GroupTheory.GroupAction.SubMulAction
 
 /-!
 # Examples of Galois categories and fiber functors
@@ -45,20 +46,15 @@ variable (G : Type u) [Group G]
 /-- Given `f : X ⟶ Y` for `X Y : Action FintypeCat G`, the complement of the image
 of `f` has a natural `G`-action. -/
 noncomputable def Action.imageComplement {X Y : Action FintypeCat G}
-    (f : X ⟶ Y) : Action FintypeCat G where
-  V := FintypeCat.imageComplement f.hom
-  ρ := {
-    toFun g := FintypeCat.homMk (fun y ↦ Subtype.mk ((Y.ρ g).hom y.val) <| by
-      intro ⟨x, h⟩
-      apply y.property
-      use (X.ρ g⁻¹).hom x
-      calc (X.ρ g⁻¹ ≫ f.hom) x
-          = ((Y.ρ g⁻¹ * Y.ρ g)).hom y.val := by rw [f.comm, FintypeCat.comp_apply, h]; rfl
-        _ = y.val := by
-          simp [← map_mul, inv_mul_cancel, Action.ρ_one])
-    map_one' := by aesop
-    map_mul' := by aesop
-  }
+    (f : X ⟶ Y) : Action FintypeCat G :=
+  let p : SubMulAction G Y.V := {
+    carrier := Set.range f.hom
+    smul_mem' := fun g ↦ by
+      rintro _ ⟨x, rfl⟩
+      exact ⟨(X.ρ g).hom x, by
+        simpa only [FintypeCat.comp_apply] using ConcreteCategory.congr_hom (f.comm g) x⟩ }
+  haveI : Fintype ((pᶜ : SubMulAction G Y.V)) := Fintype.ofFinite _
+  Action.FintypeCat.ofMulAction G (FintypeCat.of (pᶜ : SubMulAction G Y.V))
 
 /-- The inclusion from the complement of the image of `f : X ⟶ Y` into `Y`. -/
 noncomputable def Action.imageComplementIncl {X Y : Action FintypeCat G} (f : X ⟶ Y) :
@@ -110,20 +106,16 @@ theorem Action.pretransitive_of_isConnected (X : Action FintypeCat G)
   exists_smul_eq x y := by
     /- We show that the `G`-orbit of `x` is a non-initial subobject of `X` and hence by
     connectedness, the orbit equals `X.V`. -/
-    let T : Set X.V := MulAction.orbit G x
-    have : Fintype T := Fintype.ofFinite T
-    letI : MulAction G (FintypeCat.of T) := inferInstanceAs <| MulAction G ↑(MulAction.orbit G x)
-    let T' : Action FintypeCat G := Action.FintypeCat.ofMulAction G (FintypeCat.of T)
+    have : Fintype (MulAction.orbit G x) := Fintype.ofFinite _
+    let T' : Action FintypeCat G :=
+      Action.FintypeCat.ofMulAction G (FintypeCat.of (MulAction.orbit G x))
     let i : T' ⟶ X := ⟨FintypeCat.homMk Subtype.val, fun _ ↦ rfl⟩
     have : Mono i := ConcreteCategory.mono_of_injective _ (Subtype.val_injective)
     have : IsIso i := by
       apply IsConnected.noTrivialComponent T' i
-      apply (not_initial_iff_fiber_nonempty (Action.forget _ _) T').mpr
-      exact Set.Nonempty.coe_sort (MulAction.nonempty_orbit x)
-    have hb : Function.Bijective i.hom := by
-      apply (ConcreteCategory.isIso_iff_bijective i.hom).mp
-      exact map_isIso (forget₂ _ FintypeCat) i
-    obtain ⟨⟨y', ⟨g, (hg : g • x = y')⟩⟩, (hy' : y' = y)⟩ := hb.surjective y
+      exact not_initial_of_inhabited (Action.forget _ _) ⟨x, MulAction.mem_orbit_self x⟩
+    obtain ⟨⟨y', ⟨g, (hg : g • x = y')⟩⟩, (hy' : y' = y)⟩ :=
+      (ConcreteCategory.bijective_of_isIso ((forget₂ _ FintypeCat).map i)).surjective y
     use g
     exact hg.trans hy'
 
@@ -138,14 +130,10 @@ theorem Action.isConnected_of_transitive (X : FintypeCat) [MulAction G X]
     obtain ⟨(y : Y.V)⟩ := (not_initial_iff_fiber_nonempty (Action.forget _ _) Y).mp hni
     have : IsIso i.hom := by
       refine (ConcreteCategory.isIso_iff_bijective i.hom).mpr ⟨?_, fun x' ↦ ?_⟩
-      · haveI : Mono i.hom := map_mono (forget₂ _ _) i
-        exact ConcreteCategory.injective_of_mono_of_preservesPullback i.hom
-      · letI x : X := i.hom y
-        obtain ⟨σ, hσ⟩ := MulAction.exists_smul_eq G x x'
-        use σ • y
-        change (Y.ρ σ ≫ i.hom) y = x'
-        rw [i.comm, FintypeCat.comp_apply]
-        exact hσ
+      · exact ConcreteCategory.injective_of_mono_of_preservesPullback ((forget₂ _ FintypeCat).map i)
+      · obtain ⟨σ, hσ⟩ := MulAction.exists_smul_eq (M := G) (α := X) (i.hom y) x'
+        exact ⟨σ • y, by
+          simpa [FintypeCat.comp_apply] using (ConcreteCategory.congr_hom (i.comm σ) y).trans hσ⟩
     apply isIso_of_reflects_iso i (Action.forget _ _)
 
 /-- A nonempty finite `G`-set is connected if and only if the `G`-action is transitive. -/

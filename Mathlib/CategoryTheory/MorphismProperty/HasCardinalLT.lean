@@ -34,12 +34,7 @@ protected abbrev HasCardinalLT (P : MorphismProperty C) (κ : Cardinal.{w}) :=
 lemma hasCardinalLT_ofHoms {C : Type*} [Category* C]
     {ι : Type*} {X Y : ι → C} (f : ∀ i, X i ⟶ Y i) {κ : Cardinal}
     (h : HasCardinalLT ι κ) : (MorphismProperty.ofHoms f).HasCardinalLT κ :=
-  h.of_surjective (fun i ↦ ⟨Arrow.mk (f i), ⟨i⟩⟩) (by
-    rintro ⟨f, hf⟩
-    rw [MorphismProperty.mem_toSet_iff, MorphismProperty.ofHoms_iff] at hf
-    obtain ⟨i, hf⟩ := hf
-    obtain rfl : f = _ := hf
-    exact ⟨i, rfl⟩)
+  h.of_surjective (fun i ↦ ⟨Arrow.mk (f i), ⟨i⟩⟩) fun ⟨⟨_, _, _⟩, ⟨i⟩⟩ ↦ ⟨i, rfl⟩
 
 lemma HasCardinalLT.iSup
     {ι : Type*} {P : ι → MorphismProperty C} {κ : Cardinal.{w}} [Fact κ.IsRegular]

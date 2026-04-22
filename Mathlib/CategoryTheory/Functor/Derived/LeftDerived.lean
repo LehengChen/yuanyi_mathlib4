@@ -53,6 +53,8 @@ class IsLeftDerivedFunctor (LF : D ⥤ H) {F : C ⥤ H} {L : C ⥤ D} (α : L �
     (W : MorphismProperty C) [L.IsLocalization W] : Prop where
   isRightKanExtension (LF α) : LF.IsRightKanExtension α
 
+attribute [instance] IsLeftDerivedFunctor.isRightKanExtension
+
 lemma isLeftDerivedFunctor_iff_isRightKanExtension [L.IsLocalization W] :
     LF.IsLeftDerivedFunctor α W ↔ LF.IsRightKanExtension α := by
   constructor
@@ -72,25 +74,21 @@ variable [L.IsLocalization W] [LF.IsLeftDerivedFunctor α W]
 
 /-- Constructor for natural transformations to a left derived functor. -/
 noncomputable def leftDerivedLift (G : D ⥤ H) (β : L ⋙ G ⟶ F) : G ⟶ LF :=
-  have := IsLeftDerivedFunctor.isRightKanExtension LF α W
   LF.liftOfIsRightKanExtension α G β
 
 @[reassoc (attr := simp)]
 lemma leftDerived_fac (G : D ⥤ H) (β : L ⋙ G ⟶ F) :
     whiskerLeft L (LF.leftDerivedLift α W G β) ≫ α = β :=
-  have := IsLeftDerivedFunctor.isRightKanExtension LF α W
   LF.liftOfIsRightKanExtension_fac α G β
 
 @[reassoc (attr := simp)]
 lemma leftDerived_fac_app (G : D ⥤ H) (β : L ⋙ G ⟶ F) (X : C) :
     (LF.leftDerivedLift α W G β).app (L.obj X) ≫ α.app X = β.app X :=
-  have := IsLeftDerivedFunctor.isRightKanExtension LF α W
   LF.liftOfIsRightKanExtension_fac_app α G β X
 
 include W in
 lemma leftDerived_ext (G : D ⥤ H) (γ₁ γ₂ : G ⟶ LF)
     (hγ : whiskerLeft L γ₁ ≫ α = whiskerLeft L γ₂ ≫ α) : γ₁ = γ₂ :=
-  have := IsLeftDerivedFunctor.isRightKanExtension LF α W
   LF.hom_ext_of_isRightKanExtension α γ₁ γ₂ hγ
 
 /-- The natural transformation `LF' ⟶ LF` on left derived functors that is
@@ -139,7 +137,6 @@ noncomputable abbrev leftDerivedUnique [LF'.IsLeftDerivedFunctor α'₂ W] : LF 
 lemma isLeftDerivedFunctor_iff_isIso_leftDerivedLift (G : D ⥤ H) (β : L ⋙ G ⟶ F) :
     G.IsLeftDerivedFunctor β W ↔ IsIso (LF.leftDerivedLift α W G β) := by
   rw [isLeftDerivedFunctor_iff_isRightKanExtension]
-  have := IsLeftDerivedFunctor.isRightKanExtension _ α W
   exact isRightKanExtension_iff_isIso _ α _ (by simp)
 
 end
@@ -180,7 +177,6 @@ variable {F L W}
 
 lemma HasLeftDerivedFunctor.mk' [LF.IsLeftDerivedFunctor α W] :
     HasLeftDerivedFunctor F W := by
-  have := IsLeftDerivedFunctor.isRightKanExtension LF α W
   simpa only [hasLeftDerivedFunctor_iff F L W] using HasRightKanExtension.mk LF α
 
 section

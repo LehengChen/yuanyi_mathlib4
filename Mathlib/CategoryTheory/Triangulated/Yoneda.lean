@@ -99,12 +99,8 @@ lemma preadditiveYoneda_homologySequenceδ_apply
     (preadditiveYoneda.obj B).homologySequenceδ
       ((triangleOpEquivalence _).functor.obj (op T)) n₀ n₁ h x =
       T.mor₃ ≫ x⟦(1 : ℤ)⟧' ≫ (shiftFunctorAdd' C n₀ 1 n₁ h).inv.app B := by
-  simp only [Functor.homologySequenceδ, preadditiveYoneda_shiftMap_apply,
-    ShiftedHom.comp, ← Category.assoc]
-  congr 2
-  apply (ShiftedHom.opEquiv _).injective
-  rw [Equiv.apply_symm_apply]
-  rfl
+  rw [Functor.homologySequenceδ, preadditiveYoneda_shiftMap_apply, ShiftedHom.opEquiv_symm_apply_comp]
+  exact ShiftedHom.opEquiv'_symm_op_opShiftFunctorEquivalence_counitIso_inv_app_op_shift T.mor₃ x n₁ (by lia)
 
 end
 

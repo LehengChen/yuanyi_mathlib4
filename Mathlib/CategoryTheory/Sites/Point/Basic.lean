@@ -241,17 +241,13 @@ lemma toPresheafFiber_map_surjective [Presheaf.IsLocallySurjective J f] :
 
 lemma toPresheafFiber_map_injective [Presheaf.IsLocallyInjective J f] :
     Function.Injective (Φ.presheafFiber.map f) := by
-  suffices ∀ (X : C) (x : Φ.fiber.obj X) (p₁ p₂ : ToType (P.obj (op X)))
-      (hp : f.app _ p₁ = f.app _ p₂), Φ.toPresheafFiber X x P p₁ = Φ.toPresheafFiber X x P p₂ by
-    rintro q₁ q₂ h
-    obtain ⟨X, x, p₁, p₂, rfl, rfl⟩ := Φ.toPresheafFiber_jointly_surjective₂ q₁ q₂
-    simp only [toPresheafFiber_naturality_apply, toPresheafFiber_eq_iff'] at h
-    obtain ⟨Y, g, y, rfl, h⟩ := h
-    simp only [← NatTrans.naturality_apply] at h
-    simpa using this _ y _ _ h
-  intro X x p₁ p₂ h
-  obtain ⟨Y, g, hg, y, rfl⟩ := Φ.jointly_surjective _ (Presheaf.equalizerSieve_mem J f _ _ h) x
-  simp_all [← toPresheafFiber_w_apply]
+  rintro q₁ q₂ h
+  obtain ⟨X, x, p₁, p₂, rfl, rfl⟩ := Φ.toPresheafFiber_jointly_surjective₂ q₁ q₂
+  simp only [toPresheafFiber_naturality_apply, toPresheafFiber_eq_iff'] at h ⊢
+  obtain ⟨Y, g, y, rfl, h⟩ := h
+  obtain ⟨Z, k, hk, z, rfl⟩ := Φ.jointly_surjective _
+    (Presheaf.equalizerSieve_mem J f _ _ (by simpa [← NatTrans.naturality_apply] using h)) y
+  exact ⟨Z, k ≫ g, z, by simp, by simpa [← FunctorToTypes.map_comp_apply] using hk⟩
 
 lemma toPresheafFiber_map_bijective
     [Presheaf.IsLocallyInjective J f] [Presheaf.IsLocallySurjective J f] :

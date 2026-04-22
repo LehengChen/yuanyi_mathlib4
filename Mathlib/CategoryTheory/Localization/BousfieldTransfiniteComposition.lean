@@ -47,24 +47,15 @@ instance (J : Type w) [LinearOrder J] [SuccOrder J] [OrderBot J] [WellFoundedLT 
           (fun ⟨k, hk⟩ ↦ by simpa using hj' _ hk)
     · let d : (hf.F.op ⋙ yoneda.obj Z).WellOrderInductionData :=
         .ofExists (fun j hj ↦ (hf.map_mem j hj _ hZ).2) (fun j hj s ↦ by
-          let c : Cocone ((Set.principalSegIio j).monotone.functor ⋙ hf.F) :=
-            { pt := Z
-              ι.app k := s.1 (op k)
-              ι.naturality _ _ g := by
-                dsimp
-                simpa only [Category.comp_id] using s.2 g.op }
-          exact ⟨(hf.F.isColimitOfIsWellOrderContinuous j hj).desc c, fun k hk ↦
-            by simpa using (hf.F.isColimitOfIsWellOrderContinuous j hj).fac c ⟨k, hk⟩⟩)
+          let G := (Set.principalSegIio j).monotone.functor ⋙ hf.F
+          let h := hf.F.isColimitOfIsWellOrderContinuous j hj
+          let e := Limits.opCompYonedaSectionsEquiv G Z
+          exact ⟨h.homEquiv.symm (e s), by simpa using h.ι_app_homEquiv_symm (e s)⟩)
       let σ := d.sectionsMk (hf.isoBot.hom ≫ g)
-      let c : Cocone hf.F :=
-        { pt := Z
-          ι.app j := σ.1 (op j)
-          ι.naturality _ _ f := by
-            dsimp
-            simpa only [Category.comp_id] using σ.2 f.op }
-      exact ⟨hf.isColimit.desc c, by
-        simp only [← hf.fac, Category.assoc, hf.isColimit.fac c ⊥, c, σ,
-          d.sectionsMk_val_op_bot, Iso.inv_hom_id_assoc]⟩
+      exact ⟨hf.isColimit.homEquiv.symm ((Limits.opCompYonedaSectionsEquiv hf.F Z) σ), by
+        simp only [← hf.fac, Category.assoc, hf.isColimit.ι_app_homEquiv_symm,
+          Limits.opCompYonedaSectionsEquiv_apply_app, σ, d.sectionsMk_val_op_bot,
+          Iso.inv_hom_id_assoc]⟩
 
 instance : MorphismProperty.IsStableUnderTransfiniteComposition.{w} P.isLocal where
 

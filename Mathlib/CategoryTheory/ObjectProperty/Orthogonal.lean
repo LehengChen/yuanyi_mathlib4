@@ -51,14 +51,10 @@ lemma leftOrthogonal_iff (X : C) :
     P.leftOrthogonal X ↔ ∀ ⦃Y : C⦄ (f : X ⟶ Y), P Y → f = 0 := Iff.rfl
 
 instance : P.rightOrthogonal.IsClosedUnderIsomorphisms where
-  of_iso e h X f hX := by
-    rw [← cancel_mono e.inv, zero_comp]
-    exact h _ hX
+  of_iso e h _ f hX := zero_of_comp_mono e.inv (h (f ≫ e.inv) hX)
 
 instance : P.leftOrthogonal.IsClosedUnderIsomorphisms where
-  of_iso e h Y f hY := by
-    rw [← cancel_epi e.hom, comp_zero]
-    exact h _ hY
+  of_iso e h _ f hY := zero_of_epi_comp e.hom (h (e.hom ≫ f) hY)
 
 instance [HasZeroObject C] : P.rightOrthogonal.ContainsZero where
   exists_zero := ⟨0, isZero_zero _, fun _ _ _ ↦ by ext⟩

@@ -146,19 +146,15 @@ section Interchange
 
 variable {C₉ : Type u₉} [Category.{v₉} C₉] {R₃ : C₆ ⥤ C₉} {B₃ : C₈ ⥤ C₉}
 
-set_option backward.isDefEq.respectTransparency false in
 /-- When composing 2-squares which form a diagram of grid, composing horizontally first yields the
 same result as composing vertically first. -/
 lemma hCompVCompHComp (w₁ : TwoSquare T L R B) (w₂ : TwoSquare T' R R' B')
     (w₃ : TwoSquare B L' R'' B'') (w₄ : TwoSquare B' R'' R₃ B₃) :
     (w₁ ≫ₕ w₂) ≫ᵥ (w₃ ≫ₕ w₄) = (w₁ ≫ᵥ w₃) ≫ₕ (w₂ ≫ᵥ w₄) := by
-  unfold hComp vComp whiskerLeft whiskerRight
   ext c
-  simp only [comp_obj, NatTrans.comp_app, associator_hom_app, associator_inv_app, comp_id, id_comp,
-    map_comp, assoc]
-  slice_rhs 2 3 =>
-    rw [← Functor.comp_map _ B₃, ← w₄.naturality]
-  simp
+  have h := congrArg (fun f => R₃.map (w₂.natTrans.app (T.obj c)) ≫ f)
+    (w₄.natTrans.naturality_assoc (w₁.natTrans.app c) (B₃.map (w₃.natTrans.app (L.obj c))))
+  simpa [hComp, vComp, whiskerLeft, whiskerRight, Category.assoc] using h
 
 end Interchange
 

@@ -657,15 +657,11 @@ noncomputable def hom : (presheaf data G₀).obj (op (F.obj X₀)) ⟶ G₀.obj.
     presheafObjπ data G₀ _ (Sieve.ofArrows.i ha) ≫
       IsDenseSubsite.mapPreimage J F G₀ (Sieve.ofArrows.h ha)) (by
         rintro ⟨W₀, a, ha⟩ ⟨T₀, b, hb⟩ ⟨U₀, p₁, p₂, fac⟩
-        have ha' := Sieve.ofArrows.fac ha
-        have hb' := Sieve.ofArrows.fac hb
-        dsimp at ha hb ha' hb' p₁ p₂ fac ⊢
+        dsimp at ha hb p₁ p₂ fac ⊢
         rw [assoc, assoc, IsDenseSubsite.mapPreimage_comp_map,
-          IsDenseSubsite.mapPreimage_comp_map,
-          ← restriction_eq_of_fac data G₀ (F.map (p₁ ≫ a))
-            (F.map p₁ ≫ Sieve.ofArrows.h ha) (by rw [assoc, ha', map_comp]),
-          restriction_eq_of_fac data G₀ (F.map (p₁ ≫ a))
-            (F.map p₂ ≫ Sieve.ofArrows.h hb) (by rw [assoc, hb', fac, map_comp])])
+          IsDenseSubsite.mapPreimage_comp_map]
+        exact presheafObj_mapPreimage_condition data G₀ _ _ _ _ _ (by
+          simpa [PreOneHypercoverDenseData.toPreOneHypercover] using congrArg F.map fac))
 
 variable {X₀}
 

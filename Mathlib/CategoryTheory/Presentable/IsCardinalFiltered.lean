@@ -145,11 +145,7 @@ lemma isFiltered_of_isCardinalFiltered (J : Type u) [Category.{v} J]
     IsFiltered J := by
   rw [IsFiltered.iff_cocone_nonempty.{w}]
   intro A _ _ F
-  have hA : HasCardinalLT (Arrow A) κ := by
-    refine HasCardinalLT.of_le ?_ hκ.out.aleph0_le
-    simp only [hasCardinalLT_aleph0_iff]
-    infer_instance
-  exact ⟨cocone F hA⟩
+  exact ⟨cocone F (hasCardinalLT_of_finite _ _ hκ.out.aleph0_le)⟩
 
 @[deprecated (since := "2025-10-07")] alias isFiltered_of_isCardinalDirected :=
   isFiltered_of_isCardinalFiltered
@@ -205,19 +201,15 @@ instance isCardinalFiltered_under
   nonempty_cocone {A _} F hA := ⟨by
     have := isFiltered_of_isCardinalFiltered J κ
     let c := cocone (F ⋙ Under.forget j₀) hA
-    let x (a : A) : j₀ ⟶ IsFiltered.max j₀ c.pt := (F.obj a).hom ≫ c.ι.app a ≫
+    let s : (Functor.const A).obj j₀ ⟶ F ⋙ Under.forget j₀ :=
+      { app a := (F.obj a).hom
+        naturality a b f := by simpa using (F.map f).w }
+    let x (a : A) : j₀ ⟶ IsFiltered.max j₀ c.pt := s.app a ≫ c.ι.app a ≫
       IsFiltered.rightToMax j₀ c.pt
     have hκ' : HasCardinalLT A κ := hasCardinalLT_of_hasCardinalLT_arrow hA
-    exact
-      { pt := Under.mk (toCoeq x hκ')
-        ι :=
-          { app a := Under.homMk (c.ι.app a ≫ IsFiltered.rightToMax j₀ c.pt ≫ coeqHom x hκ')
-              (by simpa [x] using coeq_condition x hκ' a)
-            naturality a b f := by
-              ext
-              have := c.w f
-              dsimp at this ⊢
-              simp only [reassoc_of% this, Category.comp_id] } }⟩
+    change Cocone (Under.lift (F ⋙ Under.forget j₀) s)
+    exact Under.liftCocone _ s (c.extend (IsFiltered.rightToMax j₀ c.pt ≫ coeqHom x hκ'))
+      (toCoeq x hκ') (fun a ↦ by simpa [x, s] using coeq_condition x hκ' a)⟩
 
 instance isCardinalFiltered_prod (J₁ : Type u) (J₂ : Type u')
     [Category.{v} J₁] [Category.{v'} J₂] (κ : Cardinal.{w}) [Fact κ.IsRegular]

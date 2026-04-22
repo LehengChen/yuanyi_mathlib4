@@ -49,11 +49,7 @@ noncomputable def constantPresheafAdj {T : C} (hT : IsTerminal T) :
   counit := {
     app := fun F => {
       app := fun ⟨X⟩ => F.map (IsTerminal.from hT X).op
-      naturality := fun _ _ _ => by
-        simp only [Functor.comp_obj, Functor.const_obj_obj, Functor.id_obj, Functor.const_obj_map,
-          Category.id_comp, ← Functor.map_comp]
-        congr
-        simp }
+      naturality := fun _ _ _ => by dsimp; rw [id_comp, ← map_comp]; congr; exact hT.hom_ext _ _ }
     naturality := by intros; ext; simp /- Note: `aesop` works but is kind of slow -/ }
 
 variable [HasWeakSheafify J D]

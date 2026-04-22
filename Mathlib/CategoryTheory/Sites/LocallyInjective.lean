@@ -80,11 +80,7 @@ lemma equalizerSieve_mem [IsLocallyInjective J φ]
 lemma isLocallyInjective_of_injective (hφ : ∀ (X : Cᵒᵖ), Function.Injective (φ.app X)) :
     IsLocallyInjective J φ where
   equalizerSieve_mem {X} x y h := by
-    convert J.top_mem X.unop
-    ext Y f
-    simp only [equalizerSieve_apply, op_unop, Sieve.top_apply, iff_true]
-    apply hφ
-    simp [h]
+    simp [(equalizerSieve_eq_top_iff x y).2 (hφ X h)]
 
 instance [IsIso φ] : IsLocallyInjective J φ :=
   isLocallyInjective_of_injective J φ (fun X => Function.Bijective.injective (by
@@ -109,17 +105,11 @@ lemma isLocallyInjective_iff_equalizerSieve_mem_imp :
       equalizerSieve (φ.app _ x) (φ.app _ y) ∈ J X.unop → equalizerSieve x y ∈ J X.unop := by
   constructor
   · intro _ X x y h
-    let S := equalizerSieve (φ.app _ x) (φ.app _ y)
-    let T : ∀ ⦃Y : C⦄ ⦃f : Y ⟶ X.unop⦄ (_ : S f), Sieve Y := fun Y f _ =>
-      equalizerSieve (F₁.map f.op x) ((F₁.map f.op y))
-    refine J.superset_covering ?_ (J.transitive h (Sieve.bind S.1 T) ?_)
-    · rintro Y f ⟨Z, a, g, hg, ha, rfl⟩
-      simpa using ha
-    · intro Y f hf
-      refine J.superset_covering (Sieve.le_pullback_bind S.1 T _ hf)
-        (equalizerSieve_mem J φ _ _ ?_)
-      rw [NatTrans.naturality_apply, NatTrans.naturality_apply]
-      exact hf
+    refine J.superset_covering ?_ <| J.bind_covering h fun {Y} {f} hf =>
+      equalizerSieve_mem J φ (F₁.map f.op x) (F₁.map f.op y) (by
+        simpa [equalizerSieve_apply, NatTrans.naturality_apply] using hf)
+    rintro Y f ⟨Z, a, g, hg, ha, rfl⟩
+    simpa using ha
   · intro hφ
     exact ⟨fun {X} x y h => hφ x y (by simp [h])⟩
 

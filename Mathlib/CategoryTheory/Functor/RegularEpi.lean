@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Limits.FunctorCategory.EpiMono
 public import Mathlib.CategoryTheory.Limits.FunctorCategory.Shapes.Pullbacks
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
 public import Mathlib.CategoryTheory.Limits.Shapes.RegularMono
 
 /-!
@@ -37,12 +38,7 @@ instance [∀ {F G : D} (f : F ⟶ G) [Epi f], HasPullback f f] [HasPushouts D]
     w := PullbackCone.combine f f _ (fun k ↦ pullback.isLimit (f.app k) (f.app k)) |>.condition
     isColimit := evaluationJointlyReflectsColimits _ fun k ↦ by
       have := IsRegularEpiCategory.regularEpiOfEpi (f.app k)
-      refine .equivOfNatIsoOfIso ?_ _ _ ?_ (isColimitCoforkOfEffectiveEpi (f.app k)
-        (pullback.cone (f.app k) (f.app k))
-        (pullback.isLimit (f.app k) (f.app k)))
-      · refine NatIso.ofComponents (by rintro (_ | _); exacts [Iso.refl _, Iso.refl _]) ?_
-        rintro _ _ (_ | _)
-        all_goals cat_disch
-      · exact Cocone.ext (Iso.refl _) <| by rintro (_ | _ | _); all_goals cat_disch }⟩⟩
+      refine (isColimitMapCoconeCoforkEquiv ((evaluation C D).obj k) _).symm ?_
+      simpa using isColimitCoforkOfEffectiveEpi (f.app k) _ (pullback.isLimit _ _) }⟩⟩
 
 end CategoryTheory.Functor

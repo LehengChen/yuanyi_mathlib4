@@ -49,19 +49,14 @@ theorem hasInitial_of_weakly_initial_and_hasWideEqualizers [HasWideEqualizers.{v
   let endos := T ⟶ T
   let i := wideEqualizer.ι (id : endos → endos)
   haveI : Nonempty endos := ⟨𝟙 _⟩
-  have : ∀ X : C, Unique (wideEqualizer (id : endos → endos) ⟶ X) := by
-    intro X
-    refine ⟨⟨i ≫ Classical.choice (hT X)⟩, fun a => ?_⟩
-    let E := equalizer a (i ≫ Classical.choice (hT _))
+  exact (IsInitial.ofUniqueHom (fun X ↦ i ≫ Classical.choice (hT X)) fun X a ↦ by
+    let E := equalizer a (i ≫ Classical.choice (hT X))
     let e : E ⟶ wideEqualizer id := equalizer.ι _ _
     let h : T ⟶ E := Classical.choice (hT E)
-    have : ((i ≫ h) ≫ e) ≫ i = i ≫ 𝟙 _ := by
-      rw [Category.assoc, Category.assoc]
-      apply wideEqualizer.condition (id : endos → endos) (h ≫ e ≫ i)
-    rw [Category.comp_id, cancel_mono_id i] at this
-    haveI : IsSplitEpi e := IsSplitEpi.mk' ⟨i ≫ h, this⟩
-    rw [← cancel_epi e]
-    apply equalizer.condition
-  exact hasInitial_of_unique (wideEqualizer (id : endos → endos))
+    haveI : IsSplitEpi e := IsSplitEpi.mk' ⟨i ≫ h, by
+      apply (cancel_mono i).1
+      simpa [Category.assoc] using
+        wideEqualizer.condition (id : endos → endos) (h ≫ e ≫ i) (𝟙 _)⟩
+    exact eq_of_epi_equalizer).hasInitial
 
 end CategoryTheory

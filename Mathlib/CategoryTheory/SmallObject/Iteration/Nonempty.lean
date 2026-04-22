@@ -131,20 +131,16 @@ noncomputable def mkOfLimit {j : J} (hj : Order.IsSuccLimit j)
     · rw [arrowMap_functor _ _ _ _ _ hij, arrow_mk_mapObj,
         arrowMap_limit _ _ hi _ _ hk]
       congr 1
-      apply Arrow.functor_ext
-      rintro ⟨l₁, hl₁⟩ ⟨l₂, hl₂⟩ f
-      dsimp
-      generalize_proofs
-      rw [← arrowMap, ← arrowMap, arrowMap_functor hj iter l₁ l₂ _ (hl₂.trans hij),
-        arrow_mk_mapObj]
-      apply congr_arrowMap
+      refine Arrow.functor_ext (fun (X Y : Set.Iio i) (f : X ⟶ Y) => ?_)
+      change arrowMap (iter i hij).F X.1 Y.1 (leOfHom f) Y.2.le =
+        arrowMap (functor hj iter) X.1 Y.1 (leOfHom f) (Y.2.trans hij).le
+      rw [arrowMap_functor hj iter X.1 Y.1 (leOfHom f) (Y.2.trans hij), arrow_mk_mapObj]
+      exact congr_arrowMap (iter i hij) (iter Y.1 (Y.2.trans hij)) (leOfHom f) Y.2.le (by rfl)
     · rw [arrowMap_functor_to_top _ _ _ hk, ← arrowι_def _ hi]
       congr 1
-      apply Arrow.functor_ext
-      rintro ⟨l₁, hl₁⟩ ⟨l₂, hl₂⟩ f
-      dsimp
-      generalize_proofs
-      rw [← arrowMap, arrow_mk_mapObj, arrowMap_functor _ _ _ _ _ hl₂, arrow_mk_mapObj]
+      refine Arrow.functor_ext (fun (X Y : Set.Iio i) (f : X ⟶ Y) => ?_)
+      simpa [arrowMap, restrictionLT, inductiveSystem] using
+        (arrowMap_functor hj iter X.1 Y.1 (leOfHom f) Y.2).symm
 
 variable (Φ)
 

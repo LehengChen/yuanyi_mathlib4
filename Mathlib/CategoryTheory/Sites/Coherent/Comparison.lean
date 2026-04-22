@@ -88,15 +88,11 @@ theorem extensive_regular_generate_coherent [Preregular C] [FinitaryPreExtensive
         change _ ∈ ((extensiveCoverage C) ⊔ (regularCoverage C)).toGrothendieck R
         rw [Sieve.pullback_comp]
         apply pullback_stable
-        have : generate (Presieve.ofArrows X fun (i : I) ↦ Sigma.ι X i) ≤
-            (generate (Presieve.ofArrows X f)).pullback (Sigma.desc f) := by
-          rintro Q q ⟨E, e, r, ⟨hq, rfl⟩⟩
-          exact ⟨E, e, r ≫ (Sigma.desc f), by cases hq; simpa using Presieve.ofArrows.mk _, by simp⟩
-        apply Coverage.saturate_of_superset _ this
-        apply Coverage.Saturate.of
-        refine Or.inl ⟨I, inferInstance, _, _, ⟨rfl, ?_⟩⟩
-        convert IsIso.id _
-        aesop
+        apply ((extensiveCoverage C) ⊔ (regularCoverage C)).mem_toGrothendieck_sieves_of_superset
+            (R := Presieve.ofArrows X fun i ↦ Sigma.ι X i)
+        · rw [Presieve.ofArrows_le_iff]
+          exact fun i ↦ by simpa using Sieve.ofArrows_mk X f i
+        · exact Or.inl ⟨I, inferInstance, X, Sigma.ι X, rfl, inferInstance⟩
     | top => apply Coverage.Saturate.top
     | transitive Y T => apply Coverage.Saturate.transitive Y T <;> [assumption; assumption]
 

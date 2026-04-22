@@ -209,15 +209,11 @@ variable (f g) in
 theorem hom_ext {W : C} {φ₁ φ₂ : W ⟶ pullbackObj f g} (h₁ : φ₁ ≫ fst _ _ = φ₂ ≫ fst _ _)
     (h₂ : φ₁ ≫ snd _ _ = φ₂ ≫ snd _ _) :
     φ₁ = φ₂ := by
-  let adj := mapPullbackAdj g
   let U : Over Z := Over.mk (φ₁ ≫ snd f g)
-  let φ₁' : U ⟶ (pullback g).obj (Over.mk f) := Over.homMk φ₁
-  let φ₂' : U ⟶ (pullback g).obj (Over.mk f) := Over.homMk φ₂ (by simpa using h₂.symm)
-  have : φ₁' = φ₂' := by
-    apply (adj.homEquiv U _).symm.injective
-    apply (Over.forget X).map_injective
-    simpa using h₁
-  exact congr_arg CommaMorphism.left this
+  let φ₂' : U ⟶ (pullback g).obj (.mk f) := Over.homMk φ₂ (by simpa using h₂.symm)
+  change (Over.homMk φ₁ : U ⟶ (pullback g).obj (.mk f)).left = φ₂'.left
+  exact congr_arg CommaMorphism.left <| ((mapPullbackAdj g).homEquiv U (.mk f)).symm.injective <|
+    by ext; simpa [φ₂'] using h₁
 
 section Lift
 

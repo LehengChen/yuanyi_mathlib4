@@ -86,13 +86,9 @@ variable {f g}
 /-- Split coequalizers are absolute: they are preserved by any functor. -/
 @[simps]
 def IsSplitCoequalizer.map {Z : C} {π : Y ⟶ Z} (q : IsSplitCoequalizer f g π) (F : C ⥤ D) :
-    IsSplitCoequalizer (F.map f) (F.map g) (F.map π) where
-  rightSection := F.map q.rightSection
-  leftSection := F.map q.leftSection
-  condition := by rw [← F.map_comp, q.condition, F.map_comp]
-  rightSection_π := by rw [← F.map_comp, q.rightSection_π, F.map_id]
-  leftSection_bottom := by rw [← F.map_comp, q.leftSection_bottom, F.map_id]
-  leftSection_top := by rw [← F.map_comp, q.leftSection_top, F.map_comp]
+    IsSplitCoequalizer (F.map f) (F.map g) (F.map π) := by
+  refine ⟨F.map q.rightSection, F.map q.leftSection, ?_, ?_, ?_, ?_⟩ <;>
+    simp_rw [← F.map_comp] <;> simp [q.condition]
 
 section
 

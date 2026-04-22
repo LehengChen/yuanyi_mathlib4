@@ -156,13 +156,9 @@ def coalgebraEquivalence (ι : Type*) [Unique ι] {X S : C} (f : X ⟶ S) :
   unitIso :=
     NatIso.ofComponents
       (fun D ↦ isoMk (fun i ↦ eqToIso (congr_arg D.obj (by subsingleton)))
-        (fun i₁ i₂ ↦ by
-          obtain rfl := Subsingleton.elim i₁ default
-          obtain rfl := Subsingleton.elim i₂ default
-          simp)) (fun {D₁ D₂} α ↦ by
-      ext i
-      obtain rfl := Subsingleton.elim i default
-      simp)
+        (by intro i₁ i₂; rw [Subsingleton.elim i₁ default, Subsingleton.elim i₂ default]; simp))
+      (fun {D₁ D₂} α ↦ by
+        ext i; simp [Subsingleton.elim i default])
   counitIso := Iso.refl _
 
 end DescentDataAsCoalgebra

@@ -37,17 +37,13 @@ variable (F : C ⥤ D) [PreservesFiniteCoproducts F]
 
 instance [F.ReflectsEffectiveEpis] : F.ReflectsFiniteEffectiveEpiFamilies where
   reflects {α _ B} X π h := by
-    simp only [← effectiveEpi_desc_iff_effectiveEpiFamily]
-    apply F.effectiveEpi_of_map
-    convert (inferInstance :
-      EffectiveEpi (inv (sigmaComparison F X) ≫ (Sigma.desc (fun a ↦ F.map (π a)))))
-    simp
+    simp only [← effectiveEpi_desc_iff_effectiveEpiFamily, ← sigmaComparison_map_desc] at h ⊢
+    exact F.effectiveEpi_of_map _ (effectiveEpi_of_effectiveEpi_epi_comp _ (sigmaComparison F X))
 
 instance [F.PreservesEffectiveEpis] : F.PreservesFiniteEffectiveEpiFamilies where
   preserves {α _ B} X π h := by
-    simp only [← effectiveEpi_desc_iff_effectiveEpiFamily]
-    convert (inferInstance :
-      EffectiveEpi ((sigmaComparison F X) ≫ (F.map (Sigma.desc π))))
-    simp
+    simpa [← effectiveEpi_desc_iff_effectiveEpiFamily, ← sigmaComparison_map_desc] using
+      (inferInstance :
+        EffectiveEpi ((sigmaComparison F X) ≫ (F.map (Sigma.desc π))))
 
 end CategoryTheory

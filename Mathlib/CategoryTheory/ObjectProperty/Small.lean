@@ -113,17 +113,13 @@ lemma EssentiallySmall.exists_small_le (P : ObjectProperty C)
   have h (X' : Subtype P') : ∃ (X : Subtype P), Nonempty (X'.1 ≅ X.1) :=
     ⟨⟨X'.2.2.choose, X'.2.2.choose_spec.choose⟩, X'.2.2.choose_spec.choose_spec⟩
   choose φ hφ using h
-  refine ⟨fun X ↦ X ∈ Set.range (Subtype.val ∘ φ), ?_, ?_, ?_⟩
-  · exact small_of_surjective (f := fun X ↦ ⟨(φ X).1, by tauto⟩)
-      (by rintro ⟨_, Z, rfl⟩; exact ⟨Z, rfl⟩)
-  · intro X hX
-    simp only [Set.mem_range, Function.comp_apply, Subtype.exists] at hX
-    obtain ⟨Y, hY, rfl⟩ := hX
-    exact (φ ⟨Y, hY⟩).2
+  refine ⟨.ofObj (fun X' : Subtype P' ↦ (φ X').1), inferInstance, ?_, ?_⟩
+  · rintro _ ⟨X'⟩
+    exact (φ X').2
   · intro X hX
     obtain ⟨Y, hY, ⟨e⟩⟩ := hQ _ hX
     let Z : Subtype P' := ⟨Y, hY, ⟨X, hX, ⟨e.symm⟩⟩⟩
-    exact ⟨_, ⟨Z, rfl⟩, ⟨e ≪≫ (hφ Z).some⟩⟩
+    exact ⟨_, ⟨Z⟩, ⟨e ≪≫ (hφ Z).some⟩⟩
 
 instance (P : ObjectProperty C) [ObjectProperty.Small.{w} P] :
     ObjectProperty.EssentiallySmall.{w} P where
@@ -153,22 +149,14 @@ instance {P Q : ObjectProperty C}
     ObjectProperty.EssentiallySmall.{w} (P ⊔ Q) := by
   obtain ⟨P', _, hP'⟩ := EssentiallySmall.exists_small_le' P
   obtain ⟨Q', _, hQ'⟩ := EssentiallySmall.exists_small_le' Q
-  refine ⟨P' ⊔ Q', inferInstance, ?_⟩
-  simp only [sup_le_iff]
-  constructor
-  · exact hP'.trans (monotone_isoClosure le_sup_left)
-  · exact hQ'.trans (monotone_isoClosure le_sup_right)
+  exact ⟨P' ⊔ Q', inferInstance, by simpa [isoClosure_sup] using sup_le_sup hP' hQ'⟩
 
 instance {α : Type*} (P : α → ObjectProperty C)
     [∀ a, ObjectProperty.EssentiallySmall.{w} (P a)] [Small.{w} α] :
     ObjectProperty.EssentiallySmall.{w} (⨆ a, P a) where
   exists_small_le' := by
-    have h (a : α) := EssentiallySmall.exists_small_le' (P a)
-    choose Q _ hQ using h
-    refine ⟨⨆ a, Q a, inferInstance, ?_⟩
-    simp only [iSup_le_iff]
-    intro a
-    exact (hQ a).trans (monotone_isoClosure (le_iSup Q a))
+    choose Q _ hQ using fun a ↦ EssentiallySmall.exists_small_le' (P a)
+    exact ⟨⨆ a, Q a, inferInstance, by simpa [isoClosure_iSup] using iSup_mono hQ⟩
 
 @[simp]
 lemma essentiallySmall_op_iff (P : ObjectProperty C) :

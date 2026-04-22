@@ -30,14 +30,10 @@ open CompleteLattice in
 instance {J : Type w} [Category.{w'} J] {X : Type u} [IsFilteredOrEmpty J] :
     PreservesColimitsOfShape J (functorToTypes (X := X)) where
   preservesColimit {F} := by
-    apply preservesColimit_of_preserves_colimit_cocone (colimitCocone F).isColimit
-    apply Types.FilteredColimit.isColimitOf
-    · rintro ⟨x, hx⟩
-      simp only [colimitCocone_cocone_pt, iSup_eq_iUnion, mem_iUnion] at hx
-      obtain ⟨i, hi⟩ := hx
-      exact ⟨i, ⟨x, hi⟩, rfl⟩
-    · intro i j ⟨x, hx⟩ ⟨y, hy⟩ h
-      obtain rfl : x = y := by simpa using h
-      exact ⟨IsFiltered.max i j, IsFiltered.leftToMax i j, IsFiltered.rightToMax i j, rfl⟩
+    refine preservesColimit_of_preserves_colimit_cocone (colimitCocone F).isColimit <|
+      Types.FilteredColimit.isColimitOf' (F ⋙ functorToTypes) _
+        (fun ⟨x, hx⟩ ↦ ?_) fun i ⟨x, hx⟩ ⟨y, hy⟩ h ↦ ?_
+    · aesop (add simp [colimitCocone_cocone_pt, iSup_eq_iUnion])
+    · exact ⟨i, 𝟙 _, by simpa using h⟩
 
 end Set

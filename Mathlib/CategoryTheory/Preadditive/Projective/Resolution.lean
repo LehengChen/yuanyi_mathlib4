@@ -6,6 +6,7 @@ Authors: Kim Morrison, Joël Riou
 module
 
 public import Mathlib.Algebra.Homology.QuasiIso
+public import Mathlib.Algebra.Homology.HomologicalComplexAbelian
 public import Mathlib.Algebra.Homology.SingleHomology
 public import Mathlib.CategoryTheory.Preadditive.Projective.Preserves
 
@@ -128,12 +129,7 @@ variable (Z)
 noncomputable def self [Projective Z] : ProjectiveResolution Z where
   complex := (ChainComplex.single₀ C).obj Z
   π := 𝟙 ((ChainComplex.single₀ C).obj Z)
-  projective n := by
-    cases n
-    · simpa
-    · apply IsZero.projective
-      apply HomologicalComplex.isZero_single_obj_X
-      simp
+  projective n := inferInstance
 
 variable {Z} {Z' : C} (P' : ProjectiveResolution Z')
 

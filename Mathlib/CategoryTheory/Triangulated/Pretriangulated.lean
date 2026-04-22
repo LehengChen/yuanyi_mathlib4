@@ -471,21 +471,16 @@ lemma isIso₂_of_isIso₁₃ {T T' : Triangle C} (φ : T ⟶ T') (hT : T ∈ di
       dsimp only [invRotate] at eq
       rw [← cancel_mono φ.hom₁, assoc, assoc, eq, IsIso.inv_hom_id_assoc, hh]
     erw [assoc, comp_distTriang_mor_zero₁₂ _ (inv_rot_of_distTriang _ hT), comp_zero]
-  refine isIso_of_yoneda_map_bijective _ (fun A => ⟨?_, ?_⟩)
-  · intro f₁ f₂ h
-    simpa only [← cancel_mono φ.hom₂] using h
-  · intro y₂
-    obtain ⟨x₃, hx₃⟩ : ∃ (x₃ : A ⟶ T.obj₃), x₃ ≫ φ.hom₃ = y₂ ≫ T'.mor₂ :=
-      ⟨y₂ ≫ T'.mor₂ ≫ inv φ.hom₃, by simp⟩
-    obtain ⟨x₂, hx₂⟩ := Triangle.coyoneda_exact₃ _ hT x₃
-      (by rw [← cancel_mono (φ.hom₁⟦(1 : ℤ)⟧'), assoc, zero_comp, φ.comm₃, reassoc_of% hx₃,
-        comp_distTriang_mor_zero₂₃ _ hT', comp_zero])
-    obtain ⟨y₁, hy₁⟩ := Triangle.coyoneda_exact₂ _ hT' (y₂ - x₂ ≫ φ.hom₂)
-      (by rw [sub_comp, assoc, ← φ.comm₂, ← reassoc_of% hx₂, hx₃, sub_self])
-    obtain ⟨x₁, hx₁⟩ : ∃ (x₁ : A ⟶ T.obj₁), x₁ ≫ φ.hom₁ = y₁ := ⟨y₁ ≫ inv φ.hom₁, by simp⟩
-    refine ⟨x₂ + x₁ ≫ T.mor₁, ?_⟩
-    dsimp
-    rw [add_comp, assoc, φ.comm₁, reassoc_of% hx₁, ← hy₁, add_sub_cancel]
+  have : Epi φ.hom₂ := (epi_iff_cancel_zero _).2 fun A f hf => by
+    obtain ⟨g, rfl⟩ := Triangle.yoneda_exact₂ _ hT' f
+      (by rw [← cancel_epi φ.hom₁, ← φ.comm₁_assoc, hf, comp_zero, comp_zero])
+    obtain ⟨h, hh⟩ := Triangle.yoneda_exact₃ _ hT (φ.hom₃ ≫ g)
+      (by rw [φ.comm₂_assoc, hf])
+    have : g = T'.mor₃ ≫ inv (φ.hom₁⟦(1 : ℤ)⟧') ≫ h := by
+      rw [← cancel_epi φ.hom₃, ← φ.comm₃_assoc, IsIso.hom_inv_id_assoc, ← hh]
+    rw [this, comp_distTriang_mor_zero₂₃_assoc _ hT', zero_comp]
+  haveI : IsSplitMono φ.hom₂ := isSplitMono_of_mono φ.hom₂
+  exact isIso_of_epi_of_isSplitMono φ.hom₂
 
 /-- If the first and second components of a morphism of distinguished triangles are
 isomorphisms, the third component is as well. This can be thought of as a

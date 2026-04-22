@@ -680,13 +680,9 @@ def mapIsoToOrderIso (e : X ≅ Y) : Subobject X ≃o Subobject Y where
     dsimp
     constructor
     · intro h
-      apply_fun (map e.inv).obj at h
-      · simpa only [← map_comp, e.hom_inv_id, map_id] using h
-      · apply Functor.monotone
+      simpa only [← map_comp, e.hom_inv_id, map_id] using (Functor.monotone (map e.inv)) h
     · intro h
-      apply_fun (map e.hom).obj at h
-      · exact h
-      · apply Functor.monotone
+      exact (Functor.monotone (map e.hom)) h
 
 /-- `map f : Subobject X ⥤ Subobject Y` is
 the left adjoint of `pullback f : Subobject Y ⥤ Subobject X`. -/
@@ -706,18 +702,12 @@ theorem map_pullback [HasPullbacks C] {X Y Z W : C} {f : X ⟶ Y} {g : X ⟶ Z} 
   revert p
   apply Quotient.ind'
   intro a
-  apply Quotient.sound
-  apply ThinSkeleton.equiv_of_both_ways
-  · refine MonoOver.homMk (pullback.lift (pullback.fst _ _) _ ?_) (pullback.lift_snd _ _ _)
-    simp [← comm, pullback.condition_assoc]
-  · refine MonoOver.homMk (pullback.lift (pullback.fst _ _)
-      (PullbackCone.IsLimit.lift t (pullback.fst _ _ ≫ a.arrow) (pullback.snd _ _) _)
-      (PullbackCone.IsLimit.lift_fst _ _ _ ?_).symm) ?_
-    · rw [← pullback.condition, assoc]
-      rfl
-    · dsimp
-      rw [pullback.lift_snd_assoc]
-      apply PullbackCone.IsLimit.lift_snd
+  change (map g).obj ((pullback f).obj (mk a.arrow)) =
+    (pullback k).obj ((map h).obj (mk a.arrow))
+  have H : IsPullback (pullback.fst a.arrow f) (pullback.snd a.arrow f ≫ g) (a.arrow ≫ h) k :=
+    (IsPullback.of_hasPullback a.arrow f).paste_vert (IsPullback.of_isLimit t)
+  rw [pullback_obj_mk (IsPullback.of_hasPullback a.arrow f), map_mk, map_mk,
+    pullback_obj_mk H]
 
 end Map
 

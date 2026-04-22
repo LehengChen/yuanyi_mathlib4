@@ -257,20 +257,16 @@ theorem sep {X : C} (P : Cᵒᵖ ⥤ D) (S : J.Cover X) (x y : ToType ((J.plusOb
   use B
   -- Prove that this cover refines the two covers over which our representatives are defined
   -- and use these proofs.
-  let ex : B ⟶ Sx :=
-    homOfLE
-      (by
-        rintro Y f ⟨Z, e1, e2, he2, he1, hee⟩
-        rw [← hee]
-        apply leOfHom (h1 ⟨_, _, he2⟩)
-        exact he1)
-  let ey : B ⟶ Sy :=
-    homOfLE
-      (by
-        rintro Y f ⟨Z, e1, e2, he2, he1, hee⟩
-        rw [← hee]
-        apply leOfHom (h2 ⟨_, _, he2⟩)
-        exact he1)
+  let ex : B ⟶ Sx := homOfLE fun Y f hf => by
+    let I : B.Arrow := ⟨Y, f, hf⟩
+    change Sx I.f
+    rw [← I.middle_spec]
+    exact (leOfHom (h1 I.fromMiddle) _ I.toMiddle.hf)
+  let ey : B ⟶ Sy := homOfLE fun Y f hf => by
+    let I : B.Arrow := ⟨Y, f, hf⟩
+    change Sy I.f
+    rw [← I.middle_spec]
+    exact (leOfHom (h2 I.fromMiddle) _ I.toMiddle.hf)
   use ex, ey
   -- Now prove that indeed the representatives become equal over `B`.
   -- This will follow by using the fact that our representatives become
@@ -290,13 +286,9 @@ theorem inj_of_sep (P : Cᵒᵖ ⥤ D)
         (∀ I : S.Arrow, P.map I.f.op x = P.map I.f.op y) → x = y)
     (X : C) : Function.Injective ((J.toPlus P).app (op X)) := by
   intro x y h
-  simp only [toPlus_eq_mk] at h
-  rw [eq_mk_iff_exists] at h
+  rw [toPlus_eq_mk, toPlus_eq_mk, eq_mk_iff_exists] at h
   obtain ⟨W, h1, h2, hh⟩ := h
-  apply hsep X W
-  intro I
-  apply_fun fun e => e I at hh
-  exact hh
+  exact hsep X W x y (fun I => by simpa using congrArg (fun e : Meq P W => e I) hh)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- An auxiliary definition to be used in the proof of `exists_of_sep` below.
@@ -570,14 +562,9 @@ noncomputable def plusPlusSheaf : (Cᵒᵖ ⥤ D) ⥤ Sheaf J D where
   obj P := ⟨J.sheafify P, J.sheafify_isSheaf P⟩
   map η := ⟨J.sheafifyMap η⟩
 
-set_option backward.isDefEq.respectTransparency false in
 instance plusPlusSheaf_preservesZeroMorphisms [Preadditive D] :
     (plusPlusSheaf J D).PreservesZeroMorphisms where
-  map_zero F G := by
-    ext : 3
-    refine colimit.hom_ext (fun j => ?_)
-    erw [colimit.ι_map, comp_zero]
-    simp
+  map_zero F G := by ext; simp [GrothendieckTopology.sheafifyMap]; rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The sheafification functor is left adjoint to the forgetful functor. -/

@@ -416,11 +416,7 @@ def mkNatTrans : F ⟶ G where
     | zero => e₀
     | one => e₁
   naturality _ _ f := by
-    cases f
-    all_goals
-      dsimp
-      simp only [Functor.map_id, Category.id_comp, Category.comp_id, Functor.map_comp, h₁, h₂, h₃,
-        reassoc_of% h₁, reassoc_of% h₂, Category.assoc]
+    cases f <;> dsimp <;> grind
 
 set_option backward.privateInPublic true in
 @[simp]
@@ -440,17 +436,11 @@ def mkNatIso (e₀ : F.obj zero ≅ G.obj zero) (e₁ : F.obj one ≅ G.obj one)
     (h₁ : F.map left ≫ e₀.hom = e₁.hom ≫ G.map left := by cat_disch)
     (h₂ : F.map right ≫ e₀.hom = e₁.hom ≫ G.map right := by cat_disch)
     (h₃ : F.map reflexion ≫ e₁.hom = e₀.hom ≫ G.map reflexion := by cat_disch) :
-    F ≅ G where
-  hom := mkNatTrans e₀.hom e₁.hom
-  inv := mkNatTrans e₀.inv e₁.inv
-        (by rw [← cancel_epi e₁.hom, e₁.hom_inv_id_assoc, ← reassoc_of% h₁, e₀.hom_inv_id,
-            Category.comp_id])
-        (by rw [← cancel_epi e₁.hom, e₁.hom_inv_id_assoc, ← reassoc_of% h₂, e₀.hom_inv_id,
-            Category.comp_id])
-        (by rw [← cancel_epi e₀.hom, e₀.hom_inv_id_assoc, ← reassoc_of% h₃, e₁.hom_inv_id,
-            Category.comp_id])
-  hom_inv_id := by ext x; cases x <;> simp
-  inv_hom_id := by ext x; cases x <;> simp
+    F ≅ G :=
+  NatIso.ofComponents (by rintro (_ | _); exacts [e₀, e₁])
+    (by
+      rintro _ _ f
+      cases f <;> dsimp <;> grind)
 
 variable (F)
 

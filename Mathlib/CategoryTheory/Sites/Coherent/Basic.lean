@@ -113,16 +113,11 @@ def regularCoverage [Preregular C] : Coverage C where
     (fun (_ : Unit) ↦ f) ∧ EffectiveEpi f }
   pullback := by
     intro X Y f S ⟨Z, π, hπ, h_epi⟩
-    have := Preregular.exists_fac f π
-    obtain ⟨W, h, _, i, this⟩ := this
-    refine ⟨Presieve.singleton h, ⟨?_, ?_⟩⟩
-    · exact ⟨W, h, by {rw [Presieve.ofArrows_pUnit h]}, inferInstance⟩
-    · intro W g hg
-      cases hg
-      refine ⟨Z, i, π, ⟨?_, this⟩⟩
-      cases hπ
-      rw [Presieve.ofArrows_pUnit]
-      exact Presieve.singleton.mk
+    obtain ⟨W, h, _, i, hi⟩ := Preregular.exists_fac f π
+    refine ⟨Presieve.singleton h, ?_, ?_⟩
+    · exact ⟨W, h, by simp [Presieve.ofArrows_pUnit], inferInstance⟩
+    · rintro _ _ ⟨⟩
+      exact ⟨Z, i, π, by simp [hπ, Presieve.ofArrows_pUnit], hi⟩
 
 /--
 The regular Grothendieck topology on a preregular category `C`.

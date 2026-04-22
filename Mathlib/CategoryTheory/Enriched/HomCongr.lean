@@ -40,19 +40,11 @@ variable (V : Type u') [Category.{v'} V] [MonoidalCategory V]
 
 /-- Given isomorphisms `α : X ≅ X₁` and `β : Y ≅ Y₁` in `C`, we can construct
 an isomorphism between `V` objects `X ⟶[V] Y` and `X₁ ⟶[V] Y₁`. -/
-@[simps]
+@[simps!]
 def eHomCongr {X Y X₁ Y₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁) :
-    (X ⟶[V] Y) ≅ (X₁ ⟶[V] Y₁) where
-  hom := eHomWhiskerRight V α.inv Y ≫ eHomWhiskerLeft V X₁ β.hom
-  inv := eHomWhiskerRight V α.hom Y₁ ≫ eHomWhiskerLeft V X β.inv
-  hom_inv_id := by
-    rw [← eHom_whisker_exchange]
-    slice_lhs 2 3 => rw [← eHomWhiskerRight_comp]
-    simp [← eHomWhiskerLeft_comp]
-  inv_hom_id := by
-    rw [← eHom_whisker_exchange]
-    slice_lhs 2 3 => rw [← eHomWhiskerRight_comp]
-    simp [← eHomWhiskerLeft_comp]
+    (X ⟶[V] Y) ≅ (X₁ ⟶[V] Y₁) :=
+  ((eHomFunctor V C).mapIso α.symm.op).app Y ≪≫
+    ((eHomFunctor V C).obj (Opposite.op X₁)).mapIso β
 
 lemma eHomCongr_refl (X Y : C) :
     eHomCongr V (Iso.refl X) (Iso.refl Y) = Iso.refl (X ⟶[V] Y) := by aesop
@@ -64,7 +56,8 @@ lemma eHomCongr_trans {X₁ Y₁ X₂ Y₂ X₃ Y₃ : C} (α₁ : X₁ ≅ X₂
   ext; simp [eHom_whisker_exchange_assoc]
 
 lemma eHomCongr_symm {X Y X₁ Y₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁) :
-    (eHomCongr V α β).symm = eHomCongr V α.symm β.symm := rfl
+    (eHomCongr V α β).symm = eHomCongr V α.symm β.symm := by
+  ext; simp [eHomCongr, eHom_whisker_exchange]
 
 /-- `eHomCongr` respects composition of morphisms. Recall that for any
 composable pair of arrows `f : X ⟶ Y` and `g : Y ⟶ Z` in `C`, the composite
@@ -78,7 +71,7 @@ lemma eHomCongr_comp {X Y Z X₁ Y₁ Z₁ : C} (α : X ≅ X₁) (β : Y ≅ Y�
     eHomEquiv V (f ≫ g) ≫ (eHomCongr V α γ).hom =
       (λ_ _).inv ≫ (eHomEquiv V f ≫ (eHomCongr V α β).hom) ▷ _ ≫
         _ ◁ (eHomEquiv V g ≫ (eHomCongr V β γ).hom) ≫ eComp V X₁ Y₁ Z₁ := by
-  simp only [eHomCongr, MonoidalCategory.whiskerRight_id, assoc,
+  simp only [eHomCongr_hom, MonoidalCategory.whiskerRight_id, assoc,
     MonoidalCategory.whiskerLeft_comp]
   rw [rightUnitor_inv_naturality_assoc, rightUnitor_inv_naturality_assoc,
     rightUnitor_inv_naturality_assoc, hom_inv_id_assoc, ← whisker_exchange_assoc,
@@ -92,8 +85,8 @@ lemma eHomCongr_inv_comp {X Y Z X₁ Y₁ Z₁ : C} (α : X ≅ X₁) (β : Y �
     (γ : Z ≅ Z₁) (f : X₁ ⟶ Y₁) (g : Y₁ ⟶ Z₁) :
     eHomEquiv V (f ≫ g) ≫ (eHomCongr V α γ).inv =
       (λ_ _).inv ≫ (eHomEquiv V f ≫ (eHomCongr V α β).inv) ▷ _ ≫
-        _ ◁ (eHomEquiv V g ≫ (eHomCongr V β γ).inv) ≫ eComp V X Y Z :=
-  eHomCongr_comp V α.symm β.symm γ.symm f g
+        _ ◁ (eHomEquiv V g ≫ (eHomCongr V β γ).inv) ≫ eComp V X Y Z := by
+  simpa [← eHomCongr_symm] using eHomCongr_comp V α.symm β.symm γ.symm f g
 
 end Iso
 end CategoryTheory

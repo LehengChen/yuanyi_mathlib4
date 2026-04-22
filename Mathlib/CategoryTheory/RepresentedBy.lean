@@ -83,14 +83,10 @@ lemma IsRepresentedBy.representableBy_homEquiv_apply (h : F.IsRepresentedBy x)
     h.representableBy.homEquiv f = F.map f.op x :=
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 lemma RepresentableBy.isRepresentedBy (R : F.RepresentableBy X) :
-    F.IsRepresentedBy (R.homEquiv (𝟙 X)) := by
-  rw [IsRepresentedBy.iff_isIso_uliftYonedaEquiv]
-  convert (RepresentableBy.equivUliftYonedaIso _ _ <|
-    representableByUliftFunctorEquiv.{v}.symm R).isIso_hom
-  ext
-  simp [uliftYonedaEquiv, ← homEquiv_eq]
+    F.IsRepresentedBy (R.homEquiv (𝟙 X)) where
+  map_bijective := fun {Y} => by
+    simpa only [← R.homEquiv_eq] using (@R.homEquiv Y).bijective
 
 lemma IsRepresentedBy.iff_exists_representableBy :
     F.IsRepresentedBy x ↔ ∃ (R : F.RepresentableBy X), R.homEquiv (𝟙 X) = x :=

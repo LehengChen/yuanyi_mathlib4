@@ -196,14 +196,10 @@ def pointedToBipointedFstBipointedToPointedFstAdjunction :
           invFun := fun f => ⟨fun o => o.elim Y.toProd.2 f.toFun, f.map_point, rfl⟩
           left_inv := fun f => by
             apply Bipointed.Hom.ext
-            funext x
-            cases x
-            · exact f.map_snd.symm
-            · rfl }
-      homEquiv_naturality_left_symm := fun f g => by
-        apply Bipointed.Hom.ext
-        funext x
-        cases x <;> rfl }
+            change (fun o => o.elim Y.toProd.2 (f.toFun ∘ some)) = f.toFun
+            exact funext (fun x => by cases x <;> first | exact f.map_snd.symm | simp) }
+      homEquiv_naturality_left_symm := fun {X' X Y} f g => Bipointed.Hom.ext <| by
+        exact (funext (Option.elim_map (f := f.toFun) (g' := Y.toProd.2) (g := g.toFun))).symm }
 
 /-- The free/forgetful adjunction between `PointedToBipointed_snd` and `BipointedToPointed_snd`.
 -/
@@ -215,11 +211,7 @@ def pointedToBipointedSndBipointedToPointedSndAdjunction :
           invFun := fun f => ⟨fun o => o.elim Y.toProd.1 f.toFun, rfl, f.map_point⟩
           left_inv := fun f => by
             apply Bipointed.Hom.ext
-            funext x
-            cases x
-            · exact f.map_fst.symm
-            · rfl }
-      homEquiv_naturality_left_symm := fun f g => by
-        apply Bipointed.Hom.ext
-        funext x
-        cases x <;> rfl }
+            change (fun o => o.elim Y.toProd.1 (f.toFun ∘ some)) = f.toFun
+            exact funext (fun x => by cases x <;> first | exact f.map_fst.symm | simp) }
+      homEquiv_naturality_left_symm := fun {X' X Y} f g => Bipointed.Hom.ext <| by
+        exact (funext (Option.elim_map (f := f.toFun) (g' := Y.toProd.1) (g := g.toFun))).symm }

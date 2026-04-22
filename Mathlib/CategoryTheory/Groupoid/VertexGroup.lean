@@ -6,7 +6,7 @@ Authors: Rémi Bottinelli
 module
 
 public import Mathlib.Algebra.Group.Basic
-public import Mathlib.Algebra.Group.Equiv.Defs
+public import Mathlib.CategoryTheory.Conj
 public import Mathlib.CategoryTheory.Groupoid
 public import Mathlib.CategoryTheory.PathCategory.Basic
 public import Mathlib.Combinatorics.Quiver.Path
@@ -61,14 +61,9 @@ its endpoints.
 def vertexGroupIsomOfMap {c d : C} (f : c ⟶ d) : (c ⟶ c) ≃* (d ⟶ d) where
   toFun γ := inv f ≫ γ ≫ f
   invFun δ := f ≫ δ ≫ inv f
-  left_inv γ := by
-    simp_rw [Category.assoc, comp_inv, Category.comp_id, ← Category.assoc, comp_inv,
-      Category.id_comp]
-  right_inv δ := by
-    simp_rw [Category.assoc, inv_comp, ← Category.assoc, inv_comp, Category.id_comp,
-      Category.comp_id]
-  map_mul' γ₁ γ₂ := by
-    simp only [vertexGroup_mul, inv_eq_inv, Category.assoc, IsIso.hom_inv_id_assoc]
+  left_inv := ((Groupoid.isoEquivHom c d).symm f).symm_self_conj
+  right_inv := ((Groupoid.isoEquivHom c d).symm f).self_symm_conj
+  map_mul' := ((Groupoid.isoEquivHom c d).symm f).conj_comp
 
 /-- A path in the groupoid defines an isomorphism between its endpoints.
 -/

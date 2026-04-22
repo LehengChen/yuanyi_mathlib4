@@ -140,40 +140,31 @@ lemma ShortComplex.liftCycles_comp_homologyπ_eq_zero_iff_up_to_refinements
     {A : C} (x₂ : A ⟶ S.X₂) (hx₂ : x₂ ≫ S.g = 0) :
     S.liftCycles x₂ hx₂ ≫ S.homologyπ = 0 ↔
       ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁), π ≫ x₂ = x₁ ≫ S.f := by
-  have := CokernelCofork.IsColimit.comp_π_eq_zero_iff_up_to_refinements
-        S.homologyIsCokernel (S.liftCycles x₂ hx₂)
-  dsimp at this
-  simp [this, ← cancel_mono S.iCycles]
+  simpa [liftCycles_i, toCycles_i, ← cancel_mono S.iCycles] using
+    CokernelCofork.IsColimit.comp_π_eq_zero_iff_up_to_refinements
+      S.homologyIsCokernel (S.liftCycles x₂ hx₂)
 
 lemma ShortComplex.liftCycles_comp_homologyπ_eq_iff_up_to_refinements
     {A : C} (x₂ x₂' : A ⟶ S.X₂) (hx₂ : x₂ ≫ S.g = 0) (hx₂' : x₂' ≫ S.g = 0) :
     S.liftCycles x₂ hx₂ ≫ S.homologyπ = S.liftCycles x₂' hx₂' ≫ S.homologyπ ↔
       ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁), π ≫ x₂ = π ≫ x₂' + x₁ ≫ S.f := by
-  suffices S.liftCycles x₂ hx₂ ≫ S.homologyπ = S.liftCycles x₂' hx₂' ≫ S.homologyπ ↔
-      S.liftCycles (x₂ - x₂') (by simp [hx₂, hx₂']) ≫ S.homologyπ = 0 by
-    simp [this, S.liftCycles_comp_homologyπ_eq_zero_iff_up_to_refinements,
-      sub_eq_iff_eq_add']
-  rw [← sub_eq_zero, ← sub_comp, sub_liftCycles]
+  rw [← sub_eq_zero, ← sub_comp, sub_liftCycles,
+    S.liftCycles_comp_homologyπ_eq_zero_iff_up_to_refinements]
+  simp [sub_eq_iff_eq_add']
 
 lemma ShortComplex.comp_homologyπ_eq_zero_iff_up_to_refinements
     {A : C} (z₂ : A ⟶ S.cycles) :
     z₂ ≫ S.homologyπ = 0 ↔
-      ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁), π ≫ z₂ = x₁ ≫ S.toCycles := by
-  obtain ⟨x₂, hx₂, rfl⟩ : ∃ (x₂ : A ⟶ S.X₂) (hx₂ : x₂ ≫ S.g = 0), z₂ = S.liftCycles x₂ hx₂ :=
-    ⟨z₂ ≫ S.iCycles, by simp, by simp [← cancel_mono S.iCycles, liftCycles_i]⟩
-  simp [liftCycles_comp_homologyπ_eq_zero_iff_up_to_refinements, ← cancel_mono S.iCycles]
+      ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁), π ≫ z₂ = x₁ ≫ S.toCycles :=
+  CokernelCofork.IsColimit.comp_π_eq_zero_iff_up_to_refinements S.homologyIsCokernel z₂
 
 lemma ShortComplex.comp_homologyπ_eq_iff_up_to_refinements
     {A : C} (z₂ z₂' : A ⟶ S.cycles) :
     z₂ ≫ S.homologyπ = z₂' ≫ S.homologyπ ↔
       ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁),
         π ≫ z₂ = π ≫ z₂' + x₁ ≫ S.toCycles := by
-  obtain ⟨x₂, hx₂, rfl⟩ : ∃ (x₂ : A ⟶ S.X₂) (hx₂ : x₂ ≫ S.g = 0), z₂ = S.liftCycles x₂ hx₂ :=
-    ⟨z₂ ≫ S.iCycles, by simp, by simp [← cancel_mono S.iCycles]⟩
-  obtain ⟨x₂', hx₂', rfl⟩ : ∃ (x₂' : A ⟶ S.X₂) (hx₂' : x₂' ≫ S.g = 0), z₂' =
-    S.liftCycles x₂' hx₂' := ⟨z₂' ≫ S.iCycles, by simp,
-      by simp [← cancel_mono S.iCycles]⟩
-  simp [liftCycles_comp_homologyπ_eq_iff_up_to_refinements, ← cancel_mono S.iCycles]
+  rw [← sub_eq_zero, ← sub_comp, S.comp_homologyπ_eq_zero_iff_up_to_refinements]
+  simp [sub_eq_iff_eq_add']
 
 lemma ShortComplex.comp_pOpcycles_eq_zero_iff_up_to_refinements
     {A : C} (x₂ : A ⟶ S.X₂) :

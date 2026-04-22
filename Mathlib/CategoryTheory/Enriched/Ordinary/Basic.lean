@@ -339,11 +339,7 @@ instance (P : ObjectProperty C) :
     change _ = eId V X.obj
     rw [← eHomEquiv_id]
     rfl
-  homEquiv_comp f g := by
-    simp only [ObjectProperty.ι_obj, Equiv.trans_apply]
-    change (eHomEquiv V) (P.ι.map (f ≫ g)) = _
-    rw [Functor.map_comp, eHomEquiv_comp]
-    rfl
+  homEquiv_comp f g := by simpa using eHomEquiv_comp V (P.ι.map f) (P.ι.map g)
 
 end full_subcategory
 

@@ -144,11 +144,7 @@ theorem toPrefunctor_comp (F : C ⥤ D) (G : D ⥤ E) :
 
 lemma toPrefunctor_injective {F G : C ⥤ D} (h : F.toPrefunctor = G.toPrefunctor) :
     F = G := by
-  obtain ⟨obj, map, _, _⟩ := F
-  obtain ⟨obj', map', _, _⟩ := G
-  obtain rfl : obj = obj' := congr_arg Prefunctor.obj h
-  obtain rfl : @map = @map' := by simpa [Functor.toPrefunctor] using h
-  rfl
+  cases F; cases G; simpa [Functor.toPrefunctor] using h
 
 end
 

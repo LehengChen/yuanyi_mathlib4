@@ -80,17 +80,10 @@ variable [Abelian C] [∀ i, Abelian (D i)] [CategoryWithHomology C]
 
 lemma shortExact_iff (S : ShortComplex C) :
     S.ShortExact ↔ ∀ (i : I), (S.map (F i)).ShortExact := by
-  refine ⟨fun hS i ↦ ?_, fun hS ↦ ?_⟩
-  · have := hS.mono_f
-    have := hS.epi_g
-    exact hS.map (F i)
-  · have : Mono S.f := by
-      rw [hP.jointlyReflectMonomorphisms.mono_iff]
-      exact fun i ↦ (hS i).mono_f
-    have : Epi S.g := by
-      rw [hP.jointlyReflectEpimorphisms.epi_iff]
-      exact fun i ↦ (hS i).epi_g
-    exact { exact := (hP.exact_iff S).2 (fun i ↦ (hS i).exact) }
+  refine ⟨fun hS i ↦ hS.map_of_exact (F i), fun hS ↦ ?_⟩
+  exact ShortComplex.ShortExact.mk' ((hP.exact_iff S).2 fun i ↦ (hS i).exact)
+    ((hP.jointlyReflectMonomorphisms.mono_iff S.f).2 fun i ↦ (hS i).mono_f)
+    ((hP.jointlyReflectEpimorphisms.epi_iff S.g).2 fun i ↦ (hS i).epi_g)
 
 lemma shortComplexQuasiIso_iff {S₁ S₂ : ShortComplex C} (f : S₁ ⟶ S₂) :
     ShortComplex.QuasiIso f ↔

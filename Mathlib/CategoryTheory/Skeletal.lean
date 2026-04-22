@@ -357,12 +357,8 @@ theorem equiv_of_both_ways {X Y : C} (f : X ⟶ Y) (g : Y ⟶ X) : X ≈ Y :=
   ⟨iso_of_both_ways f g⟩
 
 instance thinSkeletonPartialOrder : PartialOrder (ThinSkeleton C) :=
-  { CategoryTheory.ThinSkeleton.preorder C with
-    le_antisymm :=
-      Quotient.ind₂
-        (by
-          rintro _ _ ⟨f⟩ ⟨g⟩
-          apply Quotient.sound (equiv_of_both_ways f g)) }
+  @PartialOrder.mk (ThinSkeleton C) (CategoryTheory.ThinSkeleton.preorder C) <|
+    Quotient.ind₂ fun _ _ ⟨f⟩ ⟨g⟩ => Quotient.sound (equiv_of_both_ways f g)
 
 theorem skeletal : Skeletal (ThinSkeleton C) := fun X Y =>
   Quotient.inductionOn₂ X Y fun _ _ h => h.elim fun i => i.1.le.antisymm i.2.le

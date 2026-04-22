@@ -41,16 +41,12 @@ lemma hasLeftCalculusOfFractions (adj : G ⊣ F) (W : MorphismProperty C₁)
     [W.IsMultiplicative] (hW : W.IsInvertedBy G) (hW' : (W.functorCategory C₁) adj.unit) :
     W.HasLeftCalculusOfFractions where
   exists_leftFraction X Y φ := by
-    obtain ⟨T, s, _, f, rfl⟩ := φ.cases
-    dsimp
-    have := hW s (by assumption)
-    exact ⟨{
-      f := adj.unit.app X ≫ F.map (inv (G.map s)) ≫ F.map (G.map f)
-      s := adj.unit.app Y
-      hs := hW' Y}, by
-      have := adj.unit.naturality s
-      dsimp at this ⊢
-      rw [reassoc_of% this, Functor.map_inv, IsIso.hom_inv_id_assoc, adj.unit_naturality]⟩
+    obtain ⟨T, s, hs, f, rfl⟩ := φ.cases
+    have := hW s hs
+    refine ⟨LeftFraction.mk (adj.homEquiv X (G.obj Y) (inv (G.map s) ≫ G.map f))
+      (adj.unit.app Y) (hW' Y), ?_⟩
+    simpa only [Adjunction.homEquiv_unit, ← adj.unit_naturality, IsIso.hom_inv_id_assoc] using
+      adj.homEquiv_naturality_left s (inv (G.map s) ≫ G.map f)
   ext X' X Y f₁ f₂ s _ h := by
     have := hW s (by assumption)
     refine ⟨_, adj.unit.app Y, hW' _, ?_⟩

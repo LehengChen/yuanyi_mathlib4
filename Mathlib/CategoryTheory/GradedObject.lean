@@ -450,21 +450,12 @@ the point of this latter cofan computes the coproduct of the `X i` such that `r 
 @[simp]
 def isColimitCofanMapObjComp :
     IsColimit (cofanMapObjComp X p q r hpqr k c c') :=
-  mkCofanColimit _
-    (fun s => Cofan.IsColimit.desc hc'
-      (fun ⟨j, (hj : q j = k)⟩ => Cofan.IsColimit.desc (hc j hj)
-        (fun ⟨i, (hi : p i = j)⟩ => s.inj ⟨i, by
-          simp only [Set.mem_preimage, Set.mem_singleton_iff, ← hpqr, hi, hj]⟩)))
-    (fun s ⟨i, (hi : r i = k)⟩ => by simp)
-    (fun s m hm => by
-      apply Cofan.IsColimit.hom_ext hc'
-      rintro ⟨j, rfl : q j = k⟩
-      apply Cofan.IsColimit.hom_ext (hc j rfl)
-      rintro ⟨i, rfl : p i = j⟩
-      dsimp
-      rw [Cofan.IsColimit.fac, Cofan.IsColimit.fac, ← hm]
-      dsimp
-      rw [assoc])
+  let e : ((j : q ⁻¹' {k}) × p ⁻¹' {j.1}) ≃ r ⁻¹' {k} :=
+    Equiv.sigmaSubtypeFiberEquivSubtype p (fun i => by
+      simp only [Set.mem_preimage, Set.mem_singleton_iff]
+      rw [hpqr])
+  (Cofan.isColimitTrans c' hc' (fun j i => (c j.1 j.2).inj i)
+    (fun j => hc j.1 j.2)).whiskerEquivalence (Discrete.equivalence e.symm)
 
 include hpqr in
 lemma hasMap_comp [(X.mapObj p).HasMap q] : X.HasMap r :=

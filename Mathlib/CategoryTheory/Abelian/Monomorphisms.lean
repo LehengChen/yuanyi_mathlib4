@@ -28,13 +28,9 @@ variable {C : Type u} [Category.{v} C] [Abelian C]
 open MorphismProperty
 
 instance : (monomorphisms C).IsStableUnderCobaseChange :=
-  IsStableUnderCobaseChange.mk' (fun _ _ _ f g _ hf ↦ by
-    simp only [monomorphisms.iff] at hf ⊢
-    infer_instance)
+  .mk' (fun _ _ _ _ _ _ (_ : Mono _) ↦ inferInstanceAs (Mono _))
 
 instance : (epimorphisms C).IsStableUnderBaseChange :=
-  IsStableUnderBaseChange.mk' (fun _ _ _ f g _ hf ↦ by
-    simp only [epimorphisms.iff] at hf ⊢
-    infer_instance)
+  .mk' (fun _ _ _ _ _ _ (_ : Epi _) ↦ inferInstanceAs (Epi _))
 
 end CategoryTheory.Abelian

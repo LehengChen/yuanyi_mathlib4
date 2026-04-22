@@ -60,12 +60,8 @@ lemma isCardinalFilteredGenerator
   exists_colimitsOfShape Y := by
     have := adj.isLeftAdjoint
     obtain ⟨J, _, _, ⟨hY⟩⟩ := hP.exists_colimitsOfShape (G.obj Y)
-    exact ⟨J, inferInstance, inferInstance,
-      ObjectProperty.prop_of_isIso _ (adj.counit.app Y) ⟨{
-        diag := _
-        ι := _
-        isColimit := isColimitOfPreserves F hY.isColimit
-        prop_diag_obj j := P.prop_map_obj _ (hY.prop_diag_obj j) }⟩⟩
+    exact ⟨J, inferInstance, inferInstance, ⟨{ (hY.map F).ofIso (asIso (adj.counit.app Y)) with
+      prop_diag_obj := fun j ↦ P.prop_map_obj _ (hY.prop_diag_obj j) }⟩⟩
 
 lemma hasCardinalFilteredGenerator [HasCardinalFilteredGenerator C κ]
     [G.IsCardinalAccessible κ] [G.Full] [G.Faithful] :

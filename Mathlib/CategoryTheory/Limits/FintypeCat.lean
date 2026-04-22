@@ -72,14 +72,9 @@ as types. -/
 noncomputable def productEquiv {ι : Type*} [Finite ι] (X : ι → FintypeCat.{u}) :
     (∏ᶜ X : FintypeCat) ≃ ∀ i, X i :=
   letI : Fintype ι := Fintype.ofFinite _
-  haveI : Small.{u} ι :=
-    ⟨ULift (Fin (Fintype.card ι)), ⟨(Fintype.equivFin ι).trans Equiv.ulift.symm⟩⟩
-  let is₁ : FintypeCat.incl.obj (∏ᶜ fun i ↦ X i) ≅ (∏ᶜ fun i ↦ X i : Type u) :=
-    PreservesProduct.iso FintypeCat.incl (fun i ↦ X i)
-  let is₂ : (∏ᶜ fun i ↦ X i : Type u) ≅ Shrink.{u} (∀ i, X i) :=
-    Types.Small.productIso (fun i ↦ X i)
-  let e : (∀ i, X i) ≃ Shrink.{u} (∀ i, X i) := equivShrink _
-  (equivEquivIso.symm is₁).trans ((equivEquivIso.symm is₂).trans e.symm)
+  haveI : Small.{u} ι := Small.mk' ((Fintype.equivFin ι).trans Equiv.ulift.symm)
+  ((PreservesProduct.iso FintypeCat.incl X) ≪≫ Types.Small.productIso (fun i ↦ X i)).toEquiv.trans
+    (equivShrink _).symm
 
 @[simp]
 lemma productEquiv_apply {ι : Type*} [Finite ι] (X : ι → FintypeCat.{u})

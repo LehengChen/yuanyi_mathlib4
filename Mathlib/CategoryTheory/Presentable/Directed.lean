@@ -194,13 +194,8 @@ def Diagram.single (j : J) : Diagram J κ where
   src := by rintro _ _ _ ⟨⟩; exact ⟨⟨⟩⟩
   tgt := by rintro _ _ _ ⟨⟩; exact ⟨⟨⟩⟩
   hW :=
-    (hasCardinalLT_of_finite _ κ (Cardinal.IsRegular.aleph0_le Fact.out)).of_surjective
-        (fun (_ : Unit) ↦ ⟨Arrow.mk (𝟙 j), ⟨⟨⟩⟩⟩) (by
-      rintro ⟨f, hf⟩
-      refine ⟨⟨⟩, ?_⟩
-      ext
-      exact ((MorphismProperty.ofHoms_iff _ _).1
-        ((MorphismProperty.arrow_mk_mem_toSet_iff _ _).1 hf)).choose_spec.symm)
+    MorphismProperty.hasCardinalLT_ofHoms (fun (_ : Unit) ↦ 𝟙 j)
+      (hasCardinalLT_of_finite _ κ (Cardinal.IsRegular.aleph0_le Fact.out))
   hP :=
     (hasCardinalLT_of_finite _ κ (Cardinal.IsRegular.aleph0_le Fact.out)).of_surjective
       (fun (_ : Unit) ↦ ⟨j, by simp⟩) (fun ⟨k, hk⟩ ↦ ⟨⟨⟩, by aesop⟩)
@@ -294,14 +289,10 @@ lemma isCardinalFiltered_aux
   have hL : HasCardinalLT shape.L κ := by
     have : HasCardinalLT (ι × (Σ (i : ι), Subtype (D i).P)) κ :=
       hasCardinalLT_prod hκ hι (hasCardinalLT_sigma _ _ hι (fun i ↦ (D i).hP))
-    refine this.of_injective (fun ⟨⟨i₁, i₂, j⟩, h₁, h₂⟩ ↦ ⟨i₁, i₂, ⟨j, h₂⟩⟩) ?_
-    rintro ⟨⟨i₁, i₂, j⟩, _, _⟩ ⟨⟨i₁', i₂', j'⟩, _, _⟩ h
-    rw [Prod.ext_iff, Sigma.ext_iff] at h
-    dsimp at h
-    obtain rfl : i₁ = i₁' := h.1
-    obtain rfl : i₂ = i₂' := h.2.1
-    obtain rfl : j = j' := by simpa using h
-    rfl
+    exact this.of_injective (fun ⟨x, h⟩ ↦ ⟨x.1, x.2.1, ⟨x.2.2, h.2⟩⟩) (by
+      rintro ⟨x, hx⟩ ⟨y, hy⟩ h
+      apply Subtype.ext
+      simpa using congr_arg (fun y : ι × (Σ i, Subtype (D i).P) => (y.1, y.2.1, y.2.2.1)) h)
   have hR : HasCardinalLT shape.R κ := hasCardinalLT_of_finite _ _ hκ
   have hshape : HasCardinalLT (Arrow (WalkingMultispan shape)) κ := by
     rw [hasCardinalLT_iff_of_equiv (WalkingMultispan.arrowEquiv shape),

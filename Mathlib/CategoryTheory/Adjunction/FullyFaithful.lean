@@ -274,17 +274,13 @@ instance [R.IsEquivalence] : IsIso h.counit := by
   have := h.isEquivalence_left_of_isEquivalence_right
   infer_instance
 
-set_option backward.isDefEq.respectTransparency false in
 theorem isIso_map_unit_of_isLeftAdjoint_comp {E : Type*} [Category* E]
     {T : C ⥤ E} {S : E ⥤ D} {X : C} (adj2 : T ⊣ S ⋙ R) [R.Faithful] [R.Full] :
     IsIso (T.map (h.unit.app X)) := by
-  let FF := FullyFaithful.ofFullyFaithful R
   apply isIso_of_coyoneda_map_bijective
-  intro Y
-  convert ((adj2.homEquiv (R.obj (L.obj X)) Y).trans <| FF.homEquiv.symm.trans <|
-    (h.homEquiv X (S.obj Y)).trans (adj2.homEquiv X Y).symm).bijective using 1
-  ext x
-  have := adj2.counit_naturality x
-  simp_all [Adjunction.homEquiv]
+  intro Y; rw [adj2.map_comp_bijective_iff]
+  exact (h.map_comp_bijective_iff (f := h.unit.app X) (Z := S.obj Y)).mp <|
+    ⟨(fun _ _ hgg => (cancel_epi (L.map (h.unit.app X))).1 hgg),
+      fun g => ⟨inv (L.map (h.unit.app X)) ≫ g, by simp⟩⟩
 
 end CategoryTheory.Adjunction

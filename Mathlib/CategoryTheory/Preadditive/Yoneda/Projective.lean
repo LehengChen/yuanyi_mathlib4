@@ -34,12 +34,8 @@ namespace Projective
 theorem projective_iff_preservesEpimorphisms_preadditiveCoyoneda_obj (P : C) :
     Projective P ↔ (preadditiveCoyoneda.obj (op P)).PreservesEpimorphisms := by
   rw [projective_iff_preservesEpimorphisms_coyoneda_obj]
-  refine ⟨fun h : (preadditiveCoyoneda.obj (op P) ⋙
-      forget AddCommGrpCat).PreservesEpimorphisms => ?_, ?_⟩
-  · exact Functor.preservesEpimorphisms_of_preserves_of_reflects (preadditiveCoyoneda.obj (op P))
-        (forget _)
-  · intro
-    exact (inferInstance : (preadditiveCoyoneda.obj (op P) ⋙ forget _).PreservesEpimorphisms)
+  change (preadditiveCoyoneda.obj (op P) ⋙ forget AddCommGrpCat).PreservesEpimorphisms ↔ _
+  exact ⟨fun h => Functor.preservesEpimorphisms_of_preserves_of_reflects _ (forget _), fun h => inferInstance⟩
 
 theorem projective_iff_preservesEpimorphisms_preadditiveCoyonedaObj (P : C) :
     Projective P ↔ (preadditiveCoyonedaObj P).PreservesEpimorphisms := by

@@ -155,30 +155,22 @@ for the refinements when we know whether or not the simples are isomorphic.
 -/
 theorem finrank_hom_simple_simple_le_one (X Y : C) [FiniteDimensional 𝕜 (X ⟶ X)] [Simple X]
     [Simple Y] : finrank 𝕜 (X ⟶ Y) ≤ 1 := by
-  obtain (h | h) := subsingleton_or_nontrivial (X ⟶ Y)
-  · rw [finrank_zero_of_subsingleton]
-    exact zero_le_one
-  · obtain ⟨f, nz⟩ := (nontrivial_iff_exists_ne 0).mp h
-    haveI fi := (isIso_iff_nonzero f).mpr nz
-    refine finrank_le_one f ?_
-    intro g
-    obtain ⟨c, w⟩ := endomorphism_simple_eq_smul_id 𝕜 (g ≫ inv f)
-    exact ⟨c, by simpa using w =≫ f⟩
+  by_cases h : Nonempty (X ≅ Y)
+  · obtain ⟨f⟩ := h
+    rw [← (Linear.homCongr 𝕜 (Iso.refl X) f).finrank_eq,
+      finrank_endomorphism_simple_eq_one 𝕜 X]
+  · simp [finrank_hom_simple_simple_eq_zero_of_not_iso 𝕜 fun i => h ⟨i⟩]
 
 theorem finrank_hom_simple_simple_eq_one_iff (X Y : C) [FiniteDimensional 𝕜 (X ⟶ X)]
     [FiniteDimensional 𝕜 (X ⟶ Y)] [Simple X] [Simple Y] :
     finrank 𝕜 (X ⟶ Y) = 1 ↔ Nonempty (X ≅ Y) := by
-  fconstructor
+  constructor
   · intro h
-    rw [finrank_eq_one_iff'] at h
-    obtain ⟨f, nz, -⟩ := h
-    rw [← isIso_iff_nonzero] at nz
-    exact ⟨asIso f⟩
+    obtain ⟨f, nz, -⟩ := finrank_eq_one_iff'.mp h
+    exact letI := (isIso_iff_nonzero f).mpr nz; ⟨asIso f⟩
   · rintro ⟨f⟩
-    have le_one := finrank_hom_simple_simple_le_one 𝕜 X Y
-    have zero_lt : 0 < finrank 𝕜 (X ⟶ Y) :=
-      finrank_pos_iff_exists_ne_zero.mpr ⟨f.hom, (isIso_iff_nonzero f.hom).mp inferInstance⟩
-    lia
+    exact (Linear.homCongr 𝕜 (Iso.refl X) f).finrank_eq.symm.trans
+      (finrank_endomorphism_simple_eq_one 𝕜 X)
 
 theorem finrank_hom_simple_simple_eq_zero_iff (X Y : C) [FiniteDimensional 𝕜 (X ⟶ X)]
     [FiniteDimensional 𝕜 (X ⟶ Y)] [Simple X] [Simple Y] :

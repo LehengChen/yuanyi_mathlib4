@@ -7,7 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Limits.Constructions.Filtered
 public import Mathlib.CategoryTheory.Preadditive.Basic
-public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.BigOperators.Group.Finset.Piecewise
 
 /-!
 # Additional results about the `liftToFinset` construction
@@ -38,12 +38,8 @@ theorem finiteSubcoproductsCocone_ι_app_eq_sum {α : Type w} [DecidableEq α] (
   dsimp only [liftToFinsetObj_obj, Discrete.functor_obj_eq_as, finiteSubcoproductsCocone_pt,
     Functor.const_obj_obj, finiteSubcoproductsCocone_ι_app]
   ext v
-  simp only [colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app, Preadditive.comp_sum]
-  rw [Finset.sum_eq_single v]
-  · simp
-  · intro b hb hb₁
-    rw [Sigma.ι_π_of_ne_assoc _ (Ne.symm hb₁), zero_comp]
-  · simp
+  simp [colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app, Preadditive.comp_sum,
+    Sigma.ι_π_assoc, dite_comp]
 
 end CoproductsFromFiniteFiltered
 
@@ -59,12 +55,8 @@ theorem finiteSubproductsCocone_π_app_eq_sum {α : Type w} [DecidableEq α] (f 
   dsimp only [finiteSubproductsCone_pt, Functor.const_obj_obj, liftToFinsetObj_obj,
     Discrete.functor_obj_eq_as, finiteSubproductsCone_π_app]
   ext v
-  simp only [limit.lift_π, Fan.mk_pt, Fan.mk_π_app, Preadditive.sum_comp, Category.assoc]
-  rw [Finset.sum_eq_single v]
-  · simp
-  · intro b hb hb₁
-    rw [Pi.ι_π_of_ne _ hb₁, comp_zero]
-  · simp
+  simp [limit.lift_π, Fan.mk_pt, Fan.mk_π_app, Preadditive.sum_comp, Category.assoc,
+    Pi.ι_π, comp_dite]
 
 end ProductsFromFiniteCofiltered
 

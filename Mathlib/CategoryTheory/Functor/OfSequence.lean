@@ -129,19 +129,12 @@ def ofSequence : F ⟶ G where
   app := app
   naturality := by
     intro i j φ
-    obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le (leOfHom φ)
-    obtain rfl := Subsingleton.elim φ (homOfLE (by lia))
-    revert i j
-    induction k with
-    | zero =>
-        intro i j hk
-        obtain rfl : j = i := by lia
-        simp
-    | succ k hk =>
-        intro i j hk'
-        obtain rfl : j = i + k + 1 := by lia
-        simp only [← homOfLE_comp (show i ≤ i + k by lia) (show i + k ≤ i + k + 1 by lia),
-          Functor.map_comp, assoc, naturality, reassoc_of% (hk rfl)]
+    rw [Subsingleton.elim φ (homOfLE (leOfHom φ))]
+    induction j, leOfHom φ using Nat.le_induction with
+    | base => simp
+    | succ j hij ih =>
+        rw [← homOfLE_comp hij (j.le_add_right 1), Functor.map_comp, Functor.map_comp]
+        rw [assoc, naturality j, ← assoc, ih (homOfLE hij), assoc]
 
 end NatTrans
 

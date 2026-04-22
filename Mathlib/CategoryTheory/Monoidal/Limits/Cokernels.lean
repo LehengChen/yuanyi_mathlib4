@@ -31,15 +31,14 @@ variable {C : Type*} [Category* C]
   {X₂ Y₂ : C} {f₂ : X₂ ⟶ Y₂} {c₂ : CokernelCofork f₂} (hc₂ : IsColimit c₂)
   [HasBinaryCoproduct (X₁ ⊗ Y₂) (Y₁ ⊗ X₂)]
 
+local instance : HasBinaryCoproduct (((curriedTensor C).obj X₁).obj Y₂)
+    (((curriedTensor C).obj Y₁).obj X₂) := by assumption
 variable (c₁ c₂) in
 /-- Given two cokernel coforks `c₁` and `c₂` for `f₁ : X₁ ⟶ Y₁` and `f₂ : X₂ ⟶ Y₂`,
 this is the cokernel cofork for `(X₁ ⊗ Y₂) ⨿ (Y₁ ⊗ X₂) ⟶ Y₁ ⊗ Y₂` with
 point `c₁.pt ⊗ c₂.pt`. -/
 noncomputable abbrev tensor : CokernelCofork (coprod.desc (f₁ ▷ Y₂) (Y₁ ◁ f₂)) :=
-  CokernelCofork.ofπ (c₁.π ⊗ₘ c₂.π) (by
-    ext
-    · simp [tensorHom_def, ← comp_whiskerRight_assoc, coprod.inl_desc]
-    · simp [tensorHom_def', ← whiskerLeft_comp_assoc, coprod.inr_desc])
+  mapBifunctor c₁ c₂ (curriedTensor C)
 
 /-- Given two colimit cokernel coforks `c₁` and `c₂` for `f₁ : X₁ ⟶ Y₁` and
 `f₂ : X₂ ⟶ Y₂`, if the cokernels of `f₁` and `f₂` are preserves by suitable
@@ -50,9 +49,6 @@ noncomputable def isColimitTensor
     [PreservesColimit (parallelPair f₁ 0) (tensorRight Y₂)]
     [PreservesColimit (parallelPair f₁ 0) (tensorRight X₂)] :
     IsColimit (c₁.tensor c₂) :=
-  haveI : HasBinaryCoproduct (((curriedTensor C).obj X₁).obj Y₂)
-    (((curriedTensor C).obj Y₁).obj X₂) := by assumption
-  IsColimit.ofIsoColimit (isColimitMapBifunctor hc₁ hc₂ (curriedTensor C))
-    (Cofork.ext (Iso.refl _) (by dsimp only [Cofork.π]; simp [tensorHom_def]))
+  isColimitMapBifunctor hc₁ hc₂ (curriedTensor C)
 
 end CategoryTheory.Limits.CokernelCofork

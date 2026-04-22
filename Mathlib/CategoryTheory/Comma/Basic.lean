@@ -279,11 +279,7 @@ instance essSurj_map [F₁.EssSurj] [F₂.EssSurj] [F.Full] [IsIso α] [IsIso β
       right := F₂.objPreimage X.right
       hom := F.preimage ((inv α).app _ ≫ L'.map (F₁.objObjPreimageIso X.left).hom ≫
         X.hom ≫ R'.map (F₂.objObjPreimageIso X.right).inv ≫ (inv β).app _) },
-          ⟨isoMk (F₁.objObjPreimageIso X.left) (F₂.objObjPreimageIso X.right) (by
-            dsimp
-            simp only [NatIso.isIso_inv_app, Functor.comp_obj, Functor.map_preimage, assoc,
-              IsIso.inv_hom_id, comp_id, IsIso.hom_inv_id_assoc]
-            rw [← R'.map_comp, Iso.inv_hom_id, R'.map_id, comp_id])⟩⟩
+          ⟨isoMk (F₁.objObjPreimageIso X.left) (F₂.objObjPreimageIso X.right) (by simp)⟩⟩
 
 noncomputable instance isEquivalenceMap
     [F₁.IsEquivalence] [F₂.IsEquivalence] [F.Faithful] [F.Full] [IsIso α] [IsIso β] :

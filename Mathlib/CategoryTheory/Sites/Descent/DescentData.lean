@@ -398,18 +398,13 @@ lemma exists_equivalence_of_sieve_eq
     (h : Sieve.ofArrows _ f = Sieve.ofArrows _ f') :
     ∃ (e : F.DescentData f ≌ F.DescentData f'),
       Nonempty (F.toDescentData f ⋙ e.functor ≅ F.toDescentData f') := by
-  have h₁ (i' : ι') : ∃ (i : ι) (g' : X' i' ⟶ X i), g' ≫ f i = f' i' := by
-    obtain ⟨_, _, _, ⟨i⟩, fac⟩ : Sieve.ofArrows X f (f' i') := by
-      rw [h]; apply Sieve.ofArrows_mk
-    exact ⟨i, _, fac⟩
-  have h₂ (i : ι) : ∃ (i' : ι') (g : X i ⟶ X' i'), g ≫ f' i' = f i := by
-    obtain ⟨_, _, _, ⟨i'⟩, fac⟩ : Sieve.ofArrows X' f' (f i) := by
-      rw [← h]; apply Sieve.ofArrows_mk
-    exact ⟨i', _, fac⟩
-  choose α p' w using h₁
-  choose β q' w' using h₂
-  exact ⟨pullFunctorEquivalence (p' := p') (q' := q') F (Iso.refl _)
-    (by cat_disch) (by cat_disch), ⟨toDescentDataCompPullFunctorIso _ _ ≪≫
+  have h₁ (i' : ι') : Sieve.ofArrows X f (f' i') := by simpa [h] using Sieve.ofArrows_mk X' f' i'
+  have h₂ (i : ι) : Sieve.ofArrows X' f' (f i) := by simpa [← h] using Sieve.ofArrows_mk X f i
+  exact ⟨pullFunctorEquivalence (α := fun i' ↦ Sieve.ofArrows.i (h₁ i'))
+    (p' := fun i' ↦ Sieve.ofArrows.h (h₁ i')) (β := fun i ↦ Sieve.ofArrows.i (h₂ i))
+    (q' := fun i ↦ Sieve.ofArrows.h (h₂ i)) F (Iso.refl _)
+    (by simp) (by simp),
+    ⟨toDescentDataCompPullFunctorIso _ _ ≪≫
     Functor.isoWhiskerRight (Cat.Hom.toNatIso (F.mapId _)) _ ≪≫ Functor.leftUnitor _⟩⟩
 
 lemma nonempty_fullyFaithful_toDescentData_iff_of_sieve_eq

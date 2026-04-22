@@ -102,19 +102,15 @@ instance [F.IsDense] : (restrictedULiftYoneda.{w} F).Faithful where
 set_option backward.isDefEq.respectTransparency false in
 instance [F.IsDense] : (restrictedULiftYoneda.{w} F).Full where
   map_surjective {Y Z} f := by
-    let c : Cocone (CostructuredArrow.proj F Y ⋙ F) :=
-      { pt := Z
-        ι :=
-          { app g := ((f.app (op g.left)) (ULift.up g.hom)).down
-            naturality g₁ g₂ φ := by
-              simpa [uliftFunctor, uliftYoneda,
-                restrictedULiftYoneda, ← ULift.down_inj] using
-                (congr_fun (f.naturality φ.left.op) (ULift.up g₂.hom)).symm } }
-    refine ⟨(F.denseAt Y).desc c, ?_⟩
+    let φ : CostructuredArrow.proj F Y ⋙ F ⟶ (Functor.const _).obj Z :=
+      { app g := ((f.app (op g.left)) (ULift.up g.hom)).down
+        naturality g₁ g₂ φ := by
+          simpa [uliftFunctor, uliftYoneda, restrictedULiftYoneda, ← ULift.down_inj] using
+            (congr_fun (f.naturality φ.left.op) (ULift.up g₂.hom)).symm }
+    refine ⟨(F.denseAt Y).homEquiv.symm φ, ?_⟩
     ext ⟨X⟩ ⟨x⟩
-    have := (F.denseAt Y).fac c (.mk x)
-    dsimp [c] at this
-    simpa using ULift.down_injective this
+    apply ULift.down_injective
+    simpa [φ] using (F.denseAt Y).comp_homEquiv_symm φ (.mk x)
 
 variable {F} in
 lemma IsDense.of_fullyFaithful_restrictedULiftYoneda [F.Full]

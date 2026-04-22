@@ -477,35 +477,27 @@ lemma conjugateEquiv_comp_id_right_apply :
 
 end
 
+set_option linter.style.longLine false in
 lemma conjugateEquiv_whiskerLeft
     {a b c : B} {l₁ : a ⟶ b} {r₁ : b ⟶ a} (adj₁ : l₁ ⊣ r₁)
     {l₂ : b ⟶ c} {r₂ : c ⟶ b} (adj₂ : l₂ ⊣ r₂)
     {l₂' : b ⟶ c} {r₂' : c ⟶ b} (adj₂' : l₂' ⊣ r₂') (φ : l₂' ⟶ l₂) :
     conjugateEquiv (adj₁.comp adj₂) (adj₁.comp adj₂') (l₁ ◁ φ) =
       conjugateEquiv adj₂ adj₂' φ ▷ r₁ := by
-  have := mateEquiv_hcomp adj₁ adj₁ adj₂ adj₂' ((λ_ _).hom ≫ (ρ_ _).inv)
-    ((λ_ _).hom ≫ φ ≫ (ρ_ _).inv)
-  dsimp [leftAdjointSquare.hcomp, rightAdjointSquare.hcomp] at this
-  simp only [comp_whiskerRight, leftUnitor_whiskerRight, Category.assoc, whiskerLeft_comp,
-    whiskerLeft_rightUnitor_inv, Iso.hom_inv_id, Category.comp_id, triangle_assoc,
-    inv_hom_whiskerRight_assoc, Iso.inv_hom_id_assoc, mateEquiv_leftUnitor_hom_rightUnitor_inv,
-    whiskerLeft_rightUnitor, triangle_assoc_comp_left_inv_assoc, Iso.hom_inv_id_assoc] at this
-  simp [conjugateEquiv_apply, this]
+  have h := congrArg (fun f => (ρ_ (r₂ ≫ r₁)).homCongr (λ_ (r₂' ≫ r₁)) f)
+    (mateEquiv_hcomp adj₁ adj₁ adj₂ adj₂' ((λ_ _).hom ≫ (ρ_ _).inv) ((λ_ _).hom ≫ φ ≫ (ρ_ _).inv))
+  simpa [conjugateEquiv_apply, conjugateEquiv_id_comp_right_apply, mateEquiv_leftUnitor_hom_rightUnitor_inv, leftAdjointSquare.hcomp, rightAdjointSquare.hcomp, Iso.homCongr_comp] using h
 
+set_option linter.style.longLine false in
 lemma conjugateEquiv_whiskerRight
     {a b c : B} {l₁ : a ⟶ b} {r₁ : b ⟶ a} (adj₁ : l₁ ⊣ r₁)
     {l₁' : a ⟶ b} {r₁' : b ⟶ a} (adj₁' : l₁' ⊣ r₁')
     {l₂ : b ⟶ c} {r₂ : c ⟶ b} (adj₂ : l₂ ⊣ r₂) (φ : l₁' ⟶ l₁) :
     conjugateEquiv (adj₁.comp adj₂) (adj₁'.comp adj₂) (φ ▷ l₂) =
       r₂ ◁ conjugateEquiv adj₁ adj₁' φ := by
-  have := mateEquiv_hcomp adj₁ adj₁' adj₂ adj₂
-    ((λ_ _).hom ≫ φ ≫ (ρ_ _).inv) ((λ_ _).hom ≫ (ρ_ _).inv)
-  dsimp [leftAdjointSquare.hcomp, rightAdjointSquare.hcomp] at this
-  simp only [comp_whiskerRight, leftUnitor_whiskerRight, Category.assoc, whiskerLeft_comp,
-    whiskerLeft_rightUnitor_inv, Iso.hom_inv_id, Category.comp_id, triangle_assoc,
-    inv_hom_whiskerRight_assoc, Iso.inv_hom_id_assoc, mateEquiv_leftUnitor_hom_rightUnitor_inv,
-    leftUnitor_inv_whiskerRight, Iso.inv_hom_id, triangle_assoc_comp_right_assoc] at this
-  simp [conjugateEquiv_apply, this]
+  have h := congrArg (fun f => (Iso.refl _).homCongr (λ_ (r₂ ≫ r₁')) f)
+    (mateEquiv_hcomp adj₁ adj₁' adj₂ adj₂ ((λ_ _).hom ≫ φ ≫ (ρ_ _).inv) ((λ_ _).hom ≫ (ρ_ _).inv))
+  simpa [conjugateEquiv_apply, conjugateEquiv_comp_id_right_apply, mateEquiv_leftUnitor_hom_rightUnitor_inv, leftAdjointSquare.hcomp, rightAdjointSquare.hcomp, Iso.homCongr_comp] using h
 
 set_option linter.flexible false in -- simp followed by bicategory
 lemma conjugateEquiv_associator_hom

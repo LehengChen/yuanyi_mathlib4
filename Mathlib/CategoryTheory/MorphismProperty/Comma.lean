@@ -393,23 +393,19 @@ variable (R) in
 @[simps!]
 def mapLeftIso [P.RespectsIso] [Q.RespectsIso] [W.RespectsIso]
       (e : L₁ ≅ L₂) :
-    P.Comma L₁ R Q W ≌ P.Comma L₂ R Q W where
-  functor := Comma.mapLeft R e.inv (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-  inverse := Comma.mapLeft R e.hom (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-  unitIso := (mapLeftId _ _).symm ≪≫
-    mapLeftEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
-    mapLeftComp _ _ _
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-  counitIso :=
-    (mapLeftComp _ _ _
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop)).symm ≪≫
-    mapLeftEq _ _ _ e.inv_hom_id
-      (fun X ↦ (P.cancel_left_of_respectsIso _ _).mpr X.prop) ≪≫
-    mapLeftId _ _
+    P.Comma L₁ R Q W ≌ P.Comma L₂ R Q W :=
+  let h {L L' : A ⥤ T} (l : L ⟶ L') [∀ X, IsIso (l.app X)] :
+      ∀ X : P.Comma L' R Q W, P (l.app X.left ≫ X.hom) :=
+    fun X ↦ MorphismProperty.RespectsIso.precomp P _ _ X.prop
+  { functor := Comma.mapLeft R e.inv (h e.inv)
+    inverse := Comma.mapLeft R e.hom (h e.hom)
+    unitIso := (mapLeftId _ _).symm ≪≫
+      mapLeftEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
+      mapLeftComp _ _ _ (h _) (h _) (h _)
+    counitIso :=
+      (mapLeftComp _ _ _ (h _) (h _) (h _)).symm ≪≫
+      mapLeftEq _ _ _ e.inv_hom_id (h _) ≪≫
+      mapLeftId _ _ }
 
 variable (L) in
 /-- A natural transformation `R₁ ⟶ R₂` induces a functor `P.Comma L R₁ Q W ⥤ P.Comma L R₂ Q W`. -/
@@ -455,23 +451,19 @@ variable (L) in
 @[simps!]
 def mapRightIso [P.RespectsIso] [Q.RespectsIso] [W.RespectsIso]
       (e : R₁ ≅ R₂) :
-    P.Comma L R₁ Q W ≌ P.Comma L R₂ Q W where
-  functor := Comma.mapRight L e.hom (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-  inverse := Comma.mapRight L e.inv (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-  unitIso := (mapRightId _ _).symm ≪≫
-    mapRightEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
-    mapRightComp _ _ _
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-  counitIso :=
-    (mapRightComp _ _ _
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop)).symm ≪≫
-    mapRightEq _ _ _ e.inv_hom_id
-      (fun X ↦ (P.cancel_right_of_respectsIso _ _).mpr X.prop) ≪≫
-    mapRightId _ _
+    P.Comma L R₁ Q W ≌ P.Comma L R₂ Q W :=
+  let h {R R' : B ⥤ T} (r : R ⟶ R') [∀ X, IsIso (r.app X)] :
+      ∀ X : P.Comma L R Q W, P (X.hom ≫ r.app X.right) :=
+    fun X ↦ MorphismProperty.RespectsIso.postcomp P _ _ X.prop
+  { functor := Comma.mapRight L e.hom (h e.hom)
+    inverse := Comma.mapRight L e.inv (h e.inv)
+    unitIso := (mapRightId _ _).symm ≪≫
+      mapRightEq _ _ _ e.hom_inv_id.symm (fun X ↦ by simpa using X.prop) ≪≫
+      mapRightComp _ _ _ (h _) (h _) (h _)
+    counitIso :=
+      (mapRightComp _ _ _ (h _) (h _) (h _)).symm ≪≫
+      mapRightEq _ _ _ e.inv_hom_id (h _) ≪≫
+      mapRightId _ _ }
 
 end Functoriality
 

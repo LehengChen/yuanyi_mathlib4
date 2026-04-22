@@ -94,16 +94,12 @@ lemma inr_π : biprod.inr ≫ π f g = cokernel.π (f ≫ g) := by simp [π]
 
 @[reassoc (attr := simp)]
 lemma ι_φ : ι f g ≫ φ f g = 0 := by
-  dsimp [ι, φ]
-  aesop
+  ext <;> simp [ι, φ, Category.assoc]
 
 @[reassoc (attr := simp)]
 lemma φ_π : φ f g ≫ π f g = 0 := by
-  dsimp [φ, π]
-  ext
-  · rw [biprod.inl_desc_assoc, assoc, biprod.inl_desc, comp_zero,
-      ← assoc, cokernel.condition]
-  · simp
+  ext <;> first | rw [inl_φ_assoc, inl_π, comp_zero, ← Category.assoc, cokernel.condition] |
+    simp [φ, π, biprod.desc_eq, biprod.lift_eq, Category.assoc]
 
 instance : Mono (ι f g) := mono_of_mono_fac (ι_fst f g)
 

@@ -103,16 +103,9 @@ def piLimitFan ⦃J : Type u⦄ (F : J → Grpd.{u, u}) : Limits.Fan F :=
 set_option backward.isDefEq.respectTransparency false in
 /-- The product fan over an indexed family of groupoids, is a limit cone. -/
 def piLimitFanIsLimit ⦃J : Type u⦄ (F : J → Grpd.{u, u}) : Limits.IsLimit (piLimitFan F) :=
-  Limits.mkFanLimit (piLimitFan F) (fun s => Functor.pi' fun j => s.proj j)
-    (by
-      intros
-      dsimp only [piLimitFan]
-      simp [comp_eq_comp])
-    (by
-      intro s m w
-      apply Functor.pi_ext
-      intro j; specialize w j
-      simpa)
+  Limits.mkFanLimit (piLimitFan F) (fun s => Functor.pi' fun j => s.proj j) (uniq := by
+    intro s m w
+    exact Functor.pi_ext _ _ (by simpa [piLimitFan] using w))
 
 instance has_pi : Limits.HasProducts.{u} Grpd.{u, u} :=
   Limits.hasProducts_of_limit_fans (by apply piLimitFan) (by apply piLimitFanIsLimit)

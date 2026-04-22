@@ -67,11 +67,7 @@ noncomputable def fromRightResolution :
   obj R := CostructuredArrow.mk (Y := StructuredArrow.mk R.w)
     (StructuredArrow.homMk ((isoOfHom L W₂ R.w R.hw).inv ≫ y))
   map {R R'} φ := CostructuredArrow.homMk (StructuredArrow.homMk φ.f) (by
-    ext
-    dsimp
-    rw [← assoc, ← cancel_epi (isoOfHom L W₂ R.w R.hw).hom,
-      isoOfHom_hom, isoOfHom_hom_inv_id_assoc, assoc, ← L.map_comp_assoc,
-      φ.comm, isoOfHom_hom_inv_id_assoc])
+    ext; simp [← cancel_epi (isoOfHom L W₂ R.w R.hw).hom, ← L.map_comp_assoc, φ.comm])
 
 set_option backward.isDefEq.respectTransparency false in
 lemma isConnected :

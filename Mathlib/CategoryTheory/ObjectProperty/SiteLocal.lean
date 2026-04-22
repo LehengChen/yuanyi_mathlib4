@@ -53,17 +53,12 @@ lemma mk_of_zeroHypercover [P.IsClosedUnderIsomorphisms]
       P X ↔ ∀ i, P (𝒰.X i)) :
     P.IsLocal K where
   component {X R} hR Y f hf hX := by
-    rw [CategoryTheory.Precoverage.mem_iff_exists_zeroHypercover] at hR
-    obtain ⟨𝒰, rfl⟩ := hR
-    rw [H 𝒰] at hX
-    obtain ⟨i⟩ := hf
-    exact hX i
+    obtain ⟨𝒰, rfl⟩ := CategoryTheory.Precoverage.mem_iff_exists_zeroHypercover.mp hR
+    cases hf
+    exact (H 𝒰).mp hX _
   of_presieve {X R} hR h := by
-    rw [CategoryTheory.Precoverage.mem_iff_exists_zeroHypercover] at hR
-    obtain ⟨𝒰, rfl⟩ := hR
-    rw [H 𝒰]
-    intro i
-    exact h ⟨i⟩
+    obtain ⟨𝒰, rfl⟩ := CategoryTheory.Precoverage.mem_iff_exists_zeroHypercover.mp hR
+    exact (H 𝒰).mpr fun i ↦ h ⟨i⟩
 
 lemma of_le [IsLocal P L] (hle : K ≤ L) : IsLocal P K where
   component hR _ f hf hX := component (hle _ hR) f hf hX

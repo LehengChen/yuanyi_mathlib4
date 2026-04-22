@@ -607,13 +607,9 @@ set_option backward.isDefEq.respectTransparency false in
 instance {ι : Type*} (f : ι → Type*) (g : (i : ι) → (f i) → C)
     [∀ i, HasCoproduct (g i)] [HasCoproduct fun i => ∐ g i] :
     HasCoproduct fun p : Σ i, f i => g p.1 p.2 where
-  exists_colimit := Nonempty.intro
-    { cocone := Cofan.mk (∐ fun i => ∐ g i)
-        (fun X => Sigma.ι (g X.1) X.2 ≫ Sigma.ι (fun i => ∐ g i) X.1)
-      isColimit := mkCofanColimit _
-        (fun s => Sigma.desc fun b => Sigma.desc fun c => s.inj ⟨b, c⟩)
-        (by simp)
-        (by intro s (m : (∐ fun i ↦ ∐ g i) ⟶ _) w; aesop_cat (add norm simp Sigma.forall)) }
+  exists_colimit := ⟨⟨_, Cofan.isColimitTrans (Cofan.mk (∐ fun i => ∐ g i) (Sigma.ι _))
+    (coproductIsCoproduct _) (fun i x => Sigma.ι (g i) x)
+    (fun i => coproductIsCoproduct (g i))⟩⟩
 
 set_option backward.isDefEq.respectTransparency false in
 /-- An iterated coproduct is a coproduct over a sigma type. -/
@@ -774,14 +770,9 @@ def limitConeOfUnique [Unique β] (f : β → C) : LimitCone (Discrete.functor f
         dsimp
         congr
         subsingleton)) }
-  isLimit :=
-    { lift := fun s => s.π.app default
-      fac := fun s j => by
-        obtain rfl := Subsingleton.elim j default
-        simp
-      uniq := fun s m w => by
-        specialize w default
-        simpa using w }
+  isLimit := mkFanLimit _ (fun s => s.proj default)
+    (by intro s j; obtain rfl := Subsingleton.elim j default; simp [Fan.proj])
+    (by intro s m w; simpa [Fan.proj] using w default)
 
 instance (priority := 100) hasProduct_unique [Nonempty β] [Subsingleton β] (f : β → C) :
     HasProduct f :=
@@ -809,14 +800,9 @@ def colimitCoconeOfUnique [Unique β] (f : β → C) : ColimitCocone (Discrete.f
         dsimp
         congr
         subsingleton)) }
-  isColimit :=
-    { desc := fun s => s.ι.app default
-      fac := fun s j => by
-        obtain rfl := Subsingleton.elim j default
-        apply Category.id_comp
-      uniq := fun s m w => by
-        specialize w default
-        simp_all }
+  isColimit := mkCofanColimit _ (fun s => s.inj default)
+    (by intro s j; obtain rfl := Subsingleton.elim j default; simp [Cofan.inj])
+    (by intro s m w; simpa [Cofan.inj] using w default)
 
 instance (priority := 100) hasCoproduct_unique [Nonempty β] [Subsingleton β] (f : β → C) :
     HasCoproduct f :=

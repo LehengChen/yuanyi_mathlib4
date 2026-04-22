@@ -149,30 +149,24 @@ variable {X : D} {S : K.Cover X} (s : Multifork (S.index R))
 set_option backward.isDefEq.respectTransparency false in
 /-- Auxiliary definition for `lift`. -/
 def liftAux {Y : C} (f : G.obj Y ⟶ X) : s.pt ⟶ F.obj (op Y) :=
-  Multifork.IsLimit.lift (hF.isLimitMultifork ⟨_, G.cover_lift J K (K.pullback_stable f S.2)⟩)
+  hF.amalgamate ⟨_, G.cover_lift J K (K.pullback_stable f S.2)⟩
     (fun k ↦ s.ι (⟨_, G.map k.f ≫ f, k.hf⟩) ≫ α.app (op k.Y)) (by
-      intro { fst := ⟨Y₁, p₁, hp₁⟩, snd := ⟨Y₂, p₂, hp₂⟩, r := ⟨W, g₁, g₂, w⟩ }
-      dsimp at g₁ g₂ w ⊢
-      simp only [Category.assoc, ← α.naturality, Functor.comp_map,
-        Functor.op_map, Quiver.Hom.unop_op]
-      apply s.condition_assoc
+      rintro ⟨Y₁, p₁, hp₁⟩ ⟨Y₂, p₂, hp₂⟩ ⟨W, g₁, g₂, w⟩
+      let r : S.Relation :=
         { fst.hf := hp₁
           snd.hf := hp₂
           r.g₁ := G.map g₁
           r.g₂ := G.map g₂
           r.w := by simpa using G.congr_map w =≫ f
-          .. })
+          .. }
+      simpa [r, Category.assoc, ← α.naturality] using s.condition_assoc r (α.app (op W)))
 
 lemma liftAux_map {Y : C} (f : G.obj Y ⟶ X) {W : C} (g : W ⟶ Y) (i : S.Arrow)
     (h : G.obj W ⟶ i.Y) (w : h ≫ i.f = G.map g ≫ f) :
     liftAux hF α s f ≫ F.map g.op = s.ι i ≫ R.map h.op ≫ α.app _ :=
-  (Multifork.IsLimit.fac
-    (hF.isLimitMultifork ⟨_, G.cover_lift J K (K.pullback_stable f S.2)⟩) _ _
+  (hF.amalgamate_map ⟨_, G.cover_lift J K (K.pullback_stable f S.2)⟩ _ _
       ⟨W, g, by simpa only [Sieve.functorPullback_apply, functorPullback_mem,
         Sieve.pullback_apply, ← w] using S.1.downward_closed i.hf h⟩).trans (by
-        dsimp
-        simp only [← Category.assoc]
-        congr 1
         let r : S.Relation :=
           { fst.f := G.map g ≫ f
             fst.hf := by simpa only [← w] using S.1.downward_closed i.hf h
@@ -181,7 +175,7 @@ lemma liftAux_map {Y : C} (f : G.obj Y ⟶ X) {W : C} (g : W ⟶ Y) (i : S.Arrow
             r.g₂ := h
             r.w := by simpa using w.symm
             .. }
-        simpa [r] using s.condition r)
+        simpa [r] using s.condition_assoc r (α.app (op W)))
 
 lemma liftAux_map' {Y Y' : C} (f : G.obj Y ⟶ X) (f' : G.obj Y' ⟶ X) {W : C}
     (a : W ⟶ Y) (b : W ⟶ Y') (w : G.map a ≫ f = G.map b ≫ f') :

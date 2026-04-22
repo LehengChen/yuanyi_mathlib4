@@ -66,15 +66,11 @@ def liftToFinsetColimitCocone [HasColimitsOfShape (Finset (Discrete α)) C]
           { pt := s.pt
             ι := { app := fun _ => Sigma.desc fun x => s.ι.app x } }
       uniq := fun s m h => by
-        apply colimit.hom_ext
-        rintro t
+        refine colimit.hom_ext fun S => ?_
         dsimp [liftToFinsetObj]
-        apply colimit.hom_ext
-        rintro ⟨⟨j, hj⟩⟩
-        convert h j using 1
-        · simp [← colimit.w (liftToFinsetObj F) ⟨⟨Finset.singleton_subset_iff.2 hj⟩⟩]
-          rfl
-        · simp }
+        refine Sigma.hom_ext _ _ fun j => ?_
+        simpa [← colimit.w (liftToFinsetObj F) ⟨⟨Finset.singleton_subset_iff.2 j.2⟩⟩] using
+          h j.1 }
 
 set_option backward.isDefEq.respectTransparency false in
 variable (C) (α) in
@@ -208,15 +204,11 @@ def liftToFinsetLimitCone [HasLimitsOfShape (Finset (Discrete α))ᵒᵖ C]
           { pt := s.pt
             π := { app := fun _ => Pi.lift fun x => s.π.app x } }
       uniq := fun s m h => by
-        apply limit.hom_ext
-        rintro t
+        refine limit.hom_ext fun S => ?_
         dsimp [liftToFinsetObj]
-        apply limit.hom_ext
-        rintro ⟨⟨j, hj⟩⟩
-        convert h j using 1
-        · simp [← limit.w (liftToFinsetObj F) ⟨⟨⟨Finset.singleton_subset_iff.2 hj⟩⟩⟩]
-          rfl
-        · simp }
+        refine Pi.hom_ext _ _ fun j => ?_
+        simpa [← limit.w (liftToFinsetObj F) ⟨⟨⟨Finset.singleton_subset_iff.2 j.2⟩⟩⟩] using
+          h j.1 }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The converse of the construction in `liftToFinsetLimitCone`: we can form a cone on the

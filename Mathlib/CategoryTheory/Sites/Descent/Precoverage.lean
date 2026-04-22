@@ -247,17 +247,13 @@ set_option backward.isDefEq.respectTransparency false in
 lemma map_hom ⦃i : ι⦄ ⦃Y : C⦄ (q : Y ⟶ X i) ⦃j : ι'⦄
     (a : Y ⟶ X' j) (fac : a ≫ f' j = q ≫ f i := by cat_disch) :
     (F.map q.op.toLoc).toFunctor.map (hom w hf' φ i) = mor w φ q a fac := by
-  let s := Presieve.IsSheafFor.amalgamate
-    (((isSheaf_iff_isSheaf_of_type _ _).1 (IsPrestack.isSheaf J _ _)).isSheafFor _
-      (by simpa using sieve_mem _ hf' i)) _
-        (compatible_familyOfElements w φ i)
-  have hs : (familyOfElements w φ i).IsAmalgamation s :=
-    Presieve.IsSheafFor.isAmalgamation
-      (((isSheaf_iff_isSheaf_of_type _ _).1 (IsPrestack.isSheaf J _ _)).isSheafFor _
-        (by simpa using sieve_mem _ hf' i)) (compatible_familyOfElements w φ i)
+  let h := (((isSheaf_iff_isSheaf_of_type _ _).1
+    (IsPrestack.isSheaf J (D₁.obj i) (D₂.obj i))).isSheafFor (sieve f f' i).arrows
+      (by simpa using sieve_mem _ hf' i))
   simpa [hom, familyOfElements_eq w φ (Z := Over.mk q) _ a fac,
     presheafHomObjHomEquiv, pullHom, mapComp'_id_comp_hom_app,
-    mapComp'_id_comp_inv_app] using hs _ (mem_sieve _ _ fac)
+    mapComp'_id_comp_inv_app] using
+      h.valid_glue (compatible_familyOfElements w φ i) _ (mem_sieve _ _ fac)
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -329,19 +325,15 @@ lemma isEquivalence_toDescentData_of_sieve_le
     obtain ⟨_, p, _, ⟨i⟩, fac⟩ := h₂ _ (Sieve.ofArrows_mk _ f' i')
     exact ⟨_, _, fac⟩
   choose α p hp using H
-  obtain ⟨H, h, ⟨e⟩⟩ :
-      ∃ (H : _ ⥤ _) (_ : H.FullyFaithful),
-        Nonempty (F.toDescentData f ⋙ H ≅ F.toDescentData f') := by
-    refine ⟨pullFunctor F (p := 𝟙 _) (p' := p) (by cat_disch), ?_, ?_⟩
-    · exact fullyFaithfulPullFunctor F hp h₁
-    · exact ⟨toDescentDataCompPullFunctorIso _ _ ≪≫
-          (Functor.isoWhiskerRight (Cat.Hom.toNatIso (F.mapId _)) _) ≪≫
-            Functor.leftUnitor _⟩
-  have := (F.fullyFaithfulToDescentData _ (J.superset_covering h₂ h₁)).faithful
-  have := (F.fullyFaithfulToDescentData _ (J.superset_covering h₂ h₁)).full
-  have : (F.toDescentData f).EssSurj := ⟨fun D ↦
-    ⟨_, ⟨h.preimageIso (e.app _ ≪≫ (F.toDescentData f').objObjPreimageIso (H.obj D))⟩⟩⟩
-  exact { }
+  let H := pullFunctor F (f := f) (p := 𝟙 _) (f' := f') (p' := p) (by cat_disch)
+  have e : F.toDescentData f ⋙ H ≅ F.toDescentData f' :=
+    toDescentDataCompPullFunctorIso _ _ ≪≫
+      Functor.isoWhiskerRight (Cat.Hom.toNatIso (F.mapId _)) _ ≪≫ Functor.leftUnitor _
+  letI : H.IsEquivalence := ⟨(fullyFaithfulPullFunctor F hp h₁).faithful,
+    (fullyFaithfulPullFunctor F hp h₁).full,
+    ⟨fun D ↦ ⟨_, ⟨e.app _ ≪≫ (F.toDescentData f').objObjPreimageIso D⟩⟩⟩⟩
+  exact @Functor.isEquivalence_of_comp_right _ _ _ _ _ _ (F.toDescentData f) H inferInstance
+    (Functor.isEquivalence_of_iso e.symm)
 
 end
 

@@ -162,13 +162,9 @@ lemma isGroupoid_of_reflects_iso {C D : Type*} [Category* C] [Category* D]
 def Groupoid.ofFullyFaithfulToGroupoid {C : Type*} [𝒞 : Category C] {D : Type u} [Groupoid.{v} D]
     (F : C ⥤ D) (h : F.FullyFaithful) : Groupoid C :=
   { 𝒞 with
-    inv f := h.preimage <| Groupoid.inv (F.map f)
-    inv_comp f := by
-      apply h.map_injective
-      simp
-    comp_inv f := by
-      apply h.map_injective
-      simp }
+    inv f := (h.preimageIso ((isoEquivHom _ _).symm (F.map f))).inv
+    inv_comp f := by simpa using (h.preimageIso ((isoEquivHom _ _).symm (F.map f))).inv_hom_id
+    comp_inv f := by simpa using (h.preimageIso ((isoEquivHom _ _).symm (F.map f))).hom_inv_id }
 
 instance InducedCategory.groupoid {C : Type u} (D : Type u₂) [Groupoid.{v} D] (F : C → D) :
     Groupoid.{v} (InducedCategory D F) :=

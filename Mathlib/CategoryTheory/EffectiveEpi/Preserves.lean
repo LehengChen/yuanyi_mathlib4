@@ -66,14 +66,10 @@ def effectiveEpiFamilyStructOfEquivalence : EffectiveEpiFamilyStruct (fun a ↦ 
         Category.assoc, Equivalence.fun_inv_map, Iso.inv_hom_id_app, Category.comp_id] at this
     simp [this]
   uniq ε h m hm := by
-    simp only [Functor.comp_obj, Adjunction.homEquiv_counit,
-      Equivalence.toAdjunction_counit]
-    have := EffectiveEpiFamily.uniq X π (fun a ↦ e.unit.app _ ≫ e.inverse.map (ε a))
-      (effectiveEpiFamilyStructOfEquivalence_aux e X π ε h)
-    specialize this (e.unit.app _ ≫ e.inverse.map m) fun a ↦ ?_
-    · rw [← congrArg e.inverse.map (hm a)]
-      simp
-    · simp [← this]
+    exact (e.toAdjunction.homEquiv _ _).injective <| by
+      simpa only [Adjunction.homEquiv_unit, Equiv.apply_symm_apply] using
+        EffectiveEpiFamily.uniq X π _ _ _
+          (fun a ↦ by dsimp; rw [← congrArg e.inverse.map (hm a)]; simp)
 
 instance (F : C ⥤ D) [F.IsEquivalence] :
     EffectiveEpiFamily (fun a ↦ F.obj (X a)) (fun a ↦ F.map (π a)) :=

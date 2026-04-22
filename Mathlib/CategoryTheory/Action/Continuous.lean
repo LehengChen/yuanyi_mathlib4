@@ -98,14 +98,10 @@ taking actions of `H` to actions of `G`. This is the analogue of
 @[simps! obj_obj map]
 def res (f : G →ₜ* H) : ContAction V H ⥤ ContAction V G :=
   ObjectProperty.lift _ (ObjectProperty.ι _ ⋙ Action.res _ f) fun X ↦ by
-    constructor
-    let v : G × (forget₂ _ TopCat).obj X → H × (forget₂ _ TopCat).obj X := fun p ↦ (f p.1, p.2)
-    have : Continuous v := by fun_prop
-    let u : H × (forget₂ _ TopCat).obj X → (forget₂ _ TopCat).obj X :=
-      fun p ↦ (forget₂ _ TopCat).map (X.obj.ρ p.1) p.2
-    have : Continuous u := X.2.1
-    change Continuous (u ∘ v)
-    fun_prop
+    change ContinuousSMul G ((forget₂ _ TopCat).obj ((Action.res V (f : G →* H)).obj X.obj))
+    letI : ContinuousSMul H ((forget₂ (Action V H) TopCat).obj X.obj) := X.2
+    simpa using (MulAction.continuousSMul_compHom (X := (forget₂ (Action V H) TopCat).obj X.obj)
+      (f := (f : G →* H)) (map_continuous f))
 
 /-- Restricting scalars along a composition is naturally isomorphic to restricting scalars twice. -/
 @[simps! hom inv]

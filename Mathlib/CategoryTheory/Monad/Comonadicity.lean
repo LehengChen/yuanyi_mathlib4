@@ -391,13 +391,9 @@ def comonadicOfHasPreservesCoreflexiveEqualizersOfReflectsIsomorphisms :
       rw [comparisonAdjunction_unit_app]
       change IsIso (IsLimit.conePointUniqueUpToIso _ ?_).inv
       · infer_instance
-      have : IsCoreflexivePair (G.map (F.map (adj.unit.app Y)))
-          (adj.unit.app (G.obj (F.obj Y))) := by
-        apply IsCoreflexivePair.mk' (G.map (adj.counit.app _)) _ _
-        · rw [← G.map_comp, ← G.map_id]
-          exact congr_arg G.map (adj.left_triangle_components Y)
-        · rw [← G.map_id]
-          simp
+      haveI : IsCoreflexivePair (G.map (F.map (adj.unit.app Y)))
+          (adj.unit.app (G.obj (F.obj Y))) :=
+        ComonadicityInternal.main_pair_coreflexive _ ((comparison adj).obj Y)
       apply @unitEqualizerOfCoreflectsEqualizer _ _ _ _ _ _ _ _ ?_
       apply reflectsLimit_of_reflectsIsomorphisms
     exact (comparisonAdjunction adj).toEquivalence.symm.isEquivalence_inverse

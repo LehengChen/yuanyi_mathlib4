@@ -148,24 +148,18 @@ variable (F : C ⥤ D)
 
 namespace Limits
 
+open Functor.essImage HasLimit HasColimit
+
 /-- The essential image of a functor is closed under the limits it preserves. -/
 instance [HasLimitsOfShape J C] [PreservesLimitsOfShape J F] [F.Full] [F.Faithful] :
     F.essImage.IsClosedUnderLimitsOfShape J :=
-  .mk' (by
-    rintro _ ⟨G, hG⟩
-    exact ⟨limit (Functor.essImage.liftFunctor G F hG),
-      ⟨IsLimit.conePointsIsoOfNatIso
-        (isLimitOfPreserves F (limit.isLimit _)) (limit.isLimit _)
-        (Functor.essImage.liftFunctorCompIso _ _ _)⟩⟩)
+  .mk' fun _ h => by cases h with
+    | limit G h => exact ⟨_, ⟨preservesLimitIso F _ ≪≫ isoOfNatIso (liftFunctorCompIso G F h)⟩⟩
 
 /-- The essential image of a functor is closed under the colimits it preserves. -/
 instance [HasColimitsOfShape J C] [PreservesColimitsOfShape J F] [F.Full] [F.Faithful] :
     F.essImage.IsClosedUnderColimitsOfShape J :=
-  .mk' (by
-    rintro _ ⟨G, hG⟩
-    exact ⟨colimit (Functor.essImage.liftFunctor G F hG),
-      ⟨IsColimit.coconePointsIsoOfNatIso
-        (isColimitOfPreserves F (colimit.isColimit _)) (colimit.isColimit _)
-        (Functor.essImage.liftFunctorCompIso _ _ _)⟩⟩)
+  .mk' fun _ h => by cases h with
+    | colimit G h => exact ⟨_, ⟨preservesColimitIso F _ ≪≫ isoOfNatIso (liftFunctorCompIso G F h)⟩⟩
 
 end CategoryTheory.Limits

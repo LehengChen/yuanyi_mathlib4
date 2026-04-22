@@ -91,14 +91,9 @@ to the contractible triangle for `X.unop` in `C`. -/
 @[simps!]
 noncomputable def contractibleTriangleIso (X : Cᵒᵖ) :
     contractibleTriangle X ≅ (triangleOpEquivalence C).functor.obj
-      (Opposite.op (contractibleTriangle X.unop).invRotate) :=
-  Triangle.isoMk _ _ (Iso.refl _) (Iso.refl _)
-    (IsZero.iso (isZero_zero _) (by
-      dsimp
-      rw [IsZero.iff_id_eq_zero]
-      change (𝟙 ((0 : C)⟦(-1 : ℤ)⟧)).op = 0
-      rw [← Functor.map_id, id_zero, Functor.map_zero, op_zero]))
-    (by simp) (by simp) (by simp)
+      (Opposite.op (contractibleTriangle X.unop).invRotate) := by
+  refine Triangle.isoMk _ _ (Iso.refl _) (Iso.refl _) (IsZero.iso (isZero_zero _)
+    ((Functor.map_isZero (shiftFunctor C (-1 : ℤ)) (isZero_zero _)).op)) ?_ ?_ ?_ <;> simp
 
 lemma contractible_distinguished (X : Cᵒᵖ) :
     contractibleTriangle X ∈ distinguishedTriangles C := by

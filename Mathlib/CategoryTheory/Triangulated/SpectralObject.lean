@@ -120,14 +120,8 @@ def precomp : SpectralObject C ι' where
     refine Triangle.isoMk _ _ (X.ω₁.mapIso (ComposableArrows.isoMk₁ (Iso.refl _) (Iso.refl _)))
       (X.ω₁.mapIso (ComposableArrows.isoMk₁ (Iso.refl _) (Iso.refl _)))
       (X.ω₁.mapIso (ComposableArrows.isoMk₁ (Iso.refl _) (Iso.refl _))) ?_ ?_ ?_
-    · dsimp
-      simp only [← Functor.map_comp]
-      congr 1
-      cat_disch
-    · dsimp
-      simp only [← Functor.map_comp]
-      congr 1
-      cat_disch
+    · simpa [← Functor.map_comp] using congrArg X.ω₁.map (by cat_disch)
+    · simpa [← Functor.map_comp] using congrArg X.ω₁.map (by cat_disch)
     · have := X.δ'.naturality (F.mapComposableArrowsObjMk₂Iso f g).hom
       dsimp at this ⊢
       rw [← cancel_epi (X.ω₁.map (F.mapComposableArrowsObjMk₁Iso _).inv)]

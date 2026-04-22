@@ -59,19 +59,15 @@ lemma isStrongGenerator
     [HasCoproducts.{w} A] [HasPullbacks A] (C : Type w) [SmallCategory C] :
     (ObjectProperty.ofObj (fun (T : C × (Subtype P)) ↦
       freeYoneda T.1 T.2.1)).IsStrongGenerator := by
-  rw [ObjectProperty.isStrongGenerator_iff] at hP ⊢
-  obtain ⟨hP₁, hP₂⟩ := hP
-  refine ⟨Presheaf.isSeparating (C := C) (ι := Subtype P) (S := Subtype.val)
-    (by simpa using hP₁),
-    fun P₁ P₂ i _ hi ↦ ?_⟩
+  rw [ObjectProperty.isStrongGenerator_iff]
+  refine ⟨Presheaf.isSeparating C (by simpa using hP.isSeparating), fun P₁ P₂ i _ hi ↦ ?_⟩
   rw [NatTrans.isIso_iff_isIso_app]
   rintro ⟨X⟩
-  refine hP₂ _ (fun G hG f ↦ ?_)
-  obtain ⟨y, rfl⟩ := freeYonedaHomEquiv.surjective f
-  obtain ⟨x, rfl⟩ := hi (freeYoneda X G)
-    (ObjectProperty.ofObj_apply (fun (T : C × (Subtype P)) ↦
-      freeYoneda T.1 T.2.1) ⟨X, G, hG⟩) y
-  exact ⟨freeYonedaHomEquiv x, by simp [freeYonedaHomEquiv_comp]⟩
+  refine hP.isIso_of_mono _ (fun G hG ↦ ?_)
+  apply Function.Surjective.of_comp (g := freeYonedaHomEquiv (X := X) (M := G))
+  simpa [Function.comp_def, freeYonedaHomEquiv_comp] using
+    freeYonedaHomEquiv.surjective.comp (hi (freeYoneda X G)
+      (ObjectProperty.ofObj.mk (⟨X, ⟨G, hG⟩⟩ : C × Subtype P)))
 
 instance {A : Type u'} [Category.{v'} A] (κ : Cardinal.{w}) [Fact κ.IsRegular]
     [IsCardinalLocallyPresentable A κ] [HasPullbacks A]

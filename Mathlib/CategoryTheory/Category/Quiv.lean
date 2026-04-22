@@ -254,21 +254,17 @@ def adj : Cat.free ⊣ Quiv.forget :=
 def pathsEquiv {V : Type u} {C : Type u₁} [Quiver.{v} V] [Category.{v₁} C] :
     (Paths V ⥤ C) ≃ V ⥤q C where
   toFun F := (Paths.of V).comp F.toPrefunctor
-  invFun G := Cat.freeMap G ⋙ pathComposition C
+  invFun := Paths.lift
   left_inv F := by
-    dsimp
-    rw [Cat.freeMap_comp, Functor.assoc, pathComposition_naturality, ← Functor.assoc,
-      freeMap_pathsOf_pathComposition, Functor.id_comp]
+    simpa using (Paths.lift_unique ((Paths.of V).comp F.toPrefunctor) F rfl).symm
   right_inv G := by
-    dsimp
-    rw [← Functor.toPrefunctor_comp, ← Prefunctor.comp_assoc,
-      pathsOf_freeMap_toPrefunctor, Prefunctor.comp_assoc,
-      pathsOf_pathComposition_toPrefunctor, Prefunctor.comp_id]
+    simpa using Paths.lift_spec G
 
 @[simp]
 lemma adj_homEquiv {V C : Type u} [Quiver.{max u v} V] [Category.{max u v} C] :
     adj.homEquiv (Quiv.of V) (Cat.of C) =
-      (Cat.Hom.equivFunctor (.of (Paths V)) (.of C)).trans (pathsEquiv (V := V) (C := C)) := rfl
+      (Cat.Hom.equivFunctor (.of (Paths V)) (.of C)).trans (pathsEquiv (V := V) (C := C)) :=
+  by ext F; rfl
 
 end Quiv
 

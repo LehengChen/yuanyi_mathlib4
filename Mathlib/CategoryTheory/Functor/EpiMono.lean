@@ -161,13 +161,9 @@ theorem reflectsEpimorphisms.iso_iff {F G : C ⥤ D} (α : F ≅ G) :
   ⟨fun _ => reflectsEpimorphisms.of_iso α, fun _ => reflectsEpimorphisms.of_iso α.symm⟩
 
 theorem preservesEpimorphisms_of_adjunction {F : C ⥤ D} {G : D ⥤ C} (adj : F ⊣ G) :
-    PreservesEpimorphisms F :=
-  { preserves := fun {X} {Y} f hf =>
-      ⟨by
-        intro Z g h H
-        replace H := congr_arg (adj.homEquiv X Z) H
-        rwa [adj.homEquiv_naturality_left, adj.homEquiv_naturality_left, cancel_epi,
-          Equiv.apply_eq_iff_eq] at H⟩ }
+    PreservesEpimorphisms F where
+  preserves {X Y} f := ⟨fun {Z} g h H => by
+    simpa [adj.homEquiv_naturality_left, cancel_epi] using congr_arg (adj.homEquiv X Z) H⟩
 
 instance (priority := 100) preservesEpimorphisms_of_isLeftAdjoint (F : C ⥤ D) [IsLeftAdjoint F] :
     PreservesEpimorphisms F :=

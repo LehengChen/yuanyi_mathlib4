@@ -54,14 +54,10 @@ noncomputable def colimitYonedaHomEquiv : (colimit (F ⋙ yoneda) ⟶ G) ≃ lim
 theorem colimitYonedaHomEquiv_π_apply (η : colimit (F ⋙ yoneda) ⟶ G) (i : Iᵒᵖ) :
     limit.π (F.op ⋙ G) i (colimitYonedaHomEquiv F G η) =
       η.app (op (F.obj i.unop)) ((colimit.ι (F ⋙ yoneda) i.unop).app _ (𝟙 _)) := by
-  simp only [Functor.comp_obj, Functor.op_obj, colimitYonedaHomEquiv, uliftFunctor_obj,
-    Iso.trans_def, Iso.trans_assoc, Iso.toEquiv_comp, Equiv.symm_trans_apply,
-    Equiv.symm_symm, Equiv.trans_apply, Iso.toEquiv_fun, Iso.symm_hom, Equiv.ulift_apply]
-  have (a : _) := congrArg ULift.down
-    (congrFun (preservesLimitIso_inv_π uliftFunctor.{u, v} (F.op ⋙ G) i) a)
-  dsimp at this
-  rw [this, ← types_comp_apply (HasLimit.isoOfNatIso _).hom (limit.π _ _),
-    HasLimit.isoOfNatIso_hom_π]
+  change ULift.down (((preservesLimitIso uliftFunctor.{u, v} (F.op ⋙ G)).inv ≫
+    uliftFunctor.map (limit.π _ i)) _) = _
+  rw [preservesLimitIso_inv_π, Iso.trans_def, Iso.trans_hom, types_comp_apply,
+    ← types_comp_apply (HasLimit.isoOfNatIso _).hom (limit.π _ _), HasLimit.isoOfNatIso_hom_π]
   simp
 
 instance : Small.{v} (colimit (F ⋙ yoneda) ⟶ G) where

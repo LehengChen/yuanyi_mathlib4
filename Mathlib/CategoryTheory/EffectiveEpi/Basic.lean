@@ -227,21 +227,12 @@ is an `EffectiveEpiFamily`.
 noncomputable
 def effectiveEpiFamilyStructOfIsIsoDesc {B : C} {α : Type*} (X : α → C)
     (π : (a : α) → (X a ⟶ B)) [HasCoproduct X] [IsIso (Sigma.desc π)] :
-    EffectiveEpiFamilyStruct X π where
-  desc e _ := (asIso (Sigma.desc π)).inv ≫ (Sigma.desc e)
-  fac e h := by
-    intro a
-    have : π a = Sigma.ι X a ≫ (asIso (Sigma.desc π)).hom := by simp only [asIso_hom,
-      colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app]
-    rw [this, assoc]
-    simp only [asIso_hom, asIso_inv, IsIso.hom_inv_id_assoc, colimit.ι_desc, Cofan.mk_pt,
-      Cofan.mk_ι_app]
-  uniq e h m hm := by
-    simp only [asIso_inv, IsIso.eq_inv_comp]
-    ext a
-    simp only [colimit.ι_desc_assoc, Discrete.functor_obj, Cofan.mk_pt, Cofan.mk_ι_app,
-      colimit.ι_desc]
-    exact hm a
+    EffectiveEpiFamilyStruct X π :=
+  haveI : IsIso (Sigma.desc (Cofan.mk B π).inj) := by simpa
+  let H : IsColimit (Cofan.mk B π) := Cofan.isColimitOfIsIsoSigmaDesc _
+  { desc e _ := H.desc (Cofan.mk _ e)
+    fac e _ a := H.fac (Cofan.mk _ e) ⟨a⟩
+    uniq e _ m hm := H.uniq (Cofan.mk _ e) m (fun ⟨a⟩ => hm a) }
 
 instance {B : C} {α : Type*} (X : α → C) (π : (a : α) → (X a ⟶ B)) [HasCoproduct X]
     [IsIso (Sigma.desc π)] : EffectiveEpiFamily X π :=

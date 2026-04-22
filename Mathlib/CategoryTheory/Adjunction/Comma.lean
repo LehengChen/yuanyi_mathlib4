@@ -50,15 +50,11 @@ def leftAdjointOfStructuredArrowInitialsAux (A : C) (B : D) :
   toFun g := (⊥_ StructuredArrow A G).hom ≫ G.map g
   invFun f := CommaMorphism.right (initial.to (StructuredArrow.mk f))
   left_inv g := by
-    let B' : StructuredArrow A G := StructuredArrow.mk ((⊥_ StructuredArrow A G).hom ≫ G.map g)
-    let g' : ⊥_ StructuredArrow A G ⟶ B' := StructuredArrow.homMk g rfl
-    have : initial.to _ = g' := by cat_disch
-    change CommaMorphism.right (initial.to B') = _
-    rw [this]
-    rfl
+    simpa using congrArg CommaMorphism.right <|
+      initial.hom_ext (initial.to (StructuredArrow.mk ((⊥_ StructuredArrow A G).hom ≫ G.map g)))
+        (StructuredArrow.homMk g rfl)
   right_inv f := by
-    let B' : StructuredArrow A G := StructuredArrow.mk f
-    apply (CommaMorphism.w (initial.to B')).symm.trans (Category.id_comp _)
+    simpa using (CommaMorphism.w (initial.to (StructuredArrow.mk f))).symm
 
 /--
 If each structured arrow category on `G` has an initial object, construct a left adjoint to `G`. It
@@ -96,13 +92,9 @@ def rightAdjointOfCostructuredArrowTerminalsAux (B : D) (A : C) :
   invFun g := G.map g ≫ (⊤_ CostructuredArrow G A).hom
   left_inv := by cat_disch
   right_inv g := by
-    let B' : CostructuredArrow G A :=
-      CostructuredArrow.mk (G.map g ≫ (⊤_ CostructuredArrow G A).hom)
-    let g' : B' ⟶ ⊤_ CostructuredArrow G A := CostructuredArrow.homMk g rfl
-    have : terminal.from _ = g' := by cat_disch
-    change CommaMorphism.left (terminal.from B') = _
-    rw [this]
-    rfl
+    simpa using congrArg CommaMorphism.left (terminal.hom_ext
+      (terminal.from (CostructuredArrow.mk (G.map g ≫ (⊤_ CostructuredArrow G A).hom)))
+      (CostructuredArrow.homMk g rfl))
 
 set_option backward.isDefEq.respectTransparency false in
 /--

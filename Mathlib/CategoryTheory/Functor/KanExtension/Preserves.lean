@@ -517,6 +517,7 @@ Kan extensions along `L : A ⥤ C` of every functor `A ⥤ B`. -/
 abbrev PreservesPointwiseRightKanExtensions :=
   ∀ (F : A ⥤ B), G.PreservesPointwiseRightKanExtension F L
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Commuting a functor that preserves right Kan extensions with the `ran` functor. -/
 @[simps!]
 def ranCompIsoOfPreserves [G.PreservesRightKanExtensions L]
@@ -524,16 +525,11 @@ def ranCompIsoOfPreserves [G.PreservesRightKanExtensions L]
     L.ran ⋙ (whiskeringRight _ _ _).obj G ≅ (whiskeringRight _ _ _).obj G ⋙ L.ran :=
   NatIso.ofComponents (fun F ↦ rightKanExtensionCompIsoOfPreserves _ _ _)
     (fun {F F'} η ↦ by
-      apply hom_ext_of_isRightKanExtension
-        (L.rightKanExtension <| F' ⋙ G)
-        (L.rightKanExtensionCounit <| F' ⋙ G)
-      dsimp [ran]
-      ext
-      simp only [comp_obj, Category.assoc, rightKanExtensionCompIsoOfPreserves_hom_fac,
-        NatTrans.comp_app, whiskerLeft_app, whiskerRight_app, associator_inv_app, Category.id_comp,
-        liftOfIsRightKanExtension_fac, rightKanExtensionCompIsoOfPreserves_hom_fac_assoc,
-        ← G.map_comp]
-      simp)
+      apply rightKanExtension_hom_ext; dsimp [ran]; ext X
+      simp only [NatTrans.comp_app, whiskerLeft_app, whiskerRight_app, Category.assoc,
+        rightKanExtensionCompIsoOfPreserves_hom_fac_app,
+        rightKanExtensionCompIsoOfPreserves_hom_fac_app_assoc,
+        liftOfIsRightKanExtension_fac_app, ← G.map_comp])
 
 end RightKanExtension
 

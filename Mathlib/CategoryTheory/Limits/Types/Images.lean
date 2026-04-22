@@ -114,12 +114,7 @@ lemma surjective_π_app_zero_of_surjective_map
     (hc : IsLimit c)
     (hF : ∀ n, Function.Surjective (F.map (homOfLE (Nat.le_succ n)).op)) :
     Function.Surjective (c.π.app ⟨0⟩) := by
-  let i := hc.conePointUniqueUpToIso (limitConeIsLimit F)
-  have : c.π.app ⟨0⟩ = i.hom ≫ (limitCone F).π.app ⟨0⟩ := by simp [i]
-  rw [this]
-  apply Function.Surjective.comp
-  · exact surjective_π_app_zero_of_surjective_map_aux hF
-  · rw [← epi_iff_surjective]
-    infer_instance
+  simpa using (surjective_π_app_zero_of_surjective_map_aux hF).comp
+    ((epi_iff_surjective (hc.conePointUniqueUpToIso (limitConeIsLimit F)).hom).1 inferInstance)
 
 end CategoryTheory.Limits.Types

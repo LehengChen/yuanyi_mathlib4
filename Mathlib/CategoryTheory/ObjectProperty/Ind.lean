@@ -83,23 +83,19 @@ lemma ind_iff_exists (H : P ≤ isFinitelyPresentable.{w} C)
     exact ⟨_, u, pres.ι.app j, hcomp, h j⟩
   · let incl : P.FullSubcategory ⥤ (isFinitelyPresentable.{w} C).FullSubcategory :=
       ObjectProperty.ιOfLE H
-    have H (d : CostructuredArrow (isFinitelyPresentable.{w} C).ι X) : ∃ c,
+    have hpre (d : CostructuredArrow (isFinitelyPresentable.{w} C).ι X) : ∃ c,
         Nonempty (d ⟶ (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X).obj c) := by
       obtain ⟨W, u, v, huv, hW⟩ := hfac d.hom
       exact ⟨CostructuredArrow.mk (Y := FullSubcategory.mk _ hW) v,
         ⟨CostructuredArrow.homMk ⟨u⟩ huv⟩⟩
     have : (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X).Final :=
       Functor.final_of_exists_of_isFiltered_of_fullyFaithful (C := CostructuredArrow (incl ⋙ _) X)
-        (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X) H
+        (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X) hpre
     have : IsFiltered (CostructuredArrow P.ι X) :=
       .of_exists_of_isFiltered_of_fullyFaithful (C := CostructuredArrow (incl ⋙ _) X)
-        (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X) H
-    obtain ⟨hc⟩ : P.ι.isDenseAt X :=
-      Functor.IsDenseAt.of_final (F := (isFinitelyPresentable.{w} C).ι) incl
-        (Functor.IsDense.isDenseAt _ _)
-    have : EssentiallySmall.{w} (CostructuredArrow P.ι X) :=
-      essentiallySmall_of_fully_faithful (C := CostructuredArrow (incl ⋙ _) X)
-        (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X)
-    exact of_essentiallySmall_index ⟨_, _, hc⟩ fun Y ↦ Y.left.2
+        (CostructuredArrow.pre incl (isFinitelyPresentable.{w} C).ι X) hpre
+    have : ObjectProperty.EssentiallySmall.{w} P := .of_le H
+    exact of_essentiallySmall_index ⟨_, _, show P.ι.DenseAt X from
+      ((isFinitelyPresentable.{w} C).ι.denseAt X).precompOfFinal incl⟩ fun Y ↦ Y.left.2
 
 end CategoryTheory.ObjectProperty

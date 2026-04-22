@@ -13,6 +13,7 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
 public import Mathlib.CategoryTheory.Limits.Shapes.Kernels
 public import Mathlib.CategoryTheory.Limits.Shapes.Multiequalizer
 public import Mathlib.CategoryTheory.Limits.Types.Coproducts
+public import Mathlib.CategoryTheory.Limits.Types.Multiequalizer
 public import Mathlib.CategoryTheory.Limits.Types.Products
 public import Mathlib.CategoryTheory.Limits.Types.Pullbacks
 public import Mathlib.CategoryTheory.Limits.Shapes.FiniteProducts
@@ -280,34 +281,20 @@ theorem multiequalizer_ext {J : MulticospanShape.{w, w'}}
 /-- An auxiliary equivalence to be used in `multiequalizerEquiv` below. -/
 def multiequalizerEquivAux {J : MulticospanShape.{w, w'}} (I : MulticospanIndex J C) :
     (I.multicospan ⋙ forget C).sections ≃
-    { x : ∀ i : J.L, ToType (I.left i) // ∀ i : J.R, I.fst i (x _) = I.snd i (x _) } where
-  toFun x :=
-    ⟨fun _ => x.1 (WalkingMulticospan.left _), fun i => by
-      have a := x.2 (WalkingMulticospan.Hom.fst i)
-      have b := x.2 (WalkingMulticospan.Hom.snd i)
-      rw [← b] at a
-      exact a⟩
-  invFun x :=
-    { val := fun j =>
-        match j with
-        | WalkingMulticospan.left _ => x.1 _
-        | WalkingMulticospan.right b => I.fst b (x.1 _)
-      property := by
-        rintro (a | b) (a' | b') (f | f | f)
-        · simp
-        · rfl
-        · dsimp
-          exact (x.2 b').symm
-        · simp }
-  left_inv := by
-    intro x; ext (a | b)
-    · rfl
-    · rw [← x.2 (WalkingMulticospan.Hom.fst b)]
-      rfl
-  right_inv := by
-    intro x
-    ext i
-    rfl
+    { x : ∀ i : J.L, ToType (I.left i) // ∀ i : J.R, I.fst i (x _) = I.snd i (x _) } :=
+  let I' : MulticospanIndex J (Type s) :=
+    { left := fun i => ToType (I.left i)
+      right := fun i => ToType (I.right i)
+      fst := fun i => I.fst i
+      snd := fun i => I.snd i }
+  let e : I'.multicospan ≅ I.multicospan ⋙ forget C :=
+    WalkingMulticospan.functorExt (fun _ => Iso.refl _) (fun _ => Iso.refl _)
+  (((Functor.sectionsFunctor _).mapIso e).toEquiv.symm.trans
+    I'.sectionsEquiv.symm).trans
+      { toFun s := ⟨s.val, s.property⟩
+        invFun s := ⟨s.1, s.2⟩
+        left_inv := by rintro ⟨_, _⟩; rfl
+        right_inv := by rintro ⟨_, _⟩; rfl }
 
 /-- The equivalence between the noncomputable multiequalizer and
 the concrete multiequalizer. -/

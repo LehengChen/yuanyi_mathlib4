@@ -150,7 +150,7 @@ variable {G U}
 an explicit zero-cochain. -/
 def OneCohomologyRelation (γ₁ γ₂ : OneCochain G U) (α : ZeroCochain G U) : Prop :=
   ∀ (i j : I) ⦃T : C⦄ (a : T ⟶ U i) (b : T ⟶ U j),
-    G.map a.op (α i) * γ₁.ev i j a b = γ₂.ev i j a b * G.map b.op (α j)
+    γ₂.ev i j a b = G.map a.op (α i) * γ₁.ev i j a b * (G.map b.op (α j))⁻¹
 
 namespace OneCohomologyRelation
 
@@ -158,16 +158,12 @@ lemma refl (γ : OneCochain G U) : OneCohomologyRelation γ γ 1 := fun _ _ _ _ 
 
 lemma symm {γ₁ γ₂ : OneCochain G U} {α : ZeroCochain G U} (h : OneCohomologyRelation γ₁ γ₂ α) :
     OneCohomologyRelation γ₂ γ₁ α⁻¹ := fun i j T a b ↦ by
-  rw [← mul_left_inj (G.map b.op (α j)), mul_assoc, ← h i j a b,
-    mul_assoc, Cochain₀.inv_apply, map_inv, inv_mul_cancel_left,
-    Cochain₀.inv_apply, map_inv, inv_mul_cancel, mul_one]
+  simp [h i j a b, mul_assoc]
 
 lemma trans {γ₁ γ₂ γ₃ : OneCochain G U} {α β : ZeroCochain G U}
     (h₁₂ : OneCohomologyRelation γ₁ γ₂ α) (h₂₃ : OneCohomologyRelation γ₂ γ₃ β) :
     OneCohomologyRelation γ₁ γ₃ (β * α) := fun i j T a b ↦ by
-  dsimp
-  rw [map_mul, map_mul, mul_assoc, h₁₂ i j a b, ← mul_assoc,
-    h₂₃ i j a b, mul_assoc]
+  simp [map_mul, h₂₃ i j a b, h₁₂ i j a b, mul_assoc]
 
 end OneCohomologyRelation
 

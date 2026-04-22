@@ -31,7 +31,7 @@ universe v' u' u
 
 namespace CategoryTheory.Types
 
-open MorphismProperty Limits
+open MorphismProperty Limits Limits.Types.FilteredColimit
 
 instance : (monomorphisms (Type u)).IsStableUnderCobaseChange where
   of_isPushout {X₁ X₂ X₃ X₄ t l r b} sq ht := by
@@ -44,12 +44,8 @@ instance : MorphismProperty.IsStableUnderFilteredColimits.{v', u'} (monomorphism
     replace hφ (j : J) := congr_fun (hφ j)
     dsimp at hφ
     intro x₁ y₁ h
-    obtain ⟨j, x₁, y₁, rfl, rfl⟩ : ∃ (j : J) (x₁' y₁' : F₁.obj j),
-        x₁ = c₁.ι.app j x₁' ∧ y₁ = c₁.ι.app j y₁' := by
-      obtain ⟨j, x₁, rfl⟩ := Types.jointly_surjective_of_isColimit hc₁ x₁
-      obtain ⟨l, y₁, rfl⟩ := Types.jointly_surjective_of_isColimit hc₁ y₁
-      exact ⟨_,  _, _, congr_fun (c₁.w (IsFiltered.leftToMax j l)).symm _,
-        congr_fun (c₁.w (IsFiltered.rightToMax j l)).symm _⟩
+    obtain ⟨j, x₁, y₁, h₁, h₂⟩ := jointly_surjective_of_isColimit₂ hc₁ x₁ y₁
+    rw [← h₁, ← h₂] at h ⊢
     rw [hφ, hφ] at h
     obtain ⟨k, α, hk⟩ := (Types.FilteredColimit.isColimit_eq_iff' hc₂ _ _).1 h
     simp only [← FunctorToTypes.naturality] at hk
@@ -60,20 +56,15 @@ instance (T : Type u') : MorphismProperty.IsStableUnderCoproductsOfShape
   IsStableUnderCoproductsOfShape.mk _ _ (by
     intro X₁ X₂ _ _ f h
     simp only [monomorphisms.iff, mono_iff_injective] at h ⊢
-    intro x₁ x₂ hx
-    obtain ⟨i₁, x₁, rfl⟩ := Cofan.inj_jointly_surjective_of_isColimit
-      (coproductIsCoproduct X₁) x₁
-    obtain ⟨i₂, x₂, rfl⟩ := Cofan.inj_jointly_surjective_of_isColimit
-      (coproductIsCoproduct X₁) x₂
-    simp only [cofan_mk_inj] at hx ⊢
-    replace hx : Sigma.ι X₂ i₁ (f i₁ x₁) = Sigma.ι X₂ i₂ (f i₂ x₂) := by
-      have h₁ := congr_fun (Sigma.ι_map f i₁) x₁
-      have h₂ := congr_fun (Sigma.ι_map f i₂) x₂
-      dsimp at h₁ h₂
-      rw [← h₁, ← h₂, hx]
-    obtain rfl := Cofan.eq_of_inj_apply_eq_of_isColimit (coproductIsCoproduct X₂) _ _ hx
-    obtain rfl := h _ (Cofan.inj_injective_of_isColimit (coproductIsCoproduct X₂) i₁ hx)
-    rfl)
+    refine Function.Injective.of_comp_right (f := Limits.Sigma.map f)
+      (g := (Cofan.mk _ (Sigma.ι X₁)).cofanTypes.fromSigma) ?_
+      (CofanTypes.bijective_fromSigma_of_isColimit
+        ((Cofan.isColimit_cofanTypes_iff _).2 ⟨coproductIsCoproduct X₁⟩)).2
+    convert (CofanTypes.bijective_fromSigma_of_isColimit
+      ((Cofan.isColimit_cofanTypes_iff _).2 ⟨coproductIsCoproduct X₂⟩)).1.comp
+        (Function.injective_id.sigma_map h) using 1
+    ext ⟨i, x⟩
+    exact congr_fun (Sigma.ι_map f i) x)
 
 instance : MorphismProperty.IsStableUnderCoproducts (monomorphisms (Type u)) where
 

@@ -42,23 +42,18 @@ set_option backward.isDefEq.respectTransparency false in
 to the diagram used to define `P ⋙ F`. -/
 def diagramCompIso (X : C) : J.diagram P X ⋙ F ≅ J.diagram (P ⋙ F) X :=
   NatIso.ofComponents
-    (fun W => by
-      refine ?_ ≪≫ HasLimit.isoOfNatIso (W.unop.multicospanComp _ _).symm
-      refine
-        (isLimitOfPreserves F (limit.isLimit _)).conePointUniqueUpToIso (limit.isLimit _))
+    (fun W => preservesLimitIso F (W.unop.index P).multicospan ≪≫
+      HasLimit.isoOfNatIso (W.unop.multicospanComp _ _).symm)
     (by
       intro A B f
-      dsimp
-      ext g
-      simp [← F.map_comp])
+      cat_disch)
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 theorem diagramCompIso_hom_ι (X : C) (W : (J.Cover X)ᵒᵖ) (i : W.unop.Arrow) :
     (J.diagramCompIso F P X).hom.app W ≫ Multiequalizer.ι ((unop W).index (P ⋙ F)) i =
     F.map (Multiequalizer.ι _ _) := by
-  delta diagramCompIso
-  simp
+  simp [diagramCompIso]
 
 variable [∀ X : C, HasColimitsOfShape (J.Cover X)ᵒᵖ D]
 variable [∀ X : C, HasColimitsOfShape (J.Cover X)ᵒᵖ E]
@@ -69,11 +64,8 @@ set_option backward.isDefEq.respectTransparency false in
 def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
   NatIso.ofComponents
     (fun X => by
-      refine ?_ ≪≫ HasColimit.isoOfNatIso (J.diagramCompIso F P X.unop)
-      refine
-        (isColimitOfPreserves F
-              (colimit.isColimit (J.diagram P (unop X)))).coconePointUniqueUpToIso
-          (colimit.isColimit _))
+      exact preservesColimitIso F (J.diagram P X.unop) ≪≫
+        HasColimit.isoOfNatIso (J.diagramCompIso F P X.unop))
     (by
       intro X Y f
       apply (isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).hom_ext
@@ -81,7 +73,7 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
       dsimp [plusObj, plusMap]
       simp only [Functor.map_comp, Category.assoc]
       slice_rhs 1 2 =>
-        erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).fac]
+        rw [ι_preservesColimitIso_hom]
       slice_lhs 1 3 =>
         simp only [← F.map_comp]
         dsimp [colimMap, IsColimit.map, colimit.pre]
@@ -92,8 +84,7 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
         rw [F.map_comp]
       simp only [Category.assoc]
       slice_lhs 2 3 =>
-        erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P Y.unop))).fac]
-      dsimp
+        rw [ι_preservesColimitIso_hom]
       simp only [HasColimit.isoOfNatIso_ι_hom_assoc, GrothendieckTopology.diagramPullback_app,
         colimit.ι_pre, HasColimit.isoOfNatIso_ι_hom, ι_colimMap_assoc]
       simp only [← Category.assoc]
@@ -110,11 +101,7 @@ set_option backward.isDefEq.respectTransparency false in
 theorem ι_plusCompIso_hom (X) (W) :
     F.map (colimit.ι _ W) ≫ (J.plusCompIso F P).hom.app X =
       (J.diagramCompIso F P X.unop).hom.app W ≫ colimit.ι _ W := by
-  delta diagramCompIso plusCompIso
-  simp only [Iso.trans_hom, NatIso.ofComponents_hom_app, ←
-    Category.assoc]
-  erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P (unop X)))).fac]
-  simp
+  simp [plusCompIso]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]

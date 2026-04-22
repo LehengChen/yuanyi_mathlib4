@@ -135,18 +135,14 @@ def mk' (S : StrictlyUnitaryLaxFunctorCore B C) :
 
 instance mapId_isIso (F : StrictlyUnitaryLaxFunctor B C) (x : B) :
     IsIso (F.mapId x) := by
-  rw [mapId_eq_eqToHom]
-  infer_instance
+  simpa [F.mapId_eq_eqToHom] using (inferInstance : IsIso (eqToHom (F.map_id x).symm))
 
 /-- Promote the morphism `F.mapId x : 𝟙 (F.obj x) ⟶ F.map (𝟙 x)`
 to an isomorphism when `F` is strictly unitary. -/
-@[simps]
+@[simps!]
 def mapIdIso (F : StrictlyUnitaryLaxFunctor B C) (x : B) :
-   𝟙 (F.obj x) ≅ F.map (𝟙 x) where
-  hom := F.mapId x
-  inv := eqToHom (F.map_id x)
-  hom_inv_id := by simp [F.mapId_eq_eqToHom]
-  inv_hom_id := by simp [F.mapId_eq_eqToHom]
+   𝟙 (F.obj x) ≅ F.map (𝟙 x) :=
+  eqToIso (F.map_id x).symm
 
 variable (B) in
 /-- The identity `StrictlyUnitaryLaxFunctor`. -/

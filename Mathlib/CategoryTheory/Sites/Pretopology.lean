@@ -181,12 +181,8 @@ def trivial : Pretopology C where
   pullbacks X Y f S := by
     rintro ⟨Z, g, i, rfl⟩
     refine ⟨pullback g f, pullback.snd _ _, ?_, ?_⟩
-    · refine ⟨⟨pullback.lift (f ≫ inv g) (𝟙 _) (by simp), ⟨?_, by simp⟩⟩⟩
-      ext
-      · rw [assoc, pullback.lift_fst, ← pullback.condition_assoc]
-        simp
-      · simp
-    · apply pullback_singleton
+    · infer_instance
+    · exact pullback_singleton (f := f) g
   transitive := by
     rintro X S Ti ⟨Z, g, i, rfl⟩ hS
     rcases hS g (singleton_self g) with ⟨Y, f, i, hTi⟩
@@ -292,21 +288,13 @@ def Precoverage.toPretopology [Limits.HasPullbacks C] (J : Precoverage C) [J.Has
   transitive X R Ti hR hTi := by
     obtain ⟨ι, Z, g, rfl⟩ := R.exists_eq_ofArrows
     choose κ W p hp using fun ⦃Y⦄ (f : Y ⟶ X) hf ↦ (Ti f hf).exists_eq_ofArrows
-    have : (Presieve.ofArrows Z g).bind Ti =
-        .ofArrows (fun ij : Σ i, κ (g i) ⟨i⟩ ↦ W _ _ ij.2) (fun ij ↦ p _ _ ij.2 ≫ g ij.1) := by
-      apply le_antisymm
-      · rintro T u ⟨S, v, w, ⟨i⟩, hv, rfl⟩
-        rw [hp] at hv
-        obtain ⟨j⟩ := hv
-        exact .mk <| Sigma.mk (β := fun i : ι ↦ κ (g i) ⟨i⟩) i j
-      · rintro T u ⟨ij⟩
-        use Z ij.1, p (g ij.1) ⟨ij.1⟩ ij.2, g ij.1, ⟨ij.1⟩
-        rw [hp]
-        exact ⟨⟨_⟩, rfl⟩
-    rw [this]
-    refine J.comp_mem_coverings (Y := fun (i : ι) (j : κ (g i) ⟨i⟩) ↦ W _ _ j)
-      (g := fun i j ↦ p _ _ j) _ hR fun i ↦ ?_
-    rw [← hp]
-    exact hTi _ _
+    rw [show Ti = fun _ f H ↦ Presieve.ofArrows (W f H) (p f H) by
+      funext Y f H
+      exact hp f H]
+    rw [Presieve.ofArrows_bind]
+    exact J.comp_mem_coverings (Y := fun (i : ι) (j : κ (g i) ⟨i⟩) ↦ W _ _ j)
+      (g := fun i j ↦ p _ _ j) _ hR fun i ↦ by
+      rw [← hp]
+      exact hTi _ _
 
 end CategoryTheory

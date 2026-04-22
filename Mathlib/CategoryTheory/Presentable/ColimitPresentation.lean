@@ -105,19 +105,14 @@ instance [IsFiltered J] [∀ j, IsFiltered (I j)]
   cocone_maps {k l} f g := by
     let a := IsFiltered.coeq f.base g.base
     obtain ⟨a', u, hu⟩ := Total.exists_hom_of_hom (P := P) l.2 (IsFiltered.coeqHom f.base g.base)
-    have : (f.hom ≫ u.hom) ≫ (P _).ι.app _ = (g.hom ≫ u.hom) ≫ (P _).ι.app _ := by
-      simp only [Category.assoc, Functor.const_obj_obj, ← u.w, ← f.w_assoc, ← g.w_assoc]
-      rw [← Functor.map_comp, hu, IsFiltered.coeq_condition f.base g.base]
-      simp
-    obtain ⟨j, p, q, hpq⟩ := IsFinitelyPresentable.exists_eq_of_isColimit (P _).isColimit _ _ this
-    dsimp at p q
-    refine ⟨⟨a, IsFiltered.coeq p q⟩,
-      u ≫ { base := 𝟙 _, hom := (P _).diag.map (p ≫ IsFiltered.coeqHom p q) }, ?_⟩
-    apply Total.Hom.ext
-    · simp [hu, IsFiltered.coeq_condition f.base g.base]
-    · rw [Category.assoc] at hpq
-      simp only [Functor.map_comp, comp_hom, reassoc_of% hpq]
-      simp [← Functor.map_comp, ← IsFiltered.coeq_condition]
+    obtain ⟨j, p, hp⟩ := (Types.FilteredColimit.isColimit_eq_iff'
+      (isColimitOfPreserves (coyoneda.obj (Opposite.op ((P k.1).diag.obj k.2))) (P _).isColimit)
+      (f.hom ≫ u.hom) (g.hom ≫ u.hom)).1 (by
+        simp [Category.assoc, ← u.w, ← f.w_assoc, ← g.w_assoc,
+          ← Functor.map_comp, hu, IsFiltered.coeq_condition f.base g.base])
+    refine ⟨⟨a, j⟩, u ≫ { base := 𝟙 _, hom := (P _).diag.map p }, ?_⟩
+    exact Total.Hom.ext (by simp [hu, IsFiltered.coeq_condition f.base g.base])
+      (by simpa [comp_hom, Category.assoc] using hp)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If `P` is a colimit presentation over `J` of `X` and for every `j` we are given a colimit

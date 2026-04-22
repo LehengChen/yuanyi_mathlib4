@@ -259,15 +259,11 @@ theorem inv_left_hom_right [IsIso sq] : inv sq.left ≫ f.hom ≫ sq.right = g.h
 instance mono_left [Mono sq] : Mono sq.left where
   right_cancellation {Z} φ ψ h := by
     let aux : (Z ⟶ f.left) → (Arrow.mk (𝟙 Z) ⟶ f) := fun φ =>
-      { left := φ
-        right := φ ≫ f.hom }
-    have : ∀ g, (aux g).right = g ≫ f.hom := fun g => rfl
+      Arrow.homMk φ (φ ≫ f.hom)
     change (aux φ).left = (aux ψ).left
     congr 1
     rw [← cancel_mono sq]
-    ext
-    · exact h
-    · simp [this, ← Arrow.w_mk_right, reassoc_of% h]
+    ext <;> simp [aux, h, ← Arrow.w_mk_right, reassoc_of% h]
 
 instance epi_right [Epi sq] : Epi sq.right where
   left_cancellation {Z} φ ψ h := by
@@ -276,9 +272,7 @@ instance epi_right [Epi sq] : Epi sq.right where
     change (aux φ).right = (aux ψ).right
     congr 1
     rw [← cancel_epi sq]
-    ext
-    · simp only [comp_left, comp_left, aux, mk_left, homMk_left, w_assoc, h]
-    · exact h
+    ext <;> simp [aux, h, ← Category.assoc]
 
 @[reassoc (attr := simp)]
 lemma hom_inv_id_left (e : f ≅ g) : e.hom.left ≫ e.inv.left = 𝟙 _ := by

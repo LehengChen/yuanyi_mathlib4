@@ -1134,11 +1134,7 @@ set_option backward.isDefEq.respectTransparency false in
 @[ext]
 theorem hom_ext {W : C} (i j : multicoequalizer I ⟶ W)
     (h : ∀ b, Multicoequalizer.π I b ≫ i = Multicoequalizer.π I b ≫ j) : i = j :=
-  colimit.hom_ext
-    (by
-      rintro (a | b)
-      · simp_rw [← colimit.w I.multispan (WalkingMultispan.Hom.fst a), Category.assoc, h]
-      · apply h)
+  Multicofork.IsColimit.hom_ext (colimit.isColimit _) h
 
 variable [HasCoproduct I.left] [HasCoproduct I.right]
 

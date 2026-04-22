@@ -86,14 +86,10 @@ theorem piComparison_fac :
     piComparison F (fun x ↦ op (X x)) = F.map (opCoproductIsoProduct' hc (productIsProduct _)).inv ≫
     Equalizer.Presieve.Arrows.forkMap F X c.inj := by
   have : HasCoproduct X := ⟨⟨c, hc⟩⟩
-  dsimp only [Equalizer.Presieve.Arrows.forkMap]
-  have h : Pi.lift (fun i ↦ F.map (c.inj i).op) =
-      F.map (Pi.lift (fun i ↦ (c.inj i).op)) ≫ piComparison F _ := by simp
-  rw [h, ← Category.assoc, ← Functor.map_comp]
-  have hh : Pi.lift (fun i ↦ (c.inj i).op) = (productIsProduct (op <| X ·)).lift c.op := by
-    simp [Pi.lift, productIsProduct]
-  rw [hh, ← desc_op_comp_opCoproductIsoProduct'_hom hc]
-  simp
+  ext i a
+  rw [piComparison_comp_π]
+  simp [Equalizer.Presieve.Arrows.forkMap, ← FunctorToTypes.map_comp_apply,
+    opCoproductIsoProduct'_inv_comp_inj]
 
 variable [(ofArrows X c.inj).HasPairwisePullbacks]
 
@@ -104,16 +100,12 @@ If `F` preserves a particular product, then it `IsSheafFor` the corresponding pr
 -/
 theorem isSheafFor_of_preservesProduct [PreservesLimit (Discrete.functor (fun x ↦ op (X x))) F] :
     (ofArrows X c.inj).IsSheafFor F := by
-  rw [Equalizer.Presieve.Arrows.sheaf_condition, Limits.Types.type_equalizer_iff_unique]
+  rw [Equalizer.Presieve.Arrows.sheaf_condition, Limits.Types.type_equalizer_iff_unique]; intro b _
   have : HasCoproduct X := ⟨⟨c, hc⟩⟩
-  have hi : IsIso (piComparison F (fun x ↦ op (X x))) := inferInstance
-  rw [piComparison_fac (hc := hc), isIso_iff_bijective, Function.bijective_iff_existsUnique] at hi
-  intro b _
-  obtain ⟨t, ht₁, ht₂⟩ := hi b
-  refine ⟨F.map ((opCoproductIsoProduct' hc (productIsProduct _)).inv) t, ht₁, fun y hy ↦ ?_⟩
-  apply_fun F.map ((opCoproductIsoProduct' hc (productIsProduct _)).hom) using injective_of_mono _
-  simp [← FunctorToTypes.map_comp_apply,
-    ht₂ (F.map ((opCoproductIsoProduct' hc (productIsProduct _)).hom) y) (by simp [← hy])]
+  refine ((isIso_iff_bijective (F.map (opCoproductIsoProduct' hc (productIsProduct _)).inv)).mp
+    inferInstance).existsUnique_iff.2 ?_
+  simpa [piComparison_fac (hc := hc)] using
+    ((isIso_iff_bijective (piComparison F (fun x ↦ op (X x)))).mp inferInstance).existsUnique b
 
 variable [HasInitial C] [∀ i, Mono (c.inj i)]
   (hd : Pairwise fun i j => IsPullback (initial.to _) (initial.to _) (c.inj i) (c.inj j))

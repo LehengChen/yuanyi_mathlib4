@@ -74,13 +74,9 @@ set_option backward.isDefEq.respectTransparency false in
 theorem congr_reverse {X Y : Paths <| Quiver.Symmetrify V} (p q : X ⟶ Y) :
     HomRel.CompClosure redStep p q → HomRel.CompClosure redStep p.reverse q.reverse := by
   rintro ⟨_, _, XW, _, _, WY, _, _, f⟩
-  have : HomRel.CompClosure redStep (WY.reverse ≫ 𝟙 _ ≫ XW.reverse)
-      (WY.reverse ≫ (f.toPath ≫ (Quiver.reverse f).toPath) ≫ XW.reverse) := by
-    constructor
-    constructor
-  simpa only [CategoryStruct.comp, CategoryStruct.id, Quiver.Path.reverse, Quiver.Path.nil_comp,
-    Quiver.Path.reverse_comp, Quiver.reverse_reverse, Quiver.Path.reverse_toPath,
-    Quiver.Path.comp_assoc] using this
+  simpa [CategoryStruct.comp, CategoryStruct.id, Quiver.Path.reverse, Quiver.Path.comp_assoc] using
+    HomRel.comp_right (r := HomRel.CompClosure redStep) XW.reverse <|
+      HomRel.comp_left (r := HomRel.CompClosure redStep) WY.reverse <| .of (redStep.step _ _ f)
 
 open Relation in
 theorem congr_comp_reverse {X Y : Paths <| Quiver.Symmetrify V} (p : X ⟶ Y) :
@@ -96,18 +92,10 @@ theorem congr_comp_reverse {X Y : Paths <| Quiver.Symmetrify V} (p : X ⟶ Y) :
     · exact q ≫ Quiver.Path.reverse q
     · apply EqvGen.symm
       apply EqvGen.rel
-      have : HomRel.CompClosure redStep (q ≫ 𝟙 _ ≫ Quiver.Path.reverse q)
-          (q ≫ (Quiver.Hom.toPath f ≫ Quiver.Hom.toPath (Quiver.reverse f)) ≫
-            Quiver.Path.reverse q) := by
-        apply HomRel.CompClosure.intro
-        apply redStep.step
-      simp only [Category.assoc, Category.id_comp] at this ⊢
-      -- Porting note: `simp` cannot see how `Quiver.Path.comp_assoc` is relevant, so change to
-      -- category notation
-      change HomRel.CompClosure redStep (q ≫ Quiver.Path.reverse q)
-        (Quiver.Path.cons q f ≫ (Quiver.Hom.toPath (Quiver.reverse f)) ≫ (Quiver.Path.reverse q))
-      simp only [← Category.assoc] at this ⊢
-      exact this
+      simpa [CategoryStruct.comp, ← Quiver.Path.comp_assoc] using
+        HomRel.comp_right (r := HomRel.CompClosure redStep) (Quiver.Path.reverse q) <|
+          HomRel.comp_left (r := HomRel.CompClosure redStep) q <|
+            .of (redStep.step _ _ f)
     · exact ih
 
 theorem congr_reverse_comp {X Y : Paths <| Quiver.Symmetrify V} (p : X ⟶ Y) :

@@ -129,12 +129,8 @@ lemma isPullback_of_forall_isPullback {P X Y Z : C} (fst : P ⟶ X) (snd : P ⟶
       (pullback.lift fst snd h) m := by
     rw [← IsPullback.paste_vert_iff this.flip (by ext <;> simp [m, pullback.condition])]
     simpa using .of_hasPullback _ _
-  have heq : pullback.snd (pullback.lift fst snd h) ((𝒰.pullbackCoverOfLeft f g).f i) =
-      H'.isoPullback.inv ≫ (H i).isoPullback.hom := by
-    rw [Iso.eq_inv_comp]
-    cat_disch
-  rw [heq]
-  infer_instance
+  convert (inferInstance : IsIso (H'.isoPullback.inv ≫ (H i).isoPullback.hom))
+  aesop (add simp [Iso.eq_inv_comp])
 
 end Precoverage.ZeroHypercover
 

@@ -96,22 +96,14 @@ theorem isIso_tfae : List.TFAE
     , ∀ (d d' : D), IsIso (L.map ((adj.unit.app d) ⊗ₘ (adj.unit.app d')))] := by
   tfae_have 3 → 4
   | h => by
-    -- We can commute the tensor product in the condition that `L.map ((adj.unit.app d) ▷ d')` is
-    -- an isomorphism:
-    have h' : ∀ d d', IsIso (L.map (d ◁ (adj.unit.app d'))) := by
-      intro d d'
-      have := braiding_naturality (𝟙 d) (adj.unit.app d')
-      rw [← Iso.eq_comp_inv, id_tensorHom] at this
-      rw [this]
-      simp only [map_comp, id_obj, comp_obj, tensorHom_id, Category.assoc]
-      infer_instance
     intro d d'
-    -- We then write the tensor product of the two units as the composition of the whiskered units,
-    -- and conclude.
-    have : (adj.unit.app d) ⊗ₘ (adj.unit.app d') =
-        (adj.unit.app d ▷ d') ≫ (((L ⋙ R).obj _) ◁ adj.unit.app d') := by
-      simp [← tensorHom_id, ← id_tensorHom, tensorHom_comp_tensorHom]
-    rw [this, map_comp]
+    rw [show (adj.unit.app d) ⊗ₘ (adj.unit.app d') =
+        (adj.unit.app d ▷ d') ≫ (((L ⋙ R).obj _) ◁ adj.unit.app d') by
+      simp [← tensorHom_id, ← id_tensorHom, tensorHom_comp_tensorHom], map_comp]
+    refine IsIso.comp_isIso' inferInstance ?_
+    rw [show ((L ⋙ R).obj d) ◁ adj.unit.app d' =
+        (β_ _ _).hom ≫ (adj.unit.app d' ▷ (L ⋙ R).obj d) ≫ (β_ _ _).inv by
+      simp, map_comp, map_comp]
     infer_instance
   tfae_have 4 → 1
   | _, _, _ => by
@@ -153,21 +145,13 @@ theorem isIso_tfae : List.TFAE
           (coyoneda.obj ⟨(L ⋙ R).obj d⟩).map (adj.unit.app ((ihom d').obj (R.obj c))) ≫
             (coyoneda.map (adj.unit.app d).op).app _ := by simp
     rw [← isIso_iff_bijective]
-    suffices IsIso ((coyoneda.map (adj.unit.app d).op).app ((ihom d').obj (R.obj c)) ≫
-        (coyoneda.obj ⟨d⟩).map (adj.unit.app ((ihom d').obj (R.obj c)))) from
-      IsIso.of_isIso_comp_right _ ((coyoneda.obj ⟨d⟩).map (adj.unit.app ((ihom d').obj (R.obj c))))
-    rw [w₄]
-    refine IsIso.comp_isIso' inferInstance ?_
-    constructor
-    -- We give the inverse of the bottom map in the stack of commutative squares:
-    refine ⟨fun f ↦ R.map ((adj.homEquiv _ _).symm f), ?_, by ext; simp⟩
+    rw [← isIso_comp_right_iff _ ((coyoneda.obj ⟨d⟩).map
+      (adj.unit.app ((ihom d').obj (R.obj c))))]
+    rw [w₄, isIso_comp_left_iff, isIso_iff_bijective]
+    convert (((FullyFaithful.ofFullyFaithful R).homEquiv).symm.trans
+      (adj.homEquiv d (L.obj ((ihom d').obj (R.obj c))))).bijective using 1
     ext f
-    simp only [comp_obj, flip_obj_obj, yoneda_obj_obj, id_obj, flip_map_app,
-      Adjunction.homEquiv_counit, map_comp, types_comp_apply, yoneda_obj_map, Quiver.Hom.unop_op,
-      Category.assoc]
-    have : f = R.map (R.preimage f) := by simp
-    rw [this]
-    simp [← map_comp, -map_preimage]
+    simp [Functor.FullyFaithful.homEquiv]
   tfae_have 2 ↔ 3 := by
     conv => lhs; intro c d; rw [isIso_iff_isIso_yoneda_map]
     conv => rhs; intro d d'; rw [isIso_iff_isIso_coyoneda_map]

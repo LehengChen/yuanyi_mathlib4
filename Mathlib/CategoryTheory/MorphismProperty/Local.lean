@@ -195,12 +195,8 @@ lemma eq_of_zeroHypercover_target [HasEqualizers C] [HasPullbacks C] {X Y S : C}
         pullback.map s (𝒰.f i) t (𝒰.f i) g (𝟙 (𝒰.X i)) (𝟙 S) (by simp [hg]) (by simp)) :
     f = g := by
   suffices IsIso (equalizer.ι f g) from Limits.eq_of_epi_equalizer
-  change MorphismProperty.isomorphisms C _
-  rw [(MorphismProperty.isomorphisms C).iff_of_zeroHypercover_target (𝒰.pullback₁ s)]
-  intro i
-  have : pullback.snd (equalizer.ι f g) (pullback.fst s (𝒰.f i)) =
-      (equalizerPullbackMapIso hf hg _).inv ≫ equalizer.ι _ _ := by
-    ext <;> simp [pullback.condition]
-  simpa [this] using equalizer.ι_of_eq (H i)
+  exact MorphismProperty.IsLocalAtTarget.of_zeroHypercover (𝒰.pullback₁ s) fun i ↦ by
+    simpa [← MorphismProperty.cancel_left_of_respectsIso (P := .isomorphisms C)
+      ((equalizerPullbackMapIso hf hg (𝒰.f i)).hom)] using equalizer.ι_of_eq (H i)
 
 end CategoryTheory

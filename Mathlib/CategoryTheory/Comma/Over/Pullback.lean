@@ -68,20 +68,12 @@ set_option backward.isDefEq.respectTransparency false in
 /-- `Over.map f` is left adjoint to `Over.pullback f`. -/
 @[simps! unit_app counit_app]
 def mapPullbackAdj {X Y : C} (f : X ⟶ Y) [HasPullbacksAlong f] :
-    Over.map f ⊣ pullback f :=
-  Adjunction.mkOfHomEquiv
-    { homEquiv := fun x y =>
-        { toFun := fun u =>
-            Over.homMk (pullback.lift u.left x.hom <| by simp)
-          invFun := fun v => Over.homMk (v.left ≫ pullback.fst _ _) <| by
-            simp [← Over.w v, pullback.condition]
-          left_inv := by cat_disch
-          right_inv := fun v => by
-            ext
-            dsimp
-            ext
-            · simp
-            · simpa using (Over.w v).symm } }
+    Over.map f ⊣ pullback f where
+  unit.app x := Over.homMk (pullback.lift (𝟙 _) x.hom (by simp))
+  unit.naturality x y u := by
+    ext
+    apply pullback.hom_ext <;> simp
+  counit.app y := Over.homMk (pullback.fst _ _) pullback.condition
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The pullback along an epi that's preserved under pullbacks is faithful.
@@ -200,25 +192,12 @@ set_option backward.isDefEq.respectTransparency false in
 /-- `Under.pushout f` is left adjoint to `Under.map f`. -/
 @[simps! unit_app counit_app]
 def mapPushoutAdj {X Y : C} (f : X ⟶ Y) [HasPushoutsAlong f] :
-    pushout f ⊣ map f :=
-  Adjunction.mkOfHomEquiv {
-    homEquiv := fun x y => {
-      toFun := fun u => Under.homMk (pushout.inl _ _ ≫ u.right) <| by
-        simp only [map_obj_hom]
-        rw [← Under.w u]
-        simp only [Functor.const_obj_obj, map_obj_right, Functor.id_obj, pushout_obj, mk_right,
-          mk_hom]
-        rw [← assoc, ← assoc, pushout.condition]
-      invFun := fun v => Under.homMk (pushout.desc v.right y.hom <| by simp)
-      left_inv := fun u => by
-        ext
-        dsimp
-        ext
-        · simp
-        · simpa using (Under.w u).symm
-      right_inv := by cat_disch
-    }
-  }
+    pushout f ⊣ map f where
+  unit.app x := Under.homMk (pushout.inl _ _) pushout.condition
+  counit.app y := Under.homMk (pushout.desc (𝟙 _) y.hom (by simp)) (by simp)
+  counit.naturality x y u := by
+    ext
+    apply pushout.hom_ext <;> simp
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.flexible false in -- simp followed by infer_instance

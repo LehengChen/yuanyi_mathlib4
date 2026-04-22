@@ -20,7 +20,7 @@ We show some additional lemmas for pullbacks in the category of types.
 
 universe v u
 
-open CategoryTheory Limits
+open CategoryTheory Limits Function
 
 namespace CategoryTheory.Limits.Types
 
@@ -231,12 +231,8 @@ lemma isPullback_iff :
   · intro h
     exact ⟨h.w, fun x₁ y₁ ⟨h₁, h₂⟩ ↦ ext_of_isPullback h h₁ h₂, exists_of_isPullback h⟩
   · rintro ⟨w, h₁, h₂⟩
-    let φ : X₁ ⟶ PullbackObj r b := fun x₁ ↦ ⟨⟨t x₁, l x₁⟩, congr_fun w x₁⟩
-    have hφ : IsIso φ := by
-      rw [isIso_iff_bijective]
-      grind [Function.Bijective, Function.Injective, Function.Surjective]
-    exact ⟨⟨w⟩, ⟨IsLimit.ofIsoLimit ((Types.pullbackLimitCone r b).isLimit)
-      (PullbackCone.ext (asIso φ)).symm⟩⟩
+    exact ⟨⟨w⟩, ⟨((PullbackCone.mk t l w).isLimitEquivBijective).symm <| by
+      aesop (add simp [PullbackCone.toPullbackObj, Bijective, Injective, Surjective])⟩⟩
 
 end
 

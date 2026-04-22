@@ -169,23 +169,18 @@ theorem δ_naturality {m n : M} {X Y : C} (f : X ⟶ Y) [F.OplaxMonoidal] :
 theorem μ_naturality₂ {m n m' n' : M} (f : m ⟶ m') (g : n ⟶ n') (X : C) [F.LaxMonoidal] :
     (F.map g).app ((F.obj m).obj X) ≫ (F.obj n').map ((F.map f).app X) ≫ (μ F m' n').app X =
       (μ F m n).app X ≫ (F.map (f ⊗ₘ g)).app X := by
-  have := congr_app (μ_natural F f g) X
-  dsimp at this
-  simpa using this
+  simpa only [endofunctorMonoidalCategory_tensorMap_app, NatTrans.comp_app, ← Category.assoc] using
+    congr_app (μ_natural F f g) X
 
 @[reassoc (attr := simp)]
 theorem μ_naturalityₗ {m n m' : M} (f : m ⟶ m') (X : C) [F.LaxMonoidal] :
     (F.obj n).map ((F.map f).app X) ≫ (μ F m' n).app X =
-      (μ F m n).app X ≫ (F.map (f ▷ n)).app X := by
-  rw [← tensorHom_id, ← μ_naturality₂ F f (𝟙 n) X]
-  simp
+      (μ F m n).app X ≫ (F.map (f ▷ n)).app X := congr_app (μ_natural_left F f n) X
 
 @[reassoc (attr := simp)]
 theorem μ_naturalityᵣ {m n n' : M} (g : n ⟶ n') (X : C) [F.LaxMonoidal] :
     (F.map g).app ((F.obj m).obj X) ≫ (μ F m n').app X =
-      (μ F m n).app X ≫ (F.map (m ◁ g)).app X := by
-  rw [← id_tensorHom, ← μ_naturality₂ F (𝟙 m) g X]
-  simp
+      (μ F m n).app X ≫ (F.map (m ◁ g)).app X := congr_app (μ_natural_right F m g) X
 
 @[reassoc (attr := simp)]
 theorem δ_naturalityₗ {m n m' : M} (f : m ⟶ m') (X : C) [F.OplaxMonoidal] :

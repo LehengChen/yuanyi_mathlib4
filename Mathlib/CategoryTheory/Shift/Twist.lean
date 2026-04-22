@@ -114,14 +114,9 @@ lemma shiftFunctorAdd'_hom_app (i j k : A) (h : i + j = k) (X : t.Category) :
       (t.z i j).val • (t.shiftIso k).hom.app X ≫
         (shiftFunctorAdd' C i j k h).hom.app X ≫
         (shiftFunctor C j).map ((t.shiftIso i).inv.app X) ≫ (t.shiftIso j).inv.app _ := by
-  have : (shiftFunctorAdd' t.Category i j k h).hom.app X =
-      (t.z i j).val • (shiftFunctorAdd' C i j k h).hom.app X := by
-    dsimp [shiftFunctorAdd']
-    cat_disch
-  rw [this]
-  congr
-  change _ = 𝟙 _ ≫ _ ≫ (shiftFunctor C j).map (𝟙 _) ≫ 𝟙 _
-  simp
+  simp [shiftFunctorAdd', shiftIso, ShiftMkCore.shiftFunctorAdd_eq (shiftMkCore t),
+    ShiftMkCore.shiftFunctor_eq (shiftMkCore t), shiftMkCore, CatCenter.smul_iso_hom_eq,
+    CatCenter.smul_eq, CatCenter.naturality]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -131,14 +126,9 @@ lemma shiftFunctorAdd'_inv_app (i j k : A) (h : i + j = k) (X : t.Category) :
         (shiftFunctor C j).map ((t.shiftIso i).hom.app X) ≫
         (shiftFunctorAdd' C i j k h).inv.app X ≫
         (t.shiftIso k).inv.app X := by
-  have : (shiftFunctorAdd' t.Category i j k h).inv.app X =
-      ((t.z i j)⁻¹).val • (shiftFunctorAdd' C i j k h).inv.app X := by
-    dsimp [shiftFunctorAdd']
-    cat_disch
-  rw [this]
-  congr
-  change _ = 𝟙 _ ≫ (shiftFunctor C j).map (𝟙 _) ≫ _ ≫ 𝟙 _
-  simp
+  simp [shiftFunctorAdd', shiftIso, ShiftMkCore.shiftFunctorAdd_eq (shiftMkCore t),
+    ShiftMkCore.shiftFunctor_eq (shiftMkCore t), shiftMkCore, CatCenter.smul_iso_inv_eq,
+    CatCenter.smul_eq, CatCenter.naturality]
 
 end TwistShiftData
 

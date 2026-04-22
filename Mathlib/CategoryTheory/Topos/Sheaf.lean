@@ -93,10 +93,6 @@ lemma Presheaf.χ_unique (m : F ⟶ G) (χ' : G ⟶ Functor.sieves C)
     (hχ' : IsPullback m ((Functor.isTerminalConst _ Types.isTerminalPUnit).from _) χ' (truth C)) :
     χ' = χ m := by
   ext X x
-  simp only [IsPullback.iff_app, Functor.const_obj_obj, Functor.sieves_obj,
-    Functor.isTerminalConst_from_app, Types.isPullback_iff, and_true, truth_app, forall_const,
-    forall_and] at hχ'
-  obtain ⟨h₁, h₂, h₃⟩ := hχ'
   refine Sieve.ext fun Y f => ?_
   simp only [χ_app, Opposite.op_unop]
   rw [Sieve.mem_iff_pullback_eq_top, ← Quiver.Hom.unop_op f,
@@ -104,11 +100,11 @@ lemma Presheaf.χ_unique (m : F ⟶ G) (χ' : G ⟶ Functor.sieves C)
     ← FunctorToTypes.naturality G (Functor.sieves C) χ' f.op x, Quiver.Hom.unop_op]
   constructor
   · intro h
-    obtain ⟨z, hz⟩ := h₃ _ _ h
-    use z, hz.symm
+    simpa [eq_comm] using
+      Types.exists_of_isPullback (hχ'.app (.op Y)) (G.map f.op x) PUnit.unit (by simpa using h)
   · rintro ⟨a, h⟩
     rw [h, ← FunctorToTypes.comp, NatTrans.comp_app]
-    simpa using congr($(h₁ (.op Y)) a)
+    simpa using congr($(hχ'.w).app (.op Y) a)
 
 variable (C) in
 /-- A construction of a subject classifier in a category of presheaves. -/
@@ -183,16 +179,12 @@ lemma isPullback_χ_truth (m : F ⟶ G) [Mono m] :
     IsPullback m ((isTerminalTerminal J _).from F) (Sheaf.χ m) (Sheaf.truth J) := by
   apply IsPullback.of_map (sheafToPresheaf J _)
   · ext : 1
-    simp only [Ω_obj, ObjectProperty.FullSubcategory.comp_hom, χ_hom, terminal_obj, truth_hom,
-      ← cancel_mono (closedSieves J).ι, Category.assoc, Subfunctor.lift_ι]
-    exact Presheaf.comp_χ_eq m.hom
+    simpa [← cancel_mono (closedSieves J).ι] using Presheaf.comp_χ_eq m.hom
   · simp only [ObjectProperty.ι_obj, terminal_obj, Ω_obj, ObjectProperty.ι_map, χ_hom, truth_hom]
-    apply IsPullback.of_right _
+    exact (Presheaf.isPullback_χ_truth m.hom).of_right
       ((cancel_mono ((closedSieves J).ι)).mp (by simpa using Presheaf.comp_χ_eq _))
-      (.of_horiz_isIso_mono ⟨_⟩ : IsPullback (𝟙 _) _ (Presheaf.χ m.hom) (closedSieves J).ι)
-    · simp only [Category.comp_id]
-      exact Presheaf.isPullback_χ_truth m.hom
-    · simp_all
+      (.of_horiz_isIso_mono (by simp [Subfunctor.lift_ι]) :
+        IsPullback (𝟙 _) _ (Presheaf.χ m.hom) (closedSieves J).ι)
 
 set_option backward.isDefEq.respectTransparency false in
 lemma χ_unique (m : F ⟶ G) [Mono m] (χ' : G ⟶ Sheaf.Ω J)

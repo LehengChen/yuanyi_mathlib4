@@ -139,12 +139,8 @@ variable {C : Type v} [Category.{w} C]
 def differenceFunctor (f : C → G) : C ⥤ SingleObj G where
   obj _ := ()
   map {x y} _ := f y * (f x)⁻¹
-  map_id := by
-    intro
-    simp only [SingleObj.id_as_one, mul_inv_cancel]
-  map_comp := by
-    intros
-    rw [SingleObj.comp_as_mul, ← mul_assoc, mul_left_inj, mul_assoc, inv_mul_cancel, mul_one]
+  map_id := by simp [SingleObj.id_as_one]
+  map_comp := by simp [SingleObj.comp_as_mul, mul_assoc]
 
 /-- A monoid homomorphism `f: M → End X` into the endomorphisms of an object `X` of a category `C`
 induces a functor `SingleObj M ⥤ C`. -/

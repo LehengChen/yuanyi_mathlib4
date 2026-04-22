@@ -55,11 +55,7 @@ noncomputable def skyscraperPresheafHomEquiv :
   toFun f :=
     { app X := Pi.lift (fun x ↦ Φ.toPresheafFiber X.unop x P ≫ f)
       naturality {X Y} g := by
-        dsimp
-        ext y
-        have := Φ.toPresheafFiber_w g.unop y P
-        dsimp at this
-        simp [reassoc_of% this] }
+        exact Pi.hom_ext _ _ (fun y ↦ by simpa using (Φ.toPresheafFiber_w g.unop y P =≫ f)) }
   invFun g := Φ.presheafFiberDesc (fun X x ↦ g.app (op X) ≫ Pi.π _ x) (by simp)
   left_inv f := by cat_disch
   right_inv g := by cat_disch
@@ -156,14 +152,10 @@ private lemma isSheaf_skyscraperPresheaf_aux
   obtain ⟨Y₁, f₁, hf₁, y₁, hy₁⟩ := Φ.jointly_surjective _ hR x
   refine ⟨s.π.app (op (Presieve.categoryMk _ _ hf₁)) ≫ Pi.π _ y₁,
     fun Y₂ f₂ hf₂ y₂ hy₂ ↦ ?_⟩
-  obtain ⟨Z, p₁, p₂, z, fac, hz₁, hz₂⟩ :
-      ∃ (Z : C) (p₁ : Z ⟶ Y₁) (p₂ : Z ⟶ Y₂) (z : Φ.fiber.obj Z), p₁ ≫ f₁ = p₂ ≫ f₂ ∧
-        Φ.fiber.map p₁ z = y₁ ∧ Φ.fiber.map p₂ z = y₂ := by
-    let α₁ : Φ.fiber.elementsMk _ y₁ ⟶ Φ.fiber.elementsMk _ x := ⟨f₁, hy₁⟩
-    let α₂ : Φ.fiber.elementsMk _ y₂ ⟶ Φ.fiber.elementsMk _ x := ⟨f₂, hy₂⟩
-    obtain ⟨z, q₁, q₂, fac⟩ := IsCofiltered.cospan α₁ α₂
-    rw [Subtype.ext_iff] at fac
-    exact ⟨z.1, q₁.1, q₂.1, z.2, fac, by simp, by simp⟩
+  let α₁ : Φ.fiber.elementsMk _ y₁ ⟶ Φ.fiber.elementsMk _ x := ⟨f₁, hy₁⟩
+  let α₂ : Φ.fiber.elementsMk _ y₂ ⟶ Φ.fiber.elementsMk _ x := ⟨f₂, hy₂⟩
+  obtain ⟨z, ⟨p₁, hz₁⟩, ⟨p₂, hz₂⟩, fac⟩ := IsCofiltered.cospan α₁ α₂
+  rw [Subtype.ext_iff] at fac
   let φ₁ : Presieve.categoryMk _ _ (R.downward_closed hf₁ p₁) ⟶
       Presieve.categoryMk _ _ hf₁ :=
     ObjectProperty.homMk (Over.homMk p₁)
@@ -171,7 +163,7 @@ private lemma isSheaf_skyscraperPresheaf_aux
       Presieve.categoryMk _ _ hf₂ :=
     ObjectProperty.homMk (Over.homMk p₂)
   simpa [hz₁, hz₂, φ₁, φ₂] using
-    (Cone.w s φ₂.op =≫ Pi.π _ z).trans (Cone.w s φ₁.op =≫ Pi.π _ z).symm
+    (Cone.w s φ₂.op =≫ Pi.π _ z.2).trans (Cone.w s φ₁.op =≫ Pi.π _ z.2).symm
 
 lemma isSheaf_skyscraperPresheaf (M : A) :
     Presheaf.IsSheaf J (Φ.skyscraperPresheaf M) := by

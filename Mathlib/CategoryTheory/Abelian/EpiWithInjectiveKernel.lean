@@ -81,14 +81,9 @@ instance : (epiWithInjectiveKernel : MorphismProperty C).IsMultiplicative where
             · simp [reassoc_of% σ₁.s_g, σ₂.f_r]
           s_g := by simp [reassoc_of% σ₁.s_g, σ₂.s_g]
           id := by
-            dsimp
-            have h := g₁ ≫= σ₂.id =≫ σ₁.s
-            simp only [add_comp, assoc, comp_add, id_comp] at h
-            rw [← σ₁.id, ← h]
-            simp only [comp_add, add_comp, assoc, BinaryBicone.inl_fst_assoc,
-              BinaryBicone.inr_fst_assoc, zero_comp, comp_zero, add_zero,
-              BinaryBicone.inl_snd_assoc, BinaryBicone.inr_snd_assoc, zero_add]
-            abel }
+            rw [show (g₁ ≫ g₂) ≫ σ₂.s ≫ σ₁.s = g₁ ≫ σ₁.s - g₁ ≫ σ₂.r ≫ f₂ ≫ σ₁.s by
+              simpa [Category.assoc] using g₁ ≫= σ₂.g_s =≫ σ₁.s]
+            simp [Category.assoc, σ₁.id] }
 
 end Abelian
 

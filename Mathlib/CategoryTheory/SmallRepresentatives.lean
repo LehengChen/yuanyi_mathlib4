@@ -5,8 +5,7 @@ Authors: Joël Riou
 -/
 module
 
-public import Mathlib.CategoryTheory.Comma.Arrow
-public import Mathlib.SetTheory.Cardinal.HasCardinalLT
+public import Mathlib.CategoryTheory.Comma.CardinalArrow
 
 /-!
 # Representatives of small categories
@@ -125,18 +124,12 @@ noncomputable def equivalence : h.smallCategoryOfSet.obj ≌ C :=
 `h.smallCategoryOfSet.obj ≌ C` is actually an isomorphism: it induces
 a bijection on the type of arrows. -/
 noncomputable def arrowEquiv : Arrow h.smallCategoryOfSet.obj ≃ Arrow C :=
-  Equiv.ofBijective h.functor.mapArrow.obj (by
-    constructor
-    · rintro ⟨x, y, f⟩ ⟨x', y', g⟩ hfg
-      obtain rfl : x = x' := by simpa using congr_arg Arrow.leftFunc.obj hfg
-      obtain rfl : y = y' := by simpa using congr_arg Arrow.rightFunc.obj hfg
-      obtain rfl : f = g := by simpa [Arrow.mk_eq_mk_iff] using hfg
-      rfl
-    · rintro ⟨X, Y, f⟩
-      obtain ⟨x, rfl⟩ := h.objEquiv.surjective X
-      obtain ⟨y, rfl⟩ := h.objEquiv.surjective Y
-      obtain ⟨f, rfl⟩ := h.homEquiv.surjective f
-      exact ⟨Arrow.mk f, rfl⟩)
+  Equiv.ofBijective h.functor.mapArrow.obj <| by
+    simpa using
+      ((Arrow.equivSigma h.smallCategoryOfSet.obj).trans
+        ((Equiv.sigmaCongr h.objEquiv fun _ =>
+          Equiv.sigmaCongr h.objEquiv fun _ => h.homEquiv).trans
+            (Arrow.equivSigma C).symm)).bijective
 
 end CoreSmallCategoryOfSet
 
@@ -179,21 +172,13 @@ lemma exists_equivalence (C : Type u) [Category.{v} C] (hC : HasCardinalLT (Arro
     ∃ (S : SmallCategoryCardinalLT κ),
       Nonempty (categoryFamily κ S ≌ C) := by
   let Ω := κ.ord.ToType
-  have ι : Arrow C ↪ Ω := Nonempty.some (by
-    rw [← Cardinal.lift_mk_le']
-    simpa [Ω] using hC.le)
   have h₁ : Cardinal.lift.{w} (Cardinal.mk C) ≤
       Cardinal.lift.{u} (Cardinal.mk Ω) := by
-    rw [Cardinal.lift_mk_le']
-    refine ⟨Function.Embedding.trans { toFun X := Arrow.mk (𝟙 X), inj' := ?_ } ι⟩
-    intro X Y h
-    exact congr_arg Arrow.leftFunc.obj h
+    simpa [Ω, HasCardinalLT] using le_of_lt (hasCardinalLT_of_hasCardinalLT_arrow hC)
   have h₂ (X Y : C) : Cardinal.lift.{w} (Cardinal.mk (X ⟶ Y)) ≤
       Cardinal.lift.{v} (Cardinal.mk Ω) := by
-    rw [Cardinal.lift_mk_le']
-    refine ⟨Function.Embedding.trans { toFun f := Arrow.mk f, inj' := ?_ } ι⟩
-    intro f g h
-    simpa [Arrow.mk_eq_mk_iff] using h
+    simpa [Ω, HasCardinalLT] using le_of_lt
+      (hC.of_injective (fun f ↦ Arrow.mk f) (Arrow.mk_injective X Y))
   let f₁ := (Cardinal.lift_mk_le'.1 h₁).some
   let f₂ (X Y) := (Cardinal.lift_mk_le'.1 (h₂ X Y)).some
   let e := Equiv.ofInjective _ f₁.injective

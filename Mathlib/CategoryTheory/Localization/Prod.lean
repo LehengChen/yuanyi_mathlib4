@@ -80,14 +80,10 @@ noncomputable def prodLift :
     W₁.Localization × W₂.Localization ⥤ E := by
   refine uncurry.obj (Construction.lift (prodLift₁ F hF).flip ?_).flip
   intro _ _ f₂ hf₂
-  haveI : ∀ (X₁ : W₁.Localization),
-      IsIso (((Functor.flip (prodLift₁ F hF)).map f₂).app X₁) := fun X₁ => by
-    obtain ⟨X₁, rfl⟩ := (Construction.objEquiv W₁).surjective X₁
-    exact ((MorphismProperty.isomorphisms E).arrow_mk_iso_iff
-      (((Functor.mapArrowFunctor _ _).mapIso
-        (eqToIso (Functor.congr_obj (prod_fac₁ F hF) X₁))).app (Arrow.mk f₂))).2
-          (hF _ ⟨MorphismProperty.id_mem _ _, hf₂⟩)
-  apply NatIso.isIso_of_isIso_app
+  rw [NatTrans.isIso_iff_isIso_app]
+  rintro ⟨⟨X₁⟩⟩
+  exact (NatIso.isIso_map_iff (eqToIso (Functor.congr_obj (prod_fac₁ F hF) X₁)) f₂).2
+    (hF _ ⟨MorphismProperty.id_mem _ _, hf₂⟩)
 
 lemma prod_fac₂ :
     W₂.Q ⋙ (curry.obj (prodLift F hF)).flip = (prodLift₁ F hF).flip := by

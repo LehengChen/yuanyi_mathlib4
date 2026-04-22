@@ -85,16 +85,12 @@ lemma comap_precoverage {D : Type*} [Category* D] (P : MorphismProperty D) (F : 
 
 /-- If `P` is stable under base change, this is the coverage on `C` where covering presieves
 are those where every morphism satisfies `P`. -/
-@[simps toPrecoverage]
+@[simps! toPrecoverage]
 def coverage (P : MorphismProperty C) [P.IsStableUnderBaseChange] [P.HasPullbacks] :
-    Coverage C where
-  __ := precoverage P
-  pullback X Y f S hS := by
-    have : S.HasPullbacks f := ⟨fun {W} h hh ↦ P.hasPullback _ (hS hh)⟩
-    refine ⟨S.pullbackArrows f, ?_, .pullbackArrows f S⟩
-    intro Z g ⟨W, a, h⟩
-    have := S.hasPullback f h
-    exact P.pullback_snd _ _ (hS h)
+    Coverage C := by
+  letI : Precoverage.HasPullbacks P.precoverage :=
+    ⟨fun f hS ↦ ⟨fun {W} h hh ↦ P.hasPullback _ (hS hh)⟩⟩
+  exact P.precoverage.toCoverage
 
 /-- If `P` is stable under base change, it induces a Grothendieck topology: the one associated
 to `coverage P`. -/

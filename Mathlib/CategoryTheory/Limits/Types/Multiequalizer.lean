@@ -46,17 +46,13 @@ def MulticospanIndex.sectionsEquiv :
         | .left i => s.val i
         | .right j => I.fst j (s.val _)
       property := by
-        rintro _ _ (_ | _ | r)
-        · rfl
-        · rfl
-        · exact (s.property r).symm }
+        rintro _ _ (_ | _ | r) <;> simp [MulticospanIndex.multicospan, s.property] }
   invFun s :=
     { val := fun i ↦ s.val (.left i)
       property := fun r ↦ (s.property (.fst r)).trans (s.property (.snd r)).symm }
   right_inv s := by
-    ext (_ | r)
-    · rfl
-    · exact s.property (.fst r)
+    ext (_ | r) <;> simp only [multicospan_obj]
+    exact s.property (.fst r)
 
 namespace Multifork
 

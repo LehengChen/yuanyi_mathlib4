@@ -5,7 +5,7 @@ Authors: Andrew Yang, Calle Sönne
 -/
 module
 
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
+public import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Pullbacks
 
 /-!
 # Pasting lemma
@@ -276,20 +276,14 @@ Then the big square is a pushout if both the small squares are.
 -/
 def pasteHorizIsPushout (H : IsColimit t₁) (H' : IsColimit t₂) :
     IsColimit (t₁.pasteHoriz t₂ hi₂) := by
-  apply PushoutCocone.isColimitAux'
-  intro s
-  -- Obtain the induced map from descending from both the small squares consecutively.
-  obtain ⟨l₁, hl₁, hl₁'⟩ := PushoutCocone.IsColimit.desc' H s.inl (f₂ ≫ s.inr)
-    (by rw [s.condition, Category.assoc])
-  obtain ⟨l₂, hl₂, hl₂'⟩ := PushoutCocone.IsColimit.desc' H' l₁ s.inr (by rw [← hl₁', hi₂])
-  refine ⟨l₂, by simp [hl₂, hl₁], hl₂', ?_⟩
-  -- Uniqueness also follows from the universal property of both the small squares.
-  intro m hm₁ hm₂
-  apply PushoutCocone.IsColimit.hom_ext H' _ (by simpa [hl₂'] using hm₂)
-  simp only [PushoutCocone.mk_pt, PushoutCocone.mk_ι_app, Category.assoc] at hm₁ hm₂
-  apply PushoutCocone.IsColimit.hom_ext H
-  · rw [hm₁, ← hl₁, hl₂]
-  · rw [← hi₂, reassoc_of% t₂.condition, reassoc_of% t₂.condition, hm₂, hl₂']
+  let hι : i₂.op = t₁.op.snd := by simpa using congrArg Quiver.Hom.op hi₂
+  let e : t₁.op.pasteVert t₂.op hι ≅ (t₁.pasteHoriz t₂ hi₂).op :=
+    PullbackCone.ext (Iso.refl _) (by simp [PullbackCone.pasteVert, PushoutCocone.pasteHoriz])
+      (by simp [PullbackCone.pasteVert, PushoutCocone.pasteHoriz])
+  exact (PushoutCocone.isColimitEquivIsLimitOp _).symm <|
+    IsLimit.ofIsoLimit
+      (pasteVertIsPullback hι ((PushoutCocone.isColimitEquivIsLimitOp t₁) H)
+        ((PushoutCocone.isColimitEquivIsLimitOp t₂) H')) e
 
 variable (t₂)
 
@@ -305,21 +299,13 @@ Then the right square is a pushout if the left square and the big square are.
 -/
 def rightSquareIsPushout (H : IsColimit t₁) (H' : IsColimit (t₁.pasteHoriz t₂ hi₂)) :
     IsColimit t₂ := by
-  apply PushoutCocone.isColimitAux'
-  intro s
-  -- Obtain the induced morphism from the universal property of the big square
-  obtain ⟨l, hl, hl'⟩ := PushoutCocone.IsColimit.desc' H' (g₁ ≫ s.inl) s.inr
-    (by rw [reassoc_of% t₁.condition, ← hi₂, s.condition, Category.assoc])
-  refine ⟨l, ?_, hl', ?_⟩
-  -- To check that `l` is compatible with the projections, we use the universal property of `t₁`
-  · simp only [PushoutCocone.mk_pt, PushoutCocone.mk_ι_app, Category.assoc] at hl hl'
-    apply PushoutCocone.IsColimit.hom_ext H hl
-    rw [← Category.assoc, ← hi₂, t₂.condition, s.condition, Category.assoc, hl']
-  -- Uniqueness of the lift follows from the universal property of the big square
-  · intro m hm₁ hm₂
-    apply PushoutCocone.IsColimit.hom_ext H'
-    · simpa [← hm₁] using hl.symm
-    · simpa [← hm₂] using hl'.symm
+  let hι : i₂.op = t₁.op.snd := by simpa using congrArg Quiver.Hom.op hi₂
+  let e : t₁.op.pasteVert t₂.op hι ≅ (t₁.pasteHoriz t₂ hi₂).op :=
+    PullbackCone.ext (Iso.refl _) (by simp [PullbackCone.pasteVert, PushoutCocone.pasteHoriz])
+      (by simp [PullbackCone.pasteVert, PushoutCocone.pasteHoriz])
+  exact (PushoutCocone.isColimitEquivIsLimitOp t₂).symm <|
+    topSquareIsPullback t₂.op hι ((PushoutCocone.isColimitEquivIsLimitOp t₁) H)
+      (IsLimit.ofIsoLimit ((PushoutCocone.isColimitEquivIsLimitOp _) H') e.symm)
 
 /-- Given that the left square is a pushout, the pasted square is a pushout iff the right square is.
 -/

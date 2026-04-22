@@ -91,15 +91,11 @@ equivalence `triangleOpEquivalence C : (Triangle C)ᵒᵖ ≌ Triangle Cᵒᵖ` 
 @[simps!]
 noncomputable def counitIso : inverse C ⋙ functor C ≅ 𝟭 _ :=
   NatIso.ofComponents (fun T => by
-    refine Triangle.isoMk _ _ (Iso.refl _) (Iso.refl _) (Iso.refl _) ?_ ?_ ?_
-    · simp
-    · simp
-    · dsimp
-      rw [Functor.map_id, comp_id, id_comp, Functor.map_comp,
-        ← opShiftFunctorEquivalence_counitIso_inv_naturality_assoc,
-        opShiftFunctorEquivalence_counitIso_inv_app_shift, ← Functor.map_comp,
-        Iso.hom_inv_id_app, Functor.map_id]
-      simp only [Functor.id_obj, comp_id])
+    refine Triangle.isoMk _ _ (Iso.refl _) (Iso.refl _) (Iso.refl _) (comm₃ := ?_)
+    simpa [opShiftFunctorEquivalence_counitIso_inv_app_shift] using
+      (opShiftFunctorEquivalence_counitIso_inv_naturality_assoc (C := C) 1 T.mor₃
+        ((shiftFunctor Cᵒᵖ (1 : ℤ)).map
+          ((opShiftFunctorEquivalence C 1).unitIso.inv.app T.obj₁))).symm)
     (by cat_disch)
 
 end TriangleOpEquivalence

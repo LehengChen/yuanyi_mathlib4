@@ -269,32 +269,21 @@ lemma equiv_smallHomMap (G : D₁ ⥤ D₂) (e : Φ.functor ⋙ L₂ ≅ L₁ �
     (SmallHom.equiv W₂ L₂) (Φ.smallHomMap f) =
       e.hom.app X ≫ G.map (SmallHom.equiv W₁ L₁ f) ≫ e.inv.app Y := by
   obtain ⟨g, rfl⟩ := (SmallHom.equiv W₁ W₁.Q).symm.surjective f
+  have h₁ : (SmallHom.equiv W₁ L₁) ((SmallHom.equiv W₁ W₁.Q).symm g) =
+      homEquiv W₁ W₁.Q L₁ g := by
+    simp [SmallHom.equiv]
+  have h₂ (h : W₂.Q.obj (Φ.functor.obj X) ⟶ W₂.Q.obj (Φ.functor.obj Y)) :
+      (SmallHom.equiv W₂ L₂) ((SmallHom.equiv W₂ W₂.Q).symm h) =
+        homEquiv W₂ W₂.Q L₂ h := by
+    simp [SmallHom.equiv]
   simp only [smallHomMap, Equiv.apply_symm_apply]
-  let G' := Φ.localizedFunctor W₁.Q W₂.Q
-  let β := CatCommSq.iso Φ.functor W₁.Q W₂.Q G'
-  let E₁ := (uniq W₁.Q L₁ W₁).functor
-  let α₁ : W₁.Q ⋙ E₁ ≅ L₁ := compUniqFunctor W₁.Q L₁ W₁
-  let E₂ := (uniq W₂.Q L₂ W₂).functor
-  let α₂ : W₂.Q ⋙ E₂ ≅ L₂ := compUniqFunctor W₂.Q L₂ W₂
-  rw [SmallHom.equiv_equiv_symm W₁ W₁.Q L₁ E₁ α₁,
-    SmallHom.equiv_equiv_symm W₂ W₂.Q L₂ E₂ α₂]
-  change α₂.inv.app _ ≫ E₂.map (β.hom.app X ≫ G'.map g ≫ β.inv.app Y) ≫ _ = _
-  let γ : G' ⋙ E₂ ≅ E₁ ⋙ G := liftNatIso W₁.Q W₁ (W₁.Q ⋙ G' ⋙ E₂) (W₁.Q ⋙ E₁ ⋙ G) _ _
-    ((Functor.associator _ _ _).symm ≪≫ Functor.isoWhiskerRight β.symm E₂ ≪≫
-      Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft _ α₂ ≪≫ e ≪≫
-      Functor.isoWhiskerRight α₁.symm G ≪≫ Functor.associator _ _ _)
-  have hγ : ∀ (X : C₁), γ.hom.app (W₁.Q.obj X) =
-      E₂.map (β.inv.app X) ≫ α₂.hom.app (Φ.functor.obj X) ≫
-        e.hom.app X ≫ G.map (α₁.inv.app X) := fun X ↦ by
-    simp [γ, id_comp, comp_id]
-  simp only [Functor.map_comp, ← NatIso.naturality_1 γ, ← Functor.comp_map,
-    ← cancel_epi (e.inv.app X), ← cancel_epi (G.map (α₁.hom.app X)),
-    ← cancel_epi (γ.hom.app (W₁.Q.obj X)), assoc, Iso.inv_hom_id_app_assoc,
-    ← Functor.map_comp_assoc, Iso.hom_inv_id_app, Functor.map_id, id_comp,
-    Iso.hom_inv_id_app_assoc]
-  simp only [hγ, assoc, ← Functor.map_comp_assoc, Iso.inv_hom_id_app,
-    Functor.map_id, id_comp, Iso.hom_inv_id_app_assoc,
-    Iso.hom_inv_id_app, Functor.comp_obj, comp_id]
+  rw [h₁, h₂]
+  change (homEquiv W₂ W₂.Q L₂) (Φ.homMap W₁.Q W₂.Q g) =
+    e.hom.app X ≫ G.map ((homEquiv W₁ W₁.Q L₁) g) ≫ e.inv.app Y
+  rw [← Φ.homMap_apply L₁ L₂ G e ((homEquiv W₁ W₁.Q L₁) g)]
+  simp only [homEquiv_apply]
+  rw [LocalizerMorphism.homMap_homMap, LocalizerMorphism.homMap_homMap]
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]

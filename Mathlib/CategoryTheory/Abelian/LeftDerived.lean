@@ -193,12 +193,9 @@ lemma ProjectiveResolution.leftDerivedToHomotopyCategory_app_eq
   dsimp [isoLeftDerivedToHomotopyCategoryObj, Functor.mapHomotopyCategoryFactors,
     NatTrans.leftDerivedToHomotopyCategory]
   rw [assoc]
-  erw [id_comp, comp_id]
-  obtain ⟨β, hβ⟩ := (HomotopyCategory.quotient _ _).map_surjective (iso P).hom
-  rw [← hβ]
-  dsimp
-  simp only [← Functor.map_comp, NatTrans.mapHomologicalComplex_naturality]
-  rfl
+  erw [id_comp, comp_id, HomotopyCategory.isoOfHomotopyEquiv_hom]
+  simp [projectiveResolutions, HomotopyCategory.quotient_obj_as, ← Functor.map_comp,
+    NatTrans.mapHomologicalComplex_naturality]
 
 @[simp]
 lemma NatTrans.leftDerivedToHomotopyCategory_id (F : C ⥤ D) [F.Additive] :

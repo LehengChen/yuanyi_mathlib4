@@ -38,22 +38,12 @@ instance functorCategoryPreadditive : Preadditive (C ⥤ D) where
     { nsmul := nsmulRec
       zsmul := zsmulRec
       sub := fun α β => { app := fun X => α.app X - β.app X }
-      add_assoc := by
-        intros
-        ext
-        apply add_assoc
-      zero_add := by
-        intros
-        ext
-        apply zero_add
-      add_zero := by
-        intros
-        ext
-        apply add_zero
-      add_comm := by
-        intros
-        ext
-        apply add_comm
+      __ := Function.Injective.addCommSemigroup
+        (fun α : F ⟶ G => fun X => α.app X)
+        (fun _ _ h => by ext X; exact congr_fun h X) (fun _ _ => rfl)
+      __ := Function.Injective.addZeroClass
+        (fun α : F ⟶ G => fun X => α.app X)
+        (fun _ _ h => by ext X; exact congr_fun h X) rfl (fun _ _ => rfl)
       sub_eq_add_neg := by
         intros
         ext

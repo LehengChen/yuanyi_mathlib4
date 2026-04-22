@@ -59,14 +59,8 @@ lemma range_le_equalizer_iff {G : C ⥤ Type w} (φ : G ⟶ A.toFunctor) :
 
 lemma equalizer_eq_iff :
     Subfunctor.equalizer f g = A ↔ f = g := by
-  have := range_le_equalizer_iff f g (𝟙 _)
-  simp only [Category.id_comp, range_ι] at this
-  rw [← this]
-  constructor
-  · intro h
-    rw [h]
-  · intro h
-    exact le_antisymm (equalizer_le f g) h
+  have h := range_le_equalizer_iff f g (𝟙 _)
+  simpa [Category.id_comp, range_ι, le_antisymm_iff, equalizer_le] using h
 
 /-- Given two morphisms `f` and `g` in `A.toFunctor ⟶ F₂`, this is the monomorphism
 of functors corresponding to the inclusion `Subfunctor.equalizer f g ≤ A`. -/

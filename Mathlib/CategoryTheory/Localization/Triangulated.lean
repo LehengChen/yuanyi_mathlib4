@@ -96,27 +96,18 @@ lemma complete_distinguished_essImageDistTriang_morphism
   obtain ⟨T₂', e₂, hT₂'⟩ := hT₂
   have comm₁ := e₁.inv.comm₁
   have comm₁' := e₂.hom.comm₁
-  have comm₂ := e₁.hom.comm₂
-  have comm₂' := e₂.hom.comm₂
-  have comm₃ := e₁.inv.comm₃
-  have comm₃' := e₂.hom.comm₃
-  dsimp at comm₁ comm₁' comm₂ comm₂' comm₃ comm₃'
-  simp only [assoc] at comm₃
+  dsimp at comm₁ comm₁'
   obtain ⟨φ, hφ₁, hφ₂⟩ := H T₁' T₂' hT₁' hT₂' (e₁.inv.hom₁ ≫ a ≫ e₂.hom.hom₁)
     (e₁.inv.hom₂ ≫ b ≫ e₂.hom.hom₂)
     (by simp only [assoc, ← comm₁', ← reassoc_of% fac, ← reassoc_of% comm₁])
-  have h₂ := φ.comm₂
-  have h₃ := φ.comm₃
-  dsimp at h₂ h₃
-  simp only [assoc] at h₃
-  refine ⟨e₁.hom.hom₃ ≫ φ.hom₃ ≫ e₂.inv.hom₃, ?_, ?_⟩
-  · rw [reassoc_of% comm₂, reassoc_of% h₂, hφ₂, assoc, assoc,
-      Iso.hom_inv_id_triangle_hom₂_assoc, ← reassoc_of% comm₂',
-      Iso.hom_inv_id_triangle_hom₃, comp_id]
-  · rw [assoc, assoc, ← cancel_epi e₁.inv.hom₃, ← reassoc_of% comm₃,
-      Iso.inv_hom_id_triangle_hom₃_assoc, ← cancel_mono (e₂.hom.hom₁⟦(1 : ℤ)⟧'),
-      assoc, assoc, assoc, assoc, assoc, ← Functor.map_comp, ← Functor.map_comp, ← hφ₁,
-      h₃, comm₃', Iso.inv_hom_id_triangle_hom₃_assoc]
+  let φ' := e₁.hom ≫ φ ≫ e₂.inv
+  have hφ'₁ : φ'.hom₁ = a := by
+    simp [φ', hφ₁, assoc]
+  have hφ'₂ : φ'.hom₂ = b := by
+    simp [φ', hφ₂, assoc]
+  refine ⟨φ'.hom₃, ?_, ?_⟩
+  · simp [hφ'₂]
+  · simpa [hφ'₁] using φ'.comm₃
 
 end Functor
 
@@ -254,12 +245,8 @@ variable [HasZeroObject D] [Preadditive D] [∀ (n : ℤ), (shiftFunctor D n).Ad
 lemma distTriang_iff (T : Triangle D) :
     (T ∈ distTriang D) ↔ T ∈ L.essImageDistTriang := by
   constructor
-  · intro hT
-    let f := L.mapArrow.objPreimage T.mor₁
-    obtain ⟨Z, g : f.right ⟶ Z, h : Z ⟶ f.left⟦(1 : ℤ)⟧, mem⟩ :=
-      Pretriangulated.distinguished_cocone_triangle f.hom
-    exact ⟨_, (exists_iso_of_arrow_iso T _ hT (L.map_distinguished _ mem)
-      (L.mapArrow.objObjPreimageIso T.mor₁).symm).choose, mem⟩
+  · exact fun hT => (L.mem_mapTriangle_essImage_of_distinguished T hT).imp
+      (fun T₀ ⟨hT₀, ⟨e⟩⟩ => ⟨e.symm, hT₀⟩)
   · rintro ⟨T₀, e, hT₀⟩
     exact isomorphic_distinguished _ (L.map_distinguished _ hT₀) _ e
 

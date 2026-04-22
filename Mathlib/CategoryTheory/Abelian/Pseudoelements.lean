@@ -364,33 +364,25 @@ set_option backward.isDefEq.respectTransparency false in
 /-- If two morphisms are exact on pseudoelements, they are exact. -/
 theorem exact_of_pseudo_exact (S : ShortComplex C)
     (hS : ∀ b, S.g b = 0 → ∃ a, S.f a = b) : S.Exact :=
-  (S.exact_iff_kernel_ι_comp_cokernel_π_zero).2 (by
-      -- If we apply `g` to the pseudoelement induced by its kernel, we get 0 (of course!).
-      have : S.g (kernel.ι S.g) = 0 := apply_eq_zero_of_comp_eq_zero _ _ (kernel.condition _)
-      -- By pseudo-exactness, we get a preimage.
-      obtain ⟨a', ha⟩ := hS _ this
-      obtain ⟨a, ha'⟩ := Quotient.exists_rep a'
-      rw [← ha'] at ha
-      obtain ⟨Z, r, q, _, eq, comm⟩ := Quotient.exact ha
-      -- Consider the pullback of `kernel.ι (cokernel.π f)` and `kernel.ι g`.
-      -- The commutative diagram given by the pseudo-equality `f a = b` induces
-      -- a cone over this pullback, so we get a factorization `z`.
-      obtain ⟨z, _, hz₂⟩ := @pullback.lift' _ _ _ _ _ _ (kernel.ι (cokernel.π S.f))
-        (kernel.ι S.g) _ (r ≫ a.hom ≫ Abelian.factorThruImage S.f) q (by
-          simp only [Category.assoc, Abelian.image.fac]
-          exact comm)
-      -- Let's give a name to the second pullback morphism.
-      let j : pullback (kernel.ι (cokernel.π S.f)) (kernel.ι S.g) ⟶ kernel S.g := pullback.snd _ _
-      -- Since `q` is an epimorphism, in particular this means that `j` is an epimorphism.
-      haveI pe : Epi j := epi_of_epi_fac hz₂
-      -- But it is also a monomorphism, because `kernel.ι (cokernel.π f)` is: A kernel is
-      -- always a monomorphism and the pullback of a monomorphism is a monomorphism.
-      -- But mono + epi = iso, so `j` is an isomorphism.
-      haveI : IsIso j := isIso_of_mono_of_epi _
-      -- But then `kernel.ι g` can be expressed using all of the maps of the pullback square, and we
-      -- are done.
-      rw [(Iso.eq_inv_comp (asIso j)).2 pullback.condition.symm]
-      simp only [Category.assoc, kernel.condition, HasZeroMorphisms.comp_zero])
+  (S.exact_iff_epi_imageToKernel').2 <|
+    epi_of_pseudo_surjective _ fun b => by
+      have hb : S.g ((kernel.ι S.g) b) = 0 := by
+        rw [← comp_apply, kernel.condition, zero_apply]
+      obtain ⟨a, ha⟩ := hS _ hb
+      refine ⟨Limits.factorThruImage S.f a, ?_⟩
+      apply pseudo_injective_of_mono (kernel.ι S.g)
+      have hcomp :
+          Limits.factorThruImage S.f ≫ imageToKernel' S.f S.g S.zero ≫ kernel.ι S.g = S.f := by
+        simp [imageToKernel']
+      have hk : (Limits.factorThruImage S.f ≫ imageToKernel' S.f S.g S.zero ≫ kernel.ι S.g) a =
+          S.f a :=
+        congrArg (fun k : S.X₁ ⟶ S.X₂ => k a) hcomp
+      calc
+        (kernel.ι S.g) ((imageToKernel' S.f S.g S.zero) (Limits.factorThruImage S.f a)) =
+            (Limits.factorThruImage S.f ≫ imageToKernel' S.f S.g S.zero ≫ kernel.ι S.g) a := by
+              simp [comp_apply]
+        _ = S.f a := hk
+        _ = (kernel.ι S.g) b := ha
 
 end
 
@@ -444,20 +436,11 @@ set_option backward.isDefEq.respectTransparency false in
 morphisms is the same. -/
 theorem ModuleCat.eq_range_of_pseudoequal {R : Type*} [Ring R] {G : ModuleCat R} {x y : Over G}
     (h : PseudoEqual G x y) : LinearMap.range x.hom.hom = LinearMap.range y.hom.hom := by
-  obtain ⟨P, p, q, hp, hq, H⟩ := h
-  refine Submodule.ext fun a => ⟨fun ha => ?_, fun ha => ?_⟩
-  · obtain ⟨a', ha'⟩ := ha
-    obtain ⟨a'', ha''⟩ := (ModuleCat.epi_iff_surjective p).1 hp a'
-    refine ⟨q a'', ?_⟩
-    dsimp at ha' ⊢
-    rw [← LinearMap.comp_apply, ← ModuleCat.hom_comp, ← H,
-      ModuleCat.hom_comp, LinearMap.comp_apply, ha'', ha']
-  · obtain ⟨a', ha'⟩ := ha
-    obtain ⟨a'', ha''⟩ := (ModuleCat.epi_iff_surjective q).1 hq a'
-    refine ⟨p a'', ?_⟩
-    dsimp at ha' ⊢
-    rw [← LinearMap.comp_apply, ← ModuleCat.hom_comp, H, ModuleCat.hom_comp, LinearMap.comp_apply,
-      ha'', ha']
+  obtain ⟨P, p, q, hp, hq, hxy⟩ := h
+  rw [← LinearMap.range_comp_of_range_eq_top x.hom.hom (ModuleCat.range_eq_top_of_epi p),
+    ← LinearMap.range_comp_of_range_eq_top y.hom.hom (ModuleCat.range_eq_top_of_epi q)]
+  simpa [ModuleCat.hom_comp] using
+    congrArg LinearMap.range (congrArg ModuleCat.Hom.hom hxy)
 
 end Module
 

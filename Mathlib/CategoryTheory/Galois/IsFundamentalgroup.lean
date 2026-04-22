@@ -182,16 +182,12 @@ lemma toAut_surjective_of_isPretransitive [TopologicalSpace G] [IsTopologicalGro
   let cl (X : PointedGaloisObject F) : Set G := gi X • MulAction.stabilizer G X.pt
   let c : Set G := ⋂ i, cl i
   have hne : c.Nonempty := by
-    rw [← Set.univ_inter c]
-    apply CompactSpace.isCompact_univ.inter_iInter_nonempty
-    · intro X
-      apply IsClosed.leftCoset
-      exact Subgroup.isClosed_of_isOpen _ (stabilizer_isOpen G X.pt)
+    apply CompactSpace.iInter_nonempty
+    · exact fun X ↦ (Subgroup.isClosed_of_isOpen _ (stabilizer_isOpen G X.pt)).leftCoset _
     · intro s
-      rw [Set.univ_inter]
       obtain ⟨gs, hgs⟩ :=
         toAut_surjective_isGalois_finite_family F G t (fun X : s ↦ X.val.obj) h
-      use gs
+      refine ⟨gs, ?_⟩
       simp only [Set.mem_iInter]
       intro X hXmem
       rw [mem_leftCoset_iff, SetLike.mem_coe, MulAction.mem_stabilizer_iff, mul_smul,

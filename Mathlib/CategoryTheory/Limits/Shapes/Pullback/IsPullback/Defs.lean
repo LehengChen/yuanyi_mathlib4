@@ -194,19 +194,15 @@ noncomputable def isoPullback (h : IsPullback fst snd f g) [HasPullback f g] : P
   (limit.isoLimitCone ⟨_, h.isLimit⟩).symm
 
 
-set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 theorem isoPullback_hom_fst (h : IsPullback fst snd f g) [HasPullback f g] :
-    h.isoPullback.hom ≫ pullback.fst _ _ = fst := by
-  dsimp [isoPullback, cone, CommSq.cone]
-  simp
+    h.isoPullback.hom ≫ pullback.fst _ _ = fst :=
+  IsLimit.conePointUniqueUpToIso_hom_comp h.isLimit (limit.isLimit _) WalkingCospan.left
 
-set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 theorem isoPullback_hom_snd (h : IsPullback fst snd f g) [HasPullback f g] :
-    h.isoPullback.hom ≫ pullback.snd _ _ = snd := by
-  dsimp [isoPullback, cone, CommSq.cone]
-  simp
+    h.isoPullback.hom ≫ pullback.snd _ _ = snd :=
+  IsLimit.conePointUniqueUpToIso_hom_comp h.isLimit (limit.isLimit _) WalkingCospan.right
 
 @[reassoc (attr := simp)]
 theorem isoPullback_inv_fst (h : IsPullback fst snd f g) [HasPullback f g] :
@@ -331,19 +327,15 @@ isomorphic to the pullback provided by the `HasLimit` API. -/
 noncomputable def isoPushout (h : IsPushout f g inl inr) [HasPushout f g] : P ≅ pushout f g :=
   (colimit.isoColimitCocone ⟨_, h.isColimit⟩).symm
 
-set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 theorem inl_isoPushout_inv (h : IsPushout f g inl inr) [HasPushout f g] :
-    pushout.inl _ _ ≫ h.isoPushout.inv = inl := by
-  dsimp [isoPushout, cocone, CommSq.cocone]
-  simp
+    pushout.inl _ _ ≫ h.isoPushout.inv = inl :=
+  IsColimit.comp_coconePointUniqueUpToIso_inv h.isColimit (colimit.isColimit _) WalkingSpan.left
 
-set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 theorem inr_isoPushout_inv (h : IsPushout f g inl inr) [HasPushout f g] :
-    pushout.inr _ _ ≫ h.isoPushout.inv = inr := by
-  dsimp [isoPushout, cocone, CommSq.cocone]
-  simp
+    pushout.inr _ _ ≫ h.isoPushout.inv = inr :=
+  IsColimit.comp_coconePointUniqueUpToIso_inv h.isColimit (colimit.isColimit _) WalkingSpan.right
 
 @[reassoc (attr := simp)]
 theorem inl_isoPushout_hom (h : IsPushout f g inl inr) [HasPushout f g] :

@@ -147,14 +147,10 @@ lemma IsStrongGenerator.colimitsCardinalClosure_eq_isCardinalPresentable
     {P : ObjectProperty C} [ObjectProperty.Small.{w} P] (hS₁ : P.IsStrongGenerator)
     (hS₂ : P ≤ isCardinalPresentable C κ) :
     isCardinalPresentable C κ = P.colimitsCardinalClosure κ := by
-  refine le_antisymm ?_ (P.colimitsCardinalClosure_le_isCardinalPresentable hS₂)
-  have := hS₁.isDense_colimitsCardinalClosure_ι hS₂
-  intro X hX
-  rw [isCardinalPresentable_iff] at hX
-  rw [← (P.colimitsCardinalClosure κ).retractClosure_eq_self]
-  obtain ⟨j, φ, hφ⟩ := IsCardinalPresentable.exists_hom_of_isColimit κ
-    ((P.colimitsCardinalClosure κ).ι.denseAt X) (𝟙 X)
-  exact ⟨_, j.left.2, ⟨{ i := _, r := _, retract := hφ }⟩⟩
+  letI := hS₁.isDense_colimitsCardinalClosure_ι hS₂
+  simpa only [(P.colimitsCardinalClosure κ).retractClosure_eq_self] using
+    (IsCardinalFilteredGenerator.of_isDense_ι (P.colimitsCardinalClosure κ) κ
+      (P.colimitsCardinalClosure_le_isCardinalPresentable hS₂)).isPresentable_eq_retractClosure
 
 namespace IsCardinalLocallyPresentable
 

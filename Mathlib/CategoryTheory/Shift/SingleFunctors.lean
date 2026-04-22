@@ -208,12 +208,7 @@ def postcomp (G : D ⥤ E) [G.CommShift A] :
   shiftIso n a a' ha' :=
     Functor.associator _ _ _ ≪≫ isoWhiskerLeft _ (G.commShiftIso n).symm ≪≫
       (Functor.associator _ _ _).symm ≪≫ isoWhiskerRight (F.shiftIso n a a' ha') G
-  shiftIso_zero a := by
-    ext X
-    dsimp
-    simp only [Functor.commShiftIso_zero, Functor.CommShift.isoZero_inv_app,
-      SingleFunctors.shiftIso_zero_hom_app, id_comp, assoc, ← G.map_comp, Iso.inv_hom_id_app,
-      Functor.map_id, Functor.id_obj, comp_id]
+  shiftIso_zero a := by ext X; simp [Functor.commShiftIso_zero, ← G.map_comp]
   shiftIso_add n m a a' a'' ha' ha'' := by
     ext X
     dsimp

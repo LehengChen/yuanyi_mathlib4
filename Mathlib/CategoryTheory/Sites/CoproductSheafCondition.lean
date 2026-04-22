@@ -45,21 +45,15 @@ def PreZeroHypercover.isLimitSigmaOfIsColimitEquiv (E : PreZeroHypercover.{w} S)
     [PreservesLimit (Discrete.functor fun i ↦ op (E.toPreOneHypercover.Y' i)) F] :
     IsLimit ((E.sigmaOfIsColimit hc).toPreOneHypercover.multifork F) ≃
       IsLimit (E.toPreOneHypercover.multifork F) := by
-  have : HasPullback (Cofan.IsColimit.desc hc E.f) (Cofan.IsColimit.desc hc E.f) :=
-    inferInstanceAs <| HasPullback
-      ((E.sigmaOfIsColimit hc).f ⟨⟩) ((E.sigmaOfIsColimit hc).f ⟨⟩)
   let c' : Cofan E.toPreOneHypercover.Y' :=
     Cofan.mk
       ((E.sigmaOfIsColimit hc).toPreOneHypercover.Y (i₁ := ⟨⟩) (i₂ := ⟨⟩) ⟨⟩)
       fun b ↦ pullback.map _ _ _ _ (c.inj _) (c.inj _) (𝟙 _) (by simp) (by simp)
-  let equiv : E.toPreOneHypercover.I₁' ≃ E.I₀ × E.I₀ :=
-    Equiv.sigmaPUnit (E.toPreOneHypercover.I₀ × E.toPreOneHypercover.I₀)
   have hc' : IsColimit c' := by
-    refine (c'.isColimitEquivOfEquiv equiv.symm).symm (Nonempty.some ?_)
-    exact IsUniversalColimit.nonempty_isColimit_prod_of_isPullback
-      huniv huniv E.f E.f ((E.sigmaOfIsColimit hc).f ⟨⟩) ((E.sigmaOfIsColimit hc).f ⟨⟩)
-      (fun i j ↦ .of_hasPullback _ _) (.of_hasPullback _ _) (.refl _) (by simp) (by simp)
-      (by simp [c', equiv, Equiv.sigmaPUnit]) (by simp [c', equiv, Equiv.sigmaPUnit])
+    refine (c'.isColimitEquivOfEquiv (Equiv.sigmaPUnit _).symm).symm (Nonempty.some <|
+      IsUniversalColimit.nonempty_isColimit_prod_of_isPullback huniv huniv E.f E.f
+        ((E.sigmaOfIsColimit hc).f ⟨⟩) ((E.sigmaOfIsColimit hc).f ⟨⟩)
+        (fun i j ↦ .of_hasPullback _ _) (.of_hasPullback _ _) (.refl _))
   refine .trans ?_ (E.toPreOneHypercover.isLimitSigmaOfIsColimitEquiv hc hc' F)
   apply PreOneHypercover.isLimitEquivOfIso
   refine PreOneHypercover.isoMk (.refl _) (fun _ ↦ .refl _) (fun _ _ ↦ .refl _)

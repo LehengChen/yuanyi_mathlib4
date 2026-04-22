@@ -101,13 +101,8 @@ instance (J : Type*) [Category* J] : (P.colimitClosure J).IsClosedUnderColimitsO
 lemma colimitsClosure_eq_unop_limitsClosure :
     P.colimitsClosure J = (P.op.limitsClosure (fun a ↦ (J a)ᵒᵖ)).unop := by
   refine le_antisymm ?_ ?_
-  · apply colimitsClosure_le
-    rw [← op_monotone_iff, op_unop]
-    apply le_limitsClosure
-  · rw [← op_monotone_iff, op_unop]
-    apply limitsClosure_le
-    rw [op_monotone_iff]
-    apply le_colimitsClosure
+  · exact colimitsClosure_le (unop_monotone (P.op.le_limitsClosure (fun a ↦ (J a)ᵒᵖ)))
+  · exact unop_monotone (limitsClosure_le (op_monotone (P.le_colimitsClosure J)))
 
 instance [ObjectProperty.EssentiallySmall.{w} P] [LocallySmall.{w} C] [Small.{w} α]
     [∀ a, Small.{w} (J a)] [∀ a, LocallySmall.{w} (J a)] :

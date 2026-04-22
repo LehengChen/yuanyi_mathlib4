@@ -76,13 +76,9 @@ lemma homMap_apply (G : D₁ ⥤ D₂) (e : Φ.functor ⋙ L₂ ≅ L₁ ⋙ G) 
     Φ.homMap L₁ L₂ f = e.hom.app X ≫ G.map f ≫ e.inv.app Y := by
   let G' := Φ.localizedFunctor L₁ L₂
   let e' := CatCommSq.iso Φ.functor L₁ L₂ G'
-  change e'.hom.app X ≫ G'.map f ≫ e'.inv.app Y = _
   letI : Localization.Lifting L₁ W₁ (Φ.functor ⋙ L₂) G := ⟨e.symm⟩
   let α : G' ≅ G := Localization.liftNatIso L₁ W₁ (L₁ ⋙ G') (Φ.functor ⋙ L₂) _ _ e'.symm
-  have : e = e' ≪≫ Functor.isoWhiskerLeft _ α := by
-    ext
-    simp [α, this]
-  simp [this]
+  simpa [homMap, α, this, assoc] using congrArg (fun k => e'.hom.app X ≫ k ≫ e.inv.app Y) (α.hom.naturality f)
 
 @[simp]
 lemma id_homMap (f : L₁.obj X ⟶ L₁.obj Y) :
@@ -94,15 +90,11 @@ lemma homMap_homMap (f : L₁.obj X ⟶ L₁.obj Y) :
     Ψ.homMap L₂ L₃ (Φ.homMap L₁ L₂ f) = (Φ.comp Ψ).homMap L₁ L₃ f := by
   let G := Φ.localizedFunctor L₁ L₂
   let G' := Ψ.localizedFunctor L₂ L₃
-  let e : Φ.functor ⋙ L₂ ≅ L₁ ⋙ G := CatCommSq.iso _ _ _ _
-  let e' : Ψ.functor ⋙ L₃ ≅ L₂ ⋙ G' := CatCommSq.iso _ _ _ _
-  rw [Φ.homMap_apply L₁ L₂ G e, Ψ.homMap_apply L₂ L₃ G' e',
-    (Φ.comp Ψ).homMap_apply L₁ L₃ (G ⋙ G')
-      (Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft _ e' ≪≫
-      (Functor.associator _ _ _).symm ≪≫ Functor.isoWhiskerRight e _ ≪≫
-      Functor.associator _ _ _)]
-  dsimp
-  simp only [Functor.map_comp, assoc, comp_id, id_comp]
+  letI : CatCommSq (Φ.comp Ψ).functor L₁ L₃ (G ⋙ G') := CatCommSq.hComp _ _ _ L₂ _ _ _
+  rw [Φ.homMap_apply L₁ L₂ G (CatCommSq.iso _ _ _ _),
+    Ψ.homMap_apply L₂ L₃ G' (CatCommSq.iso _ _ _ _),
+    (Φ.comp Ψ).homMap_apply L₁ L₃ (G ⋙ G') (CatCommSq.iso _ _ _ _)]
+  simp [G, G']
 
 end LocalizerMorphism
 

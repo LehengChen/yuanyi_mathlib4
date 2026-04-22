@@ -173,14 +173,8 @@ namespace FunctorCategoryEquivalence
 /-- Auxiliary definition for `functorCategoryEquivalence`. -/
 @[simps]
 def functor : Action V G ⥤ SingleObj G ⥤ V where
-  obj M :=
-    { obj := fun _ => M.V
-      map := fun g => M.ρ g
-      map_id := fun _ => M.ρ.map_one
-      map_comp := fun g h => M.ρ.map_mul h g }
-  map f :=
-    { app := fun _ => f.hom
-      naturality := fun _ _ g => f.comm g }
+  obj M := SingleObj.functor M.ρ
+  map f := SingleObj.natTrans f.hom f.comm
 
 /-- Auxiliary definition for `functorCategoryEquivalence`. -/
 @[simps]

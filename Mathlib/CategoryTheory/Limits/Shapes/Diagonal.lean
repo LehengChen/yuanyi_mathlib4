@@ -396,18 +396,14 @@ lemma pullback_lift_diagonal_isPullback (g : Y ⟶ X) (f : X ⟶ S) :
     IsPullback g (pullback.lift (𝟙 Y) g (by simp)) (diagonal f)
       (pullback.map (g ≫ f) f f f g (𝟙 X) (𝟙 S) (by simp) (by simp)) := by
   let i : pullback (g ≫ f) f ≅ pullback (g ≫ f) (𝟙 X ≫ f) := congrHom rfl (by simp)
-  let e : pullback (diagonal f) (map (g ≫ f) f f f g (𝟙 X) (𝟙 S) (by simp) (by simp)) ≅
-      pullback (diagonal f) (map (g ≫ f) (𝟙 X ≫ f) f f g (𝟙 X) (𝟙 S) (by simp) (by simp)) :=
-    (asIso (map _ _ _ _ (𝟙 _) i.inv (𝟙 _) (by simp) (by ext <;> simp [i]))).symm
-  apply IsPullback.of_iso_pullback _
-      (e ≪≫ pullbackDiagonalMapIdIso (T := X) (S := S) g (𝟙 X) f ≪≫ asIso (pullback.fst _ _)).symm
-  · simp [e]
-  · ext <;> simp [e, i]
-  · constructor
-    ext <;> simp
+  refine (pullback_map_diagonal_isPullback g (𝟙 X) f).of_iso
+    (asIso (pullback.fst g (𝟙 X))) (Iso.refl _) i.symm (Iso.refl _) (by simp) ?_ (by simp) ?_
+  · ext <;> simp [i, pullback.condition]
+  · ext <;> simp [i]
 
 end
 
+set_option linter.flexible false in
 set_option backward.isDefEq.respectTransparency false in
 /-- Given the following diagram with `S ⟶ S'` a monomorphism,
 
@@ -451,26 +447,11 @@ def pullbackFstFstIso {X Y S X' Y' S' : C} (f : X ⟶ S) (g : Y ⟶ S) (f' : X' 
       (pullback.lift (pullback.map _ _ _ _ _ _ _ e₁ e₂) (pullback.snd _ _) (pullback.lift_snd ..))
       (by rw [pullback.lift_fst, pullback.lift_fst])
   hom_inv_id := by
-    -- We could use `ext` here to immediately descend to the leaf goals,
-    -- but it only obscures the structure.
-    apply pullback.hom_ext
-    · apply pullback.hom_ext
-      · apply pullback.hom_ext
-        · simp only [Category.assoc, lift_fst, lift_fst_assoc, Category.id_comp]
-          rw [condition]
-        · simp [Category.assoc, condition]
-      · simp only [Category.assoc, lift_snd, lift_fst, Category.id_comp]
-    · apply pullback.hom_ext
-      · apply pullback.hom_ext
-        · simp only [Category.assoc, lift_snd_assoc, lift_fst_assoc, lift_fst, Category.id_comp]
-          rw [← condition_assoc, condition]
-        · simp only [Category.assoc, lift_snd, lift_fst_assoc, lift_snd_assoc, Category.id_comp]
-          rw [condition]
-      · simp only [Category.assoc, lift_snd, Category.id_comp]
+    ext <;> simp [Category.assoc, condition]
+    all_goals rw [← condition_assoc, condition]
   inv_hom_id := by
-    apply pullback.hom_ext
-    · simp only [Category.assoc, lift_fst, lift_fst_assoc, lift_snd, Category.id_comp]
-    · simp only [Category.assoc, lift_snd, lift_snd_assoc, Category.id_comp]
+    ext <;> simp only [Category.assoc, lift_fst, lift_snd, lift_fst_assoc, lift_snd_assoc,
+      Category.id_comp]
 
 theorem pullback_map_eq_pullbackFstFstIso_inv {X Y S X' Y' S' : C} (f : X ⟶ S) (g : Y ⟶ S)
     (f' : X' ⟶ S') (g' : Y' ⟶ S') (i₁ : X ⟶ X') (i₂ : Y ⟶ Y') (i₃ : S ⟶ S')
@@ -495,19 +476,12 @@ lemma isPullback_map_snd_snd {X Y Z S : C} (f : X ⟶ S) (g : Y ⟶ S) (h : Z �
         pullback.condition pullback.condition)
       (pullback.fst (pullback.fst f g) (pullback.fst f h))
       (pullback.fst g h) (pullback.snd f g) := by
-  refine ⟨⟨by simp⟩, ⟨PullbackCone.IsLimit.mk _ ?_ ?_ ?_ ?_⟩⟩
-  · intro c
-    refine pullback.lift c.snd
-        (pullback.lift (c.snd ≫ pullback.fst _ _) (c.fst ≫ pullback.snd _ _) ?_) ?_
-    · simp [pullback.condition, ← c.condition_assoc]
-    · simp
-  · intro c
-    apply pullback.hom_ext <;> simp [c.condition]
-  · intro c
-    apply pullback.hom_ext <;> simp
-  · intro c m hfst hsnd
-    refine pullback.hom_ext (by simpa) ?_
-    apply pullback.hom_ext <;> simp [← hsnd, pullback.condition, ← hfst]
+  refine IsPullback.of_iso_pullback ⟨by simp⟩ (pullbackRightPullbackFstIso f h (pullback.fst f g) ≪≫
+      pullback.congrHom pullback.condition rfl ≪≫
+      (pullbackRightPullbackFstIso g h (pullback.snd f g)).symm ≪≫
+      pullbackSymmetry _ _) ?_ ?_
+  · ext <;> simp
+  · simp
 
 end Diagonal
 

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Terminal
 public import Mathlib.CategoryTheory.Limits.Shapes.ZeroMorphisms
+import Mathlib.CategoryTheory.Adjunction.Opposites
 
 /-!
 # Preservation of zero objects and zero morphisms
@@ -86,15 +87,8 @@ instance (priority := 100) preservesZeroMorphisms_of_isLeftAdjoint (F : C ⥤ D)
 set_option backward.isDefEq.respectTransparency false in
 instance (priority := 100) preservesZeroMorphisms_of_isRightAdjoint (G : C ⥤ D) [IsRightAdjoint G] :
     PreservesZeroMorphisms G where
-  map_zero X Y := by
-    let adj := Adjunction.ofIsRightAdjoint G
-    calc
-      G.map (0 : X ⟶ Y) = adj.unit.app (G.obj X) ≫ G.map (adj.counit.app X) ≫ G.map 0 := ?_
-      _ = adj.unit.app (G.obj X) ≫ G.map ((leftAdjoint G).map (0 : _ ⟶ G.obj X)) ≫ G.map 0 := ?_
-      _ = 0 := ?_
-    · rw [Adjunction.right_triangle_components_assoc]
-    · simp only [← G.map_comp, comp_zero]
-    · simp only [id_obj, comp_obj, Adjunction.unit_naturality_assoc, zero_comp]
+  map_zero X Y := Quiver.Hom.op_inj <| by
+    simpa using G.op.map_zero (Opposite.op Y) (Opposite.op X)
 
 instance (priority := 100) preservesZeroMorphisms_of_full (F : C ⥤ D) [Full F] :
     PreservesZeroMorphisms F where

@@ -263,13 +263,9 @@ set_option backward.isDefEq.respectTransparency false in
 variable {C} in
 theorem exact_d_f {X Y : C} (f : X ⟶ Y) :
     (ShortComplex.mk (d f) f (by simp)).Exact := by
-  let α : ShortComplex.mk (d f) f (by simp) ⟶ ShortComplex.mk (kernel.ι f) f (by simp) :=
-    { τ₁ := Projective.π _
-      τ₂ := 𝟙 _
-      τ₃ := 𝟙 _ }
-  rw [ShortComplex.exact_iff_of_epi_of_isIso_of_mono α]
-  apply ShortComplex.exact_of_f_is_kernel
-  apply kernelIsKernel
+  rw [ShortComplex.exact_iff_epi_kernel_lift,
+    show kernel.lift _ (d f) _ = π _ by apply Fork.IsLimit.hom_ext (limit.isLimit _); simp [d]]
+  exact Projective.π_epi _
 
 namespace ProjectiveResolution
 

@@ -108,19 +108,13 @@ variable {d} {val₀ : F.obj (op ⊥)}
 def ofLE {j : J} (e : d.Extension val₀ j) {i : J} (hij : i ≤ j) : d.Extension val₀ i where
   val := F.map (homOfLE hij).op e.val
   map_zero := by
-    rw [← FunctorToTypes.map_comp_apply]
-    exact e.map_zero
+    simpa only [← FunctorToTypes.map_comp_apply] using e.map_zero
   map_succ k hk := by
-    rw [← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply, ← op_comp, ← op_comp,
-      homOfLE_comp, homOfLE_comp, e.map_succ k (lt_of_lt_of_le hk hij)]
+    simpa only [← FunctorToTypes.map_comp_apply, ← op_comp, homOfLE_comp] using
+      e.map_succ k (lt_of_lt_of_le hk hij)
   map_limit k hk hki := by
-    rw [← FunctorToTypes.map_comp_apply, ← op_comp, homOfLE_comp,
-      e.map_limit k hk (hki.trans hij)]
-    congr
-    ext ⟨l, hl⟩
-    dsimp
-    rw [← FunctorToTypes.map_comp_apply]
-    rfl
+    simpa only [← FunctorToTypes.map_comp_apply, ← op_comp, homOfLE_comp] using
+      e.map_limit k hk (hki.trans hij)
 
 lemma val_injective {j : J} {e e' : d.Extension val₀ j} (h : e.val = e'.val) : e = e' := by
   cases e
@@ -180,32 +174,27 @@ def succ {j : J} (e : d.Extension val₀ j) (hj : ¬IsMax j) :
     d.Extension val₀ (Order.succ j) where
   val := d.succ j hj e.val
   map_zero := by
-    simp only [← e.map_zero]
-    conv_rhs => rw [← d.map_succ j hj e.val]
-    rw [← FunctorToTypes.map_comp_apply]
-    rfl
+    simpa only [← FunctorToTypes.map_comp_apply, ← op_comp, homOfLE_comp, e.map_zero] using
+      congr_arg (F.map (homOfLE (bot_le : ⊥ ≤ j)).op) (d.map_succ j hj e.val)
   map_succ i hi := by
-    obtain hij | rfl := ((Order.lt_succ_iff_of_not_isMax hj).mp hi).lt_or_eq
-    · rw [← homOfLE_comp ((Order.lt_succ_iff_of_not_isMax hj).mp hi) (Order.le_succ j), op_comp,
-        FunctorToTypes.map_comp_apply, d.map_succ, ← e.map_succ i hij,
-        ← homOfLE_comp (Order.succ_le_of_lt hij) (Order.le_succ j), op_comp,
-        FunctorToTypes.map_comp_apply, d.map_succ]
+    obtain rfl | hij := (Order.lt_succ_iff_eq_or_lt_of_not_isMax hj).mp hi
     · simp only [homOfLE_refl, op_id, FunctorToTypes.map_id_apply, homOfLE_leOfHom,
         d.map_succ]
+    · rw [← homOfLE_comp hij.le (Order.le_succ j), op_comp, FunctorToTypes.map_comp_apply,
+        d.map_succ, ← e.map_succ i hij,
+        ← homOfLE_comp (Order.succ_le_of_lt hij) (Order.le_succ j), op_comp,
+        FunctorToTypes.map_comp_apply, d.map_succ]
   map_limit i hi hij := by
     obtain hij | rfl := hij.lt_or_eq
     · have hij' : i ≤ j := (Order.lt_succ_iff_of_not_isMax hj).mp hij
-      have := congr_arg (F.map (homOfLE hij').op) (d.map_succ j hj e.val)
-      rw [e.map_limit i hi, ← FunctorToTypes.map_comp_apply, ← op_comp, homOfLE_comp] at this
-      rw [this]
+      rw [← homOfLE_comp hij' (Order.le_succ j), op_comp, FunctorToTypes.map_comp_apply,
+        d.map_succ, e.map_limit i hi hij']
       congr
       ext ⟨⟨l, hl⟩⟩
       dsimp
-      conv_lhs => rw [← d.map_succ j hj e.val]
-      rw [← FunctorToTypes.map_comp_apply]
-      rfl
-    · exfalso
-      exact hj hi.isMax
+      rw [← homOfLE_comp (hl.le.trans hij') (Order.le_succ j), op_comp,
+        FunctorToTypes.map_comp_apply, d.map_succ]
+    · exact (hj hi.isMax).elim
 
 variable [WellFoundedLT J]
 
@@ -218,34 +207,30 @@ def limit (j : J) (hj : Order.IsSuccLimit j)
     { val := fun ⟨i, hi⟩ ↦ (e i hi).val
       property := fun f ↦ by apply compatibility }
   map_zero := by
-    rw [d.map_lift _ _ _ _ (by simpa [bot_lt_iff_ne_bot] using hj.not_isMin)]
+    rw [d.map_lift _ _ _ _ hj.bot_lt]
     simpa only [homOfLE_refl, op_id, FunctorToTypes.map_id_apply] using
-      (e ⊥ (by simpa [bot_lt_iff_ne_bot] using hj.not_isMin)).map_zero
+      (e ⊥ hj.bot_lt).map_zero
   map_succ i hi := by
-    convert (e (Order.succ i) ((Order.IsSuccLimit.succ_lt_iff hj).mpr hi)).map_succ i
-      (by
-        simp only [Order.lt_succ_iff_not_isMax, not_isMax_iff]
-        exact ⟨_, hi⟩) using 1
+    convert (e (Order.succ i) (hj.succ_lt hi)).map_succ i
+      (Order.lt_succ_of_not_isMax (not_isMax_iff.2 ⟨_, hi⟩)) using 1
     · dsimp
-      rw [FunctorToTypes.map_id_apply,
-        d.map_lift _ _ _ _ ((Order.IsSuccLimit.succ_lt_iff hj).mpr hi)]
+      rw [FunctorToTypes.map_id_apply, d.map_lift _ _ _ _ (hj.succ_lt hi)]
     · congr
       rw [d.map_lift _ _ _ _ hi]
       symm
       apply compatibility
   map_limit i hi hij := by
     obtain hij' | rfl := hij.lt_or_eq
-    · have := (e i hij').map_limit i hi (by rfl)
-      dsimp at this ⊢
-      rw [FunctorToTypes.map_id_apply] at this
-      rw [d.map_lift _ _ _ _ hij']
-      dsimp
-      rw [this]
-      congr
-      dsimp
-      ext ⟨⟨l, hl⟩⟩
-      rw [map_lift _ _ _ _ _ (hl.trans hij')]
-      apply compatibility
+    · rw [d.map_lift _ _ _ _ hij']
+      convert (e i hij').map_limit i hi (by rfl) using 1
+      · dsimp
+        rw [FunctorToTypes.map_id_apply]
+      · congr
+        ext ⟨⟨l, hl⟩⟩
+        dsimp
+        rw [map_lift _ _ _ _ _ (hl.trans hij')]
+        symm
+        apply compatibility
     · dsimp
       rw [FunctorToTypes.map_id_apply]
       congr

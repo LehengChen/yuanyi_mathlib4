@@ -103,16 +103,10 @@ lemma isRightDerivabilityStructure_iff [Φ.HasRightResolutions] (e : Φ.functor 
     liftNatIso W₁.Q W₁ _ _ _ _ e''
   have : TwoSquare.vComp' e'.hom e'''.hom e₁ e₂ = e.hom := by
     ext X₁
-    rw [TwoSquare.vComp'_app, liftNatIso_hom, liftNatTrans_app]
-    simp only [Functor.comp_obj, Iso.trans_hom, isoWhiskerLeft_hom, isoWhiskerRight_hom,
-      Iso.symm_hom, NatTrans.comp_app, Functor.associator_hom_app, whiskerLeft_app,
-      whiskerRight_app, id_comp, assoc, e'']
-    dsimp [Lifting.iso]
-    rw [F.map_id, id_comp, ← F.map_comp, Iso.inv_hom_id_app, F.map_id, comp_id,
-      ← Functor.map_comp_assoc]
-    erw [show (CatCommSq.iso Φ.functor W₁.Q W₂.Q (localizedFunctor Φ W₁.Q W₂.Q)).hom =
-      (Lifting.iso W₁.Q W₁ _ _).inv by rfl, Iso.inv_hom_id_app]
-    simp
+    conv_lhs => simp [e'', e''']
+    rw [show (TwoSquare.natTrans e'.hom).app X₁ =
+      (Lifting.iso W₁.Q W₁ _ _).inv.app X₁ by rfl]
+    simp [← F.map_comp, ← E₂.functor.map_comp_assoc]
   rw [← TwoSquare.GuitartExact.vComp'_iff_of_equivalences e'.hom E₁ E₂ e''' e₁ e₂, this]
 
 instance guitartExact_of_isRightDerivabilityStructure' [h : Φ.IsRightDerivabilityStructure]

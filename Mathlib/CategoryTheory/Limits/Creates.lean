@@ -501,14 +501,10 @@ def createsLimitOfIsoDiagram {K₁ K₂ : J ⥤ C} (F : C ⥤ D) (h : K₁ ≅ K
   { reflectsLimit_of_iso_diagram F h with
     lifts := fun c t =>
       let t' := (IsLimit.postcomposeInvEquiv (isoWhiskerRight h F :) c).symm t
+      let e := Cone.postcomposeEquivalence (isoWhiskerRight h F :)
       { liftedCone := (Cone.postcompose h.hom).obj (liftLimit t')
-        validLift :=
-          Functor.mapConePostcompose F ≪≫
-            (Cone.postcompose (isoWhiskerRight h F).hom).mapIso (liftedLimitMapsToOriginal t') ≪≫
-              Cone.ext (Iso.refl _) fun j => by
-                dsimp
-                rw [Category.assoc, ← F.map_comp]
-                simp } }
+        validLift := Functor.mapConePostcomposeEquivalenceFunctor F ≪≫
+          e.functor.mapIso (liftedLimitMapsToOriginal t') ≪≫ e.counitIso.app c } }
 
 /-- If `F` creates the limit of `K` and `F ≅ G`, then `G` creates the limit of `K`. -/
 @[implicit_reducible]
@@ -553,15 +549,10 @@ def createsColimitOfIsoDiagram {K₁ K₂ : J ⥤ C} (F : C ⥤ D) (h : K₁ ≅
   { reflectsColimit_of_iso_diagram F h with
     lifts := fun c t =>
       let t' := (IsColimit.precomposeHomEquiv (isoWhiskerRight h F :) c).symm t
+      let e := Cocone.precomposeEquivalence (isoWhiskerRight h F :)
       { liftedCocone := (Cocone.precompose h.inv).obj (liftColimit t')
-        validLift :=
-          Functor.mapCoconePrecompose F ≪≫
-            (Cocone.precompose (isoWhiskerRight h F).inv).mapIso
-                (liftedColimitMapsToOriginal t') ≪≫
-              Cocone.ext (Iso.refl _) fun j => by
-                dsimp
-                rw [← F.map_comp_assoc]
-                simp } }
+        validLift := Functor.mapCoconePrecomposeEquivalenceFunctor F ≪≫
+          e.functor.mapIso (liftedColimitMapsToOriginal t') ≪≫ e.counitIso.app c } }
 
 /-- If `F` creates the colimit of `K` and `F ≅ G`, then `G` creates the colimit of `K`. -/
 @[implicit_reducible]

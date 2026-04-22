@@ -118,11 +118,7 @@ def FullyFaithful.whiskeringRight {F : D ⥤ E} (hF : F.FullyFaithful)
     ((whiskeringRight C D E).obj F).FullyFaithful where
   preimage f :=
     { app := fun X => hF.preimage (f.app X)
-      naturality := fun _ _ g => by
-        apply hF.map_injective
-        dsimp
-        simp only [map_comp, map_preimage]
-        apply f.naturality }
+      naturality := fun _ _ g => hF.map_injective (by simpa using f.naturality g) }
 
 theorem whiskeringLeft_obj_id : (whiskeringLeft C C E).obj (𝟭 _) = 𝟭 _ :=
   rfl

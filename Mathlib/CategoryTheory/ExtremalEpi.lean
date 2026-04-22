@@ -64,17 +64,11 @@ instance [StrongEpi f] : ExtremalEpi f where
 set_option backward.isDefEq.respectTransparency false in
 lemma extremalEpi_iff_strongEpi_of_hasPullbacks [HasPullbacks C] :
     ExtremalEpi f ↔ StrongEpi f := by
-  refine ⟨fun _ ↦ ⟨inferInstance, fun A B i _ ↦ ⟨fun {t b} sq ↦ ⟨⟨?_⟩⟩⟩⟩,
-    fun _ ↦ inferInstance⟩
-  have := ExtremalEpi.isIso f (pullback.lift _ _ sq.w)
-    (pullback.snd _ _) (by simp)
-  exact
-    { l := inv (pullback.snd i b) ≫ pullback.fst _ _
-      fac_left := by
-        rw [← cancel_mono i, sq.w, Category.assoc, Category.assoc]
-        congr 1
-        rw [← cancel_epi (pullback.snd i b), IsIso.hom_inv_id_assoc,
-          pullback.condition]
-      fac_right := by simp [pullback.condition] }
+  refine ⟨fun _ ↦ StrongEpi.mk' (fun A B i _ t b sq ↦ ?_), fun _ ↦ inferInstance⟩
+  have := ExtremalEpi.isIso f (pullback.lift t f sq.w) (pullback.snd i b)
+    (by rw [pullback.lift_snd])
+  refine ⟨⟨inv (pullback.snd i b) ≫ pullback.fst i b, ?_, by simp [pullback.condition]⟩⟩
+  rw [← cancel_mono i, sq.w]
+  simp [Category.assoc, pullback.condition]
 
 end CategoryTheory

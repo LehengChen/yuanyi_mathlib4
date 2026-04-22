@@ -60,19 +60,14 @@ def isColimitOfIsPushoutOfIsConnected
     (α : F ⟶ G) (cF : Cocone F) (cG : Cocone G)
     (f : cF ⟶ (Cocone.precompose α).obj cG)
     (hf : ∀ i, IsPushout (cF.ι.app i) (α.app i) f.hom (cG.ι.app i))
-    (hcF : IsColimit cF) : IsColimit cG where
-  desc s := (hf (Classical.arbitrary _)).desc
-    (hcF.desc ((Cocone.precompose α).obj s)) (s.ι.app (Classical.arbitrary _)) (by simp)
-  fac s j := by
-    let f (i : _) : cG.pt ⟶ s.pt :=
-      (hf i).desc (hcF.desc ((Cocone.precompose α).obj s)) (s.ι.app i) (by simp)
-    have (i j : _) : f i = f j := by
-      refine constant_of_preserves_morphisms f (fun j₁ j₂ g ↦ ?_) i j
-      refine (hf j₁).hom_ext (by simp [f]) ?_
-      rw [IsPushout.inr_desc, ← cG.w g, Category.assoc, IsPushout.inr_desc, Cocone.w]
-    change _ ≫ f _ = _
-    rw [this _ j]
-    simp [f]
-  uniq s g hg := (hf (Classical.arbitrary _)).hom_ext (hcF.hom_ext <| by simp [hg]) (by simp [hg])
+    (hcF : IsColimit cF) : IsColimit cG :=
+  isColimitOfOp <|
+    isLimitOfIsPullbackOfIsConnected (NatTrans.op α) cG.op cF.op
+      { hom := f.hom.op
+        w := fun j => by
+          dsimp
+          rw [← op_comp, f.w]
+          rfl }
+      (fun i => by simpa using (hf (Opposite.unop i)).op) hcF.op
 
 end CategoryTheory.Limits

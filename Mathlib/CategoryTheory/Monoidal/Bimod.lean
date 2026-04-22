@@ -153,13 +153,9 @@ def isoOfIso {X Y : Mon C} {P Q : Bimod X Y} (f : P.X ≅ Q.X)
   inv :=
     { hom := f.inv
       left_act_hom := by
-        rw [← cancel_mono f.hom, Category.assoc, Category.assoc, Iso.inv_hom_id, Category.comp_id,
-          f_left_act_hom, ← Category.assoc, ← whiskerLeft_comp, Iso.inv_hom_id,
-          whiskerLeft_id, Category.id_comp]
+        simp [← cancel_mono f.hom, Category.assoc, f_left_act_hom]
       right_act_hom := by
-        rw [← cancel_mono f.hom, Category.assoc, Category.assoc, Iso.inv_hom_id, Category.comp_id,
-          f_right_act_hom, ← Category.assoc, ← comp_whiskerRight, Iso.inv_hom_id,
-          id_whiskerRight, Category.id_comp] }
+        simp [← cancel_mono f.hom, Category.assoc, f_right_act_hom] }
   hom_inv_id := by ext; dsimp; rw [Iso.hom_inv_id]
   inv_hom_id := by ext; dsimp; rw [Iso.inv_hom_id]
 

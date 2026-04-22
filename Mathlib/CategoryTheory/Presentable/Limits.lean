@@ -79,17 +79,8 @@ lemma surjective (x : c.pt.obj cX.pt) :
     have hg {k k' : K} (φ : k ⟶ k') :
         (F.obj k').map (X.map (g φ)) ((F.map φ).app _ (z k)) =
           (F.obj k').map (X.map (g φ)) (z k') := (H φ).choose_spec.choose_spec
-    obtain ⟨j₁, α, β, hα⟩ : ∃ (j₁ : J) (α : j₀ ⟶ j₁)
-        (β : ∀ ⦃k k' : K⦄ (φ : k ⟶ k'), j φ ⟶ j₁),
-        ∀ ⦃k k' : K⦄ (φ : k ⟶ k'), α = g φ ≫ β φ := by
-      let j'' (f : Arrow K) : J := j f.hom
-      let ψ (f : Arrow K) : j₀ ⟶ IsCardinalFiltered.max j'' hK :=
-        g f.hom ≫ IsCardinalFiltered.toMax j'' hK f
-      refine ⟨IsCardinalFiltered.coeq ψ hK, IsCardinalFiltered.toCoeq ψ hK,
-        fun k k' φ ↦ IsCardinalFiltered.toMax j'' hK φ ≫ IsCardinalFiltered.coeqHom ψ hK,
-        fun k k' φ ↦ ?_⟩
-      simpa [ψ] using (IsCardinalFiltered.coeq_condition ψ hK (Arrow.mk φ)).symm
-    exact ⟨j₁, α, fun k k' φ ↦ by simp [hα φ, hg]⟩
+    obtain ⟨j₁, β, α, hα⟩ := IsCardinalFiltered.wideSpan (fun f : Arrow K ↦ g f.hom) hK
+    exact ⟨j₁, α, fun k k' φ ↦ by simp [← hα (Arrow.mk φ), hg]⟩
   let s : (F ⋙ (evaluation C (Type w')).obj (X.obj j₁)).sections :=
     { val k := (F.obj k).map (X.map α) (z k)
       property {k k'} φ := by
@@ -115,20 +106,16 @@ lemma injective (j : J) (x₁ x₂ : c.pt.obj (X.obj j))
   let y₂ := Types.isLimitEquivSections (hc (X.obj j)) x₂
   have hy₁ : (Types.isLimitEquivSections (hc (X.obj j))).symm y₁ = x₁ := by simp [y₁]
   have hy₂ : (Types.isLimitEquivSections (hc (X.obj j))).symm y₂ = x₂ := by simp [y₂]
-  have H (k : K) := (Types.FilteredColimit.isColimit_eq_iff' (ht := hF k)
+  choose j₁ f hf using fun k ↦ (Types.FilteredColimit.isColimit_eq_iff' (ht := hF k)
     (x := y₁.1 k) (y := y₂.1 k)).1 (by
       simp only [y₁, y₂, Types.isLimitEquivSections_apply]
       dsimp
       simp only [← FunctorToTypes.naturality, h])
-  let j₁ (k : K) : J := (H k).choose
-  let f (k : K) : j ⟶ j₁ k := (H k).choose_spec.choose
-  have hf (k : K) : (F.obj k).map (X.map (f k)) (y₁.1 k) =
-      (F.obj k).map (X.map (f k)) (y₂.1 k) :=
-    (H k).choose_spec.choose_spec
-  have hK' := hasCardinalLT_of_hasCardinalLT_arrow hK
-  let ψ (k : K) : j ⟶ IsCardinalFiltered.max j₁ hK' :=
-    f k ≫ IsCardinalFiltered.toMax j₁ hK' k
-  refine ⟨IsCardinalFiltered.coeq ψ hK', IsCardinalFiltered.toCoeq ψ hK', ?_⟩
+  have hf' (k : K) : (F.obj k).map (X.map (f k)) (y₁.1 k) =
+      (F.obj k).map (X.map (f k)) (y₂.1 k) := hf k
+  obtain ⟨j', β, α, hα⟩ :=
+    IsCardinalFiltered.wideSpan f (hasCardinalLT_of_hasCardinalLT_arrow hK)
+  refine ⟨j', α, ?_⟩
   apply (Types.isLimitEquivSections (hc _)).injective
   ext k
   simp only [Types.isLimitEquivSections_apply, ← hy₁, ← hy₂]
@@ -136,8 +123,7 @@ lemma injective (j : J) (x₁ x₂ : c.pt.obj (X.obj j))
   have h₂ := Types.isLimitEquivSections_symm_apply (hc (X.obj j)) y₂ k
   dsimp at h₁ h₂ ⊢
   simp only [FunctorToTypes.naturality, h₁, h₂,
-    ← IsCardinalFiltered.coeq_condition ψ hK' k,
-    map_comp, FunctorToTypes.map_comp_apply, ψ, hf]
+    ← hα k, map_comp, FunctorToTypes.map_comp_apply, hf']
 
 end isColimitMapCocone
 

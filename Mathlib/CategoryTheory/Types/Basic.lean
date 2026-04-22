@@ -179,12 +179,8 @@ lemma naturality_symm {F G : C ⥤ Type*} (e : ∀ j, F.obj j ≃ G.obj j)
     (naturality : ∀ {j j'} (f : j ⟶ j'), e j' ∘ F.map f = G.map f ∘ e j) {j j' : C}
     (f : j ⟶ j') :
     (e j').symm ∘ G.map f = F.map f ∘ (e j).symm := by
-  ext x
-  obtain ⟨y, rfl⟩ := (e j).surjective x
-  apply (e j').injective
-  dsimp
-  simp only [Equiv.apply_symm_apply, Equiv.symm_apply_apply]
-  exact (congr_fun (naturality f) y).symm
+  exact (Equiv.symm_comp_eq (e j') _ _).2 <|
+    (Equiv.eq_comp_symm (e j) _ _).2 (naturality f).symm
 
 end FunctorToTypes
 

@@ -101,30 +101,23 @@ private abbrev P {X Y : C} (f g : X ⟶ Y) [Mono (prod.lift (𝟙 X) f)] [Mono (
 set_option backward.isDefEq.respectTransparency false in
 /-- The equalizer of `f` and `g` exists. -/
 lemma hasLimit_parallelPair {X Y : C} (f g : X ⟶ Y) : HasLimit (parallelPair f g) :=
-  have huv : (pullback.fst _ _ : P f g ⟶ X) = pullback.snd _ _ :=
-    calc
-      (pullback.fst _ _ : P f g ⟶ X) = pullback.fst _ _ ≫ 𝟙 _ := Eq.symm <| Category.comp_id _
-      _ = pullback.fst _ _ ≫ prod.lift (𝟙 X) f ≫ Limits.prod.fst := by rw [prod.lift_fst]
-      _ = pullback.snd _ _ ≫ prod.lift (𝟙 X) g ≫ Limits.prod.fst := by rw [pullback.condition_assoc]
-      _ = pullback.snd _ _ := by rw [prod.lift_fst, Category.comp_id]
-  have hvu : (pullback.fst _ _ : P f g ⟶ X) ≫ f = pullback.snd _ _ ≫ g :=
-    calc
-      (pullback.fst _ _ : P f g ⟶ X) ≫ f =
-        pullback.fst _ _ ≫ prod.lift (𝟙 X) f ≫ Limits.prod.snd := by rw [prod.lift_snd]
-      _ = pullback.snd _ _ ≫ prod.lift (𝟙 X) g ≫ Limits.prod.snd := by rw [pullback.condition_assoc]
-      _ = pullback.snd _ _ ≫ g := by rw [prod.lift_snd]
-  have huu : (pullback.fst _ _ : P f g ⟶ X) ≫ f = pullback.fst _ _ ≫ g := by rw [hvu, ← huv]
+  have huv : (pullback.fst _ _ : P f g ⟶ X) = pullback.snd _ _ := by
+    convert (eq_whisker pullback.condition Limits.prod.fst :
+      (_ : P f g ⟶ X) = _) <;> simp
+  have huu : (pullback.fst _ _ : P f g ⟶ X) ≫ f = pullback.fst _ _ ≫ g := by
+    conv_rhs => rw [huv]
+    convert (eq_whisker pullback.condition Limits.prod.snd :
+      (_ : P f g ⟶ Y) = _) using 1 <;> simp
   HasLimit.mk
     { cone := Fork.ofι (pullback.fst _ _) huu
       isLimit :=
-        Fork.IsLimit.mk _
-          (fun s =>
-            pullback.lift (Fork.ι s) (Fork.ι s) <|
+        Fork.IsLimit.mk' _ fun s =>
+          ⟨pullback.lift (Fork.ι s) (Fork.ι s) <|
               Limits.prod.hom_ext (by simp only [prod.lift_fst, Category.assoc])
-                (by simp only [prod.comp_lift, Fork.condition s]))
-          (fun s => by simp) fun s m h =>
-          pullback.hom_ext (by simpa only [pullback.lift_fst] using h)
-            (by simpa only [huv.symm, pullback.lift_fst] using h) }
+                (by simp only [prod.comp_lift, Fork.condition s]),
+            by simp, fun h =>
+            pullback.hom_ext (by simpa only [pullback.lift_fst] using h)
+              (by simpa only [huv.symm, pullback.lift_fst] using h)⟩ }
 
 end
 
@@ -261,32 +254,23 @@ private abbrev Q {X Y : C} (f g : X ⟶ Y) [Epi (coprod.desc (𝟙 Y) f)] [Epi (
 set_option backward.isDefEq.respectTransparency false in
 /-- The coequalizer of `f` and `g` exists. -/
 lemma hasColimit_parallelPair {X Y : C} (f g : X ⟶ Y) : HasColimit (parallelPair f g) :=
-  have huv : (pushout.inl _ _ : Y ⟶ Q f g) = pushout.inr _ _ :=
-    calc
-      (pushout.inl _ _ : Y ⟶ Q f g) = 𝟙 _ ≫ pushout.inl _ _ := Eq.symm <| Category.id_comp _
-      _ = (coprod.inl ≫ coprod.desc (𝟙 Y) f) ≫ pushout.inl _ _ := by rw [coprod.inl_desc]
-      _ = (coprod.inl ≫ coprod.desc (𝟙 Y) g) ≫ pushout.inr _ _ := by
-        simp only [Category.assoc, pushout.condition]
-      _ = pushout.inr _ _ := by rw [coprod.inl_desc, Category.id_comp]
-  have hvu : f ≫ (pushout.inl _ _ : Y ⟶ Q f g) = g ≫ pushout.inr _ _ :=
-    calc
-      f ≫ (pushout.inl _ _ : Y ⟶ Q f g) = (coprod.inr ≫ coprod.desc (𝟙 Y) f) ≫ pushout.inl _ _ := by
-        rw [coprod.inr_desc]
-      _ = (coprod.inr ≫ coprod.desc (𝟙 Y) g) ≫ pushout.inr _ _ := by
-        simp only [Category.assoc, pushout.condition]
-      _ = g ≫ pushout.inr _ _ := by rw [coprod.inr_desc]
-  have huu : f ≫ (pushout.inl _ _ : Y ⟶ Q f g) = g ≫ pushout.inl _ _ := by rw [hvu, huv]
+  have huv : (pushout.inl _ _ : Y ⟶ Q f g) = pushout.inr _ _ := by
+    convert (whisker_eq Limits.coprod.inl pushout.condition :
+      (_ : Y ⟶ Q f g) = _) <;> simp
+  have huu : f ≫ (pushout.inl _ _ : Y ⟶ Q f g) = g ≫ pushout.inl _ _ := by
+    conv_rhs => rw [huv]
+    convert (whisker_eq Limits.coprod.inr pushout.condition :
+      (_ : X ⟶ Q f g) = _) using 1 <;> simp
   HasColimit.mk
     { cocone := Cofork.ofπ (pushout.inl _ _) huu
       isColimit :=
-        Cofork.IsColimit.mk _
-          (fun s =>
-            pushout.desc (Cofork.π s) (Cofork.π s) <|
+        Cofork.IsColimit.mk' _ fun s =>
+          ⟨pushout.desc (Cofork.π s) (Cofork.π s) <|
               coprod.hom_ext (by simp only [coprod.inl_desc_assoc])
-                (by simp only [coprod.desc_comp, Cofork.condition s]))
-          (fun s => by simp only [pushout.inl_desc, Cofork.π_ofπ]) fun s m h =>
-          pushout.hom_ext (by simpa only [pushout.inl_desc] using h)
-            (by simpa only [huv.symm, pushout.inl_desc] using h) }
+                (by simp only [coprod.desc_comp, Cofork.condition s]),
+            by simp only [pushout.inl_desc, Cofork.π_ofπ], fun h =>
+            pushout.hom_ext (by simpa only [pushout.inl_desc] using h)
+              (by simpa only [huv.symm, pushout.inl_desc] using h)⟩ }
 
 end
 

@@ -126,13 +126,9 @@ noncomputable def codomainUniqueUpToIso {b' : 𝒳} (φ' : a ⟶ b') [IsCocartes
   hom := IsCocartesian.map p f φ φ'
   inv := IsCocartesian.map p f φ' φ
   hom_inv_id := by
-    subst_hom_lift p f φ
-    apply IsCocartesian.ext p (p.map φ) φ
-    simp only [fac_assoc, fac, comp_id]
+    simpa using (map_uniq p f φ φ _ (by simp))
   inv_hom_id := by
-    subst_hom_lift p f φ'
-    apply IsCocartesian.ext p (p.map φ') φ'
-    simp only [fac_assoc, fac, comp_id]
+    simpa using (map_uniq p f φ' φ' _ (by simp))
 
 /-- Postcomposing a co-Cartesian morphism with an isomorphism lifting the identity is
 co-Cartesian. -/
@@ -343,18 +339,11 @@ instance of_isIso (φ : a ⟶ b) [IsHomLift p f φ] [IsIso φ] : IsStronglyCocar
 /-- A strongly co-Cartesian arrow lying over an isomorphism is an isomorphism. -/
 lemma isIso_of_base_isIso (φ : a ⟶ b) [IsStronglyCocartesian p f φ] [IsIso f] : IsIso φ := by
   subst_hom_lift p f φ; clear a b R S
-  -- Let `φ'` be the morphism induced by applying universal property to `𝟙 a` lying over `f ≫ f⁻¹`.
   let φ' := map p (p.map φ) φ (IsIso.hom_inv_id (p.map φ)).symm (𝟙 a)
-  use φ'
-  -- `φ ≫ φ' = 𝟙 a` follows immediately from the universal property.
-  have inv_hom : φ ≫ φ' = 𝟙 a := fac p (p.map φ) φ _ (𝟙 a)
-  refine ⟨inv_hom, ?_⟩
-  -- We will now show that `φ' ≫ φ = 𝟙 b` by showing that `φ ≫ (φ' ≫ φ) = φ ≫ 𝟙 b`.
-  have h₁ : IsHomLift p (𝟙 (p.obj b)) (φ' ≫ φ) := by
-    rw [← IsIso.inv_hom_id (p.map φ)]
-    apply IsHomLift.comp
-  apply IsStronglyCocartesian.ext p (p.map φ) φ (𝟙 (p.obj b))
-  simp only [← assoc, inv_hom, comp_id, id_comp]
+  refine ⟨φ', fac p (p.map φ) φ _ (𝟙 a), ?_⟩
+  haveI : IsHomLift p (𝟙 (p.obj b)) (φ' ≫ φ) :=
+    (IsIso.inv_hom_id (p.map φ)).symm ▸ inferInstance
+  exact IsStronglyCocartesian.ext p (p.map φ) φ (𝟙 (p.obj b)) (by simp [φ', ← assoc])
 
 end
 

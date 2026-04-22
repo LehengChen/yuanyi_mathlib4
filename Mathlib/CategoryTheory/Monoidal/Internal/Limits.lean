@@ -81,15 +81,11 @@ set_option backward.isDefEq.respectTransparency false in
 /-- Implementation of `Mon.hasLimitsOfShape`:
 the proposed cone over a functor `F : J ⥤ Mon C` is a limit cone.
 -/
-@[simps]
+@[simps!]
 def limitConeIsLimit (F : J ⥤ Mon C) (c : Cone (F ⋙ Mon.forget C)) (hc : IsLimit c) :
-    IsLimit (limitCone F c hc) where
-  lift s :=
-    { hom := hc.lift ((Mon.forget C).mapCone s)
-      isMonHom_hom.mul_hom := hc.hom_ext <| by simp
-      isMonHom_hom.one_hom := hc.hom_ext <| by simp }
-  fac s h := by ext; simp
-  uniq s m w := Hom.ext' <| hc.hom_ext fun j ↦ by simpa using congr($(w j).hom)
+    IsLimit (limitCone F c hc) :=
+  IsLimit.ofFaithful (forget C) (hc.ofIsoLimit (forgetMapConeLimitConeIso _ _ _).symm) (h:= by simp)
+    (fun s => .mk' (hc.lift ((forget C).mapCone s)) (hc.hom_ext <| by simp) (hc.hom_ext <| by simp))
 
 /--
 A helper definition to show that the forgetful functor `forget C : Mon C ⥤ C` creates limits:

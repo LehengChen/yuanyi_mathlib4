@@ -170,12 +170,8 @@ lemma liftHom_fac (i : J) (hi : i < j) :
 @[simps]
 noncomputable def lift : (sqFunctor c p f g).obj (Opposite.op j) where
   f' := liftHom hj s
-  w₁ := by
-    have h : ⊥ < j := Ne.bot_lt' (by
-      rintro rfl
-      exact Order.not_isSuccLimit_bot hj)
-    rw [liftHom_fac hj s ⊥ h]
-    simpa using (s.1 ⟨⊥, h⟩).w₁
+  w₁ := (liftHom_fac hj s ⊥ hj.bot_lt).trans (by
+    simpa using (s.1 ⟨⊥, hj.bot_lt⟩).w₁)
   w₂ := (F.isColimitOfIsWellOrderContinuous j hj).hom_ext (fun ⟨i, hij⟩ ↦ by
     have := (s.1 ⟨i, hij⟩).w₂
     dsimp at this ⊢

@@ -121,12 +121,7 @@ noncomputable def iic (j : J) :
     TransfiniteCompositionOfShape (Set.Iic j) (c.F.map (homOfLE bot_le : ⊥ ⟶ j)) where
   F := (Set.initialSegIic j).monotone.functor ⋙ c.F
   isoBot := Iso.refl _
-  incl :=
-    { app i := c.F.map (homOfLE i.2)
-      naturality i i' φ := by
-        dsimp
-        rw [← Functor.map_comp, Category.comp_id]
-        rfl }
+  incl := (coconeOfDiagramTerminal isTerminalTop _).ι
   isColimit := colimitOfDiagramTerminal isTerminalTop _
 
 /-- A transfinite composition of shape `J` induces a transfinite composition

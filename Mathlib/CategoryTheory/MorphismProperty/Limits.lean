@@ -462,12 +462,8 @@ instance : (W.limitsOfShape J).RespectsIso :=
     let c₂' : Cone X₂ := { pt := Y₂, π := (Functor.const _).map e₂.inv ≫ c₂.π }
     have h₁' : IsLimit c₁' := IsLimit.ofIsoLimit h₁ (Cone.ext e₁)
     have h₂' : IsLimit c₂' := IsLimit.ofIsoLimit h₂ (Cone.ext e₂)
-    obtain hg : h₂'.lift (Cone.mk _ (c₁'.π ≫ f)) = g :=
-      h₂'.hom_ext (fun j ↦ by
-        rw [h₂'.fac]
-        simp [reassoc_of% fac, c₁', c₂'])
-    rw [← hg]
-    exact ⟨_, _, _, _, h₁', _, _, hf⟩)
+    exact limitsOfShape.mk' X₁ X₂ c₁' c₂' h₁' h₂' f hf g (fun j ↦ by
+      simp [reassoc_of% fac, c₁', c₂']))
 
 variable {W J} in
 lemma limitsOfShape_limMap {X Y : J ⥤ C}
@@ -538,14 +534,10 @@ lemma colimitsOfShape_le_of_final {J' : Type*} [Category* J'] (F : J ⥤ J') [F.
   intro _ _ _ ⟨X₁, X₂, c₁, c₂, h₁, h₂, f, hf⟩
   have h₁' : IsColimit (c₁.whisker F) := (Functor.Final.isColimitWhiskerEquiv F c₁).symm h₁
   have h₂' : IsColimit (c₂.whisker F) := (Functor.Final.isColimitWhiskerEquiv F c₂).symm h₂
-  have : h₁.desc (Cocone.mk c₂.pt (f ≫ c₂.ι)) =
-      h₁'.desc (Cocone.mk c₂.pt (Functor.whiskerLeft _ f ≫ (c₂.whisker F).ι)) :=
-    h₁'.hom_ext (fun j ↦ by
-      have := h₁'.fac (Cocone.mk c₂.pt (Functor.whiskerLeft F f ≫ Functor.whiskerLeft F c₂.ι)) j
-      dsimp at this ⊢
-      simp [this])
-  rw [this]
-  exact ⟨_, _, _, _, h₁', h₂', _, fun _ ↦ hf _⟩
+  refine colimitsOfShape.mk' _ _ _ _ h₁' h₂'
+    (Functor.whiskerLeft F f) (fun _ ↦ hf _) _ ?_
+  intro j
+  simp
 
 variable {J} in
 lemma colimitsOfShape_eq_of_equivalence {J' : Type*} [Category* J'] (e : J ≌ J') :
@@ -564,12 +556,8 @@ instance : (W.colimitsOfShape J).RespectsIso :=
     let c₂' : Cocone X₂ := { pt := Y₂, ι := c₂.ι ≫ (Functor.const _).map e₂.hom }
     have h₁' : IsColimit c₁' := IsColimit.ofIsoColimit h₁ (Cocone.ext e₁)
     have h₂' : IsColimit c₂' := IsColimit.ofIsoColimit h₂ (Cocone.ext e₂)
-    obtain hg : h₁'.desc (Cocone.mk _ (f ≫ c₂'.ι)) = g :=
-      h₁'.hom_ext (fun j ↦ by
-        rw [h₁'.fac]
-        simp [fac, c₁', c₂'])
-    rw [← hg]
-    exact ⟨_, _, _, _, _, h₂', _, hf⟩)
+    exact colimitsOfShape.mk' X₁ X₂ c₁' c₂' h₁' h₂' f hf g (fun j ↦ by
+      simp [fac, c₁', c₂']))
 
 variable {W J} in
 lemma colimitsOfShape_colimMap {X Y : J ⥤ C}
@@ -667,18 +655,13 @@ lemma coproducts_of_small {X Y : C} (f : X ⟶ Y) {J : Type w'}
 
 lemma le_colimitsOfShape_punit : W ≤ W.colimitsOfShape (Discrete PUnit.{w + 1}) := by
   intro X₁ X₂ f hf
-  have h := initialIsInitial (C := Discrete (PUnit.{w + 1}))
-  let c₁ := coconeOfDiagramInitial (F := Discrete.functor (fun _ ↦ X₁)) h
-  let c₂ := coconeOfDiagramInitial (F := Discrete.functor (fun _ ↦ X₂)) h
-  have hc₁ : IsColimit c₁ := colimitOfDiagramInitial h _
-  have hc₂ : IsColimit c₂ := colimitOfDiagramInitial h _
-  have : hc₁.desc (Cocone.mk _ (Discrete.natTrans (fun _ ↦ by exact f) ≫ c₂.ι)) = f :=
-    hc₁.hom_ext (fun x ↦ by
-      obtain rfl : x = ⊥_ _ := by ext
-      rw [IsColimit.fac]
-      simp [c₁, c₂])
-  rw [← this]
-  exact ⟨_, _, _, _, _, hc₂, _, fun _ ↦ hf⟩
+  refine colimitsOfShape.mk' _ _ _ _
+    (colimitCoconeOfUnique (fun _ : PUnit.{w + 1} ↦ X₁)).isColimit
+    (colimitCoconeOfUnique (fun _ : PUnit.{w + 1} ↦ X₂)).isColimit
+    (Discrete.natTrans fun _ ↦ f) (fun _ ↦ hf) f ?_
+  intro j
+  obtain rfl : j = ⟨default⟩ := Subsingleton.elim _ _
+  simp [colimitCoconeOfUnique]
 
 lemma le_coproducts : W ≤ coproducts.{w} W :=
   (le_colimitsOfShape_punit.{w} W).trans

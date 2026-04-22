@@ -185,12 +185,8 @@ def compatibleYonedaFamily_toCocone (R : Presieve X) (W : C) (x : FamilyOfElemen
     { app := fun f => x f.obj.hom f.property
       naturality := by
         intro g₁ g₂ F
-        simp only [Functor.id_obj, Functor.comp_obj, ObjectProperty.ι_obj, Over.forget_obj,
-          Functor.const_obj_obj, Functor.comp_map, ObjectProperty.ι_map, Over.forget_map,
-          Functor.const_obj_map, comp_id]
-        rw [← Category.id_comp (x g₁.obj.hom g₁.property)]
-        apply hx
-        simp only [Functor.id_obj, Over.w, Opposite.unop_op, Category.id_comp] }
+        simpa [Presieve.diagram] using
+          (hx (𝟙 _) F.hom.left g₁.property g₂.property (by simp)).symm }
 
 /-- Construct a family of elements from a cocone. -/
 def yonedaFamilyOfElements_fromCocone (R : Presieve X) (s : Cocone (diagram R)) :
@@ -207,19 +203,11 @@ variable {X : C}
 
 theorem yonedaFamily_fromCocone_compatible (S : Sieve X) (s : Cocone (diagram S.arrows)) :
     FamilyOfElements.Compatible <| yonedaFamilyOfElements_fromCocone S.arrows s := by
-  intro Y₁ Y₂ Z g₁ g₂ f₁ f₂ hf₁ hf₂ hgf
-  have Hs := s.ι.naturality
-  simp only [yoneda_obj_obj, Opposite.unop_op, yoneda_obj_map, Quiver.Hom.unop_op]
-  dsimp [yonedaFamilyOfElements_fromCocone]
-  have hgf₁ : S.arrows (g₁ ≫ f₁) := by exact Sieve.downward_closed S hf₁ g₁
-  have hgf₂ : S.arrows (g₂ ≫ f₂) := by exact Sieve.downward_closed S hf₂ g₂
-  let F : (Over.mk (g₁ ≫ f₁) : Over X) ⟶ (Over.mk (g₂ ≫ f₂) : Over X) := Over.homMk (𝟙 Z)
-  let F₁ : (Over.mk (g₁ ≫ f₁) : Over X) ⟶ (Over.mk f₁ : Over X) := Over.homMk g₁
-  let F₂ : (Over.mk (g₂ ≫ f₂) : Over X) ⟶ (Over.mk f₂ : Over X) := Over.homMk g₂
-  have hF := @Hs ⟨Over.mk (g₁ ≫ f₁), hgf₁⟩ ⟨Over.mk (g₂ ≫ f₂), hgf₂⟩ (ObjectProperty.homMk F)
-  have hF₁ := @Hs ⟨Over.mk (g₁ ≫ f₁), hgf₁⟩ ⟨Over.mk f₁, hf₁⟩ (ObjectProperty.homMk F₁)
-  have hF₂ := @Hs ⟨Over.mk (g₂ ≫ f₂), hgf₂⟩ ⟨Over.mk f₂, hf₂⟩ (ObjectProperty.homMk F₂)
-  cat_disch
+  rw [compatible_iff_sieveCompatible]
+  intro Y Z f g hf
+  simpa [Presieve.diagram, yonedaFamilyOfElements_fromCocone] using
+    (@s.ι.naturality ⟨Over.mk (g ≫ f), S.downward_closed hf g⟩ ⟨Over.mk f, hf⟩
+      (ObjectProperty.homMk (Over.homMk g : (Over.mk (g ≫ f) : Over X) ⟶ Over.mk f))).symm
 
 /--
 The base of a sieve `S` is a colimit of `S` iff all Yoneda-presheaves satisfy

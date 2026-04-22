@@ -71,7 +71,6 @@ lemma isTriangulated_rightAdjoint [F.IsTriangulated] : G.IsTriangulated where
       simp only [Functor.comp_obj, homEquiv_counit, Functor.id_obj, Functor.map_comp, assoc,
         homEquiv_unit, counit_naturality, counit_naturality_assoc, left_triangle_components_assoc,
         ← h₂, adj.shift_counit_app, Iso.hom_inv_id_app_assoc]
-    rw [assoc] at h₂
     have : Mono (adj.homEquiv _ _ h) := by
       rw [mono_iff_cancel_zero]
       intro _ φ hφ
@@ -119,15 +118,11 @@ lemma isTriangulated_rightAdjoint [F.IsTriangulated] : G.IsTriangulated where
     refine isomorphic_distinguished _ mem _ (Iso.symm ?_)
     refine Triangle.isoMk _ _ (Iso.refl _) (Iso.refl _) (asIso (adj.homEquiv Z T.obj₃ h)) ?_ ?_ ?_
     · simp
-    · apply (adj.homEquiv _ _).symm.injective
-      dsimp
-      simp only [homEquiv_unit, homEquiv_counit, Functor.map_comp, assoc,
-        counit_naturality, left_triangle_components_assoc, h₁, id_comp]
+    · simp [homEquiv_unit, h₁']
     · dsimp
-      rw [Functor.map_id, comp_id, homEquiv_unit, assoc, ← G.map_comp_assoc, ← h₂,
-        Functor.map_comp, Functor.map_comp, assoc, unit_naturality_assoc, assoc,
-        Functor.commShiftIso_hom_naturality, ← adj.shift_unit_app_assoc,
-        ← Functor.map_comp, right_triangle_components, Functor.map_id, comp_id]
+      rw [Functor.map_id, comp_id, ← cancel_mono ((G.commShiftIso (1 : ℤ)).inv.app T.obj₁),
+        h₂']
+      simp [assoc]
 
 include adj in
 open Pretriangulated.Opposite Functor in

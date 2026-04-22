@@ -106,18 +106,14 @@ def limitConeLift (F : J ⥤ Cat.{v, v}) (s : Cone F) : s.pt ⟶ limitConeX F :=
             { app := fun j => (s.π.app j).toFunctor.obj
               naturality := fun _ _ f => objects.congr_map (s.π.naturality f) } }
     map f := by
-      fapply Types.Limit.mk.{v, v}
+      refine Types.Limit.mk _ ?_ ?_
       · intro j
         refine eqToHom ?_ ≫ (s.π.app j).toFunctor.map f ≫ eqToHom ?_ <;> simp
       · intro j j' h
-        dsimp
-        simp only [Functor.map_comp, eqToHom_map, ← Functor.comp_map, Category.assoc, eqToHom_trans,
-          eqToHom_trans_assoc]
-        have := congr($((s.π.naturality h).symm).toFunctor)
-        dsimp at this
-        rw [Functor.id_comp] at this
-        rw [Functor.congr_hom this f]
-        simp
+        have hs := congr($((s.π.naturality h).symm).toFunctor)
+        dsimp at hs
+        simp [Functor.map_comp, eqToHom_map, ← Functor.comp_map, Category.assoc, eqToHom_trans,
+          eqToHom_trans_assoc, Functor.id_comp, Functor.congr_hom hs f]
   }
 
 @[simp]
@@ -137,12 +133,9 @@ def limitConeIsLimit (F : J ⥤ Cat.{v, v}) : IsLimit (limitCone F) where
     exact Types.Limit.π_mk.{v, v} _ _ _ _
   uniq s m w := by
     symm
-    ext1
-    refine CategoryTheory.Functor.ext ?_ ?_
+    refine Cat.Hom.ext <| CategoryTheory.Functor.ext ?_ ?_
     · intro X
-      apply Types.limit_ext.{v, v}
-      intro j
-      simp [← w j]
+      exact Types.limit_ext _ _ _ fun j => by simp [← w j]
     · intro X Y f
       simp [fun j => Functor.congr_hom congr($((w j).symm).toFunctor) f]
 

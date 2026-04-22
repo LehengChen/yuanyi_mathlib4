@@ -95,15 +95,10 @@ instance {E : Type u₃} [Category.{v₃} E] (F : C ⥤ D) (G : D ⥤ E)
 instance [PreservesColimitsOfSize.{w, w} F] : F.IsCardinalAccessible κ where
 
 instance (A : C) : IsCardinalAccessible ((Functor.const C).obj A) κ where
-  preservesColimitOfShape J _ _ :=
-    { preservesColimit {F} :=
-        { preserves {c} hc := ⟨by
-            have h := isFiltered_of_isCardinalFiltered J κ
-            have (j : J) : IsIso ((((const C).obj A).mapCocone c).ι.app j) := by
-              dsimp
-              infer_instance
-            exact Functor.IsEventuallyConstantFrom.isColimitOfIsIso
-              (i₀ := h.nonempty.some) (fun _ _ ↦ by dsimp; infer_instance) _⟩ } }
+  preservesColimitOfShape J _ _ := by
+    have := isFiltered_of_isCardinalFiltered J κ
+    haveI := IsFiltered.isConnected (C := J)
+    exact { preservesColimit := ⟨fun {_} _ => ⟨Limits.isColimitConstCocone J A⟩⟩ }
 
 end
 
@@ -208,14 +203,10 @@ lemma isCardinalPresentable_of_equivalence
   suffices PreservesColimit Y (coyoneda.obj (op (e.functor.obj X)) ⋙ uliftFunctor.{v₁}) from
     ⟨fun {c} hc ↦ ⟨isColimitOfReflects uliftFunctor.{v₁}
         (isColimitOfPreserves (coyoneda.obj (op (e.functor.obj X)) ⋙ uliftFunctor.{v₁}) hc)⟩⟩
-  have iso : coyoneda.obj (op (e.functor.obj X)) ⋙ uliftFunctor.{v₁} ≅
-    e.inverse ⋙ coyoneda.obj (op X) ⋙ uliftFunctor.{v₃} :=
-    NatIso.ofComponents (fun Z ↦
-      (Equiv.ulift.trans ((e.toAdjunction.homEquiv X Z).trans Equiv.ulift.symm)).toIso) (by
-        intro _ _ f
-        ext ⟨g⟩
-        simp [Adjunction.homEquiv_unit])
-  exact preservesColimit_of_natIso Y iso.symm
+  exact preservesColimit_of_natIso Y
+    (show e.inverse ⋙ coyoneda.obj (op X) ⋙ uliftFunctor.{v₃} ≅
+        coyoneda.obj (op (e.functor.obj X)) ⋙ uliftFunctor.{v₁} from
+      (Adjunction.compUliftCoyonedaIso.{0} e.toAdjunction).symm.app (op X))
 
 instance isCardinalPresentable_of_isEquivalence
     {C' : Type u₃} [Category.{v₃} C'] [IsCardinalPresentable X κ] (F : C ⥤ C')

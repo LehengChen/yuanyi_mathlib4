@@ -125,20 +125,16 @@ def isPointwiseRightKanExtensionAtOfIsoOfIsLocalization
       rw [id_comp] at eq
       rw [assoc] at hφ
       simp [eq, ← reassoc_of% hφ, ← e.inv.naturality f]
-    · have : IsIso (F.map w) := by
-        have := Localization.inverts L W w hw
-        rw [← NatIso.naturality_2 e w]
-        dsimp
-        infer_instance
+    · have : IsIso (F.map w) := (MorphismProperty.IsInvertedBy.iff_of_iso W e).2
+          (MorphismProperty.IsInvertedBy.of_comp W L (Localization.inverts L W) G) w hw
       have eq := s.π.naturality (StructuredArrow.homMk w :
           StructuredArrow.mk (φ ≫ (Localization.isoOfHom L W w hw).inv) ⟶
             StructuredArrow.mk φ)
       dsimp at eq hφ ⊢
       rw [id_comp] at eq
       rw [assoc] at hφ
-      simp only [← cancel_mono (F.map w), ← eq, comp_obj, comp_map, assoc,
-        ← hφ, ← NatTrans.naturality, ← G.map_comp_assoc,
-        Localization.isoOfHom_inv_hom_id, comp_id]
+      simp only [← cancel_mono (F.map w), ← eq, comp_map, assoc, ← hφ,
+        ← NatTrans.naturality, ← G.map_comp_assoc, Localization.isoOfHom_inv_hom_id, comp_id]
   uniq s m hm := by
     have := hm (StructuredArrow.mk (𝟙 (L.obj Y)))
     dsimp at this m hm ⊢

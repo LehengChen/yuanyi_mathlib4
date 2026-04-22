@@ -30,15 +30,9 @@ lemma Arrow.finite_iff (C : Type u) [SmallCategory C] :
     Finite (Arrow C) ↔ Nonempty (FinCategory C) := by
   constructor
   · intro
-    refine ⟨?_, fun a b ↦ ?_⟩
-    · have := Finite.of_injective (fun (a : C) ↦ Arrow.mk (𝟙 a))
-        (fun _ _ ↦ congr_arg Comma.left)
-      apply Fintype.ofFinite
-    · have := Finite.of_injective (fun (f : a ⟶ b) ↦ Arrow.mk f)
-        (fun f g h ↦ by
-          change (Arrow.mk f).hom = (Arrow.mk g).hom
-          congr)
-      apply Fintype.ofFinite
+    letI := Fintype.ofFinite (Arrow C)
+    refine ⟨Fintype.ofInjective (fun a : C ↦ Arrow.mk (𝟙 a)) (fun _ _ ↦ congr_arg Comma.left),
+      fun a b ↦ Fintype.ofInjective (fun f : a ⟶ b ↦ Arrow.mk f) (Arrow.mk_injective a b)⟩
   · rintro ⟨_⟩
     have := Fintype.ofEquiv _ (Arrow.equivSigma C).symm
     infer_instance

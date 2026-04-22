@@ -225,13 +225,8 @@ noncomputable def Functor.CommShift.ofInduced :
           ← F.map_comp_assoc, Iso.hom_inv_id_app, F.map_id, Category.id_comp]
       commShiftIso_add := fun a b => by
         ext X
-        dsimp
-        simp only [isoAdd_hom_app, Iso.symm_hom, shiftFunctorAdd_inv_app_obj_of_induced,
-          shiftFunctor_of_induced]
-        rw [← Functor.map_comp_assoc, Iso.inv_hom_id_app]
-        dsimp
-        rw [Functor.map_id, Category.id_comp, Iso.inv_hom_id_app_assoc,
-          ← F.map_comp_assoc, Iso.hom_inv_id_app, F.map_id, Category.id_comp] }
+        simp [ShiftMkCore.shiftFunctorAdd_eq, ShiftMkCore.shiftFunctor_eq,
+          ← Functor.map_comp_assoc] }
 
 lemma Functor.commShiftIso_eq_ofInduced (a : A) :
     letI := HasShift.induced F A s i

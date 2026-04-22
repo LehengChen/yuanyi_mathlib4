@@ -118,22 +118,14 @@ def isPointwiseLeftKanExtensionAtOfIsoOfIsLocalization
   fac s j := by
     refine Localization.induction_costructuredArrow L W _ (by simp)
       (fun X₁ X₂ f φ hφ ↦ ?_) (fun X₁ X₂ w hw φ hφ ↦ ?_) j
-    · have eq := s.ι.naturality
+    · simpa [Functor.map_comp, assoc, ← hφ, NatTrans.naturality_assoc] using s.ι.naturality
         (CostructuredArrow.homMk f : CostructuredArrow.mk (L.map f ≫ φ) ⟶ CostructuredArrow.mk φ)
-      dsimp at eq hφ ⊢
-      rw [comp_id] at eq
-      rw [assoc] at hφ
-      rw [assoc, map_comp_assoc, ← eq, ← hφ, NatTrans.naturality_assoc, comp_map]
-    · have : IsIso (F.map w) := by
-        have := Localization.inverts L W w hw
-        rw [← NatIso.naturality_2 e w]
-        dsimp
-        infer_instance
-      have eq := s.ι.naturality
+    · have : IsIso (F.map w) := (MorphismProperty.IsInvertedBy.iff_of_iso W e).2
+        (MorphismProperty.IsInvertedBy.of_comp W L (Localization.inverts L W) G) w hw
+      have eq := by simpa using (s.ι.naturality
         (CostructuredArrow.homMk w : CostructuredArrow.mk φ ⟶ CostructuredArrow.mk
-          ((Localization.isoOfHom L W w hw).inv ≫ φ))
-      dsimp at eq hφ ⊢
-      rw [comp_id] at eq
+          ((Localization.isoOfHom L W w hw).inv ≫ φ)))
+      dsimp at hφ ⊢
       rw [assoc] at hφ
       rw [map_comp, assoc, assoc, ← cancel_epi (F.map w), eq, ← hφ,
         NatTrans.naturality_assoc, comp_map, ← G.map_comp_assoc]

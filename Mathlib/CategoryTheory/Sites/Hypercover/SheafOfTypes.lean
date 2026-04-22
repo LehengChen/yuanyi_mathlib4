@@ -75,18 +75,14 @@ lemma Precoverage.ZeroHypercover.Hom.isSheafFor_iff [Limits.HasPullbacks C] {K :
     (H₂ : ∀ {X : C} (f : X ⟶ S),
       Presieve.IsSeparatedFor F (.ofArrows (𝒰.pullback₂ f).X (𝒰.pullback₂ f).f)) :
     Presieve.IsSheafFor F (.ofArrows 𝒱.X 𝒱.f) := by
-  rw [Presieve.isSheafFor_iff_generate]
-  apply Presieve.isSheafFor_subsieve_aux (S := .generate (.ofArrows 𝒰.X 𝒰.f))
-  · rw [← Sieve.generate_le_iff, Sieve.generate_sieve, Sieve.generate_le_iff,
-      Presieve.ofArrows_le_iff]
-    intro i
-    rw [← f.w₀]
-    exact ⟨_, f.h₀ i, 𝒱.f _, ⟨_⟩, rfl⟩
-  · rwa [← Presieve.isSheafFor_iff_generate]
-  · intro Y f hf
-    rw [← Sieve.pullbackArrows_comm, ← Presieve.isSeparatedFor_iff_generate,
-      ← Presieve.ofArrows_pullback]
-    apply H₂
+  refine Presieve.isSheafFor_of_factorsThru F ?_ H₁ ?_
+  · intro Y g hg
+    obtain ⟨i⟩ := hg
+    exact ⟨_, f.h₀ i, 𝒱.f _, ⟨_⟩, f.w₀ i⟩
+  · intro Y g hg
+    refine ⟨(𝒰.pullback₂ g).presieve₀, H₂ g, ?_⟩
+    simpa [Precoverage.ZeroHypercover.pullback₂, PreZeroHypercover.presieve₀_pullback₁] using
+      Presieve.FactorsThruAlong.pullbackArrows g 𝒰.presieve₀
 
 namespace PreOneHypercover
 
@@ -165,18 +161,13 @@ lemma IsStronglySheafFor.isSheafFor_sieve_of_pullback (h₁ : E.IsStronglySheafF
   intro t ht
   choose s hs huniq using fun i ↦ H i (t.pullback (E.f i)) (ht.pullback (E.f i))
   have hr : Presieve.Arrows.Compatible _ E.f s := by
-    intro i j Z gi gj hgij
-    refine (h₁.isSeparatedFor_sieve₁ gi gj hgij).ext fun Y f ⟨k, h, hf₁, hf₂⟩ ↦ ?_
-    simp only [← FunctorToTypes.map_comp_apply, ← op_comp, hf₁, hf₂]
-    simp only [op_comp, FunctorToTypes.map_comp_apply]
-    congr! 1
-    refine (H' k).ext fun W p hp ↦ ?_
-    simp only [← FunctorToTypes.map_comp_apply, ← op_comp, hs i (p ≫ E.p₁ k) (by simpa),
-      hs j (p ≫ E.p₂ k) (by simpa [← E.w])]
-    dsimp only [Presieve.FamilyOfElements.pullback]
-    congr 1
-    simp [E.w]
-  obtain ⟨s', hs'⟩ := hr.exists_familyOfElements
+    exact h₁.isStronglySeparatedFor.arrowsCompatible s fun i j k ↦ by
+      refine (H' k).ext fun W p hp ↦ ?_
+      simp only [← FunctorToTypes.map_comp_apply, ← op_comp, hs i (p ≫ E.p₁ k) (by simpa),
+        hs j (p ≫ E.p₂ k) (by simpa [← E.w])]
+      dsimp only [Presieve.FamilyOfElements.pullback]
+      congr 1
+      simp [E.w]
   obtain ⟨t', ht', hunique⟩ := (Presieve.isSheafFor_arrows_iff _ _).mp h₁.isSheafFor_presieve₀ _ hr
   refine ⟨t', fun T f hf ↦ (h₂ f).ext fun Z g hg ↦ ?_, fun y hy ↦ ?_⟩
   · obtain ⟨W, w, u, ⟨i⟩, heq⟩ := hg

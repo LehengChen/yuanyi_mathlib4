@@ -125,20 +125,16 @@ lemma exists_isIso_of_functor_from_monoOver
   rw [Subobject.epi_iff_mk_eq_top f,
     subobjectMk_of_isColimit_eq_iSup F hc f hf] at h
   let s (j : J) : Subobject X := Subobject.mk (F.obj j).obj.hom
-  have h' : Function.Surjective (fun (j : J) ↦ (⟨s j, _, rfl⟩ : Set.range s)) := by
-    rintro ⟨_, j, rfl⟩
-    exact ⟨j, rfl⟩
-  obtain ⟨σ, hσ⟩ := h'.hasRightInverse
   have hs : HasCardinalLT (Set.range s) κ :=
     hXκ.of_injective (f := Subtype.val) Subtype.val_injective
-  refine ⟨IsCardinalFiltered.max σ hs, ?_⟩
+  refine ⟨IsCardinalFiltered.max (Set.rangeSplitting s) hs, ?_⟩
   rw [Subobject.isIso_iff_mk_eq_top, ← top_le_iff, ← h, iSup_le_iff]
   intro j
-  let t : Set.range s := ⟨_, j, rfl⟩
-  trans Subobject.mk (F.obj (σ t)).obj.hom
-  · exact (hσ t).symm.le
+  let t : Set.range s := Set.rangeFactorization s j
+  trans Subobject.mk (F.obj (Set.rangeSplitting s t)).obj.hom
+  · exact (Set.apply_rangeSplitting s t).symm.le
   · exact MonoOver.subobjectMk_le_mk_of_hom
-      (F.map (IsCardinalFiltered.toMax σ hs t))
+      (F.map (IsCardinalFiltered.toMax (Set.rangeSplitting s) hs t))
 
 end IsGrothendieckAbelian
 

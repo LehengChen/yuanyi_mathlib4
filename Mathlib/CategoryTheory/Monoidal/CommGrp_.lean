@@ -210,12 +210,7 @@ variable (F) in
 objects. -/
 @[simps!]
 def mapCommGrp : CommGrp C ⥤ CommGrp D where
-  obj A :=
-    { F.mapGrp.obj A.toGrp with
-      comm :=
-        { mul_comm := by
-            dsimp
-            rw [← Functor.LaxBraided.braided_assoc, ← Functor.map_comp, IsCommMonObj.mul_comm] } }
+  obj A := { F.mapGrp.obj A.toGrp with comm := Functor.isCommMonObj_obj (F := F) }
   map f := InducedCategory.homMk (F.mapGrp.map f.hom)
 
 protected instance Faithful.mapCommGrp [F.Faithful] : F.mapCommGrp.Faithful where

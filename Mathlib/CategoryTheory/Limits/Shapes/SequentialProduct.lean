@@ -80,15 +80,9 @@ lemma functorMap_commSq_aux {n m k : ℕ} (h : n ≤ m) (hh : ¬(k < m)) :
   induction h using Nat.leRec with
   | refl => simp
   | @le_succ_of_le m h ih =>
-    specialize ih (by lia)
-    have : homOfLE (by lia : n ≤ m + 1) =
-        homOfLE (by lia : n ≤ m) ≫ homOfLE (by lia : m ≤ m + 1) := by simp
-    rw [this, op_comp, Functor.map_comp]
-    slice_lhs 2 4 => rw [ih]
-    simp only [Functor.ofOpSequence_obj, homOfLE_leOfHom, Functor.ofOpSequence_map_homOfLE_succ,
-      functorMap, dite_eq_ite, limMap_π_assoc, Discrete.functor_obj_eq_as, Discrete.natTrans_app]
-    split_ifs
-    simp [dif_neg (by lia : ¬(k < m))]
+    rw [← homOfLE_comp h (Nat.le_succ m), op_comp, Functor.map_comp]
+    simpa [functorMap, hh, dif_neg (by lia : ¬(k < m))] using
+      congrArg (fun g => functorMap f m ≫ g) (ih (by lia))
 
 set_option backward.isDefEq.respectTransparency false in
 lemma functorMap_commSq {n m : ℕ} (h : ¬(m < n)) :
@@ -103,15 +97,11 @@ lemma functorMap_commSq {n m : ℕ} (h : ¬(m < n)) :
       simp [functorMap]
   | succ m =>
       rw [← functorMap_commSq_succ f (m + 1)]
-      simp only [Functor.ofOpSequence_obj, homOfLE_leOfHom, dite_eq_ite,
-        Functor.ofOpSequence_map_homOfLE_succ]
-      have : homOfLE (by lia : n ≤ m + 1 + 1) =
-          homOfLE (by lia : n ≤ m + 1) ≫ homOfLE (by lia : m + 1 ≤ m + 1 + 1) := by simp
-      rw [this, op_comp, Functor.map_comp]
-      simp only [Functor.ofOpSequence_obj, homOfLE_leOfHom, Functor.ofOpSequence_map_homOfLE_succ,
-        Category.assoc]
-      congr 1
-      exact functorMap_commSq_aux f (by lia) (by lia)
+      rw [← homOfLE_comp (by lia : n ≤ m + 1) (Nat.le_succ (m + 1)), op_comp, Functor.map_comp]
+      simpa only [Functor.ofOpSequence_obj, homOfLE_leOfHom,
+        Functor.ofOpSequence_map_homOfLE_succ, Category.assoc, dite_eq_ite] using
+        congrArg (fun g => functorMap f (m + 1) ≫ g)
+          (functorMap_commSq_aux f (by lia : n ≤ m + 1) (by lia : ¬(m + 1 < m + 1)))
 
 set_option backward.isDefEq.respectTransparency false in
 /--
@@ -129,14 +119,9 @@ noncomputable def cone : Cone (Functor.ofOpSequence (functorMap f)) where
         f m ≫ eqToHom (functorObj_eq_neg h).symm) (fun n ↦ ?_)
     apply Limits.Pi.hom_ext
     intro m
-    simp only [Functor.const_obj_obj, Functor.ofOpSequence_obj, homOfLE_leOfHom,
-      Functor.const_obj_map, Category.id_comp, limMap_π, Discrete.functor_obj_eq_as,
-      Discrete.natTrans_app, Functor.ofOpSequence_map_homOfLE_succ, functorMap, Category.assoc,
-      limMap_π_assoc]
-    split
-    · simp [dif_pos (by lia : m < n + 1)]
-    · split
-      all_goals simp
+    by_cases h : m < n
+    · simp [functorMap, h, dif_pos (by lia : m < n + 1)]
+    · by_cases h' : m < n + 1 <;> simp [functorMap, h, h']
 
 lemma cone_π_app (n : ℕ) : (cone f).π.app ⟨n⟩ =
     Limits.Pi.map fun m ↦ if h : m < n then eqToHom (functorObj_eq_pos h).symm else

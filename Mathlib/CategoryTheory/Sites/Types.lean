@@ -103,15 +103,11 @@ theorem eval_typesGlue {S hs α} (f) : eval.{u} S α (typesGlue S hs α f) = f :
   convert FunctorToTypes.map_id_apply S _
 
 theorem typesGlue_eval {S hs α} (s) : typesGlue.{u} S hs α (eval S α s) = s := by
-  apply (hs.isSheafFor _ (generate_discretePresieve_mem α)).isSeparatedFor.ext
-  intro β f hf
-  apply (IsSheafFor.valid_glue _ _ _ hf).trans
-  apply (FunctorToTypes.map_comp_apply _ _ _ _).symm.trans
-  rw [← op_comp]
-  --congr 2 -- Porting note: This tactic didn't work. Find an alternative.
-  suffices ((↾fun _ ↦ PUnit.unit) ≫ ↾fun _ ↦ f (Classical.choose hf)) = f by rw [this]
-  funext x
-  exact congr_arg f (Classical.choose_spec hf x).symm
+  exact (hs.isSheafFor _ (generate_discretePresieve_mem α)).isSeparatedFor.ext fun β f hf =>
+    (IsSheafFor.valid_glue _ _ _ hf).trans <| by
+      simpa [eval, ← FunctorToTypes.map_comp_apply, ← op_comp] using
+        congr_arg (fun g : β ⟶ α => S.map g.op s)
+          (funext fun x => congr_arg f (Classical.choose_spec hf x).symm)
 
 /-- Given a sheaf `S`, construct an equivalence `S(α) ≃ (α → S(*))`. -/
 @[simps]

@@ -99,15 +99,9 @@ attribute [instance] FinitaryExtensive.hasPullbacksOfInclusions
 
 theorem FinitaryExtensive.vanKampen [FinitaryExtensive C] {F : Discrete WalkingPair ⥤ C}
     (c : Cocone F) (hc : IsColimit c) : IsVanKampenColimit c := by
-  let X := F.obj ⟨WalkingPair.left⟩
-  let Y := F.obj ⟨WalkingPair.right⟩
-  have : F = pair X Y := by
-    apply Functor.hext
-    · rintro ⟨⟨⟩⟩ <;> rfl
-    · rintro ⟨⟨⟩⟩ ⟨j⟩ ⟨⟨rfl : _ = j⟩⟩ <;> simp [X, Y]
-  clear_value X Y
-  subst this
-  exact FinitaryExtensive.van_kampen' c hc
+  let e := diagramIsoPair F
+  refine (IsVanKampenColimit.precompose_isIso_iff e.inv).mp ?_
+  exact FinitaryExtensive.van_kampen' _ ((IsColimit.precomposeHomEquiv e.symm c).symm hc)
 
 namespace HasPullbacksOfInclusions
 
@@ -246,36 +240,24 @@ instance types.finitaryExtensive : FinitaryExtensive (Type u) := by
   · intro Z f
     dsimp [Limits.Types.binaryCoproductCocone]
     delta Types.PullbackObj
-    have : ∀ x, f x = Sum.inl PUnit.unit ∨ f x = Sum.inr PUnit.unit := by
-      intro x
-      rcases f x with (⟨⟨⟩⟩ | ⟨⟨⟩⟩)
-      exacts [Or.inl rfl, Or.inr rfl]
-    let eX : { p : Z × PUnit // f p.fst = Sum.inl p.snd } ≃ { x : Z // f x = Sum.inl PUnit.unit } :=
-      ⟨fun p => ⟨p.1.1, by convert p.2⟩, fun x => ⟨⟨_, _⟩, x.2⟩, fun _ => by ext; rfl,
-        fun _ => by ext; rfl⟩
-    let eY : { p : Z × PUnit // f p.fst = Sum.inr p.snd } ≃ { x : Z // f x = Sum.inr PUnit.unit } :=
-      ⟨fun p => ⟨p.1.1, p.2.trans (congr_arg Sum.inr <| Subsingleton.elim _ _)⟩,
-        fun x => ⟨⟨_, _⟩, x.2⟩, fun _ => by ext; rfl, fun _ => by ext; rfl⟩
-    fapply BinaryCofan.isColimitMk
-    · exact fun s x => dite _ (fun h => s.inl <| eX.symm ⟨x, h⟩)
-        fun h => s.inr <| eY.symm ⟨x, (this x).resolve_left h⟩
-    · intro s
-      ext ⟨⟨x, ⟨⟩⟩, _⟩
-      dsimp
-      split_ifs <;> rfl
-    · intro s
-      ext ⟨⟨x, ⟨⟩⟩, hx⟩
-      dsimp
-      split_ifs with h
-      · cases h.symm.trans hx
-      · rfl
-    · intro s m e₁ e₂
-      ext x
-      split_ifs
-      · rw [← e₁]
-        rfl
-      · rw [← e₂]
-        rfl
+    refine ((Types.binaryCofan_isColimit_iff _).mpr ⟨?_, ?_, ?_⟩).some
+    · intro x y h
+      exact Subtype.ext (Prod.ext h (Subsingleton.elim _ _))
+    · intro x y h
+      exact Subtype.ext (Prod.ext h (Subsingleton.elim _ _))
+    · convert Set.isCompl_range_inl_range_inr.preimage f
+      · ext x
+        constructor
+        · rintro ⟨⟨⟨x, y⟩, h⟩, rfl⟩
+          exact ⟨y, h.symm⟩
+        · rintro ⟨y, h⟩
+          exact ⟨⟨⟨x, y⟩, h.symm⟩, rfl⟩
+      · ext x
+        constructor
+        · rintro ⟨⟨⟨x, y⟩, h⟩, rfl⟩
+          exact ⟨y, h.symm⟩
+        · rintro ⟨y, h⟩
+          exact ⟨⟨⟨x, y⟩, h.symm⟩, rfl⟩
 
 section TopCat
 

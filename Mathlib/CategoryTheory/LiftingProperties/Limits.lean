@@ -36,13 +36,9 @@ lemma IsPushout.hasLiftingProperty (h : IsPushout s f g t)
       h.hom_ext (by rw [h.inl_desc_assoc, sq.w]) (by rw [h.inr_desc_assoc, CommSq.fac_right])⟩
 
 lemma IsPullback.hasLiftingProperty (h : IsPullback s f g t)
-    {X' Y' : C} (f' : X' ⟶ Y') [HasLiftingProperty f' g] : HasLiftingProperty f' f where
-  sq_hasLift := fun {u v} sq ↦ by
-    have w : (u ≫ s) ≫ g = f' ≫ v ≫ t := by
-      rw [Category.assoc, h.toCommSq.w, ← Category.assoc, ← Category.assoc, sq.w]
-    exact ⟨h.lift (CommSq.mk w).lift v (by rw [CommSq.fac_right]),
-      h.hom_ext (by rw [Category.assoc, h.lift_fst, CommSq.fac_left])
-        (by rw [Category.assoc, h.lift_snd, sq.w]), h.lift_snd _ _ _⟩
+    {X' Y' : C} (f' : X' ⟶ Y') [HasLiftingProperty f' g] : HasLiftingProperty f' f := by
+  haveI : HasLiftingProperty g.op f'.op := (inferInstance : HasLiftingProperty f' g).op
+  exact (h.op.hasLiftingProperty f'.op).unop
 
 instance [HasPushout s f] {T₁ T₂ : C} (p : T₁ ⟶ T₂) [HasLiftingProperty f p] :
     HasLiftingProperty (pushout.inl s f) p :=

@@ -80,15 +80,11 @@ lemma functor_linear_iff (F : C ⥤ E) (G : D ⥤ E) [Lifting L W F G] :
   constructor
   · intro
     have : (L ⋙ G).Linear R := Functor.linear_of_iso _ (Lifting.iso L W F G).symm
-    have := Localization.essSurj L W
     rw [Functor.linear_iff]
-    intro X r
-    have e := L.objObjPreimageIso X
-    have : r • 𝟙 X = e.inv ≫ (r • 𝟙 _) ≫ e.hom := by simp
-    rw [this, G.map_comp, G.map_comp, ← L.map_id, ← L.map_smul, ← Functor.comp_map,
-      (L ⋙ G).map_smul, Functor.map_id, Linear.smul_comp, Linear.comp_smul]
-    dsimp
-    rw [Category.id_comp, ← G.map_comp, e.inv_hom_id, G.map_id]
+    exact fun X r ↦ NatTrans.congr_app (Localization.natTrans_ext L W
+      (τ := Functor.whiskerRight (Linear.toCatCenter R D r) G)
+      (τ' := Functor.whiskerLeft G (Linear.toCatCenter R E r)) (fun X ↦ by
+        simpa [← L.map_smul] using (L ⋙ G).map_smul r (𝟙 X))) X
   · intro
     exact Functor.linear_of_iso _ (Lifting.iso L W F G)
 

@@ -140,14 +140,10 @@ of `A`, there exists a unique automorphism of `B` making the canonical diagram c
 lemma exists_autMap {A B : C} (f : A ⟶ B) [IsConnected A] [IsGalois B] (σ : Aut A) :
     ∃! (τ : Aut B), f ≫ τ.hom = σ.hom ≫ f := by
   let F := GaloisCategory.getFiberFunctor C
-  obtain ⟨a⟩ := nonempty_fiber_of_isConnected F A
-  refine ⟨?_, ?_, ?_⟩
-  · exact (evaluationEquivOfIsGalois F B (F.map f a)).symm (F.map (σ.hom ≫ f) a)
-  · apply evaluation_injective_of_isConnected F A B a
-    simp
-  · intro τ hτ
-    apply evaluation_aut_injective_of_isConnected F B (F.map f a)
-    simpa using ConcreteCategory.congr_hom (F.congr_map hτ) a
+  let a : F.obj A := Classical.arbitrary _
+  convert (evaluation_aut_bijective_of_isGalois F B (F.map f a)).existsUnique
+    (F.map (σ.hom ≫ f) a) using 1; ext τ
+  simp [← (evaluation_injective_of_isConnected F A B a).eq_iff]
 
 /-- A morphism from a connected object to a Galois object induces a map on automorphism
 groups. This is a group homomorphism (see `autMapHom`). -/

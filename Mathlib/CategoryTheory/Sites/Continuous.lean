@@ -155,28 +155,21 @@ private lemma isSheaf_of_isContinuous_aux (F : C ⥤ D) [Functor.IsContinuous F 
   let adj' : H' ⊣ (Functor.whiskeringLeft _ _ _).obj F.op := F.op.lanAdjunction _
   refine Presieve.IsSheaf.comp_of_W_map_of_adjunction _ adj' ?_ _ hG
   intro X S hS
-  have hWS : J.W (Sieve.shrinkFunctor.{max u₁ v₁ u₂ v₂} S).ι :=
-    Sieve.W_shrinkFunctor_ι_of_mem.{max u₁ v₁ u₂ v₂} _ S hS
-  have : K.W _ := Functor.W_map_of_adjunction_of_isContinuous_aux (J := J) K F H adj
-    (Sieve.shrinkFunctor.{max u₁ v₁ u₂ v₂} S).ι hWS
   let e : H ⋙ (Functor.whiskeringRight _ _ _).obj uliftFunctor.{w} ≅
       (Functor.whiskeringRight _ _ _).obj uliftFunctor.{w} ⋙ H' :=
     uliftFunctor.{w, max (max (max u₁ u₂) v₁) v₂}.lanCompIsoOfPreserves F.op
-  let iso : Arrow.mk (H'.map (Sieve.shrinkFunctor.{max w u₁ v₁ u₂ v₂} S).ι) ≅
-      .mk (Functor.whiskerRight
-        (H.map (Sieve.shrinkFunctor.{max u₁ v₁ u₂ v₂} S).ι) uliftFunctor.{w}) :=
-    Arrow.isoMk' _ _
+  apply (K.W.arrow_mk_iso_iff (Arrow.isoMk' _ _
       (H'.mapIso (Sieve.shrinkFunctorUliftFunctorIso.{max u₁ v₁ u₂ v₂, w} S).symm ≪≫ (e.app _).symm)
       (H'.mapIso (shrinkYonedaUliftFunctorIso.{max u₁ v₁ u₂ v₂}.app _).symm ≪≫ (e.app _).symm) <| by
         simp only [Functor.mapIso_symm, Functor.comp_obj, Functor.whiskeringRight_obj_obj,
           Iso.trans_hom, Iso.symm_hom, Functor.mapIso_inv, Iso.app_inv, Category.assoc]
         rw [← Functor.map_comp_assoc, ← dsimp% e.inv.naturality, ← Functor.map_comp_assoc,
           Sieve.shrinkFunctorUliftFunctorIso_inv_ι]
-        rfl
-  rw [K.W.arrow_mk_iso_iff iso]
+        rfl)).2
   apply GrothendieckTopology.W_of_preservesSheafification
   exact F.W_map_of_adjunction_of_isContinuous_aux J K H adj
-    (Sieve.shrinkFunctor.{max u₁ v₁ u₂ v₂} S).ι hWS
+    (Sieve.shrinkFunctor.{max u₁ v₁ u₂ v₂} S).ι
+    (Sieve.W_shrinkFunctor_ι_of_mem.{max u₁ v₁ u₂ v₂} _ S hS)
 
 /-- If `F` is continuous, any sheaf (in an arbitrary universe) remains a sheaf when
 precomposing with `F.op` (SGA 4 III 1.5). -/

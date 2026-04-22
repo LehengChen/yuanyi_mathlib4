@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 public import Mathlib.CategoryTheory.Limits.Shapes.Biproducts
+public import Mathlib.CategoryTheory.MorphismProperty.Retract
 
 /-!
 # Binary biproducts
@@ -990,17 +991,12 @@ is invertible, then `f` is invertible.
 -/
 theorem isIso_left_of_isIso_biprod_map {W X Y Z : C} (f : W ⟶ Y) (g : X ⟶ Z)
     [IsIso (biprod.map f g)] : IsIso f :=
-  ⟨⟨biprod.inl ≫ inv (biprod.map f g) ≫ biprod.fst,
-      ⟨by
-        have t := congrArg (fun p : W ⊞ X ⟶ W ⊞ X => biprod.inl ≫ p ≫ biprod.fst)
-          (IsIso.hom_inv_id (biprod.map f g))
-        simp only [Category.id_comp, Category.assoc, biprod.inl_map_assoc] at t
-        simp [t], by
-        have t := congrArg (fun p : Y ⊞ Z ⟶ Y ⊞ Z => biprod.inl ≫ p ≫ biprod.fst)
-          (IsIso.inv_hom_id (biprod.map f g))
-        simp only [Category.id_comp, Category.assoc, biprod.map_fst] at t
-        simp only [Category.assoc]
-        simp [t]⟩⟩⟩
+  MorphismProperty.of_retract
+    (P := MorphismProperty.isomorphisms C) (g := biprod.map f g)
+    { i := Arrow.homMk (biprod.inl : W ⟶ W ⊞ X) (biprod.inl : Y ⟶ Y ⊞ Z) (by simp)
+      r := Arrow.homMk (biprod.fst : W ⊞ X ⟶ W) (biprod.fst : Y ⊞ Z ⟶ Y) (by simp)
+      retract := by ext <;> simp }
+    (MorphismProperty.isomorphisms.infer_property _)
 
 /-- If
 ```

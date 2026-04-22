@@ -82,14 +82,10 @@ variable (D : GlueData C)
 
 @[simp]
 theorem t'_iij (i j : D.J) : D.t' i i j = (pullbackSymmetry _ _).hom := by
-  have eq₁ := D.t_fac i i j
-  have eq₂ := (IsIso.eq_comp_inv (D.f i i)).mpr (@pullback.condition _ _ _ _ _ _ (D.f i j) _)
-  rw [D.t_id, Category.comp_id, eq₂] at eq₁
-  have eq₃ := (IsIso.eq_comp_inv (D.f i i)).mp eq₁
-  rw [Category.assoc, ← pullback.condition, ← Category.assoc] at eq₃
-  exact
-    Mono.right_cancellation _ _
-      ((Mono.right_cancellation _ _ eq₃).trans (pullbackSymmetry_hom_comp_fst _ _).symm)
+  ext <;> simp only [pullbackSymmetry_hom_comp_fst, pullbackSymmetry_hom_comp_snd]
+  · rw [← cancel_mono (D.f i j), Category.assoc, pullback.condition, ← Category.assoc,
+      D.t_fac, D.t_id, Category.comp_id, pullback.condition]
+  · rw [D.t_fac, D.t_id, Category.comp_id]
 
 theorem t'_jii (i j : D.J) : D.t' j i i = pullback.fst _ _ ≫ D.t j i ≫ inv (pullback.snd _ _) := by
   rw [← Category.assoc, ← D.t_fac]
@@ -192,17 +188,12 @@ theorem types_π_surjective (D : GlueData Type*) : Function.Surjective D.π :=
 
 theorem types_ι_jointly_surjective (D : GlueData (Type v)) (x : D.glued) :
     ∃ (i : _) (y : D.U i), D.ι i y = x := by
-  delta CategoryTheory.GlueData.ι
-  simp_rw [← Multicoequalizer.ι_sigmaπ D.diagram]
-  rcases D.types_π_surjective x with ⟨x', rfl⟩
-  --have := colimit.isoColimitCocone (Types.coproductColimitCocone _)
-  rw [← show (colimit.isoColimitCocone (Types.coproductColimitCocone.{v, v} _)).inv _ = x' from
-      ConcreteCategory.congr_hom
-        (colimit.isoColimitCocone (Types.coproductColimitCocone _)).hom_inv_id x']
-  rcases (colimit.isoColimitCocone (Types.coproductColimitCocone _)).hom x' with ⟨i, y⟩
-  exact ⟨i, y, by
-    simp
-    rfl ⟩
+  obtain ⟨j, y, rfl⟩ := Types.jointly_surjective' (F := D.diagram.multispan) x
+  rcases j with a | i
+  · exact ⟨a.1, D.f a.1 a.2 y, by
+      simpa [GlueData.ι] using
+        congr_fun (Multicofork.fst_app_right (Multicoequalizer.multicofork D.diagram) a).symm y⟩
+  · exact ⟨i, y, rfl⟩
 
 variable (F : C ⥤ C')
 

@@ -53,15 +53,11 @@ attribute [local instance] hasEqualizers_of_hasKernels
 
 theorem exact_iff_epi_imageToKernel' : S.Exact ↔ Epi (imageToKernel' S.f S.g S.zero) := by
   rw [S.exact_iff_epi_kernel_lift]
-  have : factorThruImage S.f ≫ imageToKernel' S.f S.g S.zero = kernel.lift S.g S.f S.zero := by
+  have hfac : factorThruImage S.f ≫ imageToKernel' S.f S.g S.zero = kernel.lift S.g S.f S.zero := by
     simp only [← cancel_mono (kernel.ι _), kernel.lift_ι, imageToKernel',
       Category.assoc, image.fac]
-  constructor
-  · intro
-    exact epi_of_epi_fac this
-  · intro
-    rw [← this]
-    apply epi_comp
+  rw [← hfac]
+  exact epi_comp_iff_of_epi (factorThruImage S.f) (imageToKernel' S.f S.g S.zero)
 
 theorem exact_iff_epi_imageToKernel : S.Exact ↔ Epi (imageToKernel S.f S.g S.zero) := by
   rw [S.exact_iff_epi_imageToKernel']
@@ -135,14 +131,10 @@ def Exact.isColimitCoimage (h : S.Exact) :
     IsColimit
       (CokernelCofork.ofπ (Abelian.coimage.π S.g) (Abelian.comp_coimage_π_eq_zero S.zero) :
         CokernelCofork S.f) := by
-  rw [exact_iff_kernel_ι_comp_cokernel_π_zero] at h
-  refine CokernelCofork.IsColimit.ofπ _ _
-    (fun u hu => cokernel.desc (kernel.ι S.g) u
-      (by rw [← cokernel.π_desc S.f u hu, ← Category.assoc, h, zero_comp]))
-    (by simp) ?_
-  intro _ _ _ _ hm
-  ext
-  rw [hm, cokernel.π_desc]
+  let T : ShortComplex C :=
+    ShortComplex.mk S.f (Abelian.coimage.π S.g) (Abelian.comp_coimage_π_eq_zero S.zero)
+  exact ((ShortComplex.exact_iff_of_epi_of_isIso_of_mono
+    ({ τ₁ := 𝟙 _, τ₂ := 𝟙 _, τ₃ := Abelian.factorThruCoimage S.g } : T ⟶ S)).2 h).gIsCokernel
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If `(f, g)` is exact, then `factorThruImage g` is a cokernel of `f`. -/

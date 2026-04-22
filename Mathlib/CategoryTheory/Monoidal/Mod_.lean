@@ -224,15 +224,11 @@ def scalarRestriction (M : D) [ModObj B M] : ModObj A M where
     rw [← comp_actionHomLeft_assoc]
     rw [IsMonHom.one_hom, ModObj.one_smul]
   mul_smul' := by
-    -- oh, for homotopy.io in a widget!
-    slice_rhs 2 3 => rw [action_exchange]
-    simp only [actionHomLeft_action_assoc, Category.assoc, Iso.hom_inv_id_assoc,
-      actionHomRight_comp]
-    slice_rhs 4 6 => rw [ModObj.assoc_flip]
-    slice_rhs 2 4 => rw [← whiskerLeft_actionHomLeft]
-    slice_rhs 1 2 => rw [← comp_actionHomLeft]
-    rw [← comp_actionHomLeft, Category.assoc, ← comp_actionHomLeft_assoc,
-      IsMonHom.mul_hom, tensorHom_def, Category.assoc]
+    rw [← comp_actionHomLeft_assoc, IsMonHom.mul_hom]
+    simp only [comp_actionHomLeft, Category.assoc, ModObj.mul_smul, actionHomRight_comp]
+    rw [← actionHom_id, actionAssocIso_hom_naturality_assoc, actionHom_def']
+    simp only [actionHom_id, Category.assoc]
+    rw [← action_exchange_assoc]
 
 open MonoidalLeftAction in
 /-- If `g : M ⟶ N` is a `B`-linear morphisms of `B`-modules, then it induces an

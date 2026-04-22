@@ -6,7 +6,7 @@ Authors: Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Preadditive.Injective.Basic
-public import Mathlib.CategoryTheory.MorphismProperty.LiftingProperty
+public import Mathlib.CategoryTheory.Preadditive.Projective.LiftingProperties
 
 /-!
 # Characterization of injective objects in terms of lifting properties
@@ -45,16 +45,12 @@ end Injective
 lemma injective_iff_rlp_monomorphisms_of_isZero
     [HasZeroMorphisms C] {I Z : C} (p : I ⟶ Z) (hZ : IsZero Z) :
     Injective I ↔ (MorphismProperty.monomorphisms C).rlp p := by
-  obtain rfl := hZ.eq_of_tgt p 0
-  constructor
-  · intro _ A B i (_ : Mono i)
-    exact Injective.hasLiftingProperty_of_isZero i 0 hZ
-  · intro h
-    constructor
-    intro A B f i hi
-    have := h _ hi
-    have sq : CommSq f i (0 : I ⟶ Z) 0 := ⟨by simp⟩
-    exact ⟨sq.lift, by simp⟩
+  rw [Injective.injective_iff_projective_op]
+  refine (projective_iff_llp_epimorphisms_of_isZero p.op hZ.op).trans ⟨?_, ?_⟩
+  · intro h A B i hi
+    exact (h i.op (by infer_instance)).unop
+  · intro h A B i hi
+    exact (h i.unop (by infer_instance)).op
 
 lemma injective_iff_rlp_monomorphisms_zero
     [HasZeroMorphisms C] [HasZeroObject C] (I : C) :

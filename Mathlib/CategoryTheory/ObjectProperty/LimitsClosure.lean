@@ -111,11 +111,7 @@ instance [P.Nonempty] : (P.strictLimitsClosureStep J).Nonempty :=
 variable {P} in
 lemma strictLimitsClosureStep_monotone {Q : ObjectProperty C} (h : P ≤ Q) :
     P.strictLimitsClosureStep J ≤ Q.strictLimitsClosureStep J := by
-  dsimp [strictLimitsClosureStep]
-  simp only [sup_le_iff, iSup_le_iff]
-  exact ⟨h.trans le_sup_left, fun a ↦
-    (strictLimitsOfShape_monotone (J a) h).trans <|
-      le_iSup (fun a ↦ Q.strictLimitsOfShape (J a)) a |>.trans le_sup_right⟩
+  exact sup_le_sup h (iSup_mono fun a ↦ strictLimitsOfShape_monotone (J a) h)
 
 section
 
@@ -197,21 +193,17 @@ lemma strictLimitsClosureStep_strictLimitsClosureIter_eq_self :
       (Cardinal.isSuccLimit_ord hκ.aleph0_le), prop_iSup_iff,
       Subtype.exists, Set.mem_Iio, exists_prop] at hF
     choose o ho ho' using hF
-    obtain ⟨m, hm, hm'⟩ : ∃ (m : Ordinal.{w}) (hm : m < κ.ord), ∀ (j : J a), o j ≤ m := by
-      refine ⟨⨆ j, o ((equivShrink.{w} (J a)).symm j),
-        Ordinal.iSup_lt_of_lt_cof ?_ (fun _ ↦ ho _), fun j ↦ ?_⟩
-      · rw [hκ.cof_ord, ← hasCardinalLT_iff_cardinal_mk_lt _ κ,
-          ← hasCardinalLT_iff_of_equiv (equivShrink.{w} (J a))]
-        exact h a
-      · obtain ⟨j, rfl⟩ := (equivShrink.{w} (J a)).symm.surjective j
-        exact le_ciSup (Ordinal.bddAbove_range _) _
+    have hm : (⨆ j, o j) < κ.ord := by
+      refine Ordinal.lift_iSup_lt_of_lt_cof ?_ ho
+      simpa [← Ordinal.lift_cof, hκ.lift.cof_ord, HasCardinalLT] using h a
     refine monotone_transfiniteIterate _ _
       (fun (Q : ObjectProperty C) ↦ Q.le_strictLimitsClosureStep J) (Order.succ_le_iff.2 hm) _ ?_
     dsimp
     rw [transfiniteIterate_succ _ _ _ (by simp)]
     simp only [strictLimitsClosureStep, prop_sup_iff, prop_iSup_iff]
     exact Or.inr ⟨a, ⟨_, fun j ↦ monotone_transfiniteIterate _ _
-      (fun (Q : ObjectProperty C) ↦ Q.le_strictLimitsClosureStep J)  (hm' j) _ (ho' j)⟩⟩
+      (fun (Q : ObjectProperty C) ↦ Q.le_strictLimitsClosureStep J)
+        (Ordinal.le_iSup (fun j ↦ o j) j) _ (ho' j)⟩⟩
 
 lemma isoClosure_strictLimitsClosureIter_eq_limitsClosure :
     (P.strictLimitsClosureIter J κ.ord).isoClosure = P.limitsClosure J := by

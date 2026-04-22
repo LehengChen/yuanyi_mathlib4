@@ -53,24 +53,15 @@ theorem EffectiveEpiFamily.transitive_of_finite {α : Type} [Finite α] {Y : α 
     EffectiveEpiFamily
       (fun (c : Σ a, β a) => Y_n c.fst c.snd) (fun c => π_n c.fst c.snd ≫ π c.fst) := by
   rw [← Sieve.effectiveEpimorphic_family]
-  suffices h₂ : (Sieve.generate (Presieve.ofArrows (fun (⟨a, b⟩ : Σ _, β _) => Y_n a b)
-        (fun ⟨a,b⟩ => π_n a b ≫ π a))) ∈ (coherentTopology C) X by
-    change Nonempty _
-    rw [← Sieve.forallYonedaIsSheaf_iff_colimit]
-    exact fun W => coherentTopology.isSheaf_yoneda_obj W _ h₂
-  -- Show that a covering sieve is a colimit, which implies the original set of arrows is regular
-  -- epimorphic. We use the transitivity property of saturation
-  apply Coverage.Saturate.transitive X (Sieve.generate (Presieve.ofArrows Y π))
-  · apply Coverage.Saturate.of
-    use α, inferInstance, Y, π
-  · intro V f ⟨Y₁, h, g, ⟨hY, hf⟩⟩
-    rw [← hf, Sieve.pullback_comp]
-    apply (coherentTopology C).pullback_stable'
-    apply coherentTopology.mem_sieves_of_hasEffectiveEpiFamily
-    -- Need to show that the pullback of the family `π_n` to a given `Y i` is effective epimorphic
-    obtain ⟨i⟩ := hY
-    exact ⟨β i, inferInstance, Y_n i, π_n i, H i, fun b ↦
-      ⟨Y_n i b, (𝟙 _), π_n i b ≫ π i, ⟨(⟨i, b⟩ : Σ (i : α), β i)⟩, by simp⟩⟩
+  refine (Sieve.EffectiveEpimorphic.iff_forall_isSheafFor_yoneda _).2 fun W =>
+    coherentTopology.isSheaf_yoneda_obj W _ ?_
+  rw [← Presieve.bindOfArrows_ofArrows π π_n]
+  refine (coherentTopology C).bindOfArrows ?_ ?_
+  · exact coherentTopology.mem_sieves_of_hasEffectiveEpiFamily _ ⟨_, inferInstance, _, _,
+      h, fun a ↦ Sieve.ofArrows_mk Y π a⟩
+  · intro a
+    exact coherentTopology.mem_sieves_of_hasEffectiveEpiFamily _ ⟨_, inferInstance, _, _,
+      H a, fun b ↦ Sieve.ofArrows_mk (Y_n a) (π_n a) b⟩
 
 instance precoherentEffectiveEpiFamilyCompEffectiveEpis
     {α : Type} [Finite α] {Y Z : α → C} (π : (a : α) → (Y a ⟶ X)) [EffectiveEpiFamily Y π]

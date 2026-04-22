@@ -438,23 +438,17 @@ lemma triangle (X Y : LocalizedMonoidal L W ε) :
 
 set_option backward.isDefEq.respectTransparency false in
 noncomputable instance :
-    MonoidalCategory (LocalizedMonoidal L W ε) where
-  tensorHom_def := by intros; simp +instances [monoidalCategoryStruct]
-  id_tensorHom_id := by
-    intros
-    simp +instances [monoidalCategoryStruct]
-  tensorHom_comp_tensorHom := by intros; simp +instances [monoidalCategoryStruct]
-  whiskerLeft_id := by
-    intros
-    simp +instances [monoidalCategoryStruct]
-  id_whiskerRight := by
-    intros
-    simp +instances [monoidalCategoryStruct]
-  associator_naturality {X₁ X₂ X₃ Y₁ Y₂ Y₃} f₁ f₂ f₃ := by apply associator_naturality
-  leftUnitor_naturality := by intros; simp +instances [monoidalCategoryStruct]
-  rightUnitor_naturality := fun f ↦ (rightUnitor L W ε).hom.naturality f
-  pentagon := pentagon
-  triangle := triangle
+    MonoidalCategory (LocalizedMonoidal L W ε) :=
+  .ofTensorHom
+    (id_tensorHom_id := id_tensorHom_id L W ε)
+    (id_tensorHom := id_tensorHom L W ε)
+    (tensorHom_id := tensorHom_id L W ε)
+    (tensorHom_comp_tensorHom := fun f₁ f₂ g₁ g₂ ↦ (tensor_comp L W ε f₁ f₂ g₁ g₂).symm)
+    (associator_naturality := associator_naturality L W ε)
+    (leftUnitor_naturality := fun f ↦ by simpa [id_tensorHom] using leftUnitor_naturality L W ε f)
+    (rightUnitor_naturality := fun f ↦ by simpa [tensorHom_id] using rightUnitor_naturality L W ε f)
+    (pentagon := fun W X Y Z ↦ by simpa [id_tensorHom, tensorHom_id] using pentagon W X Y Z)
+    (triangle := fun X Y ↦ by simpa [id_tensorHom, tensorHom_id] using triangle X Y)
 
 end Monoidal
 

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Limits.Opposites
 public import Mathlib.CategoryTheory.Limits.Preserves.Finite
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
 
 /-!
 # Limit preservation properties of `Functor.op` and related constructions
@@ -470,65 +471,49 @@ lemma preservesFiniteColimits_of_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFinite
 products. -/
 lemma preservesFiniteProducts_op (F : C ⥤ D) [PreservesFiniteCoproducts F] :
     PreservesFiniteProducts F.op where
-  preserves n := by
-    apply +allowSynthFailures preservesLimitsOfShape_op
-    exact preservesColimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesLimitsOfShape_op _ F
 
 /-- If `F : C ⥤ Dᵒᵖ` preserves finite coproducts, then `F.leftOp : Cᵒᵖ ⥤ D` preserves finite
 products. -/
 lemma preservesFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ) [PreservesFiniteCoproducts F] :
     PreservesFiniteProducts F.leftOp where
-  preserves _ := by
-    apply +allowSynthFailures preservesLimitsOfShape_leftOp
-    exact preservesColimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesLimitsOfShape_leftOp _ F
 
 /-- If `F : Cᵒᵖ ⥤ D` preserves finite coproducts, then `F.rightOp : C ⥤ Dᵒᵖ` preserves finite
 products. -/
 lemma preservesFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D) [PreservesFiniteCoproducts F] :
     PreservesFiniteProducts F.rightOp where
-  preserves _ := by
-    apply +allowSynthFailures preservesLimitsOfShape_rightOp
-    exact preservesColimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesLimitsOfShape_rightOp _ F
 
 /-- If `F : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite coproducts, then `F.unop : C ⥤ D` preserves finite
 products. -/
 lemma preservesFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFiniteCoproducts F] :
     PreservesFiniteProducts F.unop where
-  preserves _ := by
-    apply +allowSynthFailures preservesLimitsOfShape_unop
-    exact preservesColimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesLimitsOfShape_unop _ F
 
 /-- If `F : C ⥤ D` preserves finite products, then `F.op : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite
 coproducts. -/
 lemma preservesFiniteCoproducts_op (F : C ⥤ D) [PreservesFiniteProducts F] :
     PreservesFiniteCoproducts F.op where
-  preserves _ := by
-    apply +allowSynthFailures preservesColimitsOfShape_op
-    exact preservesLimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesColimitsOfShape_op _ F
 
 /-- If `F : C ⥤ Dᵒᵖ` preserves finite products, then `F.leftOp : Cᵒᵖ ⥤ D` preserves finite
 coproducts. -/
 lemma preservesFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ) [PreservesFiniteProducts F] :
     PreservesFiniteCoproducts F.leftOp where
-  preserves _ := by
-    apply +allowSynthFailures preservesColimitsOfShape_leftOp
-    exact preservesLimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesColimitsOfShape_leftOp _ F
 
 /-- If `F : Cᵒᵖ ⥤ D` preserves finite products, then `F.rightOp : C ⥤ Dᵒᵖ` preserves finite
 coproducts. -/
 lemma preservesFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D) [PreservesFiniteProducts F] :
     PreservesFiniteCoproducts F.rightOp where
-  preserves _ := by
-    apply +allowSynthFailures preservesColimitsOfShape_rightOp
-    exact preservesLimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesColimitsOfShape_rightOp _ F
 
 /-- If `F : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite products, then `F.unop : C ⥤ D` preserves finite
 coproducts. -/
 lemma preservesFiniteCoproducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFiniteProducts F] :
     PreservesFiniteCoproducts F.unop where
-  preserves _ := by
-    apply +allowSynthFailures preservesColimitsOfShape_unop
-    exact preservesLimitsOfShape_of_equiv (Discrete.opposite _).symm _
+  preserves _ := preservesColimitsOfShape_unop _ F
 
 /-- If `F : C ⥤ D` reflects colimits of `K.leftOp : Jᵒᵖ ⥤ C`, then `F.op : Cᵒᵖ ⥤ Dᵒᵖ` reflects
 limits of `K : J ⥤ Cᵒᵖ`. -/

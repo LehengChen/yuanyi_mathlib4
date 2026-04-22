@@ -115,13 +115,9 @@ instance {X : C} {f : MonoOver X} : Mono ((MonoOver.forget X).obj f).hom := f.mo
 /-- The category of monomorphisms over X is a thin category,
 which makes defining its skeleton easy. -/
 instance isThin {X : C} : Quiver.IsThin (MonoOver X) := fun f g =>
-  ⟨by
-    intro h₁ h₂
-    apply InducedCategory.hom_ext
-    apply Over.OverMorphism.ext
-    rw [← cancel_mono g.arrow]
-    erw [Over.w h₁.hom]
-    erw [Over.w h₂.hom]⟩
+  ⟨fun h₁ h₂ => by
+    ext
+    simpa [cancel_mono] using (Over.w h₁.hom).trans (Over.w h₂.hom).symm⟩
 
 @[reassoc]
 theorem w {f g : MonoOver X} (k : f ⟶ g) : k.hom.left ≫ g.arrow = f.arrow :=
@@ -505,13 +501,9 @@ set_option backward.isDefEq.respectTransparency false in
 /-- When `f : X ⟶ Y` is a monomorphism, `exists f` agrees with `map f`.
 -/
 def existsIsoMap (f : X ⟶ Y) [Mono f] : «exists» f ≅ map f :=
-  NatIso.ofComponents (by
-    intro Z
-    suffices (forget _).obj ((«exists» f).obj Z) ≅ (forget _).obj ((map f).obj Z) by
-      apply (forget _).preimageIso this
-    apply Over.isoMk _ _
-    · apply imageMonoIsoSource (Z.arrow ≫ f)
-    · apply imageMonoIsoSource_hom_self)
+  NatIso.ofComponents fun Z =>
+    (forget _).preimageIso <|
+      Over.isoMk (imageMonoIsoSource (Z.arrow ≫ f)) (imageMonoIsoSource_hom_self _)
 
 /-- `exists` is adjoint to `pullback` when images exist -/
 def existsPullbackAdj (f : X ⟶ Y) [HasPullbacks C] : «exists» f ⊣ pullback f :=

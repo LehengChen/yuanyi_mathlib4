@@ -98,16 +98,11 @@ instance of_comp_left [HasLiftingProperty i p] [HasLiftingProperty i' p] :
           fac_right := by simp only [CommSq.fac_right] }⟩
 
 instance of_comp_right [HasLiftingProperty i p] [HasLiftingProperty i p'] :
-    HasLiftingProperty i (p ≫ p') :=
-  ⟨fun {f} {g} sq => by
-    have fac := sq.w
-    rw [← assoc] at fac
-    let _ := (CommSq.mk (CommSq.mk fac).fac_left.symm).lift
-    exact
-      CommSq.HasLift.mk'
-        { l := (CommSq.mk (CommSq.mk fac).fac_left.symm).lift
-          fac_left := by simp only [CommSq.fac_left]
-          fac_right := by simp only [CommSq.fac_right_assoc, CommSq.fac_right] }⟩
+    HasLiftingProperty i (p ≫ p') := by
+  rw [HasLiftingProperty.iff_op]
+  letI : HasLiftingProperty p.op i.op := (inferInstance : HasLiftingProperty i p).op
+  letI : HasLiftingProperty p'.op i.op := (inferInstance : HasLiftingProperty i p').op
+  simpa only [op_comp] using (inferInstance : HasLiftingProperty (p'.op ≫ p.op) i.op)
 
 set_option backward.isDefEq.respectTransparency false in
 theorem of_arrow_iso_left {A B A' B' X Y : C} {i : A ⟶ B} {i' : A' ⟶ B'}

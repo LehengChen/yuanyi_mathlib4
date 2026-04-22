@@ -76,32 +76,19 @@ lemma isRegularEpiCategory_sheaf (J : GrothendieckTopology C)
     -- isomorphism.
     have : IsIso ((presheafToSheaf J D).map i) :=
       Balanced.isIso_of_mono_of_epi _
-    -- The next five lines show that it suffices to show that the sheafification of `p` is a
-    -- regular epimorphism.
-    rw [h₂, isRegularEpi_iff_effectiveEpi]
-    suffices EffectiveEpi ((presheafToSheaf J D).map f.hom) by infer_instance
-    rw [← hpi, Functor.map_comp]
-    suffices EffectiveEpi ((presheafToSheaf J D).map p) by infer_instance
-    rw [← isRegularEpi_iff_effectiveEpi]
-    -- The underlying presheaf of the kernel pair of `f` is a kernel pair for `p`, and since
-    -- sheafification preserves colimits, `p` exhibits its target `I` as a coequalizer of this
-    -- kernel pair. The result follows.
-    exact ⟨⟨{
-      W := (presheafToSheaf J D).obj (pullback f f).obj
-      left := (presheafToSheaf J D).map (pullback.fst f f).hom
-      right := (presheafToSheaf J D).map (pullback.snd f f).hom
-      w := by
-        rw [← Functor.map_comp, ← Functor.map_comp]
-        congr 1
-        rw [← cancel_mono i]
-        simp [hpi, ← ObjectProperty.FullSubcategory.comp_hom, pullback.condition]
-      isColimit := by
-        have := IsRegularEpiCategory.regularEpiOfEpi p
-        exact isColimitCoforkMapOfIsColimit (presheafToSheaf J D) _
-          (isColimitCoforkOfEffectiveEpi p _
-            (PullbackCone.isLimitOfFactors f.hom f.hom i _ _ hpi hpi _
-              ((isLimitPullbackConeMapOfIsLimit (sheafToPresheaf _ _) _
-                (pullbackIsPullback f f))))) }⟩⟩
+    -- The regular epimorphism structure on `p` in the presheaf category sheafifies to one on
+    -- the sheafification of `p`, because sheafification preserves colimits.
+    have : IsRegularEpi ((presheafToSheaf J D).map p) := by
+      let hp' := regularEpiOfEpi p
+      exact ⟨⟨{
+        W := (presheafToSheaf J D).obj hp'.W
+        left := (presheafToSheaf J D).map hp'.left
+        right := (presheafToSheaf J D).map hp'.right
+        w := by simpa [← Functor.map_comp] using congrArg (presheafToSheaf J D).map hp'.w
+        isColimit := isColimitCoforkMapOfIsColimit (presheafToSheaf J D) _
+          hp'.isColimit }⟩⟩
+    rw [h₂, ← hpi, Functor.map_comp]
+    infer_instance
 
 instance (J : GrothendieckTopology C) [HasSheafify J (Type u)] :
     IsRegularEpiCategory (Sheaf J (Type u)) := isRegularEpiCategory_sheaf J fun f hf ↦

@@ -252,15 +252,9 @@ noncomputable def isColimitCokernelCoforkOfDistTriang {X₁ X₂ X₃ : A}
       cat_disch))) := by
   have hT' : Triangle.mk (0 : ((ι ⋙ shiftFunctor C (1 : ℤ)).obj 0) ⟶ _) (𝟙 (ι.obj X₃)) 0 ∈
       distTriang C := by
-    refine isomorphic_distinguished _ (inv_rot_of_distTriang _
-      (contractible_distinguished (ι.obj X₃))) _ ?_
-    refine Triangle.isoMk _ _ (IsZero.iso ?_ ?_) (Iso.refl _) (Iso.refl _) ?_ ?_ ?_
-    · dsimp
-      rw [IsZero.iff_id_eq_zero, ← Functor.map_id, ← Functor.map_id, id_zero,
-        Functor.map_zero, Functor.map_zero]
-    · dsimp
-      rw [IsZero.iff_id_eq_zero, ← Functor.map_id, id_zero, Functor.map_zero]
-    all_goals simp
+    rw [Triangle.distinguished_iff_of_isZero₁ _
+      ((ι ⋙ shiftFunctor C (1 : ℤ)).map_isZero (isZero_zero A))]
+    change IsIso (𝟙 (ι.obj X₃)); infer_instance
   refine IsColimit.ofIsoColimit (AbelianSubcategory.isColimitCokernelCofork hι hT hT') ?_
   exact Cofork.ext (Iso.refl _) (ι.map_injective (by simp))
 
@@ -275,13 +269,9 @@ lemma exists_distinguished_triangle_of_epi {X₂ X₃ : A} (π : X₂ ⟶ X₃) 
   obtain ⟨X₁, f₂, f₃, hT⟩ := distinguished_cocone_triangle (ι.map π)
   have : admissibleMorphism ι π := by simp [hA]
   obtain ⟨K, Q, α, β, γ, hT'⟩ := this f₂ f₃ hT
-  have hQ : 𝟙 Q = 0 :=
-    Cofork.IsColimit.hom_ext (isColimitCokernelCofork hι hT hT') (by
-      dsimp
-      rw [comp_id, comp_zero, ← cancel_epi π, comp_zero, mor₁_πQ hT β])
-  have : IsIso α := (Triangle.isZero₃_iff_isIso₁ _ hT').1 (by
-    dsimp
-    rw [IsZero.iff_id_eq_zero, ← ι.map_id, hQ, ι.map_zero])
+  have hQ : IsZero Q :=
+    CokernelCofork.IsColimit.isZero_of_epi (isColimitCokernelCofork hι hT hT')
+  have : IsIso α := (Triangle.isZero₃_iff_isIso₁ _ hT').1 (ι.map_isZero hQ)
   refine ⟨K, -ιK f₃ α, f₂ ≫ inv α, ?_⟩
   rw [rotate_distinguished_triangle]
   refine isomorphic_distinguished _ hT _ ?_

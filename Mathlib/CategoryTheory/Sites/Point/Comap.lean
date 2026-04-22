@@ -26,7 +26,7 @@ universe w v
 
 namespace CategoryTheory.GrothendieckTopology.Point
 
-open Limits
+open Limits Presieve
 
 variable {C D : Type*} [Category* C] [Category* D]
   {K : GrothendieckTopology D}
@@ -39,11 +39,7 @@ any point on `D` induces a point on `C` by precomposing the fiber functor with `
 @[simps]
 def comap : Point.{w} J where
   fiber := F ⋙ Φ.fiber
-  jointly_surjective {X} {R} hR x := by
-    obtain ⟨Y, f, ⟨W, g, h, hg, rfl⟩, y, rfl⟩ :=
-      Φ.jointly_surjective (Sieve.functorPushforward F R) (hF.cover_preserve hR) x
-    use W, g, hg, Φ.fiber.map h y
-    simp
+  jointly_surjective R h x := by have := Φ.4 _ (hF.1 h) x; aesop (add simp [functorPushforward])
 
 variable (A : Type*) [Category.{v} A] [HasProducts.{w} A]
   [Functor.IsContinuous F J K]

@@ -122,18 +122,14 @@ variable {F G : Sheaf J A} (φ : F ⟶ G)
 
 lemma isLocallySurjective_iff_epi' :
     IsLocallySurjective φ ↔ Epi φ := by
-  constructor
-  · intro
-    infer_instance
-  · intro
-    let data := (locallySurjective J A).factorizationData (locallyInjective J A) φ
-    have : IsLocallySurjective data.i := data.hi
-    have : IsLocallyInjective data.p := data.hp
-    have : Epi data.p := epi_of_epi_fac data.fac
-    have := mono_of_isLocallyInjective data.p
-    have := isIso_of_mono_of_epi data.p
-    rw [← data.fac]
-    infer_instance
+  refine ⟨fun _ => inferInstance, fun _ => ?_⟩
+  let data := (locallySurjective J A).factorizationData (locallyInjective J A) φ
+  haveI : IsLocallySurjective data.i := data.hi
+  haveI : IsLocallyInjective data.p := data.hp
+  haveI : IsIso data.p :=
+    (isIso_iff_mono_and_epi data.p).2 ⟨mono_of_isLocallyInjective data.p, epi_of_epi_fac data.fac⟩
+  rw [← data.fac]
+  infer_instance
 
 end
 

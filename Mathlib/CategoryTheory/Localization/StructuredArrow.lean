@@ -102,18 +102,12 @@ lemma induction_structuredArrow
     (hP₂ : ∀ ⦃Y₁ Y₂ : C⦄ (w : Y₁ ⟶ Y₂) (hw : W w) (φ : L.obj X ⟶ L.obj Y₂),
       P (StructuredArrow.mk φ) → P (StructuredArrow.mk (φ ≫ (isoOfHom L W w hw).inv)))
     (g : StructuredArrow (L.obj X) L) : P g := by
-  let P' : StructuredArrow (W.Q.obj X) W.Q → Prop :=
-    fun g ↦ P (structuredArrowEquiv W W.Q L g)
   rw [← (structuredArrowEquiv W W.Q L).apply_symm_apply g]
-  apply induction_structuredArrow' W P'
-  · convert hP₀
-    simp
-  · intro Y₁ Y₂ f φ hφ
-    convert hP₁ f (homEquiv W W.Q L φ) hφ
-    simp [homEquiv_comp]
-  · intro Y₁ Y₂ w hw φ hφ
-    convert hP₂ w hw (homEquiv W W.Q L φ) hφ
-    simp [homEquiv_comp, homEquiv_isoOfHom_inv]
+  induction (structuredArrowEquiv W W.Q L).symm g using induction_structuredArrow' W with
+  | hP₀ => simpa using hP₀
+  | hP₁ f φ hφ => simpa [homEquiv_comp] using hP₁ f (homEquiv W W.Q L φ) hφ
+  | hP₂ w hw φ hφ =>
+      simpa [homEquiv_comp, homEquiv_isoOfHom_inv] using hP₂ w hw (homEquiv W W.Q L φ) hφ
 
 end
 

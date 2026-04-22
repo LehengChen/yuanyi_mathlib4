@@ -352,18 +352,11 @@ instance of_isIso (φ : a ⟶ b) [IsHomLift p f φ] [IsIso φ] : IsStronglyCarte
 /-- A strongly Cartesian morphism lying over an isomorphism is an isomorphism. -/
 lemma isIso_of_base_isIso (φ : a ⟶ b) [IsStronglyCartesian p f φ] [IsIso f] : IsIso φ := by
   subst_hom_lift p f φ; clear a b R S
-  -- Let `φ` be the morphism induced by applying universal property to `𝟙 b` lying over `f⁻¹ ≫ f`.
   let φ' := map p (p.map φ) φ (IsIso.inv_hom_id (p.map φ)).symm (𝟙 b)
-  use φ'
-  -- `φ' ≫ φ = 𝟙 b` follows immediately from the universal property.
-  have inv_hom : φ' ≫ φ = 𝟙 b := fac p (p.map φ) φ _ (𝟙 b)
-  refine ⟨?_, inv_hom⟩
-  -- We will now show that `φ ≫ φ' = 𝟙 a` by showing that `(φ ≫ φ') ≫ φ = 𝟙 a ≫ φ`.
-  have h₁ : IsHomLift p (𝟙 (p.obj a)) (φ ≫ φ') := by
-    rw [← IsIso.hom_inv_id (p.map φ)]
-    apply IsHomLift.comp
-  apply IsStronglyCartesian.ext p (p.map φ) φ (𝟙 (p.obj a))
-  simp only [assoc, inv_hom, comp_id, id_comp]
+  refine ⟨φ', ?_, fac p (p.map φ) φ _ (𝟙 b)⟩
+  haveI : IsHomLift p (𝟙 (p.obj a)) (φ ≫ φ') := by
+    simpa using IsHomLift.comp p (p.map φ) (CategoryTheory.inv (p.map φ)) φ φ'
+  exact IsStronglyCartesian.ext p (p.map φ) φ (𝟙 (p.obj a)) (by simp [φ'])
 
 end
 

@@ -266,11 +266,7 @@ lemma opShiftFunctorEquivalence_add_unitIso_inv_app_eq
   rw [← cancel_mono ((opShiftFunctorEquivalence C p).unitIso.hom.app X), Iso.inv_hom_id_app,
     opShiftFunctorEquivalence_add_unitIso_hom_app_eq _ _ _ _ h,
     Category.assoc, Category.assoc, Category.assoc, Iso.inv_hom_id_app_assoc]
-  apply Quiver.Hom.unop_inj
-  dsimp
-  simp only [Category.assoc,
-    ← unop_comp, Iso.inv_hom_id_app, Functor.comp_obj, Functor.op_obj, unop_id,
-    Functor.map_id, id_comp, ← Functor.map_comp, Iso.hom_inv_id_app]
+  simp
 
 @[deprecated (since := "2025-12-08")] alias opShiftFunctorEquivalence_unitIso_hom_app_eq :=
   opShiftFunctorEquivalence_add_unitIso_hom_app_eq

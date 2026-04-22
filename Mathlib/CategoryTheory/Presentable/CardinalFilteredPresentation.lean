@@ -109,15 +109,11 @@ include h in
 lemma presentable [LocallySmall.{w} C] (X : C) :
     IsPresentable.{w} X := by
   obtain ⟨J, _, _, ⟨hX⟩⟩ := h.exists_colimitsOfShape X
-  obtain ⟨κ', _, le, hκ'⟩ : ∃ (κ' : Cardinal.{w}) (_ : Fact κ'.IsRegular) (_ : κ ≤ κ'),
-      HasCardinalLT (Arrow J) κ' := by
-    obtain ⟨κ', h₁, h₂⟩ := HasCardinalLT.exists_regular_cardinal_forall.{w}
-      (Sum.elim (fun (_ : Unit) ↦ Arrow J) (fun (_ : Unit) ↦ κ.ord.ToType))
-    exact ⟨κ', ⟨h₁⟩,
-      le_of_lt (by simpa [hasCardinalLT_iff_cardinal_mk_lt] using h₂ (Sum.inr ⟨⟩)),
-      h₂ (Sum.inl ⟨⟩)⟩
-  have := hX.isCardinalPresentable h.le_isCardinalPresentable _ le hκ'
-  exact isPresentable_of_isCardinalPresentable _ κ'
+  obtain ⟨κ', hκ', h'⟩ := HasCardinalLT.exists_regular_cardinal.{w} (Arrow J ⊕ κ.ord.ToType)
+  letI : Fact κ'.IsRegular := ⟨hκ'⟩
+  rw [hasCardinalLT_sum_iff _ _ _ hκ'.aleph0_le] at h'
+  exact ⟨κ', inferInstance, hX.isCardinalPresentable h.le_isCardinalPresentable _
+    (le_of_lt (by simpa [hasCardinalLT_iff_cardinal_mk_lt] using h'.2)) h'.1⟩
 
 include h in
 lemma isStrongGenerator : P.IsStrongGenerator :=

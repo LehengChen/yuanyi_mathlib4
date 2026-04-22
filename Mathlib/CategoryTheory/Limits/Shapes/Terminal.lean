@@ -337,13 +337,9 @@ instance isIso_ι_terminal [HasTerminal J] (F : J ⥤ C) : IsIso (colimit.ι F (
 
 set_option backward.isDefEq.respectTransparency false in
 theorem isIso_ι_of_isInitial {j : J} (I : IsInitial j) (F : J ⥤ C) [HasColimit F]
-    [∀ (i j : J) (f : i ⟶ j), IsIso (F.map f)] : IsIso (colimit.ι F j) :=
-  ⟨⟨colimit.desc _ (coconeOfDiagramInitial I F), by
-    refine ⟨?_, by ext; simp⟩
-    simp only [colimit.ι_desc, coconeOfDiagramInitial_pt, coconeOfDiagramInitial_ι_app,
-      Functor.const_obj_obj, IsInitial.to_self]
-    grind
-  ⟩⟩
+    [∀ (i j : J) (f : i ⟶ j), IsIso (F.map f)] : IsIso (colimit.ι F j) := by
+  change IsIso ((colimitOfDiagramInitial I F).coconePointUniqueUpToIso (colimit.isColimit F)).hom
+  infer_instance
 
 instance isIso_ι_initial [HasInitial J] (F : J ⥤ C) [∀ (i j : J) (f : i ⟶ j), IsIso (F.map f)] :
     IsIso (colimit.ι F (⊥_ J)) :=

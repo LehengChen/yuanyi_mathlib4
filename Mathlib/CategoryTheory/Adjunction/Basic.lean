@@ -460,13 +460,9 @@ def mkOfUnitCounit (adj : CoreUnitCounit F G) : F ⊣ G where
   unit := adj.unit
   counit := adj.counit
   left_triangle_components X := by
-    have := adj.left_triangle
-    rw [NatTrans.ext_iff, funext_iff] at this
-    simpa [-CoreUnitCounit.left_triangle] using this X
+    simpa [-CoreUnitCounit.left_triangle] using congr_app adj.left_triangle X
   right_triangle_components Y := by
-    have := adj.right_triangle
-    rw [NatTrans.ext_iff, funext_iff] at this
-    simpa [-CoreUnitCounit.right_triangle] using this Y
+    simpa [-CoreUnitCounit.right_triangle] using congr_app adj.right_triangle Y
 
 /-- The adjunction between the identity functor on a category and itself. -/
 @[simps]
@@ -479,22 +475,16 @@ instance : Inhabited (Adjunction (𝟭 C) (𝟭 C)) :=
   ⟨id⟩
 
 /-- If F and G are naturally isomorphic functors, establish an equivalence of hom-sets. -/
-@[simps]
+@[simps!]
 def equivHomsetLeftOfNatIso {F F' : C ⥤ D} (iso : F ≅ F') {X : C} {Y : D} :
-    (F.obj X ⟶ Y) ≃ (F'.obj X ⟶ Y) where
-  toFun f := iso.inv.app _ ≫ f
-  invFun g := iso.hom.app _ ≫ g
-  left_inv f := by simp
-  right_inv g := by simp
+    (F.obj X ⟶ Y) ≃ (F'.obj X ⟶ Y) :=
+  (iso.app X).homFromEquiv
 
 /-- If G and H are naturally isomorphic functors, establish an equivalence of hom-sets. -/
-@[simps]
+@[simps!]
 def equivHomsetRightOfNatIso {G G' : D ⥤ C} (iso : G ≅ G') {X : C} {Y : D} :
-    (X ⟶ G.obj Y) ≃ (X ⟶ G'.obj Y) where
-  toFun f := f ≫ iso.hom.app _
-  invFun g := g ≫ iso.inv.app _
-  left_inv f := by simp
-  right_inv g := by simp
+    (X ⟶ G.obj Y) ≃ (X ⟶ G'.obj Y) :=
+  (iso.app Y).homToEquiv
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Transport an adjunction along a natural isomorphism on the left. -/

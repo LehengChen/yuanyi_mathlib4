@@ -157,11 +157,7 @@ theorem iso_hom [IsFiltered (CostructuredArrow yoneda A)] : (iso A K).hom = limi
     ι_colimitCompWhiskeringLeftIsoCompColimit_hom,
     NatTrans.comp_app, Category.assoc, isoWhiskerLeft_hom, NatTrans.comp_app, Category.assoc,
     ← NatTrans.comp_app, ← whiskerLeft_comp, colimit.comp_coconePointUniqueUpToIso_hom]
-  have := i.hom.naturality (limit.π K j)
-  dsimp only [yoneda_obj_obj, Functor.const_obj_obj] at this
-  rw [← this]
-  ext
-  simp
+  exact (i.hom.naturality (limit.π K j)).symm
 
 theorem isIso_post [IsFiltered (CostructuredArrow yoneda A)] : IsIso (limit.post K A) :=
   iso_hom A K ▸ inferInstance

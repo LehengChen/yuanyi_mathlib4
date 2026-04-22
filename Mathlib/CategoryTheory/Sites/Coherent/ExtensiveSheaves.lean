@@ -97,11 +97,7 @@ theorem Presieve.isSheaf_iff_preservesFiniteProducts (F : Cᵒᵖ ⥤ Type w) :
         (FinitaryExtensive.isPullback_initial_to_sigma_ι Z)
         (hF (Presieve.ofArrows Z (fun i ↦ Sigma.ι Z i)) ?_)
     · exact preservesLimit_of_iso_diagram F i.symm
-    · apply hF
-      refine ⟨Empty, inferInstance, Empty.elim, IsEmpty.elim inferInstance, rfl, ⟨default,?_, ?_⟩⟩
-      · ext b
-        cases b
-      · simp only [eq_iff_true_of_subsingleton]
+    · exact hF _ ⟨Empty, inferInstance, Empty.elim, IsEmpty.elim inferInstance, rfl, by infer_instance⟩
     · exact ⟨Fin n, inferInstance, Z, (fun i ↦ Sigma.ι Z i), rfl, instIsIsoDescι⟩
   · rw [extensiveTopology, Presieve.isSheaf_coverage]
     intro X R ⟨Y, α, Z, π, hR, hi⟩

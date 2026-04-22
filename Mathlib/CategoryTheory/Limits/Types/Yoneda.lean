@@ -57,17 +57,11 @@ def opCompYonedaSectionsEquiv (F : J ⥤ C) (X : C) :
 
 /-- Sections of `F ⋙ yoneda.obj X` identify to natural
 transformations `(const J).obj X ⟶ F`. -/
-@[simps]
+@[simps!]
 def compYonedaSectionsEquiv (F : J ⥤ Cᵒᵖ) (X : C) :
-    (F ⋙ yoneda.obj X).sections ≃ ((const J).obj (op X) ⟶ F) where
-  toFun s :=
-    { app := fun j => (s.val j).op
-      naturality := fun j j' f => by
-        dsimp
-        rw [Category.id_comp]
-        exact Quiver.Hom.unop_inj (s.property f).symm }
-  invFun τ := ⟨fun j => (τ.app j).unop,
-    fun {j j'} f => Quiver.Hom.op_inj (by simpa using (τ.naturality f).symm)⟩
+    (F ⋙ yoneda.obj X).sections ≃ ((const J).obj (op X) ⟶ F) :=
+  ((Functor.sectionsFunctor J).mapIso (isoWhiskerLeft F (Coyoneda.objOpOp X))).toEquiv.symm.trans
+    (compCoyonedaSectionsEquiv F (op X))
 
 end
 

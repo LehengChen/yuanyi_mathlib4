@@ -220,11 +220,7 @@ attribute [to_dual existing hcomp_inv] hcomp_hom
 @[to_dual self]
 theorem isIso_map_iff {F₁ F₂ : C ⥤ D} (e : F₁ ≅ F₂) {X Y : C} (f : X ⟶ Y) :
     IsIso (F₁.map f) ↔ IsIso (F₂.map f) := by
-  revert F₁ F₂
-  suffices ∀ {F₁ F₂ : C ⥤ D} (_ : F₁ ≅ F₂) (_ : IsIso (F₁.map f)), IsIso (F₂.map f) from
-    fun F₁ F₂ e => ⟨this e, this e.symm⟩
-  intro F₁ F₂ e hf
-  exact IsIso.mk ⟨e.inv.app Y ≫ inv (F₁.map f) ≫ e.hom.app X, by cat_disch⟩
+  rw [← isIso_comp_right_iff (F₁.map f) (e.hom.app Y), e.hom.naturality f, isIso_comp_left_iff]
 
 end NatIso
 

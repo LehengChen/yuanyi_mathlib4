@@ -281,17 +281,10 @@ instance (priority := 100) guitartExact_of_isEquivalence_of_isIso
 set_option backward.isDefEq.respectTransparency false in
 instance guitartExact_id (F : C₁ ⥤ C₂) :
     GuitartExact (TwoSquare.mk (𝟭 C₁) F F (𝟭 C₂) (𝟙 F)) := by
-  rw [guitartExact_iff_isConnected_rightwards]
-  intro X₂ X₃ (g : F.obj X₂ ⟶ X₃)
-  let Z := StructuredArrowRightwards (TwoSquare.mk (𝟭 C₁) F F (𝟭 C₂) (𝟙 F)) g
-  let X₀ : Z := StructuredArrow.mk (Y := CostructuredArrow.mk g) (CostructuredArrow.homMk (𝟙 _))
-  have φ : ∀ (X : Z), X₀ ⟶ X := fun X =>
-    StructuredArrow.homMk (CostructuredArrow.homMk X.hom.left
-      (by simpa using CostructuredArrow.w X.hom))
-  have : Nonempty Z := ⟨X₀⟩
-  apply zigzag_isConnected
-  intro X Y
-  exact Zigzag.of_inv_hom (φ X) (φ Y)
+  rw [guitartExact_iff_final]
+  intro X₃
+  apply Functor.final_of_natIso (F := 𝟭 (CostructuredArrow F X₃))
+  exact NatIso.ofComponents (fun X => CostructuredArrow.isoMk (Iso.refl _)) (by simp)
 
 end TwoSquare
 

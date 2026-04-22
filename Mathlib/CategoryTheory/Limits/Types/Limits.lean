@@ -154,14 +154,10 @@ noncomputable def limitCone (F : J ⥤ Type max v u) : Cone F where
 /-- (internal implementation) the fact that the proposed limit cone is the limit -/
 @[simps]
 noncomputable def limitConeIsLimit (F : J ⥤ Type max v u) : IsLimit (limitCone F) where
-  lift s v :=
-    { val := fun j => s.π.app j v
-      property := fun f => congr_fun (Cone.w s f) _ }
+  lift s v := sectionOfCone s v
   uniq := fun _ _ w => by
-    funext x
-    apply Subtype.ext
-    funext j
-    exact congr_fun (w j) x
+    ext x
+    exact Subtype.ext (funext fun j ↦ congr_fun (w j) x)
 
 end TypeMax
 

@@ -110,16 +110,12 @@ noncomputable def iic (j : J) :
     W.TransfiniteCompositionOfShape (Set.Iic j) (h.F.map (homOfLE bot_le : ⊥ ⟶ j)) where
   __ := h.toTransfiniteCompositionOfShape.iic j
   map_mem i hi := by
-    have := h.map_mem i.1 (by
-      rw [not_isMax_iff] at hi ⊢
-      obtain ⟨i', hi'⟩ := hi
-      exact ⟨j, lt_of_lt_of_le hi' i'.2⟩)
-    rw [← W.arrow_mk_mem_toSet_iff] at this ⊢
-    have eq : Arrow.mk ((Subtype.mono_coe _).functor.map (homOfLE (Order.le_succ i))) =
-      Arrow.mk (homOfLE (Order.le_succ i.1)) :=
-        Arrow.ext rfl (Set.Iic.coe_succ_of_not_isMax hi) rfl
-    replace eq := congr_arg h.F.mapArrow.obj eq
-    convert this using 1
+    rw [← W.arrow_mk_mem_toSet_iff]
+    convert (W.arrow_mk_mem_toSet_iff _).2 (h.map_mem i.1 (Set.not_isMax_coe _ hi)) using 1
+    simpa only [CategoryTheory.TransfiniteCompositionOfShape.iic_F, Functor.comp_map] using
+      congrArg h.F.mapArrow.obj (show Arrow.mk ((Subtype.mono_coe _).functor.map
+          (homOfLE (Order.le_succ i))) = Arrow.mk (homOfLE (Order.le_succ i.1)) from
+        Arrow.ext rfl (Set.Iic.coe_succ_of_not_isMax hi) rfl)
 
 /-- A transfinite composition of shape `J` of morphisms in `W` induces a transfinite
 composition of shape `Set.Ici j` (for any `j : J`). -/
@@ -146,16 +142,12 @@ def ofComposableArrows {n : ℕ} (F : ComposableArrows C n)
     W.TransfiniteCompositionOfShape (Fin (n + 1)) F.hom where
   toTransfiniteCompositionOfShape := .ofComposableArrows F
   map_mem j hj := by
-    obtain ⟨j, rfl⟩ | rfl := j.eq_castSucc_or_eq_last
-    · replace hF := hF j
-      rw [← W.arrow_mk_mem_toSet_iff] at hF ⊢
-      have eq : Arrow.mk (homOfLE (Order.le_succ j.castSucc)) =
-        Arrow.mk (homOfLE j.castSucc_le_succ) :=
-          Arrow.ext rfl j.orderSucc_castSucc rfl
-      replace eq := congr_arg F.mapArrow.obj eq
-      convert hF using 1
-    · rw [isMax_iff_eq_top] at hj
-      exact (hj rfl).elim
+    obtain ⟨j, rfl⟩ := Fin.exists_castSucc_eq.2 (by simpa [isMax_iff_eq_top] using hj)
+    rw [← W.arrow_mk_mem_toSet_iff]
+    convert (W.arrow_mk_mem_toSet_iff _).2 (hF j) using 1
+    simpa only [CategoryTheory.TransfiniteCompositionOfShape.ofComposableArrows_F] using
+      congrArg F.mapArrow.obj (show Arrow.mk (homOfLE (Order.le_succ j.castSucc)) =
+          Arrow.mk (homOfLE j.castSucc_le_succ) from Arrow.ext rfl j.orderSucc_castSucc rfl)
 
 /-- The identity of any object is a transfinite composition of shape `Fin 1`. -/
 def id (X : C) : W.TransfiniteCompositionOfShape (Fin 1) (𝟙 X) :=

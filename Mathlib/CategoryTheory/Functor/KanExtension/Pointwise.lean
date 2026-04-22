@@ -6,6 +6,7 @@ Authors: Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Functor.KanExtension.Basic
+public import Mathlib.CategoryTheory.Limits.Final
 
 /-!
 # Pointwise Kan extensions
@@ -63,54 +64,35 @@ abbrev HasPointwiseRightKanExtension := ∀ (Y : D), HasPointwiseRightKanExtensi
 lemma hasPointwiseLeftKanExtensionAt_iff_of_iso {Y₁ Y₂ : D} (e : Y₁ ≅ Y₂) :
     HasPointwiseLeftKanExtensionAt L F Y₁ ↔
       HasPointwiseLeftKanExtensionAt L F Y₂ := by
-  revert Y₁ Y₂ e
-  suffices ∀ ⦃Y₁ Y₂ : D⦄ (_ : Y₁ ≅ Y₂) [HasPointwiseLeftKanExtensionAt L F Y₁],
-      HasPointwiseLeftKanExtensionAt L F Y₂ from
-    fun Y₁ Y₂ e => ⟨fun _ => this e, fun _ => this e.symm⟩
-  intro Y₁ Y₂ e _
-  change HasColimit ((CostructuredArrow.mapIso e.symm).functor ⋙ CostructuredArrow.proj L Y₁ ⋙ F)
-  infer_instance
+  rw [show HasPointwiseLeftKanExtensionAt L F Y₂ ↔ HasColimit
+    ((CostructuredArrow.mapIso e.symm).functor ⋙ CostructuredArrow.proj L Y₁ ⋙ F) from Iff.rfl]
+  exact (Functor.Final.hasColimit_comp_iff (CostructuredArrow.mapIso e.symm).functor).symm
 
 lemma hasPointwiseRightKanExtensionAt_iff_of_iso {Y₁ Y₂ : D} (e : Y₁ ≅ Y₂) :
     HasPointwiseRightKanExtensionAt L F Y₁ ↔
       HasPointwiseRightKanExtensionAt L F Y₂ := by
-  revert Y₁ Y₂ e
-  suffices ∀ ⦃Y₁ Y₂ : D⦄ (_ : Y₁ ≅ Y₂) [HasPointwiseRightKanExtensionAt L F Y₁],
-      HasPointwiseRightKanExtensionAt L F Y₂ from
-    fun Y₁ Y₂ e => ⟨fun _ => this e, fun _ => this e.symm⟩
-  intro Y₁ Y₂ e _
-  change HasLimit ((StructuredArrow.mapIso e.symm).functor ⋙ StructuredArrow.proj Y₁ L ⋙ F)
-  infer_instance
+  rw [show HasPointwiseRightKanExtensionAt L F Y₂ ↔ HasLimit
+    ((StructuredArrow.mapIso e.symm).functor ⋙ StructuredArrow.proj Y₁ L ⋙ F) from Iff.rfl]
+  exact (Functor.Initial.hasLimit_comp_iff (StructuredArrow.mapIso e.symm).functor).symm
 
 variable {L} in
 /-- `HasPointwiseLeftKanExtensionAt` is invariant when we replace `L` by an equivalent functor. -/
 lemma hasPointwiseLeftKanExtensionAt_iff_of_natIso {L' : C ⥤ D} (e : L ≅ L') (Y : D) :
     HasPointwiseLeftKanExtensionAt L F Y ↔
       HasPointwiseLeftKanExtensionAt L' F Y := by
-  revert L L' e
-  suffices ∀ ⦃L L' : C ⥤ D⦄ (_ : L ≅ L') [HasPointwiseLeftKanExtensionAt L F Y],
-      HasPointwiseLeftKanExtensionAt L' F Y from
-    fun L L' e => ⟨fun _ => this e, fun _ => this e.symm⟩
-  intro L L' e _
-  let Φ : CostructuredArrow L' Y ≌ CostructuredArrow L Y := Comma.mapLeftIso _ e.symm
-  let e' : CostructuredArrow.proj L' Y ⋙ F ≅
-    Φ.functor ⋙ CostructuredArrow.proj L Y ⋙ F := Iso.refl _
-  exact hasColimit_of_iso e'
+  rw [show HasPointwiseLeftKanExtensionAt L' F Y ↔ HasColimit
+    ((Comma.mapLeftIso _ e.symm).functor ⋙ CostructuredArrow.proj L Y ⋙ F) from Iff.rfl]
+  exact (Functor.Final.hasColimit_comp_iff (Comma.mapLeftIso _ e.symm).functor).symm
 
 variable {L} in
 /-- `HasPointwiseRightKanExtensionAt` is invariant when we replace `L` by an equivalent functor. -/
 lemma hasPointwiseRightKanExtensionAt_iff_of_natIso {L' : C ⥤ D} (e : L ≅ L') (Y : D) :
     HasPointwiseRightKanExtensionAt L F Y ↔
       HasPointwiseRightKanExtensionAt L' F Y := by
-  revert L L' e
-  suffices ∀ ⦃L L' : C ⥤ D⦄ (_ : L ≅ L') [HasPointwiseRightKanExtensionAt L F Y],
-      HasPointwiseRightKanExtensionAt L' F Y from
-    fun L L' e => ⟨fun _ => this e, fun _ => this e.symm⟩
-  intro L L' e _
-  let Φ : StructuredArrow Y L' ≌ StructuredArrow Y L := Comma.mapRightIso _ e.symm
-  let e' : StructuredArrow.proj Y L' ⋙ F ≅
-    Φ.functor ⋙ StructuredArrow.proj Y L ⋙ F := Iso.refl _
-  exact hasLimit_of_iso e'.symm
+  rw [show HasPointwiseRightKanExtensionAt L' F Y ↔
+      HasLimit ((Comma.mapRightIso _ e.symm).functor ⋙ StructuredArrow.proj Y L ⋙ F) from
+    Iff.rfl]
+  exact (Functor.Initial.hasLimit_comp_iff (Comma.mapRightIso _ e.symm).functor).symm
 
 lemma hasPointwiseLeftKanExtensionAt_of_equivalence
     (E : D ≌ D') (eL : L ⋙ E.functor ≅ L') (Y : D) (Y' : D') (e : E.functor.obj Y ≅ Y')

@@ -427,16 +427,11 @@ with less restrictive universe assumptions, see `FiberFunctor.isPretransitive_of
 private instance FiberFunctor.isPretransitive_of_isConnected' (X : C) [IsConnected X] :
     MulAction.IsPretransitive (Aut F) (F.obj X) := by
   obtain ⟨A, f, hgal⟩ := exists_hom_from_galois_of_connected F X
-  have hs : Function.Surjective (F.map f) := surjective_of_nonempty_fiber_of_isConnected F f
   refine ⟨fun x y ↦ ?_⟩
-  obtain ⟨a, ha⟩ := hs x
-  obtain ⟨b, hb⟩ := hs y
-  have : MulAction.IsPretransitive (Aut F) (F.obj A) := isPretransitive_of_isGalois F A
-  obtain ⟨σ, (hσ : σ.hom.app A a = b)⟩ := MulAction.exists_smul_eq (Aut F) a b
-  use σ
-  rw [← ha, ← hb]
-  change (F.map f ≫ σ.hom.app X) a = F.map f b
-  rw [σ.hom.naturality, FintypeCat.comp_apply, hσ]
+  obtain ⟨a, rfl⟩ := surjective_of_nonempty_fiber_of_isConnected F f x
+  obtain ⟨b, rfl⟩ := surjective_of_nonempty_fiber_of_isConnected F f y
+  obtain ⟨σ, hσ⟩ := (FiberFunctor.isPretransitive_of_isGalois F A).exists_smul_eq a b
+  exact ⟨σ, by rw [mulAction_naturality, hσ]⟩
 
 end Specialized
 
@@ -450,21 +445,17 @@ instance FiberFunctor.isPretransitive_of_isConnected (X : C) [IsConnected X] :
   exists_smul_eq x y := by
     let F' : C ⥤ FintypeCat.{u₂} := F ⋙ FintypeCat.uSwitch.{w, u₂}
     letI : FiberFunctor F' := FiberFunctor.comp_right _
-    let e (Y : C) : F'.obj Y ≃ F.obj Y := (F.obj Y).uSwitchEquiv
-    set x' : F'.obj X := (e X).symm x with hx'
-    set y' : F'.obj X := (e X).symm y with hy'
-    obtain ⟨g', (hg' : g'.hom.app X x' = y')⟩ := MulAction.exists_smul_eq (Aut F') x' y'
-    let gapp (Y : C) : F.obj Y ≅ F.obj Y := FintypeCat.equivEquivIso <|
-      (e Y).symm.trans <| (FintypeCat.equivEquivIso.symm (g'.app Y)).trans (e Y)
-    let g : F ≅ F := NatIso.ofComponents gapp <| fun {X Y} f ↦ by
-      ext x
-      dsimp [gapp, e]
-      erw [FintypeCat.uSwitchEquiv_naturality (F.map f)]
-      rw [← Functor.comp_map]
-      erw [← FunctorToFintypeCat.naturality, FintypeCat.uSwitchEquiv_symm_naturality (F.map f)]
-      rfl
-    refine ⟨g, show (gapp X).hom x = y from ?_⟩
-    simp [gapp, ← hx', hg', hy', Equiv.apply_symm_apply]
+    let e : Aut F ≃* Aut F' :=
+      (FullyFaithful.whiskeringRight (FintypeCat.uSwitchEquivalence.{w, u₂}).fullyFaithfulFunctor
+        C).autMulEquivOfFullyFaithful F
+    let ex : F'.obj X ≃ F.obj X := (F.obj X).uSwitchEquiv
+    obtain ⟨g', hg'⟩ := MulAction.exists_smul_eq (Aut F') (ex.symm x) (ex.symm y)
+    refine ⟨e.symm g', ex.symm.injective ?_⟩
+    dsimp [ex]
+    erw [← FintypeCat.uSwitchEquiv_symm_naturality ((e.symm g').hom.app X) x]
+    rw [show FintypeCat.uSwitch.map ((e.symm g').hom.app X) = g'.hom.app X from
+      (FintypeCat.uSwitchEquivalence.{w, u₂}).fullyFaithfulFunctor.map_preimage _]
+    exact hg'
 
 end General
 

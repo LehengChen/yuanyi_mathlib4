@@ -262,16 +262,9 @@ instance isMonoidalLeftDistrib.of_endofunctors : IsMonoidalLeftDistrib (C ⥤ C)
 
 end Endofunctors
 
-section MonoidalPreadditive
-
-attribute [local instance] preservesBinaryBiproducts_of_preservesBiproducts
-  preservesBinaryCoproducts_of_preservesBinaryBiproducts
-
 /-- A preadditive monoidal category with binary biproducts is distributive. -/
 instance IsMonoidalDistrib.of_MonoidalPreadditive_with_binary_coproducts [Preadditive C]
     [MonoidalPreadditive C] :
     IsMonoidalDistrib C where
-
-end MonoidalPreadditive
 
 end CategoryTheory

@@ -92,17 +92,10 @@ instance IsWellOrderContinuous.restriction_setIci
     have hf : Monotone f := fun _ _ h ↦ h
     have : hf.functor.Final := by
       rw [Monotone.final_functor_iff]
+      have hjm : j < m.1 :=
+        lt_of_le_of_ne m.2 fun h' ↦ hm.1 fun k _ ↦ h'.symm.le.trans k.2
       rintro ⟨j', hj'⟩
-      push _ ∈ _ at hj'
-      dsimp only [f]
-      by_cases! h : j' ≤ j
-      · refine ⟨⟨⟨j, le_refl j⟩, ?_⟩, h⟩
-        by_contra h'
-        simp only [Set.mem_Iio, not_lt] at h'
-        apply hm.1
-        rintro ⟨k, hk⟩ hkm
-        exact h'.trans hk
-      · exact ⟨⟨⟨j', h.le⟩, hj'⟩, by rfl⟩
+      exact ⟨⟨⟨max j j', le_max_left _ _⟩, max_lt hjm hj'⟩, le_max_right _ _⟩
     exact (Functor.Final.isColimitWhiskerEquiv (F := hf.functor) _).2
       (F.isColimitOfIsWellOrderContinuous m.1 (Set.Ici.isSuccLimit_coe m hm))⟩
 

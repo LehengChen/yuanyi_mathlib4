@@ -168,12 +168,7 @@ theorem comparisonAdjunction_unit_f
       (adj.counit.app (F.obj A.A))]
     (A : adj.toMonad.Algebra) :
     ((comparisonAdjunction adj).unit.app A).f = (beckCoequalizer A).desc (unitCofork A) := by
-  apply Limits.Cofork.IsColimit.hom_ext (beckCoequalizer A)
-  rw [Cofork.IsColimit.π_desc]
-  dsimp only [beckCofork_π, unitCofork_π]
-  rw [comparisonAdjunction_unit_f_aux, ← adj.homEquiv_naturality_left A.a, coequalizer.condition,
-    adj.homEquiv_naturality_right, adj.homEquiv_unit, Category.assoc]
-  apply adj.right_triangle_components_assoc
+  simp [beckCoequalizer_desc, comparisonAdjunction_unit_f_aux, Adjunction.homEquiv_unit]
 
 variable (adj)
 
@@ -303,26 +298,18 @@ def monadicOfHasPreservesReflectsGSplitCoequalizers [HasCoequalizerOfIsSplitPair
     have : ∀ (X : Algebra adj.toMonad), IsIso ((comparisonAdjunction adj).unit.app X) := by
       intro X
       apply @isIso_of_reflects_iso _ _ _ _ _ _ _ (Monad.forget adj.toMonad) ?_ _
-      · change IsIso ((comparisonAdjunction adj).unit.app X).f
-        rw [comparisonAdjunction_unit_f]
-        change
-          IsIso
-            (IsColimit.coconePointUniqueUpToIso (beckCoequalizer X)
-                (unitColimitOfPreservesCoequalizer X)).hom
-        exact (IsColimit.coconePointUniqueUpToIso _ _).isIso_hom
+      · simpa [comparisonAdjunction_unit_f] using
+          (IsColimit.coconePointUniqueUpToIso (beckCoequalizer X)
+            (unitColimitOfPreservesCoequalizer X)).isIso_hom
     have : ∀ (Y : D), IsIso ((comparisonAdjunction adj).counit.app Y) := by
       intro Y
-      rw [comparisonAdjunction_counit_app]
-      -- Porting note: passing instances through
-      change IsIso (IsColimit.coconePointUniqueUpToIso _ ?_).hom
-      · infer_instance
-      -- Porting note: passing instances through
-      apply @counitCoequalizerOfReflectsCoequalizer _ _ _ _ _ _ _ _ ?_
-      letI _ :
-        G.IsSplitPair (F.map (G.map (adj.counit.app Y)))
+      letI : G.IsSplitPair (F.map (G.map (adj.counit.app Y)))
           (adj.counit.app (F.obj (G.obj Y))) :=
         MonadicityInternal.main_pair_G_split _ ((comparison adj).obj Y)
-      infer_instance
+      rw [comparisonAdjunction_counit_app]
+      change IsIso (IsColimit.coconePointUniqueUpToIso _
+        (counitCoequalizerOfReflectsCoequalizer (adj := adj) Y)).hom
+      exact (IsColimit.coconePointUniqueUpToIso _ _).isIso_hom
     exact (comparisonAdjunction adj).toEquivalence.isEquivalence_inverse
 
 -- Porting note: added these to replace parametric instances https://github.com/leanprover/lean4/issues/2311

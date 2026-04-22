@@ -5,7 +5,7 @@ Authors: Andrew Yang
 -/
 module
 
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Defs
 
 /-!
 # The pullback of an isomorphism
@@ -63,12 +63,10 @@ theorem hasPullback_of_left_iso : HasPullback f g :=
 
 attribute [local instance] hasPullback_of_left_iso
 
-set_option backward.isDefEq.respectTransparency false in
 instance pullback_snd_iso_of_left_iso : IsIso (pullback.snd f g) := by
-  refine ⟨⟨pullback.lift (g ≫ inv f) (𝟙 _) (by simp), ?_, by simp⟩⟩
-  ext
-  · simp [← pullback.condition_assoc]
-  · simp
+  let h := IsPullback.of_isLimit (pullbackConeOfLeftIsoIsLimit f g)
+  simpa only [← h.isoPullback_inv_snd, pullbackConeOfLeftIso_snd] using
+    (inferInstance : IsIso (h.isoPullback.inv ≫ 𝟙 _))
 
 @[reassoc (attr := simp)]
 lemma pullback_inv_snd_fst_of_left_isIso :
@@ -115,12 +113,10 @@ theorem hasPullback_of_right_iso : HasPullback f g :=
 
 attribute [local instance] hasPullback_of_right_iso
 
-set_option backward.isDefEq.respectTransparency false in
 instance pullback_fst_iso_of_right_iso : IsIso (pullback.fst f g) := by
-  refine ⟨⟨pullback.lift (𝟙 _) (f ≫ inv g) (by simp), ?_, by simp⟩⟩
-  ext
-  · simp
-  · simp [pullback.condition_assoc]
+  let h := IsPullback.of_isLimit (pullbackConeOfRightIsoIsLimit f g)
+  simpa only [← h.isoPullback_inv_fst, pullbackConeOfRightIso_fst] using
+    (inferInstance : IsIso (h.isoPullback.inv ≫ 𝟙 _))
 
 @[reassoc (attr := simp)]
 lemma pullback_inv_fst_snd_of_right_isIso :
@@ -167,12 +163,10 @@ theorem hasPushout_of_left_iso : HasPushout f g :=
 
 attribute [local instance] hasPushout_of_left_iso
 
-set_option backward.isDefEq.respectTransparency false in
 instance pushout_inr_iso_of_left_iso : IsIso (pushout.inr f g) := by
-  refine ⟨⟨pushout.desc (inv f ≫ g) (𝟙 _) (by simp), by simp, ?_⟩⟩
-  ext
-  · simp [← pushout.condition]
-  · simp
+  let h := IsPushout.of_isColimit (pushoutCoconeOfLeftIsoIsLimit f g)
+  simpa only [← h.inr_isoPushout_hom, pushoutCoconeOfLeftIso_inr] using
+    (inferInstance : IsIso (𝟙 _ ≫ h.isoPushout.hom))
 
 @[reassoc (attr := simp)]
 lemma pushout_inl_inv_inr_of_right_isIso :
@@ -219,12 +213,10 @@ theorem hasPushout_of_right_iso : HasPushout f g :=
 
 attribute [local instance] hasPushout_of_right_iso
 
-set_option backward.isDefEq.respectTransparency false in
 instance pushout_inl_iso_of_right_iso : IsIso (pushout.inl _ _ : _ ⟶ pushout f g) := by
-  refine ⟨⟨pushout.desc (𝟙 _) (inv g ≫ f) (by simp), by simp, ?_⟩⟩
-  ext
-  · simp
-  · simp [pushout.condition]
+  let h := IsPushout.of_isColimit (pushoutCoconeOfRightIsoIsLimit f g)
+  simpa only [← h.inl_isoPushout_hom, pushoutCoconeOfRightIso_inl] using
+    (inferInstance : IsIso (𝟙 _ ≫ h.isoPushout.hom))
 
 @[reassoc (attr := simp)]
 lemma pushout_inr_inv_inl_of_right_isIso :

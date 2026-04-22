@@ -6,6 +6,7 @@ Authors: Kim Morrison, Adam Topaz
 module
 
 public import Mathlib.CategoryTheory.ConcreteCategory.Forget
+public import Mathlib.CategoryTheory.ConcreteCategory.Elementwise
 public import Mathlib.CategoryTheory.Limits.Preserves.Basic
 public import Mathlib.CategoryTheory.Limits.Types.Colimits
 public import Mathlib.CategoryTheory.Limits.Types.Images
@@ -142,13 +143,9 @@ theorem isColimit_rep_eq_of_exists {D : Cocone F} {i j : J} (x : ToType (F.obj i
     (y : ToType (F.obj j))
     (h : ∃ (k : _) (f : i ⟶ k) (g : j ⟶ k), F.map f x = F.map g y) :
     D.ι.app i x = D.ι.app j y := by
-  let E := (forget C).mapCocone D
-  obtain ⟨k, f, g, (hfg : (F ⋙ forget C).map f x = F.map g y)⟩ := h
-  let h1 : (F ⋙ forget C).map f ≫ E.ι.app k = E.ι.app i := E.ι.naturality f
-  let h2 : (F ⋙ forget C).map g ≫ E.ι.app k = E.ι.app j := E.ι.naturality g
-  change E.ι.app i x = E.ι.app j y
-  rw [← h1, types_comp_apply, hfg]
-  exact congrFun h2 y
+  obtain ⟨k, f, g, hfg⟩ := h
+  exact (D.w_apply f x).symm.trans <|
+    (ConcreteCategory.congr_arg (D.ι.app k) hfg).trans (D.w_apply g y)
 
 theorem colimit_rep_eq_of_exists [HasColimit F] {i j : J} (x : ToType (F.obj i))
     (y : ToType (F.obj j))

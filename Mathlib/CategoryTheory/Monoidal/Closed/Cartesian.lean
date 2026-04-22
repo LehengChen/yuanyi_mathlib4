@@ -78,12 +78,7 @@ open MonoidalClosed
 def zeroMul {I : C} (t : IsInitial I) : A ⊗ I ≅ I where
   hom := snd _ _
   inv := t.to _
-  hom_inv_id := by
-    have : snd A I = uncurry (t.to _) := by
-      rw [← curry_eq_iff]
-      apply t.hom_ext
-    rw [this, ← uncurry_natural_right, ← eq_curry_iff]
-    apply t.hom_ext
+  hom_inv_id := (t.isInitialObj (tensorLeft A) I).hom_ext _ _
   inv_hom_id := t.hom_ext _ _
 
 /-- If an initial object `0` exists in a CCC, then `0 ⨯ A ≅ 0`. -/

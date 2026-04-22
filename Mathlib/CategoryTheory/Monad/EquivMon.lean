@@ -95,12 +95,8 @@ set_option backward.isDefEq.respectTransparency false in
 def monadMonEquiv : Monad C ≌ Mon (C ⥤ C) where
   functor := monadToMon _
   inverse := monToMonad _
-  unitIso :=
-  { hom := { app := fun _ => { app := fun _ => 𝟙 _ } }
-    inv := { app := fun _ => { app := fun _ => 𝟙 _ } } }
-  counitIso :=
-  { hom := { app := fun _ => { hom := 𝟙 _ } }
-    inv := { app := fun _ => { hom := 𝟙 _ } } }
+  unitIso := Iso.refl _
+  counitIso := Iso.refl _
 
 -- Sanity check
 example (A : Monad C) {X : C} : ((monadMonEquiv C).unitIso.app A).hom.app X = 𝟙 _ :=

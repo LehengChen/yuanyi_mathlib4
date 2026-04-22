@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Limits.FinallySmall
 public import Mathlib.CategoryTheory.Limits.Preserves.Filtered
+public import Mathlib.CategoryTheory.Filtered.Small
 
 /-!
 # Finally small filtered categories
@@ -35,52 +36,29 @@ variable [IsFiltered C] [LocallySmall.{w} C] [FinallySmall.{w} C]
 
 lemma exists_of_isFiltered :
     ∃ (D : Type w) (_ : SmallCategory D) (_ : IsFiltered D) (F : D ⥤ C), F.Final := by
-  /- First, under the assumption `Category.{w}` (instead of `LocallySmall.{w}`),
-  we get most of the conclusion but instead of `D : Type w`,
-  we only get a `w`-small `D : Type u`. -/
-  have (C₀ : Type u) [Category.{w} C₀] [IsFiltered C₀] [FinallySmall.{w} C₀] :
-      ∃ (D : Type u) (_ : Small.{w} D) (_ : Category.{w} D) (_ : IsFiltered D) (F : D ⥤ C₀),
-        F.Final := by
-    /- For `D`, we can choose the full subcategory of `C₀` which is the strict image
-    of the final functor `fromFinalModel.{w} C₀ : FinalModel.{w} C₀ ⥤ C₀`,
-    where `FinalModel.{w} C₀` is a `w`-small category. -/
-    let P : ObjectProperty C₀ := ObjectProperty.strictMap ⊤ (fromFinalModel.{w} C₀)
-    have hP (X : C₀) : ∃ (Y : C₀) (hY : P Y), Nonempty (X ⟶ Y) := by
-      let f : StructuredArrow X (fromFinalModel.{w} C₀) := Classical.arbitrary _
-      exact ⟨_, ObjectProperty.strictMap_obj _ _ (X := f.right) (by tauto), ⟨f.hom⟩⟩
-    have : IsFiltered P.FullSubcategory :=
-      { nonempty := by
-          obtain ⟨X, hX, _⟩ := hP (Classical.arbitrary C₀)
-          exact ⟨X, hX⟩
-        cocone_objs := by
-          rintro ⟨X, hX⟩ ⟨Y, hY⟩
-          obtain ⟨Z, hZ, ⟨f⟩⟩ := hP (max X Y)
-          exact ⟨⟨Z, hZ⟩, ObjectProperty.homMk (leftToMax X Y ≫ f),
-            ObjectProperty.homMk (rightToMax X Y ≫ f), by tauto⟩
-        cocone_maps := by
-          rintro ⟨X, hX⟩ ⟨Y, hY⟩ ⟨f₁ : X ⟶ Y⟩ ⟨f₂ : X ⟶ Y⟩
-          obtain ⟨Z, hZ, ⟨g⟩⟩ := hP (coeq f₁ f₂)
-          exact ⟨⟨Z, hZ⟩, ObjectProperty.homMk (coeqHom f₁ f₂ ≫ g),
-            ObjectProperty.hom_ext _ (coeq_condition_assoc _ _ _) ⟩ }
-    let G : FinalModel.{w} C₀ ⥤ P.FullSubcategory :=
-      { obj X := ⟨(fromFinalModel.{w} C₀).obj X, by tauto⟩
-        map f := ObjectProperty.homMk ((fromFinalModel.{w} C₀).map f) }
-    have : (G ⋙ P.ι).Final := inferInstanceAs (fromFinalModel.{w} C₀).Final
-    exact ⟨P.FullSubcategory, small_of_surjective (f := G.obj)
-      (by rintro ⟨_, Y, _, rfl⟩; exact ⟨Y, rfl⟩), inferInstance, inferInstance, P.ι,
-      Functor.final_of_comp_full_faithful' G P.ι ⟩
   /- We get the conclusion under the assumption `Category.{w}`
   (instead of `LocallySmall.{w}`). -/
-  have (C₀ : Type u) [Category.{w} C₀] (_ : IsFiltered C₀) (_ : FinallySmall.{w} C₀) :
+  have hcat (C₀ : Type u) [Category.{w} C₀] [IsFiltered C₀] [FinallySmall.{w} C₀] :
       ∃ (D : Type w) (_ : SmallCategory D) (_ : IsFiltered D) (F : D ⥤ C₀), F.Final := by
-    obtain ⟨D, _, _, _, F, _⟩ := this C₀
-    let e := equivSmallModel.{w} D
-    exact ⟨_, _, of_equivalence e, e.inverse ⋙ F, inferInstance⟩
+    let F₀ := fromFinalModel.{w} C₀
+    let D := IsFiltered.SmallFilteredIntermediate F₀
+    let G := IsFiltered.SmallFilteredIntermediate.inclusion F₀
+    haveI : Nonempty (FinalModel.{w} C₀) := by
+      let f : StructuredArrow (Classical.arbitrary C₀) F₀ := Classical.arbitrary _
+      exact ⟨f.right⟩
+    haveI : G.Final :=
+      Functor.final_of_exists_of_isFiltered_of_fullyFaithful G (fun X => by
+        let f : StructuredArrow X F₀ := Classical.arbitrary _
+        exact ⟨(IsFiltered.SmallFilteredIntermediate.factoring F₀).obj f.right,
+          ⟨f.hom ≫
+            (IsFiltered.SmallFilteredIntermediate.factoringCompInclusion F₀).inv.app f.right⟩⟩)
+    exact ⟨D, inferInstance, inferInstance, G, inferInstance⟩
   /- To get the conclusion for the given category `C`, it suffices to apply
   the previous result to the category `ShrinkHoms C`. -/
   let e := ShrinkHoms.equivalence.{w} C
-  obtain ⟨D, _, _, F, _⟩ := this (ShrinkHoms C)
-    (of_equivalence e) (finallySmall_of_final_of_finallySmall e.functor)
+  haveI : IsFiltered (ShrinkHoms C) := of_equivalence e
+  haveI : FinallySmall.{w} (ShrinkHoms C) := finallySmall_of_final_of_finallySmall e.functor
+  obtain ⟨D, _, _, F, _⟩ := hcat (ShrinkHoms C)
   exact ⟨D, inferInstance, inferInstance, F ⋙ e.inverse, inferInstance⟩
 
 /-- If `C` is a locally small filtered finally small category,

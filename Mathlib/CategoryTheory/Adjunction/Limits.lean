@@ -110,11 +110,8 @@ noncomputable instance (priority := 100) isEquivalence_preservesColimits
 noncomputable instance (priority := 100)
     _root_.CategoryTheory.Functor.reflectsColimits_of_isEquivalence
     (E : D ⥤ C) [E.IsEquivalence] :
-    ReflectsColimitsOfSize.{v, u} E where
-  reflectsColimitsOfShape :=
-    { reflectsColimit :=
-        { reflects := fun t =>
-          ⟨(isColimitOfPreserves E.inv t).mapCoconeEquiv E.asEquivalence.unitIso.symm⟩ } }
+    ReflectsColimitsOfSize.{v, u} E := by
+  infer_instance
 
 -- see Note [lower instance priority]
 noncomputable instance (priority := 100)
@@ -140,20 +137,18 @@ theorem hasColimit_comp_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimit 
       isColimit := isColimitOfPreserves _ (colimit.isColimit K) }
 
 theorem hasColimit_of_comp_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimit (K ⋙ E)] :
-    HasColimit K := by
-  rw [hasColimit_iff_of_iso
-    ((Functor.rightUnitor _).symm ≪≫ isoWhiskerLeft K E.asEquivalence.unitIso)]
-  exact hasColimit_comp_equivalence (K ⋙ E) E.inv
+    HasColimit K :=
+  hasColimit_of_created K E
 
 /-- Transport a `HasColimitsOfShape` instance across an equivalence. -/
 theorem hasColimitsOfShape_of_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimitsOfShape J D] :
     HasColimitsOfShape J C :=
-  ⟨fun F => hasColimit_of_comp_equivalence F E⟩
+  hasColimitsOfShape_of_hasColimitsOfShape_createsColimitsOfShape E
 
 /-- Transport a `HasColimitsOfSize` instance across an equivalence. -/
 theorem has_colimits_of_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimitsOfSize.{v, u} D] :
     HasColimitsOfSize.{v, u} C :=
-  ⟨fun _ _ => hasColimitsOfShape_of_equivalence E⟩
+  hasColimits_of_hasColimits_createsColimits E
 
 end PreservationColimits
 
@@ -221,11 +216,8 @@ instance (priority := 100) isEquivalencePreservesLimits
 noncomputable instance (priority := 100)
     _root_.CategoryTheory.Functor.reflectsLimits_of_isEquivalence
     (E : D ⥤ C) [E.IsEquivalence] :
-    ReflectsLimitsOfSize.{v, u} E where
-  reflectsLimitsOfShape :=
-    { reflectsLimit :=
-        { reflects := fun t =>
-            ⟨(isLimitOfPreserves E.inv t).mapConeEquiv E.asEquivalence.unitIso.symm⟩ } }
+    ReflectsLimitsOfSize.{v, u} E := by
+  infer_instance
 
 -- see Note [lower instance priority]
 noncomputable instance (priority := 100)
@@ -249,20 +241,18 @@ theorem hasLimit_comp_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimit K] :
       isLimit := isLimitOfPreserves _ (limit.isLimit K) }
 
 theorem hasLimit_of_comp_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimit (K ⋙ E)] :
-    HasLimit K := by
-  rw [← hasLimit_iff_of_iso
-    (isoWhiskerLeft K E.asEquivalence.unitIso.symm ≪≫ Functor.rightUnitor _)]
-  exact hasLimit_comp_equivalence (K ⋙ E) E.inv
+    HasLimit K :=
+  hasLimit_of_created K E
 
 /-- Transport a `HasLimitsOfShape` instance across an equivalence. -/
 theorem hasLimitsOfShape_of_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimitsOfShape J C] :
     HasLimitsOfShape J D :=
-  ⟨fun F => hasLimit_of_comp_equivalence F E⟩
+  hasLimitsOfShape_of_hasLimitsOfShape_createsLimitsOfShape E
 
 /-- Transport a `HasLimitsOfSize` instance across an equivalence. -/
 theorem has_limits_of_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimitsOfSize.{v, u} C] :
     HasLimitsOfSize.{v, u} D :=
-  ⟨fun _ _ => hasLimitsOfShape_of_equivalence E⟩
+  hasLimits_of_hasLimits_createsLimits E
 
 end PreservationLimits
 

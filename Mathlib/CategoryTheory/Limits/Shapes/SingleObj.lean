@@ -46,11 +46,7 @@ instance (J : SingleObj M ⥤ Type u) : MulAction M (J.obj (SingleObj.star M)) w
   one_smul x := by
     change J.map (𝟙 _) x = x
     simp only [FunctorToTypes.map_id_apply]
-  mul_smul g h x := by
-    change J.map (g * h) x = (J.map h ≫ J.map g) x
-    rw [← SingleObj.comp_as_mul]
-    · simp only [FunctorToTypes.map_comp_apply, types_comp_apply]
-      rfl
+  mul_smul g h x := by simpa [SingleObj.comp_as_mul] using congrFun (J.map_comp h g) x
 
 section Limits
 
@@ -88,15 +84,11 @@ lemma colimitTypeRel_iff_orbitRel (x y : J.obj (SingleObj.star G)) :
 
 /-- The explicit quotient construction of the colimit of `J : SingleObj G ⥤ Type u` is
 equivalent to the quotient of `J.obj (SingleObj.star G)` by the induced action. -/
-@[simps]
+@[simps! apply symm_apply]
 def colimitTypeRelEquivOrbitRelQuotient :
-    J.ColimitType ≃ MulAction.orbitRel.Quotient G (J.obj (SingleObj.star G)) where
-  toFun := Quot.lift (fun p => ⟦p.2⟧) <| fun a b h => Quotient.sound <|
-    (colimitTypeRel_iff_orbitRel J a.2 b.2).mp h
-  invFun := Quot.lift (fun x => Quot.mk _ ⟨SingleObj.star G, x⟩) <| fun a b h =>
-    Quot.sound <| (colimitTypeRel_iff_orbitRel J a b).mpr h
-  left_inv := fun x => Quot.inductionOn x (fun _ ↦ rfl)
-  right_inv := fun x => Quot.inductionOn x (fun _ ↦ rfl)
+    J.ColimitType ≃ MulAction.orbitRel.Quotient G (J.obj (SingleObj.star G)) :=
+  Quot.congr (Equiv.uniqueSigma fun _ : SingleObj G ↦ J.obj _) fun a b => by
+    simpa [Equiv.uniqueSigma_apply] using colimitTypeRel_iff_orbitRel J a.2 b.2
 
 /-- The colimit of `J : SingleObj G ⥤ Type u` is equivalent to the quotient of
 `J.obj (SingleObj.star G)` by the induced action. -/

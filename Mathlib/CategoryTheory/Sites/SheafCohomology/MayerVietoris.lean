@@ -97,12 +97,8 @@ lemma mk₀_f_comp_biprodAddEquiv_symm_biprodIsoProd_hom
     (Ext.mk₀ S.shortComplex.f).comp
       (Ext.biprodAddEquiv.symm ((AddCommGrpCat.biprodIsoProd _ _).hom x)) (zero_add n) =
     (S.fromBiprod F n x) := by
-  obtain ⟨⟨x₂, x₃⟩, rfl⟩ :=
-    (AddCommGrpCat.biprodIsoProd _ _).addCommGroupIsoToAddEquiv.symm.surjective x
-  dsimp
-  rw [Ext.biprodAddEquiv_symm_apply,
-    Iso.addCommGroupIsoToAddEquiv_symm_apply,
-    fromBiprod_biprodIsoProd_inv_apply]
+  rw [← Iso.hom_inv_id_apply (AddCommGrpCat.biprodIsoProd _ _) x,
+    Ext.biprodAddEquiv_symm_apply, fromBiprod_biprodIsoProd_inv_apply]
   cat_disch
 
 variable (n₀ n₁ : ℕ) (h : n₀ + 1 = n₁)

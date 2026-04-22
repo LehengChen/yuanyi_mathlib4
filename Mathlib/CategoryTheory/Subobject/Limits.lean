@@ -259,12 +259,8 @@ def cokernelOrderHom [HasCokernels C] (X : C) : Subobject X →o (Subobject (op 
     Subobject.lift (fun _ f _ => Subobject.mk (cokernel.π f).op)
       (by
         rintro A B f g hf hg i rfl
-        refine Subobject.mk_eq_mk_of_comm _ _ (Iso.op ?_) (Quiver.Hom.unop_inj ?_)
-        · exact (IsColimit.coconePointUniqueUpToIso (colimit.isColimit _)
-            (isCokernelEpiComp (colimit.isColimit _) i.hom rfl)).symm
-        · simp only [Iso.comp_inv_eq, Iso.op_hom, Iso.symm_hom, unop_comp, Quiver.Hom.unop_op,
-            colimit.comp_coconePointUniqueUpToIso_hom, Cofork.ofπ_ι_app,
-            coequalizer.cofork_π])
+        exact Subobject.mk_eq_mk_of_comm _ _ (Iso.op (cokernel.mapIso g (i.hom ≫ g) i.symm
+          (Iso.refl X) (by simp))) (Quiver.Hom.unop_inj (by simp [cokernel.mapIso])))
   monotone' :=
     Subobject.ind₂ _ <| by
       intro A B f g hf hg h
@@ -282,13 +278,9 @@ def kernelOrderHom [HasKernels C] (X : C) : (Subobject (op X))ᵒᵈ →o Subobj
     Subobject.lift (fun _ f _ => Subobject.mk (kernel.ι f.unop))
       (by
         rintro A B f g hf hg i rfl
-        refine Subobject.mk_eq_mk_of_comm _ _ ?_ ?_
-        · exact
-            IsLimit.conePointUniqueUpToIso (limit.isLimit _)
-              (isKernelCompMono (limit.isLimit (parallelPair g.unop 0)) i.unop.hom rfl)
-        · dsimp
-          simp only [← Iso.eq_inv_comp, limit.conePointUniqueUpToIso_inv_comp,
-            Fork.ofι_π_app])
+        exact Subobject.mk_eq_mk_of_comm _ _ (kernel.mapIso (i.hom ≫ g).unop g.unop (Iso.refl X)
+          i.unop.symm (by dsimp; rw [← unop_comp, ← unop_comp]; simp))
+          (by simp [kernel.mapIso]))
   monotone' :=
     Subobject.ind₂ _ <| by
       intro A B f g hf hg h
@@ -425,13 +417,8 @@ theorem imageSubobject_iso_comp [HasEqualizers C] {X' : C} (h : X' ⟶ X) [IsIso
 
 theorem imageSubobject_le {A B : C} {X : Subobject B} (f : A ⟶ B) [HasImage f] (h : A ⟶ X)
     (w : h ≫ X.arrow = f) : imageSubobject f ≤ X :=
-  Subobject.le_of_comm
-    ((imageSubobjectIso f).hom ≫
-      image.lift
-        { I := (X : C)
-          e := h
-          m := X.arrow })
-    (by rw [assoc, image.lift_fac, imageSubobject_arrow])
+  Subobject.mk_le_of_comm (image.lift { I := (X : C), e := h, m := X.arrow })
+    (by rw [image.lift_fac])
 
 theorem imageSubobject_le_mk {A B : C} {X : C} (g : X ⟶ B) [Mono g] (f : A ⟶ B) [HasImage f]
     (h : A ⟶ X) (w : h ≫ g = f) : imageSubobject f ≤ Subobject.mk g :=

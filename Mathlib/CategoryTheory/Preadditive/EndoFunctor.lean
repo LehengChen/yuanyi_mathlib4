@@ -30,72 +30,37 @@ open CategoryTheory.Limits Preadditive
 
 /-- The category of algebras over an additive endofunctor on a preadditive category is preadditive.
 -/
-@[simps]
+@[simps!]
 instance Endofunctor.algebraPreadditive : Preadditive (Endofunctor.Algebra F) where
-  homGroup A₁ A₂ :=
-    { add := fun α β =>
-        { f := α.f + β.f
-          h := by simp only [Functor.map_add, add_comp, Endofunctor.Algebra.Hom.h, comp_add] }
-      zero :=
-        { f := 0
-          h := by simp only [Functor.map_zero, zero_comp, comp_zero] }
-      nsmul := fun n α =>
-        { f := n • α.f
-          h := by rw [comp_nsmul, Functor.map_nsmul, nsmul_comp, Endofunctor.Algebra.Hom.h] }
-      neg := fun α =>
-        { f := -α.f
-          h := by simp only [Functor.map_neg, neg_comp, Endofunctor.Algebra.Hom.h, comp_neg] }
-      sub := fun α β =>
-        { f := α.f - β.f
-          h := by simp only [Functor.map_sub, sub_comp, Endofunctor.Algebra.Hom.h, comp_sub] }
-      zsmul := fun r α =>
-        { f := r • α.f
-          h := by rw [comp_zsmul, Functor.map_zsmul, zsmul_comp, Endofunctor.Algebra.Hom.h] }
-      add_assoc := by
-        intros
-        apply Algebra.Hom.ext
-        apply add_assoc
-      zero_add := by
-        intros
-        apply Algebra.Hom.ext
-        apply zero_add
-      add_zero := by
-        intros
-        apply Algebra.Hom.ext
-        apply add_zero
-      nsmul_zero := by
-        intros
-        apply Algebra.Hom.ext
-        apply zero_smul
-      nsmul_succ := by
-        intros
-        apply Algebra.Hom.ext
-        apply succ_nsmul
-      sub_eq_add_neg := by
-        intros
-        apply Algebra.Hom.ext
-        apply sub_eq_add_neg
-      zsmul_zero' := by
-        intros
-        apply Algebra.Hom.ext
-        apply zero_smul
-      zsmul_succ' := by
-        intros
-        apply Algebra.Hom.ext
-        simp only [natCast_zsmul, succ_nsmul]
-        rfl
-      zsmul_neg' := by
-        intros
-        apply Algebra.Hom.ext
-        simp only [negSucc_zsmul, ← Nat.cast_smul_eq_nsmul ℤ]
-      neg_add_cancel := by
-        intros
-        apply Algebra.Hom.ext
-        apply neg_add_cancel
-      add_comm := by
-        intros
-        apply Algebra.Hom.ext
-        apply add_comm }
+  homGroup A₁ A₂ := by
+    letI : Add (A₁ ⟶ A₂) :=
+      { add := fun α β =>
+          { f := α.f + β.f
+            h := by simp only [Functor.map_add, add_comp, Endofunctor.Algebra.Hom.h, comp_add] } }
+    letI : Zero (A₁ ⟶ A₂) :=
+      { zero :=
+          { f := 0
+            h := by simp only [Functor.map_zero, zero_comp, comp_zero] } }
+    letI : SMul ℕ (A₁ ⟶ A₂) :=
+      { smul := fun n α =>
+          { f := n • α.f
+            h := by rw [comp_nsmul, Functor.map_nsmul, nsmul_comp, Endofunctor.Algebra.Hom.h] } }
+    letI : Neg (A₁ ⟶ A₂) :=
+      { neg := fun α =>
+          { f := -α.f
+            h := by simp only [Functor.map_neg, neg_comp, Endofunctor.Algebra.Hom.h, comp_neg] } }
+    letI : Sub (A₁ ⟶ A₂) :=
+      { sub := fun α β =>
+          { f := α.f - β.f
+            h := by simp only [Functor.map_sub, sub_comp, Endofunctor.Algebra.Hom.h, comp_sub] } }
+    letI : SMul ℤ (A₁ ⟶ A₂) :=
+      { smul := fun r α =>
+          { f := r • α.f
+            h := by rw [comp_zsmul, Functor.map_zsmul, zsmul_comp, Endofunctor.Algebra.Hom.h] } }
+    exact Function.Injective.addCommGroup Endofunctor.Algebra.Hom.f
+      (fun _ _ h => Endofunctor.Algebra.Hom.ext h)
+      rfl (fun _ _ => rfl) (fun _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)
+      (fun _ _ => rfl)
   add_comp := by
     intros
     apply Algebra.Hom.ext
@@ -107,72 +72,37 @@ instance Endofunctor.algebraPreadditive : Preadditive (Endofunctor.Algebra F) wh
 
 instance Algebra.forget_additive : (Endofunctor.Algebra.forget F).Additive where
 
-@[simps]
+@[simps!]
 instance Endofunctor.coalgebraPreadditive : Preadditive (Endofunctor.Coalgebra F) where
-  homGroup A₁ A₂ :=
-    { add := fun α β =>
-        { f := α.f + β.f
-          h := by simp only [Functor.map_add, comp_add, Endofunctor.Coalgebra.Hom.h, add_comp] }
-      zero :=
-        { f := 0
-          h := by simp only [Functor.map_zero, zero_comp, comp_zero] }
-      nsmul := fun n α =>
-        { f := n • α.f
-          h := by rw [Functor.map_nsmul, comp_nsmul, Endofunctor.Coalgebra.Hom.h, nsmul_comp] }
-      neg := fun α =>
-        { f := -α.f
-          h := by simp only [Functor.map_neg, comp_neg, Endofunctor.Coalgebra.Hom.h, neg_comp] }
-      sub := fun α β =>
-        { f := α.f - β.f
-          h := by simp only [Functor.map_sub, comp_sub, Endofunctor.Coalgebra.Hom.h, sub_comp] }
-      zsmul := fun r α =>
-        { f := r • α.f
-          h := by rw [Functor.map_zsmul, comp_zsmul, Endofunctor.Coalgebra.Hom.h, zsmul_comp] }
-      add_assoc := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply add_assoc
-      zero_add := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply zero_add
-      add_zero := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply add_zero
-      nsmul_zero := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply zero_smul
-      nsmul_succ := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply succ_nsmul
-      sub_eq_add_neg := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply sub_eq_add_neg
-      zsmul_zero' := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply zero_smul
-      zsmul_succ' := by
-        intros
-        apply Coalgebra.Hom.ext
-        simp only [natCast_zsmul, succ_nsmul]
-        rfl
-      zsmul_neg' := by
-        intros
-        apply Coalgebra.Hom.ext
-        simp only [negSucc_zsmul, ← Nat.cast_smul_eq_nsmul ℤ]
-      neg_add_cancel := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply neg_add_cancel
-      add_comm := by
-        intros
-        apply Coalgebra.Hom.ext
-        apply add_comm }
+  homGroup A₁ A₂ := by
+    letI : Add (A₁ ⟶ A₂) :=
+      { add := fun α β =>
+          { f := α.f + β.f
+            h := by simp only [Functor.map_add, comp_add, Endofunctor.Coalgebra.Hom.h, add_comp] } }
+    letI : Zero (A₁ ⟶ A₂) :=
+      { zero :=
+          { f := 0
+            h := by simp only [Functor.map_zero, zero_comp, comp_zero] } }
+    letI : SMul ℕ (A₁ ⟶ A₂) :=
+      { smul := fun n α =>
+          { f := n • α.f
+            h := by rw [Functor.map_nsmul, comp_nsmul, Endofunctor.Coalgebra.Hom.h, nsmul_comp] } }
+    letI : Neg (A₁ ⟶ A₂) :=
+      { neg := fun α =>
+          { f := -α.f
+            h := by simp only [Functor.map_neg, comp_neg, Endofunctor.Coalgebra.Hom.h, neg_comp] } }
+    letI : Sub (A₁ ⟶ A₂) :=
+      { sub := fun α β =>
+          { f := α.f - β.f
+            h := by simp only [Functor.map_sub, comp_sub, Endofunctor.Coalgebra.Hom.h, sub_comp] } }
+    letI : SMul ℤ (A₁ ⟶ A₂) :=
+      { smul := fun r α =>
+          { f := r • α.f
+            h := by rw [Functor.map_zsmul, comp_zsmul, Endofunctor.Coalgebra.Hom.h, zsmul_comp] } }
+    exact Function.Injective.addCommGroup Endofunctor.Coalgebra.Hom.f
+      (fun _ _ h => Endofunctor.Coalgebra.Hom.ext h)
+      rfl (fun _ _ => rfl) (fun _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl)
+      (fun _ _ => rfl)
   add_comp := by
     intros
     apply Coalgebra.Hom.ext

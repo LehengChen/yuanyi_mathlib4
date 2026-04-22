@@ -87,13 +87,9 @@ lemma isConservative_pointsBot :
     (pointsBot.{w} C).IsConservativeFamilyOfPoints :=
   .mk' (fun X S hS ↦ by
     obtain ⟨Y, a, ha, b, hb⟩ := hS ⟨_, ⟨X⟩⟩ (shrinkYonedaObjObjEquiv.symm (𝟙 X))
-    obtain ⟨b, rfl⟩ := shrinkYonedaObjObjEquiv.symm.surjective b
-    dsimp at b hb
-    have : b ≫ a = 𝟙 _ :=
-      shrinkYonedaObjObjEquiv.symm.injective (by
-        rw [← hb, shrinkYoneda_map_app_shrinkYonedaObjObjEquiv_symm])
-    simpa only [bot_covering, ← Sieve.id_mem_iff_eq_top, this]
-      using S.downward_closed ha b)
+    suffices hb : shrinkYonedaObjObjEquiv b ≫ a = 𝟙 X by
+      exact bot_covering.2 <| Sieve.id_mem_iff_eq_top.1 <| hb ▸ S.downward_closed ha _
+    simpa [pointBot, shrinkYonedaObjObjEquiv_map_app b a] using congrArg shrinkYonedaObjObjEquiv hb)
 
 instance {C : Type w} [SmallCategory C] :
     HasEnoughPoints.{w} (⊥ : GrothendieckTopology C) :=

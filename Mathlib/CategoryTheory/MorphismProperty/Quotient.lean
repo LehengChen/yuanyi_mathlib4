@@ -43,11 +43,7 @@ variable (W : MorphismProperty C) {homRel : HomRel C}
 
 lemma HasQuotient.iff_of_eqvGen [W.HasQuotient homRel] {X Y : C} {f g : X ⟶ Y}
     (h : Relation.EqvGen (@homRel _ _) f g) : W f ↔ W g := by
-  induction h with
-  | rel _ _ h => exact iff W h
-  | refl => rfl
-  | symm _ _ _ h => exact h.symm
-  | trans _ _ _ _ _ h₁ h₂ => exact h₁.trans h₂
+  exact ((eq_equivalence.comap (W ·)).eqvGen_iff.1 <| h.mono fun _ _ h ↦ Iff.eq (iff W h)).to_iff
 
 variable (homRel)
 

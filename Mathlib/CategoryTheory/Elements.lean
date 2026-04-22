@@ -120,14 +120,10 @@ end CategoryOfElements
 instance groupoidOfElements {G : Type u} [Groupoid.{v} G] (F : G ⥤ Type w) :
     Groupoid F.Elements where
   inv {p q} f :=
-    ⟨Groupoid.inv f.val,
-      calc
-        F.map (Groupoid.inv f.val) q.2 = F.map (Groupoid.inv f.val) (F.map f.val p.2) := by rw [f.2]
-        _ = (F.map f.val ≫ F.map (Groupoid.inv f.val)) p.2 := rfl
-        _ = p.2 := by
-          rw [← F.map_comp]
-          simp
-        ⟩
+    ⟨Groupoid.inv f.val, by
+      exact (congrArg (F.map (Groupoid.inv f.val)) f.2.symm).trans <| by
+        simpa only [asIso_hom, asIso_inv, ← Groupoid.inv_eq_inv] using
+          FunctorToTypes.map_inv_map_hom_apply (F := F) (asIso f.val) p.2⟩
   inv_comp _ := by
     ext
     simp
@@ -225,14 +221,9 @@ def fromCostructuredArrow (F : Cᵒᵖ ⥤ Type v) : (CostructuredArrow yoneda F
   obj X := ⟨op (unop X).1, yonedaEquiv.1 (unop X).3⟩
   map {X Y} f :=
     ⟨f.unop.1.op, by
-      convert (congr_fun ((unop X).hom.naturality f.unop.left.op) (𝟙 _)).symm
-      simp only [Equiv.toFun_as_coe, Quiver.Hom.unop_op, yonedaEquiv_apply, types_comp_apply,
-        Category.comp_id, yoneda_obj_map]
-      have : yoneda.map f.unop.left ≫ (unop X).hom = (unop Y).hom := by
-        convert f.unop.3
-      rw [← this]
-      simp only [yoneda_map_app, FunctorToTypes.comp]
-      rw [Category.id_comp]⟩
+      dsimp
+      rw [yonedaEquiv_naturality', Quiver.Hom.unop_op]
+      exact congrArg yonedaEquiv (CostructuredArrow.w f.unop)⟩
 
 @[simp]
 theorem fromCostructuredArrow_obj_mk (F : Cᵒᵖ ⥤ Type v) {X : C} (f : yoneda.obj X ⟶ F) :

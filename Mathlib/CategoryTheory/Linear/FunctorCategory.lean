@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Preadditive.FunctorCategory
 public import Mathlib.CategoryTheory.Linear.Basic
+public import Mathlib.Algebra.Module.Pi
 
 /-!
 # Linear structure on functor categories
@@ -26,36 +27,17 @@ variable {R : Type*} [Semiring R]
 variable {C D : Type*} [Category* C] [Category* D] [Preadditive D] [Linear R D]
 
 instance functorCategoryLinear : Linear R (C ⥤ D) where
-  homModule F G :=
-    { smul := fun r α =>
-        { app := fun X => r • α.app X
-          naturality := by
-            intros
-            rw [comp_smul, smul_comp, α.naturality] }
-      one_smul := by
-        intros
-        ext
-        apply one_smul
-      zero_smul := by
-        intros
-        ext
-        apply zero_smul
-      smul_zero := by
-        intros
-        ext
-        apply smul_zero
-      add_smul := by
-        intros
-        ext
-        apply add_smul
-      smul_add := by
-        intros
-        ext
-        apply smul_add
-      mul_smul := by
-        intros
-        ext
-        apply mul_smul }
+  homModule F G := by
+    letI : SMul R (F ⟶ G) := ⟨fun r α =>
+      { app := fun X => r • α.app X
+        naturality := by
+          cat_disch }⟩
+    exact Function.Injective.module R
+      { toFun := fun α X => α.app X
+        map_zero' := rfl
+        map_add' := fun _ _ => rfl }
+      (fun _ _ h => NatTrans.ext h)
+      (fun _ _ => rfl)
   smul_comp := by
     intros
     ext

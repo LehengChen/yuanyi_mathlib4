@@ -274,15 +274,11 @@ lemma essSurj_of_hasRightResolutions [Φ.HasRightResolutions] : (Φ.functor ⋙ 
 
 lemma isIso_iff_of_hasRightResolutions [Φ.HasRightResolutions] {F G : D₂ ⥤ H} (α : F ⟶ G) :
     IsIso α ↔ ∀ (X₁ : C₁), IsIso (α.app (L₂.obj (Φ.functor.obj X₁))) := by
-  constructor
-  · intros
-    infer_instance
-  · intro hα
-    have : ∀ (X₂ : D₂), IsIso (α.app X₂) := fun X₂ => by
-      have := Φ.essSurj_of_hasRightResolutions L₂
-      rw [← NatTrans.isIso_app_iff_of_iso α ((Φ.functor ⋙ L₂).objObjPreimageIso X₂)]
-      apply hα
-    exact NatIso.isIso_of_isIso_app α
+  have := Φ.essSurj_of_hasRightResolutions L₂
+  rw [NatTrans.isIso_iff_isIso_app]
+  exact ⟨fun h X₁ => h _, fun h X₂ => by
+    rw [← NatTrans.isIso_app_iff_of_iso α ((Φ.functor ⋙ L₂).objObjPreimageIso X₂)]
+    exact h _⟩
 
 lemma essSurj_of_hasLeftResolutions [Φ.HasLeftResolutions] : (Φ.functor ⋙ L₂).EssSurj where
   mem_essImage X₂ := by
@@ -292,15 +288,11 @@ lemma essSurj_of_hasLeftResolutions [Φ.HasLeftResolutions] : (Φ.functor ⋙ L�
 
 lemma isIso_iff_of_hasLeftResolutions [Φ.HasLeftResolutions] {F G : D₂ ⥤ H} (α : F ⟶ G) :
     IsIso α ↔ ∀ (X₁ : C₁), IsIso (α.app (L₂.obj (Φ.functor.obj X₁))) := by
-  constructor
-  · intros
-    infer_instance
-  · intro hα
-    have : ∀ (X₂ : D₂), IsIso (α.app X₂) := fun X₂ => by
-      have := Φ.essSurj_of_hasLeftResolutions L₂
-      rw [← NatTrans.isIso_app_iff_of_iso α ((Φ.functor ⋙ L₂).objObjPreimageIso X₂)]
-      apply hα
-    exact NatIso.isIso_of_isIso_app α
+  have := Φ.essSurj_of_hasLeftResolutions L₂
+  rw [NatTrans.isIso_iff_isIso_app]
+  exact ⟨fun h X₁ => h _, fun h X₂ => by
+    rw [← NatTrans.isIso_app_iff_of_iso α ((Φ.functor ⋙ L₂).objObjPreimageIso X₂)]
+    exact h _⟩
 
 end
 

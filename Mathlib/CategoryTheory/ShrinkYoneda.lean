@@ -186,14 +186,16 @@ instance : (shrinkYoneda.{w} (C := C)).Faithful := (fullyFaithfulShrinkYoneda C)
 
 instance : (shrinkYoneda.{w} (C := C)).Full := (fullyFaithfulShrinkYoneda C).full
 
+attribute [local simp] shrinkYonedaObjObjEquiv_obj_map shrinkYonedaObjObjEquiv_map_app
+attribute [local simp] shrinkYoneda_obj_map_shrinkYonedaObjObjEquiv_symm
+  shrinkYoneda_map_app_shrinkYonedaObjObjEquiv_symm
+
 /-- `shrinkYoneda` at the morphism universe level is `yoneda`. -/
 @[simps!]
 noncomputable
 def shrinkYonedaIsoYoneda : shrinkYoneda.{v} ≅ yoneda (C := C) :=
   NatIso.ofComponents
-    (fun X ↦ NatIso.ofComponents (fun Y ↦ shrinkYonedaObjObjEquiv.toIso)
-      (by intros; ext; simp [shrinkYonedaObjObjEquiv_obj_map]))
-    (by intros; ext; simp [shrinkYonedaObjObjEquiv_map_app])
+    (fun X ↦ NatIso.ofComponents (fun Y ↦ shrinkYonedaObjObjEquiv.toIso))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- `shrinkYoneda` is compatible with `uliftFunctor`. -/
@@ -209,11 +211,7 @@ def shrinkYonedaUliftFunctorIso [LocallySmall.{max w w'} C] :
 noncomputable def uliftYonedaIsoShrinkYoneda :
     uliftYoneda.{w'} (C := C) ≅ shrinkYoneda.{max w' v} :=
   NatIso.ofComponents (fun X ↦ NatIso.ofComponents
-    (fun Y ↦ (Equiv.ulift.trans shrinkYonedaObjObjEquiv.symm).toIso) (fun f ↦ by
-      ext
-      exact (shrinkYoneda_obj_map_shrinkYonedaObjObjEquiv_symm _ _).symm)) (fun g ↦ by
-      ext
-      exact (shrinkYoneda_map_app_shrinkYonedaObjObjEquiv_symm _ _).symm)
+    (fun Y ↦ (Equiv.ulift.trans shrinkYonedaObjObjEquiv.symm).toIso))
 
 /-- The functor `shrinkYoneda.{w}` followed by the evaluation
 at `Y : Cᵒᵖ` and `uliftFunctor.{v}` identifies to `coyoneda.obj Y` followed
@@ -222,10 +220,7 @@ noncomputable def shrinkYonedaCompEvaluationCompUliftFunctorIsoUliftFunctor (Y :
     shrinkYoneda.{w} ⋙ (evaluation Cᵒᵖ _).obj Y ⋙ uliftFunctor.{v} ≅
       coyoneda.obj Y ⋙ uliftFunctor.{w} :=
   NatIso.ofComponents (fun X ↦ (Equiv.ulift.trans
-    (shrinkYonedaObjObjEquiv.trans Equiv.ulift.symm)).toIso) (fun f ↦ by
-      ext ⟨g⟩
-      obtain ⟨g, rfl⟩ := shrinkYonedaObjObjEquiv.symm.surjective g
-      simp [shrinkYoneda_map_app_shrinkYonedaObjObjEquiv_symm])
+    (shrinkYonedaObjObjEquiv.trans Equiv.ulift.symm)).toIso)
 
 /-- `shrinkYoneda.obj X` is represented by `X`. -/
 @[simps]

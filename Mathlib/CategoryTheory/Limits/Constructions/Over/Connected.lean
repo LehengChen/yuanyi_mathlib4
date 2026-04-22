@@ -73,15 +73,11 @@ set_option backward.isDefEq.respectTransparency false in
 /-- (Implementation) Show that the raised cone is a limit. -/
 def isLimitRaiseCone [IsConnected J] {B : D} {F : J ⥤ CostructuredArrow K B}
     {c : Cone (F ⋙ CostructuredArrow.proj K B)}
-    (t : IsLimit c) : IsLimit (raiseCone c) where
-  lift s :=
-    CostructuredArrow.homMk (t.lift ((CostructuredArrow.proj K B).mapCone s)) <| by
-      simp [← Functor.map_comp_assoc]
-  uniq s m K := by
-    ext1
-    apply t.hom_ext
-    intro j
-    simp [← K j]
+    (t : IsLimit c) : IsLimit (raiseCone c) :=
+  IsLimit.ofFaithful (proj K B) (t.ofIsoLimit (eqToIso (mapCone_raiseCone c).symm))
+    (fun s => CostructuredArrow.homMk (t.lift ((proj K B).mapCone s)) <| by
+      simp [← Functor.map_comp_assoc])
+    (fun s => by simp)
 
 end CreatesConnected
 

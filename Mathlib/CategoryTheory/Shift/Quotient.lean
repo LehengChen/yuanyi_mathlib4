@@ -69,6 +69,8 @@ namespace Quotient
 variable [r.IsCompatibleWithShift A] [F.CommShift A]
     (hF : ∀ (x y : C) (f₁ f₂ : x ⟶ y), r f₁ f₂ → F.map f₁ = F.map f₂)
 
+attribute [local simp] lift_obj_functor_obj
+
 namespace LiftCommShift
 
 variable {A}
@@ -87,10 +89,7 @@ lemma iso_hom_app (a : A) (X : C) :
     (iso F r hF a).hom.app ((functor r).obj X) =
       (lift r F hF).map (((functor r).commShiftIso a).inv.app X) ≫
       (F.commShiftIso a).hom.app X := by
-  dsimp only [iso, natIsoLift]
-  rw [natTransLift_app]
-  dsimp
-  erw [comp_id, id_comp, id_comp, id_comp, Functor.map_id, comp_id]
+  simp [iso]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -98,10 +97,7 @@ lemma iso_inv_app (a : A) (X : C) :
     (iso F r hF a).inv.app ((functor r).obj X) =
       (F.commShiftIso a).inv.app X ≫
       (lift r F hF).map (((functor r).commShiftIso a).hom.app X) := by
-  dsimp only [iso, natIsoLift]
-  rw [natTransLift_app]
-  dsimp
-  erw [id_comp, comp_id, comp_id, comp_id, Functor.map_id, id_comp]
+  simp [iso]
 
 attribute [irreducible] iso
 

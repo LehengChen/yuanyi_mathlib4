@@ -62,11 +62,7 @@ instance category : Category (Kleisli T) where
   Hom X Y := Hom X Y
   id X := .mk <| T.η.app X.of
   comp {_} {_} {Z} f g := .mk <| f.of ≫ T.map g.of ≫ T.μ.app Z.of
-  id_comp {X} {Y} f := by
-    ext
-    dsimp
-    rw [← T.η.naturality_assoc f.of, T.left_unit]
-    apply Category.comp_id
+  id_comp {X} {Y} f := Hom.ext <| by simp [← T.η.naturality_assoc f.of, T.left_unit]
   assoc f g h := by
     simp [Monad.assoc, T.mu_naturality_assoc]
 

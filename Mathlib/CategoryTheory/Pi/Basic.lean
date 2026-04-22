@@ -214,17 +214,11 @@ theorem pi'_eval (f : ∀ i, A ⥤ C i) (i : I) : pi' f ⋙ Pi.eval C i = f i :=
 /-- Two functors to a product category are equal iff they agree on every coordinate. -/
 theorem pi_ext (f f' : A ⥤ ∀ i, C i) (h : ∀ i, f ⋙ (Pi.eval C i) = f' ⋙ (Pi.eval C i)) :
     f = f' := by
-  apply Functor.ext; rotate_left
-  · intro X
-    ext i
-    specialize h i
-    have := congr_obj h X
-    simpa
-  · intro X Y g
-    funext i
-    specialize h i
-    have := congr_hom h g
-    simpa
+  refine Functor.ext (fun X => ?_) (fun X Y g => ?_)
+  · ext i
+    exact Functor.congr_obj (h i) X
+  · ext i
+    simpa using Functor.congr_hom (h i) g
 
 end Functor
 

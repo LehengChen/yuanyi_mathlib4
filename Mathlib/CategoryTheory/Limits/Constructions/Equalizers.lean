@@ -99,18 +99,14 @@ lemma preservesEqualizers_of_preservesPullbacks_and_binaryProducts
   ⟨fun {K} =>
     preservesLimit_of_preserves_limit_cone (equalizerConeIsLimit K) <|
       { lift := fun c => by
-          refine pullback.lift ?_ ?_ ?_ ≫ (PreservesPullback.iso _ _ _ ).inv
-          · exact c.π.app WalkingParallelPair.zero
-          · exact c.π.app WalkingParallelPair.zero
+          refine pullback.lift (c.π.app WalkingParallelPair.zero)
+            (c.π.app WalkingParallelPair.zero) ?_ ≫
+              (PreservesPullback.iso G _ _).inv
           apply (mapIsLimitOfPreservesOfIsLimit G _ _ (prodIsProd _ _)).hom_ext
           rintro (_ | _)
           · simp only [Category.assoc, ← G.map_comp, prod.lift_fst, BinaryFan.π_app_left,
               BinaryFan.mk_fst]
-          · simp only [BinaryFan.π_app_right, BinaryFan.mk_snd, Category.assoc, ← G.map_comp,
-              prod.lift_snd]
-            exact
-              (c.π.naturality WalkingParallelPairHom.left).symm.trans
-                (c.π.naturality WalkingParallelPairHom.right)
+          · simpa [Fork.ι, ← G.map_comp] using Fork.condition (Fork.ofCone c)
         fac := fun c j => by
           rcases j with (_ | _) <;>
             simp only [Category.comp_id, PreservesPullback.iso_inv_fst, Cone.ofFork_π, G.map_comp,
@@ -119,12 +115,8 @@ lemma preservesEqualizers_of_preservesPullbacks_and_binaryProducts
           exact (c.π.naturality WalkingParallelPairHom.left).symm.trans (Category.id_comp _)
         uniq := fun s m h => by
           rw [Iso.eq_comp_inv]
-          have := h WalkingParallelPair.zero
-          dsimp [equalizerCone] at this
           ext <;>
-            simp only [PreservesPullback.iso_hom_snd, Category.assoc,
-              PreservesPullback.iso_hom_fst, pullback.lift_fst, pullback.lift_snd,
-              Category.comp_id, ← pullbackFst_eq_pullback_snd, ← this] }⟩
+            simpa [equalizerCone, ← pullbackFst_eq_pullback_snd] using h WalkingParallelPair.zero }⟩
 
 -- We hide the "implementation details" inside a namespace
 namespace HasCoequalizersOfHasPushoutsAndBinaryCoproducts
@@ -195,18 +187,13 @@ lemma preservesCoequalizers_of_preservesPushouts_and_binaryCoproducts [HasBinary
   ⟨fun {K} =>
     preservesColimit_of_preserves_colimit_cocone (coequalizerCoconeIsColimit K) <|
       { desc := fun c => by
-          refine (PreservesPushout.iso _ _ _).inv ≫ pushout.desc ?_ ?_ ?_
-          · exact c.ι.app WalkingParallelPair.one
-          · exact c.ι.app WalkingParallelPair.one
+          refine (PreservesPushout.iso G _ _).inv ≫
+            pushout.desc (c.ι.app WalkingParallelPair.one) (c.ι.app WalkingParallelPair.one) ?_
           apply (mapIsColimitOfPreservesOfIsColimit G _ _ (coprodIsCoprod _ _)).hom_ext
           rintro (_ | _)
           · simp only [BinaryCofan.ι_app_left, BinaryCofan.mk_inl, ←
               G.map_comp_assoc, coprod.inl_desc]
-          · simp only [BinaryCofan.ι_app_right, BinaryCofan.mk_inr, ←
-              G.map_comp_assoc, coprod.inr_desc]
-            exact
-              (c.ι.naturality WalkingParallelPairHom.left).trans
-                (c.ι.naturality WalkingParallelPairHom.right).symm
+          · simpa [Cofork.π, ← G.map_comp_assoc] using Cofork.condition (Cofork.ofCocone c)
         fac := fun c j => by
           rcases j with (_ | _) <;>
             simp only [Functor.mapCocone_ι_app, Cocone.ofCofork_ι, Category.id_comp,
@@ -215,11 +202,7 @@ lemma preservesCoequalizers_of_preservesPushouts_and_binaryCoproducts [HasBinary
           exact (c.ι.naturality WalkingParallelPairHom.left).trans (Category.comp_id _)
         uniq := fun s m h => by
           rw [Iso.eq_inv_comp]
-          have := h WalkingParallelPair.one
-          dsimp [coequalizerCocone] at this
           ext <;>
-            simp only [PreservesPushout.inl_iso_hom_assoc, Category.id_comp, pushout.inl_desc,
-              pushout.inr_desc, PreservesPushout.inr_iso_hom_assoc, ← pushoutInl_eq_pushout_inr, ←
-              this] }⟩
+            simpa [coequalizerCocone, ← pushoutInl_eq_pushout_inr] using h .one }⟩
 
 end CategoryTheory.Limits

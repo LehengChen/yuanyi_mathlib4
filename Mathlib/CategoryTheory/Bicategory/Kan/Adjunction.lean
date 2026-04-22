@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Bicategory.Kan.HasKan
 public import Mathlib.CategoryTheory.Bicategory.Adjunction.Basic
+public import Mathlib.CategoryTheory.Bicategory.Adjunction.Mate
 public import Mathlib.Tactic.TFAE
 
 /-!
@@ -47,32 +48,16 @@ open LeftExtension
 The unit of this Kan extension is given by the unit of the adjunction. -/
 def Adjunction.isAbsoluteLeftKan {f : a ⟶ b} {u : b ⟶ a} (adj : f ⊣ u) :
     IsAbsKan (.mk u adj.unit) := fun {x} h ↦
-  .mk (fun s  ↦ LeftExtension.homMk
-    (𝟙 _ ⊗≫ u ◁ s.unit ⊗≫ adj.counit ▷ s.extension ⊗≫ 𝟙 _ : u ≫ h ⟶ s.extension) <|
-      calc _
-        _ = 𝟙 _ ⊗≫ (adj.unit ▷ _ ≫ _ ◁ s.unit) ⊗≫ f ◁ adj.counit ▷ s.extension ⊗≫ 𝟙 _ := by
-          dsimp only [whisker_extension, StructuredArrow.mk_right, whisker_unit,
-            StructuredArrow.mk_hom_eq_self]
-          bicategory
-        _ = 𝟙 _ ⊗≫ s.unit ⊗≫ leftZigzag adj.unit adj.counit ▷ s.extension ⊗≫ 𝟙 _ := by
-          rw [← whisker_exchange]; bicategory
-        _ = s.unit := by
-          rw [adj.left_triangle]; bicategory) <| by
+  .mk (fun s ↦ LeftExtension.homMk (adj.homEquiv₁ ((λ_ h).inv ≫ s.unit)) <| by
+    simpa [LeftExtension.whisker_unit, bicategoricalComp] using
+      (adj.homEquiv₁_symm_apply (g := h) (h := s.extension)
+        (β := adj.homEquiv₁ ((λ_ h).inv ≫ s.unit))).symm) <| by
     intro s τ₀
     ext
-    /- We need to specify the type of `τ` to use the notation `⊗≫`. -/
-    let τ : u ≫ h ⟶ s.extension := τ₀.right
-    have hτ : adj.unit ▷ h ⊗≫ f ◁ τ = s.unit := by
-      simpa [bicategoricalComp] using LeftExtension.w τ₀
-    calc τ
-      _ = 𝟙 _ ⊗≫ rightZigzag adj.unit adj.counit ▷ h ⊗≫ τ ⊗≫ 𝟙 _ := by
-        rw [adj.right_triangle]; bicategory
-      _ = 𝟙 _ ⊗≫ u ◁ adj.unit ▷ h ⊗≫ (adj.counit ▷ _ ≫ _ ◁ τ) ⊗≫ 𝟙 _ := by
-        rw [rightZigzag]; bicategory
-      _ = 𝟙 _ ⊗≫ u ◁ (adj.unit ▷ h ⊗≫ f ◁ τ) ⊗≫ adj.counit ▷ s.extension ⊗≫ 𝟙 _ := by
-        rw [← whisker_exchange]; bicategory
-      _ = _ := by
-        rw [hτ]; dsimp only [StructuredArrow.homMk_right]
+    change τ₀.right = adj.homEquiv₁ ((λ_ h).inv ≫ s.unit)
+    apply adj.homEquiv₁.symm.injective
+    rw [adj.homEquiv₁_symm_apply (g := h) (h := s.extension) (β := τ₀.right)]
+    simpa [LeftExtension.whisker_unit, bicategoricalComp] using LeftExtension.w τ₀
 
 /-- A left Kan extension `t` of the identity along `f` that commutes with `f`, in the sense that
 `t.whisker f` is a left Kan extension, is a right adjoint to `f`. The unit of this adjoint is
@@ -128,31 +113,17 @@ open LeftLift
 The unit of this Kan lift is given by the unit of the adjunction. -/
 def Adjunction.isAbsoluteLeftKanLift {f : a ⟶ b} {u : b ⟶ a} (adj : f ⊣ u) :
     IsAbsKan (.mk f adj.unit) := fun {x} h ↦
-  .mk (fun s ↦ LeftLift.homMk
-    (𝟙 _ ⊗≫ s.unit ▷ f ⊗≫ s.lift ◁ adj.counit ⊗≫ 𝟙 _ : h ≫ f ⟶ s.lift) <|
-      calc _
-      _ = 𝟙 _ ⊗≫ (_ ◁ adj.unit ≫ s.unit ▷ _) ⊗≫ s.lift ◁ adj.counit ▷ u ⊗≫ 𝟙 _ := by
-        dsimp only [whisker_lift, StructuredArrow.mk_right, whisker_unit,
-          StructuredArrow.mk_hom_eq_self]
-        bicategory
-      _ = s.unit ⊗≫ s.lift ◁ (rightZigzag adj.unit adj.counit) ⊗≫ 𝟙 _ := by
-        rw [whisker_exchange, rightZigzag]; bicategory
-      _ = s.unit := by
-        rw [adj.right_triangle]; bicategory) <| by
+  .mk (fun s ↦ LeftLift.homMk ((adj.homEquiv₂).symm ((ρ_ h).inv ≫ s.unit)) <| by
+    simpa [LeftLift.whisker_unit, bicategoricalComp] using
+      (adj.homEquiv₂_apply (g := h) (h := s.lift)
+        (α := (adj.homEquiv₂).symm ((ρ_ h).inv ≫ s.unit))).symm) <|
+    by
       intro s τ₀
       ext
-      /- We need to specify the type of `τ` to use the notation `⊗≫`. -/
-      let τ : h ≫ f ⟶ s.lift := τ₀.right
-      have hτ : h ◁ adj.unit ⊗≫ τ ▷ u = s.unit := by simpa [bicategoricalComp] using LeftLift.w τ₀
-      calc τ
-        _ = 𝟙 _ ⊗≫ h ◁ leftZigzag adj.unit adj.counit ⊗≫ τ ⊗≫ 𝟙 _ := by
-          rw [adj.left_triangle]; bicategory
-        _ = 𝟙 _ ⊗≫ h ◁ adj.unit ▷ f ⊗≫ (_ ◁ adj.counit ≫ τ ▷ _) ⊗≫ 𝟙 _ := by
-          rw [leftZigzag]; bicategory
-        _ = 𝟙 _ ⊗≫ (h ◁ adj.unit ⊗≫ τ ▷ u) ▷ f ⊗≫ s.lift ◁ adj.counit ⊗≫ 𝟙 _ := by
-          rw [whisker_exchange]; bicategory
-        _ = _ := by
-          rw [hτ]; dsimp only [StructuredArrow.homMk_right]
+      change τ₀.right = (adj.homEquiv₂).symm ((ρ_ h).inv ≫ s.unit)
+      apply adj.homEquiv₂.injective
+      rw [adj.homEquiv₂_apply (g := h) (h := s.lift) (α := τ₀.right)]
+      simpa [LeftLift.whisker_unit, bicategoricalComp] using LeftLift.w τ₀
 
 /-- A left Kan lift `t` of the identity along `u` that commutes with `u`, in the sense that
 `t.whisker u` is a left Kan lift, is a left adjoint to `u`. The unit of this adjoint is given by

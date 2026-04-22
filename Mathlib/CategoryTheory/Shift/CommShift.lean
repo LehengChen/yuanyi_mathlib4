@@ -346,13 +346,8 @@ lemma add {a b : A} (ha : CommShiftCore τ a) (hb : CommShiftCore τ b) :
     CommShiftCore τ (a + b) where
   shift_comm := by
     ext X
-    have := (shiftFunctorAdd D a b).inv.naturality (τ.app X)
-    dsimp at this ⊢
-    simp only [Functor.commShiftIso_add, Functor.CommShift.isoAdd_hom_app,
-      ← NatTrans.naturality_2 τ ((shiftFunctorAdd C a b).app X),
-      Functor.comp_obj, hb.app_shift_assoc, ha.app_shift, assoc,
-      (shiftFunctor D b).map_comp_assoc]
-    simp [← Functor.map_comp_assoc, this]
+    simp [Functor.commShiftIso_add, ha.shift_app, hb.shift_app, ← NatTrans.naturality,
+      ← Functor.map_comp_assoc]
 
 end CommShiftCore
 

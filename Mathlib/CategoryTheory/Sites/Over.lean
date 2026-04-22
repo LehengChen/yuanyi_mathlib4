@@ -101,18 +101,13 @@ lemma overEquiv_le_overEquiv_iff {X : C} {Y : Over X} (R₁ R₂ : Sieve Y) :
 set_option backward.isDefEq.respectTransparency false in
 lemma overEquiv_pullback {X : C} {Y₁ Y₂ : Over X} (f : Y₁ ⟶ Y₂) (S : Sieve Y₂) :
     overEquiv _ (S.pullback f) = (overEquiv _ S).pullback f.left := by
-  ext Z g
-  dsimp [overEquiv, Presieve.functorPushforward]
-  constructor
-  · rintro ⟨W, a, b, h, rfl⟩
-    exact ⟨W, a ≫ f, b, h, by simp⟩
-  · rintro ⟨W, a, b, h, w⟩
-    let T := Over.mk (b ≫ W.hom)
-    let c : T ⟶ Y₁ := Over.homMk g (by dsimp [T]; rw [← Over.w a, ← reassoc_of% w, Over.w f])
-    let d : T ⟶ W := Over.homMk b
-    refine ⟨T, c, 𝟙 Z, ?_, by simp [T, c]⟩
-    rw [show c ≫ f = d ≫ a by ext; exact w]
-    exact S.downward_closed h _
+  apply (overEquiv Y₁).symm.injective
+  rw [Equiv.symm_apply_apply]
+  change S.pullback f = Sieve.functorPullback (Over.forget X)
+    ((overEquiv Y₂ S).pullback ((Over.forget X).map f))
+  rw [Sieve.functorPullback_pullback,
+    show Sieve.functorPullback (Over.forget X) (overEquiv Y₂ S) = S from
+      Equiv.symm_apply_apply (overEquiv Y₂) S]
 
 lemma overEquiv_symm_pullback {X : C} {Y₁ Y₂ : Over X} (f : Y₁ ⟶ Y₂) (S : Sieve Y₂.left) :
     (overEquiv Y₁).symm (pullback f.left S) = pullback f ((overEquiv Y₂).symm S) :=
@@ -131,13 +126,9 @@ lemma overEquiv_iff {X : C} {Y : Over X} (S : Sieve Y) {Z : C} (f : Z ⟶ Y.left
 set_option backward.isDefEq.respectTransparency false in
 lemma overEquiv_generate {X : C} {Y : Over X} (R : Presieve Y) :
     overEquiv Y (.generate R) = .generate (Presieve.functorPushforward (Over.forget X) R) := by
-  refine le_antisymm (fun Z g hg ↦ ?_) ?_
-  · rw [overEquiv_iff] at hg
-    obtain ⟨W, u, v, hv, huv⟩ := hg
-    exact ⟨W.left, u.left, v.left, ⟨W, v, 𝟙 _, hv, by simp⟩, congr($(huv).left)⟩
-  · rw [generate_le_iff]
-    rintro Z g ⟨W, u, v, hu, rfl⟩
-    exact (overEquiv_iff _ _).mpr ⟨W, Over.homMk v, u, hu, rfl⟩
+  rw [overEquiv, Equiv.coe_fn_mk, ← Sieve.generate_map_eq_functorPushforward]
+  convert (Sieve.generate_sieve (Sieve.generate (Presieve.map (Over.forget X) R))).symm
+  exact (Sieve.arrows_generate_map_eq_functorPushforward (Over.forget X)).symm
 
 set_option backward.isDefEq.respectTransparency false in
 lemma overEquiv_symm_generate {X : C} {Y : Over X} (R : Presieve Y.left) :
@@ -170,16 +161,12 @@ lemma overEquiv_functorPullback_map {X Y : C} (f : X ⟶ Y) (U : Over X)
     overEquiv U (S.functorPullback (Over.map f)) =
       overEquiv ((Over.map f).obj U) S := by
   ext Z g
-  let u : (Over.map f).obj (Over.mk (g ≫ U.hom)) ⟶ Over.mk (g ≫ U.hom ≫ f) :=
-    Over.homMk (𝟙 Z) (by simp)
-  have heq : (Over.map f).map (Over.homMk (U := Over.mk (g ≫ U.hom)) g rfl) =
-      u ≫ Over.homMk (V := (Over.map f).obj U) g rfl := by
-    ext
-    simp [u]
-  have : IsIso u :=
-    ⟨Over.homMk (𝟙 Z) (by simp), by ext; simp [u], by ext; simp [u]⟩
+  let e : (Over.map f).obj (Over.mk (g ≫ U.hom)) ≅ Over.mk (g ≫ U.hom ≫ f) :=
+    Over.isoMk (Iso.refl _) (by simp)
   rw [Sieve.overEquiv_iff, Sieve.overEquiv_iff]
-  simp [Presieve.functorPullback, heq]
+  simp only [Sieve.functorPullback_arrows, Presieve.functorPullback_mem]
+  convert Sieve.comp_mem_iff e.hom (Over.homMk (V := (Over.map f).obj U) g rfl) S
+  all_goals ext; simp [e]
 
 end Sieve
 

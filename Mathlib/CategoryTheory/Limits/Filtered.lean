@@ -43,11 +43,8 @@ theorem IsFiltered.iff_nonempty_limit : IsFiltered C ↔
     ∀ {J : Type v} [SmallCategory J] [FinCategory J] (F : J ⥤ C),
       ∃ (X : C), Nonempty (limit (F.op ⋙ yoneda.obj X)) := by
   rw [IsFiltered.iff_cocone_nonempty.{v}]
-  refine ⟨fun h J _ _ F => ?_, fun h J _ _ F => ?_⟩
-  · obtain ⟨c⟩ := h F
-    exact ⟨c.pt, ⟨(limitCompYonedaIsoCocone F c.pt).inv c.ι⟩⟩
-  · obtain ⟨pt, ⟨ι⟩⟩ := h F
-    exact ⟨⟨pt, (limitCompYonedaIsoCocone F pt).hom ι⟩⟩
+  simp [(Cocone.equiv _).toEquiv.nonempty_congr,
+    (limitCompYonedaIsoCocone _ _).toEquiv.nonempty_congr]
 
 /-- `C` is cofiltered if and only if for every functor `F : J ⥤ C` from a finite category there is
     some `X : C` such that `lim Hom(X, F·)` is nonempty. -/
@@ -55,11 +52,8 @@ theorem IsCofiltered.iff_nonempty_limit : IsCofiltered C ↔
     ∀ {J : Type v} [SmallCategory J] [FinCategory J] (F : J ⥤ C),
       ∃ (X : C), Nonempty (limit (F ⋙ coyoneda.obj (op X))) := by
   rw [IsCofiltered.iff_cone_nonempty.{v}]
-  refine ⟨fun h J _ _ F => ?_, fun h J _ _ F => ?_⟩
-  · obtain ⟨c⟩ := h F
-    exact ⟨c.pt, ⟨(limitCompCoyonedaIsoCone F c.pt).inv c.π⟩⟩
-  · obtain ⟨pt, ⟨π⟩⟩ := h F
-    exact ⟨⟨pt, (limitCompCoyonedaIsoCone F pt).hom π⟩⟩
+  simp [(Cone.equiv _).toEquiv.nonempty_congr, op_surjective.exists,
+    (limitCompCoyonedaIsoCone _ _).toEquiv.nonempty_congr]
 
 end NonemptyLimit
 

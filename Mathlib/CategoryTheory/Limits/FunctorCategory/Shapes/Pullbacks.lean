@@ -6,7 +6,7 @@ Authors: Markus Himmel
 module
 
 public import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
-public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
+public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Pullbacks
 
 /-!
 # Pullbacks in functor categories
@@ -48,12 +48,8 @@ The pullback cone `combinePullbackCones` is limiting.
 def PullbackCone.combineIsLimit (f : F ⟶ H) (g : G ⟶ H)
     (c : ∀ X, PullbackCone (f.app X) (g.app X)) (hc : ∀ X, IsLimit (c X)) :
     IsLimit (combine f g c hc) :=
-  evaluationJointlyReflectsLimits _ fun k ↦ by
-    refine IsLimit.equivOfNatIsoOfIso ?_ _ _ ?_ (hc k)
-    · exact cospanIsoMk (Iso.refl _) (Iso.refl _) (Iso.refl _)
-    · refine Cone.ext (Iso.refl _) ?_
-      rintro (_ | _ | _)
-      all_goals cat_disch
+  evaluationJointlyReflectsLimits _ fun k ↦
+    (PullbackCone.isLimitMapConeEquiv _ _).2 (PullbackCone.mkSelfIsLimit (hc k))
 
 variable [HasPullbacks C]
 

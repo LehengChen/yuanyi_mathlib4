@@ -149,15 +149,15 @@ noncomputable def pullbackAssoc [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂)
   (pullbackPullbackLeftIsPullback f₁ f₂ f₃ f₄).conePointUniqueUpToIso
     (pullbackPullbackRightIsPullback f₁ f₂ f₃ f₄)
 
+local notation "L" => pullbackPullbackLeftIsPullback f₁ f₂ f₃ f₄
+
+local notation "R" => pullbackPullbackRightIsPullback f₁ f₂ f₃ f₄
+
 @[reassoc (attr := simp)]
 theorem pullbackAssoc_inv_fst_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
     [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
     (pullbackAssoc f₁ f₂ f₃ f₄).inv ≫ pullback.fst _ _ ≫ pullback.fst _ _ = pullback.fst _ _ := by
-  trans l₁' ≫ pullback.fst _ _
-  · rw [← Category.assoc]
-    congr 1
-    exact IsLimit.conePointUniqueUpToIso_inv_comp _ _ WalkingCospan.left
-  · exact pullback.lift_fst _ _ _
+  simpa [pullback.lift_fst] using (L).conePointUniqueUpToIso_inv_comp_assoc R WalkingCospan.left g₁
 
 @[reassoc (attr := simp)]
 theorem pullbackAssoc_hom_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
@@ -169,21 +169,13 @@ theorem pullbackAssoc_hom_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) �
 theorem pullbackAssoc_hom_snd_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
     [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] : (pullbackAssoc f₁ f₂ f₃ f₄).hom ≫
     pullback.snd _ _ ≫ pullback.fst _ _ = pullback.fst _ _ ≫ pullback.snd _ _ := by
-  trans l₂ ≫ pullback.fst _ _
-  · rw [← Category.assoc]
-    congr 1
-    exact IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.right
-  · exact pullback.lift_fst _ _ _
+  simpa [pullback.lift_fst] using (L).conePointUniqueUpToIso_hom_comp_assoc R WalkingCospan.right g₃
 
 @[reassoc (attr := simp)]
 theorem pullbackAssoc_hom_snd_snd [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
     [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
     (pullbackAssoc f₁ f₂ f₃ f₄).hom ≫ pullback.snd _ _ ≫ pullback.snd _ _ = pullback.snd _ _ := by
-  trans l₂ ≫ pullback.snd _ _
-  · rw [← Category.assoc]
-    congr 1
-    exact IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.right
-  · exact pullback.lift_snd _ _ _
+  simpa [pullback.lift_snd] using (L).conePointUniqueUpToIso_hom_comp_assoc R WalkingCospan.right g₄
 
 @[reassoc (attr := simp)]
 theorem pullbackAssoc_inv_fst_snd [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
@@ -321,39 +313,31 @@ noncomputable def pushoutAssoc [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶
   (pushoutPushoutLeftIsPushout g₁ g₂ g₃ g₄).coconePointUniqueUpToIso
     (pushoutPushoutRightIsPushout g₁ g₂ g₃ g₄)
 
+local notation "L" => pushoutPushoutLeftIsPushout g₁ g₂ g₃ g₄
+
+local notation "R" => pushoutPushoutRightIsPushout g₁ g₂ g₃ g₄
+
 @[reassoc (attr := simp)]
 theorem inl_inl_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
     [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
     pushout.inl _ _ ≫ pushout.inl _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).hom = pushout.inl _ _ := by
-  trans f₁ ≫ l₁
-  · congr 1
-    exact
-      (pushoutPushoutLeftIsPushout g₁ g₂ g₃ g₄).comp_coconePointUniqueUpToIso_hom _
-        WalkingCospan.left
-  · exact pushout.inl_desc _ _ _
+  simpa [pushout.inl_desc] using
+    congrArg (fun e => f₁ ≫ e) ((L).comp_coconePointUniqueUpToIso_hom R WalkingCospan.left)
 
 @[reassoc (attr := simp)]
 theorem inr_inl_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
     [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
     pushout.inr _ _ ≫ pushout.inl _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).hom =
       pushout.inl _ _ ≫ pushout.inr _ _ := by
-  trans f₂ ≫ l₁
-  · congr 1
-    exact
-      (pushoutPushoutLeftIsPushout g₁ g₂ g₃ g₄).comp_coconePointUniqueUpToIso_hom _
-        WalkingCospan.left
-  · exact pushout.inr_desc _ _ _
+  simpa [pushout.inr_desc] using
+    congrArg (fun e => f₂ ≫ e) ((L).comp_coconePointUniqueUpToIso_hom R WalkingCospan.left)
 
 @[reassoc (attr := simp)]
 theorem inr_inr_pushoutAssoc_inv [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
     [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
     pushout.inr _ _ ≫ pushout.inr _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).inv = pushout.inr _ _ := by
-  trans f₄ ≫ l₂'
-  · congr 1
-    exact
-      (pushoutPushoutLeftIsPushout g₁ g₂ g₃ g₄).comp_coconePointUniqueUpToIso_inv
-        (pushoutPushoutRightIsPushout g₁ g₂ g₃ g₄) WalkingCospan.right
-  · exact pushout.inr_desc _ _ _
+  simpa [pushout.inr_desc] using
+    congrArg (fun e => f₄ ≫ e) ((L).comp_coconePointUniqueUpToIso_inv R WalkingCospan.right)
 
 @[reassoc (attr := simp)]
 theorem inl_pushoutAssoc_inv [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]

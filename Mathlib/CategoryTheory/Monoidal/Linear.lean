@@ -54,16 +54,12 @@ ensures that the domain is linear monoidal. -/
 theorem MonoidalLinear.ofFaithful {D : Type*} [Category* D] [Preadditive D] [Linear R D]
     [MonoidalCategory D] [MonoidalPreadditive D] (F : D ⥤ C) [F.Monoidal] [F.Faithful]
     [F.Linear R] : MonoidalLinear R D :=
-  { whiskerLeft_smul := by
-      intro X Y Z r f
-      apply F.map_injective
-      rw [Functor.Monoidal.map_whiskerLeft]
-      simp
-    smul_whiskerRight := by
-      intro r X Y f Z
-      apply F.map_injective
-      rw [Functor.Monoidal.map_whiskerRight]
-      simp }
+  { whiskerLeft_smul := fun X {Y Z} r f => F.map_injective (by
+      simp only [Functor.Monoidal.map_whiskerLeft, Functor.map_smul, Linear.comp_smul,
+        Linear.smul_comp, MonoidalLinear.whiskerLeft_smul])
+    smul_whiskerRight := fun r {Y Z} f X => F.map_injective (by
+      simp only [Functor.Monoidal.map_whiskerRight, Functor.map_smul, Linear.comp_smul,
+        Linear.smul_comp, MonoidalLinear.smul_whiskerRight]) }
 
 @[deprecated (since := "2025-10-17")] alias monoidalLinearOfFaithful := MonoidalLinear.ofFaithful
 

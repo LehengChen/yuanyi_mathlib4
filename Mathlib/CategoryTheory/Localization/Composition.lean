@@ -85,15 +85,9 @@ lemma comp [L₁.IsLocalization W₁] [L₂.IsLocalization W₂]
   -- the induced equivalence of categories `E₃ : C₃ ≅ W₂'.Localization`, and
   -- the isomorphism `iso : (W₁.Q ⋙ W₂'.Q) ⋙ E₃.inverse ≅ L₁ ⋙ L₂`
   let E₃ := (Φ.localizedFunctor L₂ W₂'.Q).asEquivalence
-  let iso : (W₁.Q ⋙ W₂'.Q) ⋙ E₃.inverse ≅ L₁ ⋙ L₂ := by
-    calc
-      _ ≅ L₁ ⋙ E₂.functor ⋙ W₂'.Q ⋙ E₃.inverse :=
-          Functor.associator _ _ _ ≪≫ isoWhiskerRight (compUniqFunctor L₁ W₁.Q W₁).symm _ ≪≫
-            Functor.associator _ _ _
-      _ ≅ L₁ ⋙ L₂ ⋙ E₃.functor ⋙ E₃.inverse :=
-          isoWhiskerLeft _ ((Functor.associator _ _ _).symm ≪≫
-            isoWhiskerRight (Φ.catCommSq L₂ W₂'.Q).iso E₃.inverse ≪≫ Functor.associator _ _ _)
-      _ ≅ L₁ ⋙ L₂ := isoWhiskerLeft _ (isoWhiskerLeft _ E₃.unitIso.symm ≪≫ L₂.rightUnitor)
+  let iso : (W₁.Q ⋙ W₂'.Q) ⋙ E₃.inverse ≅ L₁ ⋙ L₂ := Iso.compInverseIso <|
+    isoWhiskerRight (compUniqFunctor L₁ W₁.Q W₁).symm _ ≪≫ Functor.associator _ _ _ ≪≫
+      isoWhiskerLeft _ (Φ.catCommSq L₂ W₂'.Q).iso ≪≫ (Functor.associator _ _ _).symm
   -- In order to show `(W₁.Q ⋙ W₂'.Q).IsLocalization W₃`, we need
   -- to check the assumptions of `StrictUniversalPropertyFixedTarget.comp`
   have hW₃' : W₃.IsInvertedBy (W₁.Q ⋙ W₂'.Q) := by

@@ -89,17 +89,10 @@ def isLimitOfFactors (f : X ⟶ Z) (g : Y ⟶ Z) (h : W ⟶ Z) [Mono h] (x : X �
       (PullbackCone.mk _ _
         (show s.fst ≫ x = s.snd ≫ y from
           (cancel_mono h).1 <| by simp only [Category.assoc, hxh, hyh, s.condition])) :=
-  PullbackCone.isLimitAux' _ fun t =>
-    have : fst t ≫ x ≫ h = snd t ≫ y ≫ h := by  -- Porting note: reassoc workaround
-      rw [← Category.assoc, ← Category.assoc]
-      apply congrArg (· ≫ h) t.condition
-    ⟨hs.lift (PullbackCone.mk t.fst t.snd <| by rw [← hxh, ← hyh, this]),
-      ⟨hs.fac _ WalkingCospan.left, hs.fac _ WalkingCospan.right, fun hr hr' => by
-        apply PullbackCone.IsLimit.hom_ext hs <;>
-              simp only [PullbackCone.mk_fst, PullbackCone.mk_snd] at hr hr' ⊢ <;>
-            simp only [hr, hr'] <;>
-          symm
-        exacts [hs.fac _ WalkingCospan.left, hs.fac _ WalkingCospan.right]⟩⟩
+  PullbackCone.IsLimit.mk _ (fun t => PullbackCone.IsLimit.lift hs t.fst t.snd
+      (by rw [← hxh, ← hyh]; simpa only [Category.assoc] using congrArg (· ≫ h) t.condition))
+    (by simp) (by simp) fun t m hm₁ hm₂ =>
+      PullbackCone.IsLimit.hom_ext hs (by simpa using hm₁) (by simpa using hm₂)
 
 /-- If `W` is the pullback of `f, g`, it is also the pullback of `f ≫ i, g ≫ i` for any mono `i`. -/
 def isLimitOfCompMono (f : X ⟶ W) (g : Y ⟶ W) (i : W ⟶ Z) [Mono i] (s : PullbackCone f g)
@@ -107,15 +100,11 @@ def isLimitOfCompMono (f : X ⟶ W) (g : Y ⟶ W) (i : W ⟶ Z) [Mono i] (s : Pu
     IsLimit
       (PullbackCone.mk _ _
         (show s.fst ≫ f ≫ i = s.snd ≫ g ≫ i by
-          rw [← Category.assoc, ← Category.assoc, s.condition])) := by
-  apply PullbackCone.isLimitAux'
-  intro s
-  rcases PullbackCone.IsLimit.lift' H s.fst s.snd
-      ((cancel_mono i).mp (by simpa using s.condition)) with
-    ⟨l, h₁, h₂⟩
-  refine ⟨l, h₁, h₂, ?_⟩
-  intro m hm₁ hm₂
-  exact (PullbackCone.IsLimit.hom_ext H (hm₁.trans h₁.symm) (hm₂.trans h₂.symm) :)
+          rw [← Category.assoc, ← Category.assoc, s.condition])) :=
+  PullbackCone.IsLimit.mk _ (fun t => PullbackCone.IsLimit.lift H t.fst t.snd
+      ((cancel_mono i).mp (by simpa only [Category.assoc] using t.condition)))
+    (by simp) (by simp) fun t m hm₁ hm₂ =>
+      PullbackCone.IsLimit.hom_ext H (by simpa using hm₁) (by simpa using hm₂)
 
 end PullbackCone
 
@@ -268,18 +257,10 @@ def isColimitOfFactors (f : X ⟶ Y) (g : X ⟶ Z) (h : X ⟶ W) [Epi h] (x : W 
       rw [← Category.assoc]; apply congrArg (· ≫ inr s) hhy
     IsColimit (PushoutCocone.mk _ _ (show x ≫ s.inl = y ≫ s.inr from
           (cancel_epi h).1 <| by rw [reassoc₁, reassoc₂, s.condition])) :=
-  PushoutCocone.isColimitAux' _ fun t => ⟨hs.desc (PushoutCocone.mk t.inl t.inr <| by
-    rw [← hhx, ← hhy, Category.assoc, Category.assoc, t.condition]),
-      ⟨hs.fac _ WalkingSpan.left, hs.fac _ WalkingSpan.right, fun hr hr' => by
-        apply PushoutCocone.IsColimit.hom_ext hs
-        · simp only [PushoutCocone.mk_inl, PushoutCocone.mk_inr] at hr hr' ⊢
-          simp only [hr]
-          symm
-          exact hs.fac _ WalkingSpan.left
-        · simp only [PushoutCocone.mk_inl, PushoutCocone.mk_inr] at hr hr' ⊢
-          simp only [hr']
-          symm
-          exact hs.fac _ WalkingSpan.right⟩⟩
+  PushoutCocone.IsColimit.mk _ (fun t => PushoutCocone.IsColimit.desc hs t.inl t.inr
+      (by rw [← hhx, ← hhy]; simpa only [Category.assoc] using congrArg (h ≫ ·) t.condition))
+    (by simp) (by simp) fun t m hm₁ hm₂ =>
+      PushoutCocone.IsColimit.hom_ext hs (by simpa using hm₁) (by simpa using hm₂)
 
 /-- If `W` is the pushout of `f, g`,
 it is also the pushout of `h ≫ f, h ≫ g` for any epi `h`. -/
@@ -288,15 +269,11 @@ def isColimitOfEpiComp (f : X ⟶ Y) (g : X ⟶ Z) (h : W ⟶ X) [Epi h] (s : Pu
     IsColimit
       (PushoutCocone.mk _ _
         (show (h ≫ f) ≫ s.inl = (h ≫ g) ≫ s.inr by
-          rw [Category.assoc, Category.assoc, s.condition])) := by
-  apply PushoutCocone.isColimitAux'
-  intro s
-  rcases PushoutCocone.IsColimit.desc' H s.inl s.inr
-      ((cancel_epi h).mp (by simpa using s.condition)) with
-    ⟨l, h₁, h₂⟩
-  refine ⟨l, h₁, h₂, ?_⟩
-  intro m hm₁ hm₂
-  exact (PushoutCocone.IsColimit.hom_ext H (hm₁.trans h₁.symm) (hm₂.trans h₂.symm) :)
+          rw [Category.assoc, Category.assoc, s.condition])) :=
+  PushoutCocone.IsColimit.mk _ (fun t => PushoutCocone.IsColimit.desc H t.inl t.inr
+      ((cancel_epi h).mp (by simpa using t.condition)))
+    (by simp) (by simp) fun t m hm₁ hm₂ =>
+      PushoutCocone.IsColimit.hom_ext H (by simpa using hm₁) (by simpa using hm₂)
 
 end PushoutCocone
 

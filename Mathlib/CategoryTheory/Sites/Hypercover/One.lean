@@ -316,12 +316,8 @@ lemma sieve₁_inter [HasPullbacks C] {i j : E.I₀ × F.I₀} {W : C}
     refine ⟨(k, l), pullback.lift (a ≫ e) u ?_, ?_, ?_⟩
     · simp only [Category.assoc] at u₁
       simp [← reassoc_of% h₁, w, ← reassoc_of% u₁, ← pullback.condition]
-    · apply pullback.hom_ext
-      · simp [h₁]
-      · simpa using u₁
-    · apply pullback.hom_ext
-      · simp [h₂]
-      · simpa using u₂
+    · cat_disch
+    · cat_disch
 
 end
 
@@ -383,13 +379,9 @@ def Hom.mapMultiforkOfIsLimit (f : E.Hom F) (P : Cᵒᵖ ⥤ A) {c : Multifork (
     d.pt ⟶ c.pt :=
   Multifork.IsLimit.lift hc (fun a ↦ d.ι (f.s₀ a) ≫ P.map (f.h₀ a).op) <| by
     intro (k : E.I₁')
-    simp only [multicospanIndex_right, multicospanShape_fst, multicospanIndex_left,
-      multicospanIndex_fst, assoc, multicospanShape_snd, multicospanIndex_snd]
-    have heq := d.condition (f.s₁' k)
-    simp only [Hom.s₁', multicospanIndex_right, multicospanShape_fst, multicospanIndex_left,
-      multicospanIndex_fst, multicospanShape_snd, multicospanIndex_snd] at heq
-    rw [← Functor.map_comp, ← op_comp, ← Hom.w₁₁, ← Functor.map_comp, ← op_comp, ← Hom.w₁₂]
-    rw [op_comp, Functor.map_comp, reassoc_of% heq, op_comp, Functor.map_comp]
+    simp only [multicospanIndex_fst, multicospanIndex_snd, assoc]
+    simpa [Hom.s₁', ← P.map_comp, ← op_comp, Hom.w₁₁, Hom.w₁₂] using
+      d.condition (f.s₁' k) =≫ P.map (f.h₁ k.2).op
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
@@ -837,13 +829,9 @@ def interLift {G : PreOneHypercover.{w''} S} (f : G.Hom E) (g : G.Hom F) :
     simp
   w₀ := by simp
   w₁₁ k := by
-    apply pullback.hom_ext
-    · simpa using f.w₁₁ k
-    · simpa using g.w₁₁ k
+    apply pullback.hom_ext <;> simp [PreOneHypercover.inter, f.w₁₁, g.w₁₁]
   w₁₂ k := by
-    apply pullback.hom_ext
-    · simpa using f.w₁₂ k
-    · simpa using g.w₁₂ k
+    apply pullback.hom_ext <;> simp [PreOneHypercover.inter, f.w₁₂, g.w₁₂]
 
 end
 
@@ -913,12 +901,8 @@ a multiequalizer of suitable maps `F.obj (op (E.X i)) ⟶ F.obj (op (E.Y j))`
 induced by `E.p₁ j` and `E.p₂ j`. -/
 noncomputable def isLimitMultifork : IsLimit (E.multifork F.1) :=
   Multifork.IsLimit.mk _ (fun c => multiforkLift c) (fun c => multiforkLift_map c) (by
-    intro c m hm
-    apply F.property.hom_ext_ofArrows _ E.mem₀
-    intro i₀
-    dsimp only
-    rw [multiforkLift_map]
-    exact hm i₀)
+    rintro c m hm; refine F.property.hom_ext_ofArrows _ E.mem₀ ?_
+    intro i; simpa [multiforkLift_map] using hm i)
 
 end
 

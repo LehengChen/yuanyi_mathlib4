@@ -104,27 +104,21 @@ variable (T : C₁ ≌ C₂) (L : C₁ ⥤ C₃) (R : C₂ ⥤ C₄) (B : C₃ �
 /-- Horizontal inverse of a 2-commutative square -/
 @[simps!, implicit_reducible]
 def hInv (_ : CatCommSq T.functor L R B.functor) : CatCommSq T.inverse R L B.inverse where
-  iso := isoWhiskerLeft _ (L.rightUnitor.symm ≪≫ isoWhiskerLeft L B.unitIso ≪≫
-      (associator _ _ _).symm ≪≫
-      isoWhiskerRight (iso T.functor L R B.functor).symm B.inverse ≪≫
-      associator _ _ _) ≪≫ (associator _ _ _).symm ≪≫
-      isoWhiskerRight T.counitIso _ ≪≫ leftUnitor _
+  iso := (associator _ _ _ ≪≫ (iso T.functor L R B.functor).symm.inverseCompIso).isoCompInverse
 
 set_option backward.isDefEq.respectTransparency false in
 lemma hInv_hInv (h : CatCommSq T.functor L R B.functor) :
     hInv T.symm R L B.symm (hInv T L R B h) = h := by
-  ext X
-  rw [← cancel_mono (B.functor.map (L.map (T.unitIso.hom.app X)))]
-  rw [← Functor.comp_map]
-  erw [← h.iso.hom.naturality (T.unitIso.hom.app X)]
-  rw [hInv_iso_hom_app]
-  simp only [Equivalence.symm_functor]
-  rw [hInv_iso_inv_app]
-  dsimp
-  simp only [Functor.comp_obj, assoc, ← Functor.map_comp, Iso.inv_hom_id_app,
-    Equivalence.counitInv_app_functor, Functor.map_id]
-  simp only [Functor.map_comp, Equivalence.fun_inv_map, assoc,
-    Equivalence.counitInv_functor_comp, comp_id, Iso.inv_hom_id_app_assoc]
+  cases h with
+  | mk iso =>
+      apply CatCommSq.ext
+      dsimp [CatCommSq.iso]
+      apply Iso.ext
+      ext X
+      simp
+      erw [← iso.hom.naturality (T.unitIso.inv.app X)]
+      rw [Functor.comp_map, ← assoc, ← R.map_comp, T.counitIso_functor_comp]
+      simp
 
 /-- In a square of categories, when the top and bottom functors are part
 of equivalence of categories, it is equivalent to show 2-commutativity for
@@ -144,28 +138,22 @@ variable (T : C₁ ⥤ C₂) (L : C₁ ≌ C₃) (R : C₂ ≌ C₄) (B : C₃ �
 /-- Vertical inverse of a 2-commutative square -/
 @[simps!, implicit_reducible]
 def vInv (_ : CatCommSq T L.functor R.functor B) : CatCommSq B L.inverse R.inverse T where
-  iso := isoWhiskerRight (B.leftUnitor.symm ≪≫ isoWhiskerRight L.counitIso.symm B ≪≫
-      associator _ _ _ ≪≫
-      isoWhiskerLeft L.inverse (iso T L.functor R.functor B).symm) R.inverse ≪≫
-      associator _ _ _ ≪≫ isoWhiskerLeft _ (associator _ _ _) ≪≫
-      (associator _ _ _).symm ≪≫ isoWhiskerLeft _ R.unitIso.symm ≪≫
-      rightUnitor _
+  iso := (associator _ _ _ ≪≫ (iso T L.functor R.functor B).symm.compInverseIso).isoInverseComp
 
 set_option backward.isDefEq.respectTransparency false in
 lemma vInv_vInv (h : CatCommSq T L.functor R.functor B) :
     vInv B L.symm R.symm T (vInv T L R B h) = h := by
-  ext X
-  rw [vInv_iso_hom_app]
-  dsimp
-  rw [vInv_iso_inv_app]
-  rw [← cancel_mono (B.map (L.functor.map (NatTrans.app L.unitIso.hom X)))]
-  rw [← Functor.comp_map]
-  dsimp
-  simp only [Functor.map_comp, Equivalence.fun_inv_map, Functor.comp_obj,
-    Functor.id_obj, assoc, Iso.inv_hom_id_app_assoc, Iso.inv_hom_id_app, comp_id]
-  rw [← B.map_comp, L.counit_app_functor, ← L.functor.map_comp, ← NatTrans.comp_app,
-    Iso.inv_hom_id, NatTrans.id_app, L.functor.map_id]
-  simp
+  cases h with
+  | mk iso =>
+      apply CatCommSq.ext
+      dsimp [CatCommSq.iso]
+      apply Iso.ext
+      ext X
+      simp
+      rw [L.counit_app_functor]
+      erw [← iso.hom.naturality (L.unitIso.inv.app X)]
+      rw [Functor.comp_map, ← assoc, ← R.functor.map_comp]
+      simp [← T.map_comp, L.unitIso_hom_inv_id_app]
 
 /-- In a square of categories, when the left and right functors are part
 of equivalence of categories, it is equivalent to show 2-commutativity for

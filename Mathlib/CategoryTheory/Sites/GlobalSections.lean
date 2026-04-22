@@ -141,14 +141,10 @@ noncomputable def Sheaf.coneΓ [HasGlobalSectionsFunctor J A] (F : Sheaf J A) : 
 /-- The global sections cone `Sheaf.coneΓ` is limiting - that is, global sections are limits even
 when not all limits of shape `Cᵒᵖ` exist in `A`. -/
 noncomputable def Sheaf.isLimitConeΓ [HasGlobalSectionsFunctor J A] (F : Sheaf J A) :
-    IsLimit F.coneΓ where
-  lift c := F.ΓHomEquiv c.π
-  fac c j := by
-    suffices h : ((Functor.const Cᵒᵖ).map (ΓHomEquiv c.π)) ≫ F.coneΓ.π = c.π from congr_app h j
-    simp [coneΓ, ← ΓHomEquiv_naturality_left_symm]
-  uniq c f hf := by
-    replace hf : ((Functor.const Cᵒᵖ).map f) ≫ F.coneΓ.π = c.π := by ext j; exact hf j
-    simpa [coneΓ, ← ΓHomEquiv_naturality_left_symm, Equiv.symm_apply_eq] using hf
+    IsLimit F.coneΓ :=
+  IsLimit.ofRepresentableBy
+    { homEquiv := ΓHomEquiv.symm
+      homEquiv_comp := ΓHomEquiv_naturality_left_symm }
 
 /-- The restriction map from global sections of `F` to sections on `U`. -/
 noncomputable def Sheaf.ΓRes [HasGlobalSectionsFunctor J A] (F : Sheaf J A) (U : Cᵒᵖ) :

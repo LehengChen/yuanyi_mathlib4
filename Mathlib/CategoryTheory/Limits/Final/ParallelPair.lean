@@ -49,11 +49,7 @@ lemma parallelPair_initial_mk {X Y : C} (f g : X ⟶ Y)
     (parallelPair f g).Initial :=
   parallelPair_initial_mk' f g h₁ (fun Z i j => by
     obtain ⟨a, rfl, rfl⟩ := h₂ i j
-    let f₁ : (mk (Y := zero) (f ≫ a) : CostructuredArrow (parallelPair f g) Z) ⟶ mk (Y := one) a :=
-      homMk left
-    let f₂ : (mk (Y := zero) (g ≫ a) : CostructuredArrow (parallelPair f g) Z) ⟶ mk (Y := one) a :=
-      homMk right
-    exact Zigzag.of_hom_inv f₁ f₂)
+    exact Zigzag.of_hom_inv (j₂ := mk (Y := one) a) (by exact homMk left) (by exact homMk right))
 
 end Limits
 
