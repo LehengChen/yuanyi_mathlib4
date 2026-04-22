@@ -13,8 +13,9 @@ public import Mathlib.CategoryTheory.Generator.Basic
 # Generators of the category of homological complexes
 
 Let `c : ComplexShape ι` be a complex shape with no loop.
-If a category `C` has a separator, then `HomologicalComplex C c`
-has a separating family, and a separator when suitable coproducts exist.
+If a category `C` with a zero object has a separator, then `HomologicalComplex C c`
+has a separating family. If moreover `C` is preadditive and suitable coproducts exist,
+then `HomologicalComplex C c` has a separator.
 
 -/
 

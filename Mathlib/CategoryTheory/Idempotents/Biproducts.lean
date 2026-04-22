@@ -45,7 +45,7 @@ variable {C : Type*} [Category.{v} C] [Preadditive C]
 namespace Biproducts
 
 /-- The `Bicone` used in order to obtain the existence of
-the biproduct of a functor `J ⥤ Karoubi C` when the category `C` is additive. -/
+the biproduct of a finite family `F : J → Karoubi C` when the category `C` is additive. -/
 @[simps]
 def bicone [HasFiniteBiproducts C] {J : Type} [Finite J] (F : J → Karoubi C) : Bicone F where
   pt :=

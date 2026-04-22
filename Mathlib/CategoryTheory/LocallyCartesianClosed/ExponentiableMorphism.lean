@@ -111,7 +111,7 @@ def pushforwardCurry {X : Over I} {A : Over J}
   pullbackPushforwardAdj f |>.homEquiv A X u
 
 /-- The uncurrying of `A ⟶ (pushforward f).obj X` in `Over J` to a morphism
-`(Over.pullback f).obj A ⟶ X` in `Over I`. -/
+`(pullback f).obj A ⟶ X` in `Over I`. -/
 def pushforwardUncurry {X : Over I} {A : Over J}
     (v : A ⟶ (pushforward f).obj X) :
     (pullback f).obj A ⟶ X :=

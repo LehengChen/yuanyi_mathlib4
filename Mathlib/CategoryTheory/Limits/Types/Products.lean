@@ -209,7 +209,8 @@ namespace Small
 variable {J : Type v} (F : J → Type u) [Small.{u} J]
 
 /--
-A variant of `productLimitCone` using a `Small` hypothesis rather than a function to `Type`.
+A variant of `CategoryTheory.Limits.Types.productLimitCone` for `F : J → Type u`, using a
+`Small` hypothesis on `J`.
 -/
 noncomputable def productLimitCone :
     Limits.LimitCone (Discrete.functor F) where

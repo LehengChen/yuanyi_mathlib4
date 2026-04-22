@@ -16,7 +16,8 @@ public import Mathlib.CategoryTheory.Limits.ExactFunctor
 The main definition in this file is `ObjectProperty.SerreClassLocalization.abelian`
 which shows that if `L : C ⥤ D` is a localization functor with respect to
 the class of morphisms `P.isoModSerre` for a Serre class `P : ObjectProperty C`
-in the abelian category `C`, then `D` is an abelian category.
+in the abelian category `C`, and if `D` is equipped with a preadditive structure
+for which `L` is additive, then `D` is an abelian category.
 
 We also show that a functor `G : D ⥤ E` to an abelian category is exact iff
 the composition `L ⋙ G` is.

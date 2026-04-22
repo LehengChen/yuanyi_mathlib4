@@ -35,7 +35,7 @@ open Opposite
 
 /-- Dinatural transformations between two difunctors. -/
 structure DinatTrans (F G : Cᵒᵖ ⥤ C ⥤ D) : Type max u₁ v₂ where
-  /-- The component of a natural transformation. -/
+  /-- The component of a dinatural transformation. -/
   app (X : C) : (F.obj (op X)).obj X ⟶ (G.obj (op X)).obj X
   /-- The commutativity square for a given morphism. -/
   dinaturality {X Y : C} (f : X ⟶ Y) :

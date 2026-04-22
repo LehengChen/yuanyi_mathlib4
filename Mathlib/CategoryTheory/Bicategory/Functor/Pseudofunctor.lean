@@ -14,8 +14,8 @@ public import Mathlib.Tactic.CategoryTheory.ToApp
 
 A pseudofunctor is an oplax (or lax) functor whose `mapId` and `mapComp` are isomorphisms.
 We provide several constructors for pseudofunctors:
-* `Pseudofunctor.mk` : the default constructor, which requires `map₂_whiskerLeft` and
-  `map₂_whiskerRight` instead of naturality of `mapComp`.
+* `Pseudofunctor.mk` : the default constructor, which requires `map₂_whisker_left` and
+  `map₂_whisker_right` instead of naturality of `mapComp`.
 
 * `Pseudofunctor.mkOfOplax` : construct a pseudofunctor from an oplax functor whose
   `mapId` and `mapComp` are isomorphisms. This constructor uses `Iso` to describe isomorphisms.

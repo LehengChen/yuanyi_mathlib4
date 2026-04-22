@@ -257,10 +257,12 @@ instance fintypeWalkingPair : Fintype WalkingPair where
   elems := {WalkingPair.left, WalkingPair.right}
   complete x := by cases x <;> simp
 
-/-- Pullbacks are finite limits, so if `C` has all finite limits, it also has all pullbacks -/
+/-- Pullbacks are finite wide pullbacks, so if `C` has all finite wide pullbacks, it also has all
+pullbacks. -/
 example [HasFiniteWidePullbacks C] : HasPullbacks C := by infer_instance
 
-/-- Pushouts are finite colimits, so if `C` has all finite colimits, it also has all pushouts -/
+/-- Pushouts are finite wide pushouts, so if `C` has all finite wide pushouts, it also has all
+pushouts. -/
 example [HasFiniteWidePushouts C] : HasPushouts C := by infer_instance
 
 end CategoryTheory.Limits

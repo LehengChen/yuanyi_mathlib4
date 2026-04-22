@@ -198,7 +198,7 @@ noncomputable def Lifting₃.bifunctorComp₂₃ :
 
 variable {F₁₂ G F G₂₃}
 
-/-- The associator isomorphism obtained by localization. -/
+/-- The isomorphism of localized trifunctors induced by localizing `iso`. -/
 noncomputable def associator : bifunctorComp₁₂ F₁₂' G' ≅ bifunctorComp₂₃ F' G₂₃' :=
   letI := Lifting₃.bifunctorComp₁₂ L₁ L₂ L₃ L₁₂ L W₁ W₂ W₃ W₁₂ F₁₂ G F₁₂' G'
   letI := Lifting₃.bifunctorComp₂₃ L₁ L₂ L₃ L₂₃ L W₁ W₂ W₃ W₂₃ F G₂₃ F' G₂₃'

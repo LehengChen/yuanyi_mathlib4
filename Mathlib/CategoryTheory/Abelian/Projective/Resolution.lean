@@ -16,8 +16,9 @@ public import Mathlib.Tactic.SuppressCompilation
 When the underlying category is abelian:
 * `CategoryTheory.ProjectiveResolution.lift`: Given `P : ProjectiveResolution X` and
   `Q : ProjectiveResolution Y`, any morphism `X ⟶ Y` admits a lifting to a chain map
-  `P.complex ⟶ Q.complex`. It is a lifting in the sense that `P.ι` intertwines the lift and
-  the original morphism, see `CategoryTheory.ProjectiveResolution.lift_commutes`.
+  `P.complex ⟶ Q.complex`. It is a lifting in the sense that
+  `lift f P Q ≫ Q.π = P.π ≫ (ChainComplex.single₀ C).map f`, see
+  `CategoryTheory.ProjectiveResolution.lift_commutes`.
 * `CategoryTheory.ProjectiveResolution.liftHomotopy`: Any two such lifts are homotopic.
 * `CategoryTheory.ProjectiveResolution.homotopyEquiv`: Any two projective resolutions of the same
   object are homotopy equivalent.

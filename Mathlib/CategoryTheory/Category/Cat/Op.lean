@@ -12,8 +12,8 @@ public import Mathlib.CategoryTheory.Opposites
 # The dualizing functor on `Cat`
 
 We define a (strict) functor `opFunctor` and an equivalence assigning opposite categories to
-categories. We then show that this functor is strictly involutive and that it induces an
-equivalence on `Cat`.
+categories. We then show that this functor is involutive up to natural isomorphism and that it
+induces an equivalence on `Cat`.
 -/
 
 @[expose] public section

@@ -20,11 +20,13 @@ the category of elements of `A` has limits of shape `I` and the forgetful functo
 
 ## Further results
 
-- If `A` is (co)representable, then `A.Elements` has an initial object.
+- If `F : Cᵒᵖ ⥤ Type*` is representable, or `F : C ⥤ Type*` is corepresentable, then
+  `F.Elements` has an initial object.
 
 ## TODOs
 
-- Show that `A` is (co)representable if `A.Elements` has an initial object.
+- Show conversely that if `F.Elements` has an initial object, then `F` is representable or
+  corepresentable, as appropriate.
 
 -/
 

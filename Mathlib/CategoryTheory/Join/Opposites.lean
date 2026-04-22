@@ -25,8 +25,8 @@ universe v₁ v₂ u₁ u₂
 
 variable (C : Type u₁) (D : Type u₂) [Category.{v₁} C] [Category.{v₂} D]
 
-/-- The equivalence `(C ⋆ D)ᵒᵖ ≌ Dᵒᵖ ⋆ Cᵒᵖ` induced by `Join.opEquivFunctor` and
-`Join.opEquivInverse`. -/
+/-- The equivalence `(C ⋆ D)ᵒᵖ ≌ Dᵒᵖ ⋆ Cᵒᵖ`, obtained by swapping the two sides of the join
+and taking opposites. -/
 def opEquiv : (C ⋆ D)ᵒᵖ ≌ Dᵒᵖ ⋆ Cᵒᵖ where
   functor := Functor.leftOp <|
     Join.mkFunctor (inclRight _ _).rightOp (inclLeft _ _).rightOp { app _ := (edge _ _).op }
@@ -76,13 +76,15 @@ lemma opEquiv_functor_map_op_edge (c : C) (d : D) :
     (opEquiv C D).functor.map (op <| edge c d) = edge (op d) (op c) :=
   rfl
 
-/-- Characterize (up to a rightOp) the action of the left inclusion on `Join.opEquivFunctor`. -/
+/-- Characterize (up to a `rightOp`) the action of the left inclusion on the forward functor of
+`opEquiv C D`. -/
 @[simps!]
 def InclLeftCompRightOpOpEquivFunctor :
     inclLeft C D ⋙ (opEquiv C D).functor.rightOp ≅ (inclRight _ _).rightOp :=
   isoWhiskerLeft _ (leftOpRightOpIso _) ≪≫ mkFunctorLeft _ _ _
 
-/-- Characterize (up to a rightOp) the action of the right inclusion on `Join.opEquivFunctor`. -/
+/-- Characterize (up to a `rightOp`) the action of the right inclusion on the forward functor of
+`opEquiv C D`. -/
 @[simps!]
 def InclRightCompRightOpOpEquivFunctor :
     inclRight C D ⋙ (opEquiv C D).functor.rightOp ≅ (inclLeft _ _).rightOp :=
@@ -118,12 +120,12 @@ lemma opEquiv_inverse_map_edge_op (c : C) (d : D) :
     (opEquiv C D).inverse.map (edge (op d) (op c)) = op (edge c d) :=
   rfl
 
-/-- Characterize `Join.opEquivInverse` with respect to the left inclusion -/
+/-- Characterize the inverse functor of `opEquiv C D` with respect to the left inclusion. -/
 def inclLeftCompOpEquivInverse :
     Join.inclLeft Dᵒᵖ Cᵒᵖ ⋙ (opEquiv C D).inverse ≅ (inclRight _ _).op :=
   Join.mkFunctorLeft _ _ _
 
-/-- Characterize `Join.opEquivInverse` with respect to the right inclusion -/
+/-- Characterize the inverse functor of `opEquiv C D` with respect to the right inclusion. -/
 def inclRightCompOpEquivInverse :
     Join.inclRight Dᵒᵖ Cᵒᵖ ⋙ (opEquiv C D).inverse ≅ (inclLeft _ _).op :=
   Join.mkFunctorRight _ _ _

@@ -54,7 +54,7 @@ variable {C : Type (u+1)} [LargeCategory C]
 ```
 
 In order for the library to handle these cases uniformly,
-we generally work with the unconstrained `Category.{v u}`,
+we generally work with the unconstrained `Category.{v, u}`,
 for which objects live in `Type u` and morphisms live in `Type v`.
 
 Because the universe parameter `u` for the objects can be inferred from `C`

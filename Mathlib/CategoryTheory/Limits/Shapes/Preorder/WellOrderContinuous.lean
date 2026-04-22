@@ -50,9 +50,9 @@ noncomputable def isColimitOfIsWellOrderContinuous (F : J ⥤ C) [F.IsWellOrderC
     IsColimit ((Set.principalSegIio m).cocone F) :=
       (IsWellOrderContinuous.nonempty_isColimit m hm).some
 
-/-- If `F : J ⥤ C` is well-order-continuous and `h : α <i J` is a principal
-segment such that `h.top` is a limit element, then
-`F.obj h.top` identifies to the colimit of the `F.obj j` for `j : α`. -/
+/-- If `F : J ⥤ C` is well-order-continuous and `f : α <i J` is a principal
+segment such that `f.top` is a limit element, then
+`F.obj f.top` identifies to the colimit of the `F.obj j` for `j : α`. -/
 noncomputable def isColimitOfIsWellOrderContinuous' (F : J ⥤ C) [F.IsWellOrderContinuous]
     {α : Type*} [PartialOrder α] (f : α <i J) (hα : Order.IsSuccLimit f.top) :
     IsColimit (f.cocone F) :=

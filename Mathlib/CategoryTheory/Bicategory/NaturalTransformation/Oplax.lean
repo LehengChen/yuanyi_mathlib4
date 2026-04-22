@@ -42,8 +42,9 @@ transformations respectively.
 We also provide API for going between oplax transformations and strong transformations:
 * `OplaxTrans.StrongCore η`: a structure on an oplax transformation between oplax functors that
   promotes it to a strong transformation.
-* `StrongTrans.mkOfOplax η η'`: given an oplax transformation `η` such that each component
-  2-morphism is an isomorphism, `mkOfOplax` gives the corresponding strong transformation.
+* `StrongTrans.mkOfOplax η η'`: given an oplax transformation `η` and data `η'` exhibiting its
+  naturality 2-morphisms as 2-isomorphisms, `mkOfOplax` gives the corresponding strong
+  transformation.
 
 ## References
 * [Niles Johnson, Donald Yau, *2-Dimensional Categories*](https://arxiv.org/abs/2002.06055)
@@ -357,15 +358,15 @@ def toOplax {F G : B ⥤ᵒᵖᴸ C} (η : StrongTrans F G) : OplaxTrans F G whe
   app := η.app
   naturality f := (η.naturality f).hom
 
-/-- Construct a strong natural transformation from an oplax natural transformation whose
-naturality 2-morphism is an isomorphism. -/
+/-- Construct a strong natural transformation from an oplax natural transformation equipped with
+`OplaxTrans.StrongCore` data. -/
 def mkOfOplax {F G : B ⥤ᵒᵖᴸ C} (η : OplaxTrans F G) (η' : OplaxTrans.StrongCore η) :
     StrongTrans F G where
   app := η.app
   naturality := η'.naturality
 
 /-- Construct a strong natural transformation from an oplax natural transformation whose
-naturality 2-morphism is an isomorphism. -/
+naturality 2-morphisms are isomorphisms. -/
 noncomputable def mkOfOplax' {F G : B ⥤ᵒᵖᴸ C} (η : OplaxTrans F G)
     [∀ a b (f : a ⟶ b), IsIso (η.naturality f)] : StrongTrans F G where
   app := η.app

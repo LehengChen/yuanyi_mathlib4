@@ -128,7 +128,7 @@ theorem Cone.isLimit_iff_isIso_limMap_π {F : J ⥤ C} [HasLimit F] (c : Cone F)
   ⟨fun ⟨h⟩ => IsLimit.isIso_limMap_π h, fun _ => ⟨c.isLimitOfIsIsoLimMapπ⟩⟩
 
 set_option backward.isDefEq.respectTransparency false in
-/-- If `J` is connected, `F : J ⥤ C` and `C` is a cocone on `F`, then to check that `c` is a
+/-- If `J` is connected, `F : J ⥤ C` and `c` is a cocone on `F`, then to check that `c` is a
 colimit it is sufficient to check that `colimMap c.ι` is an isomorphism. The converse is also
 true, see `Cocone.isColimit_iff_isIso_colimMap_ι`. -/
 def Cocone.isColimitOfIsIsoColimMapι {F : J ⥤ C} [HasColimit F] (c : Cocone F)
@@ -196,7 +196,7 @@ namespace ProdPreservesConnectedLimits
 @[simps]
 def γ₂ {K : J ⥤ C} (X : C) : K ⋙ prod.functor.obj X ⟶ K where app _ := Limits.prod.snd
 
-/-- (Impl). The obvious natural transformation from (X × K -) to X -/
+/-- (Impl). The obvious natural transformation from `(X × K -)` to the constant functor at `X`. -/
 @[simps]
 def γ₁ {K : J ⥤ C} (X : C) : K ⋙ prod.functor.obj X ⟶ (Functor.const J).obj X where
   app _ := Limits.prod.fst

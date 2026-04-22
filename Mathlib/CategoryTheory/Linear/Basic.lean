@@ -103,8 +103,8 @@ instance inducedCategory : Linear.{w, v} R (InducedCategory C F) where
   comp_smul _ _ _ _ _ _ := by ext; apply comp_smul
 
 variable {F} in
-/-- The linear equivalence `(X ⟶ Y) ≃+ (F X ⟶ F Y)` when `F : D → C` and
-`C` is a `R`-linear category. -/
+/-- The linear equivalence `(X ⟶ Y) ≃ₗ[R] (F X ⟶ F Y)` when `F : D → C` and
+`C` is an `R`-linear category. -/
 @[simps!]
 def _root_.CategoryTheory.InducedCategory.homLinearEquiv
     {X Y : InducedCategory C F} :

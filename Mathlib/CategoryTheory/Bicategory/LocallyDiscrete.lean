@@ -36,9 +36,7 @@ with the only 2-morphisms being equalities.
 -/
 @[ext]
 structure LocallyDiscrete (C : Type u) where
-  /-- A wrapper for promoting any category to a bicategory,
-  with the only 2-morphisms being equalities.
-  -/
+  /-- The underlying object of `C`. -/
   as : C
 
 namespace LocallyDiscrete

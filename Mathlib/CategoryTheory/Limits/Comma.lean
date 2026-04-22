@@ -47,8 +47,8 @@ in the comma category. -/
 def limitAuxiliaryCone (c₁ : Cone (F ⋙ fst L R)) : Cone ((F ⋙ snd L R) ⋙ R) :=
   (Cone.postcompose (whiskerLeft F (Comma.natTrans L R) :)).obj (L.mapCone c₁)
 
-/-- If `R` preserves the appropriate limit, then given a cone for `F ⋙ fst L R : J ⥤ L` and a
-limit cone for `F ⋙ snd L R : J ⥤ R` we can build a cone for `F` which will turn out to be a limit
+/-- If `R` preserves the appropriate limit, then given a cone for `F ⋙ fst L R : J ⥤ A` and a
+limit cone for `F ⋙ snd L R : J ⥤ B` we can build a cone for `F` which will turn out to be a limit
 cone.
 -/
 @[simps]
@@ -95,8 +95,8 @@ def colimitAuxiliaryCocone (c₂ : Cocone (F ⋙ snd L R)) : Cocone ((F ⋙ fst 
   (Cocone.precompose (whiskerLeft F (Comma.natTrans L R) :)).obj (R.mapCocone c₂)
 
 /--
-If `L` preserves the appropriate colimit, then given a colimit cocone for `F ⋙ fst L R : J ⥤ L` and
-a cocone for `F ⋙ snd L R : J ⥤ R` we can build a cocone for `F` which will turn out to be a
+If `L` preserves the appropriate colimit, then given a colimit cocone for `F ⋙ fst L R : J ⥤ A` and
+a cocone for `F ⋙ snd L R : J ⥤ B` we can build a cocone for `F` which will turn out to be a
 colimit cocone.
 -/
 @[simps]

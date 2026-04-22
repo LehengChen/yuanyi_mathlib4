@@ -132,7 +132,7 @@ def forget : Algebra T ⥤ C where
   map f := f.f
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The free functor from the Eilenberg-Moore category, constructing an algebra for any object. -/
+/-- The free functor to the Eilenberg-Moore category, constructing an algebra for any object. -/
 @[simps]
 def free : C ⥤ Algebra T where
   obj X :=
@@ -251,7 +251,7 @@ end Monad
 
 namespace Comonad
 
-/-- An Eilenberg-Moore coalgebra for a comonad `T`. -/
+/-- An Eilenberg-Moore coalgebra for a comonad `G`. -/
 structure Coalgebra (G : Comonad C) : Type max u₁ v₁ where
   /-- The underlying object associated to a coalgebra. -/
   A : C
@@ -344,7 +344,7 @@ def forget : Coalgebra G ⥤ C where
   map f := f.f
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The cofree functor from the Eilenberg-Moore category, constructing a coalgebra for any
+/-- The cofree functor to the Eilenberg-Moore category, constructing a coalgebra for any
 object. -/
 @[simps]
 def cofree : C ⥤ Coalgebra G where
@@ -392,12 +392,12 @@ instance forget_reflects_iso : G.forget.ReflectsIsomorphisms where
 
 instance forget_faithful : (forget G).Faithful where
 
-/-- Given a coalgebra morphism whose carrier part is an epimorphism, we get an algebra epimorphism.
+/-- Given a coalgebra morphism whose carrier part is an epimorphism, we get a coalgebra epimorphism.
 -/
 theorem algebra_epi_of_epi {X Y : Coalgebra G} (f : X ⟶ Y) [h : Epi f.f] : Epi f :=
   (forget G).epi_of_epi_map h
 
-/-- Given a coalgebra morphism whose carrier part is a monomorphism, we get an algebra monomorphism.
+/-- Given a coalgebra morphism whose carrier part is a monomorphism, we get a coalgebra monomorphism.
 -/
 theorem algebra_mono_of_mono {X Y : Coalgebra G} (f : X ⟶ Y) [h : Mono f.f] : Mono f :=
   (forget G).mono_of_mono_map h

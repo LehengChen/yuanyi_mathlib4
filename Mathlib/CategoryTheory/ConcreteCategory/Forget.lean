@@ -90,7 +90,7 @@ class HasForget₂ where
   forget_comp : forget₂ ⋙ forget D = forget C := by aesop
 
 /-- The forgetful functor `C ⥤ D` between concrete categories for which we have an instance
-`HasForget₂ C`. -/
+`HasForget₂ C D`. -/
 abbrev forget₂ [HasForget₂ C D] : C ⥤ D :=
   HasForget₂.forget₂
 

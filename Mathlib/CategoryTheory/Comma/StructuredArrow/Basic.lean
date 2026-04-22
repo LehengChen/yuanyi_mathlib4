@@ -475,8 +475,8 @@ theorem homMk_surjective {f f' : CostructuredArrow S T} (φ : f ⟶ f') :
       φ = CostructuredArrow.homMk ψ hψ :=
   ⟨φ.left, CostructuredArrow.w φ, rfl⟩
 
-/-- Given a costructured arrow `S(Y) ⟶ X`, and an arrow `Y' ⟶ Y'`, we can construct a morphism of
-costructured arrows given by `(S(Y) ⟶ X) ⟶ (S(Y') ⟶ S(Y) ⟶ X)`. -/
+/-- Given a costructured arrow `S(Y) ⟶ T` and an arrow `Y' ⟶ Y`, we can construct a morphism of
+costructured arrows `(S(Y') ⟶ T) ⟶ (S(Y) ⟶ T)`. -/
 @[simps]
 def homMk' (f : CostructuredArrow S T) (g : Y' ⟶ f.left) : mk (S.map g ≫ f.hom) ⟶ f where
   left := g
@@ -596,7 +596,7 @@ def mapIso (i : T ≅ T') : CostructuredArrow S T ≌ CostructuredArrow S T' :=
   Comma.mapRightIso _ ((Functor.const _).mapIso i)
 
 /-- A natural isomorphism `S ≅ S'` induces an equivalence
-`CostrucutredArrow S T ≌ CostructuredArrow S' T`. -/
+`CostructuredArrow S T ≌ CostructuredArrow S' T`. -/
 @[simps!]
 def mapNatIso (i : S ≅ S') : CostructuredArrow S T ≌ CostructuredArrow S' T :=
   Comma.mapLeftIso _ i

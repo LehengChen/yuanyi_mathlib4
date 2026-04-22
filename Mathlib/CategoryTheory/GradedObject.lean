@@ -262,7 +262,7 @@ variable [HasZeroMorphisms C]
 /--
 The `total` functor taking a graded object to the coproduct of its graded components is faithful.
 To prove this, we need to know that the coprojections into the coproduct are monomorphisms,
-which follows from the fact we have zero morphisms and decidable equality for the grading.
+which follows from the fact we have zero morphisms.
 -/
 instance : (total β C).Faithful where
   map_injective {X Y} f g w := by

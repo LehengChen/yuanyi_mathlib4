@@ -27,7 +27,7 @@ public import Mathlib.CategoryTheory.Limits.Constructions.EpiMono
   monomorphisms are stable under pushouts.
 - `CategoryTheory.Adhesive.toRegularMonoCategory`: Monomorphisms in adhesive categories are
   regular (this implies that adhesive categories are balanced).
-- `CategoryTheory.adhesive_functor`: The category `C ⥤ D` is adhesive if `D`
+- `CategoryTheory.adhesive_functor`: The category `D ⥤ C` is adhesive if `C`
   has all pullbacks and all pushouts and is adhesive
 
 ## References

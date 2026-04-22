@@ -13,7 +13,7 @@ public import Mathlib.CategoryTheory.Localization.Adjunction
 # Bousfield localization
 
 Given a predicate `P : ObjectProperty C` on the objects of a category `C`,
-we define `W.isLocal : MorphismProperty C` as the class of morphisms `f : X ⟶ Y`
+we define `P.isLocal : MorphismProperty C` as the class of morphisms `f : X ⟶ Y`
 such that for any `Z : C` such that `P Z`, the precomposition with `f`
 induces a bijection `(Y ⟶ Z) ≃ (X ⟶ Z)`.
 

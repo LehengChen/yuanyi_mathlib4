@@ -62,8 +62,8 @@ section
 variable [HasProduct f]
 
 /--
-If `G` preserves products and `C` has them, then the fan constructed of the mapped projection of a
-product is a limit.
+If `G` preserves the product of `f` and `C` has it, then the fan constructed of the mapped
+projections of that product is a limit.
 -/
 def isLimitOfHasProductOfPreservesLimit [PreservesLimit (Discrete.functor f) G] :
     IsLimit (Fan.mk _ fun j : J => G.map (Pi.π f j) : Fan fun j => G.obj (f j)) :=
@@ -71,7 +71,7 @@ def isLimitOfHasProductOfPreservesLimit [PreservesLimit (Discrete.functor f) G] 
 
 variable [HasProduct fun j : J => G.obj (f j)]
 
-/-- If `pi_comparison G f` is an isomorphism, then `G` preserves the limit of `f`. -/
+/-- If `piComparison G f` is an isomorphism, then `G` preserves the limit of `f`. -/
 lemma PreservesProduct.of_iso_comparison [i : IsIso (piComparison G f)] :
     PreservesLimit (Discrete.functor f) G := by
   apply preservesLimit_of_preserves_limit_cone (productIsProduct f)
@@ -88,8 +88,8 @@ lemma inv_piComparison_comp_map_π [IsIso (piComparison G f)] (j : J) :
 variable [PreservesLimit (Discrete.functor f) G]
 
 /--
-If `G` preserves limits, we have an isomorphism from the image of a product to the product of the
-images.
+If `G` preserves the product of `f`, we have an isomorphism from the image of that product to the
+product of the images.
 -/
 def PreservesProduct.iso : G.obj (∏ᶜ f) ≅ ∏ᶜ fun j => G.obj (f j) :=
   IsLimit.conePointUniqueUpToIso (isLimitOfHasProductOfPreservesLimit G f) (limit.isLimit _)
@@ -136,8 +136,8 @@ section
 
 variable [HasCoproduct f]
 
-/-- If `G` preserves coproducts and `C` has them,
-then the cofan constructed of the mapped inclusion of a coproduct is a colimit.
+/-- If `G` preserves the coproduct of `f` and `C` has it,
+then the cofan constructed of the mapped inclusions of that coproduct is a colimit.
 -/
 def isColimitOfHasCoproductOfPreservesColimit [PreservesColimit (Discrete.functor f) G] :
     IsColimit (Cofan.mk _ fun j : J => G.map (Sigma.ι f j) : Cofan fun j => G.obj (f j)) :=
@@ -145,7 +145,7 @@ def isColimitOfHasCoproductOfPreservesColimit [PreservesColimit (Discrete.functo
 
 variable [HasCoproduct fun j : J => G.obj (f j)]
 
-/-- If `sigma_comparison G f` is an isomorphism, then `G` preserves the colimit of `f`. -/
+/-- If `sigmaComparison G f` is an isomorphism, then `G` preserves the colimit of `f`. -/
 lemma PreservesCoproduct.of_iso_comparison [i : IsIso (sigmaComparison G f)] :
     PreservesColimit (Discrete.functor f) G := by
   apply preservesColimit_of_preserves_colimit_cocone (coproductIsCoproduct f)
@@ -161,8 +161,8 @@ lemma map_ι_comp_inv_sigmaComparison [IsIso (sigmaComparison G f)] (j : J) :
 
 variable [PreservesColimit (Discrete.functor f) G]
 
-/-- If `G` preserves colimits,
-we have an isomorphism from the image of a coproduct to the coproduct of the images.
+/-- If `G` preserves the coproduct of `f`,
+we have an isomorphism from the image of the coproduct of `f` to the coproduct of the images.
 -/
 def PreservesCoproduct.iso : G.obj (∐ f) ≅ ∐ fun j => G.obj (f j) :=
   IsColimit.coconePointUniqueUpToIso (isColimitOfHasCoproductOfPreservesColimit G f)

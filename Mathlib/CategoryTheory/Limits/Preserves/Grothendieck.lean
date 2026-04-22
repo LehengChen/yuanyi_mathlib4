@@ -11,8 +11,9 @@ public import Mathlib.CategoryTheory.Limits.Shapes.Grothendieck
 /-!
 # Colimits on Grothendieck constructions preserving limits
 
-We characterize the condition in which colimits on Grothendieck constructions preserve limits: By
-preserving limits on the Grothendieck construction's base category as well as on each of its fibers.
+We give a sufficient condition for colimits on Grothendieck constructions to preserve limits: it is
+enough that colimits preserve limits on the Grothendieck construction's base category as well as on
+each of its fibers.
 -/
 
 @[expose] public section

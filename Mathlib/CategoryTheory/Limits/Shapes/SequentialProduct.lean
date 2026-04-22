@@ -41,7 +41,7 @@ lemma functorObj_eq_neg {n m : ℕ} (h : ¬(m < n)) :
 variable [Category* C] (f : ∀ n, M n ⟶ N n) [HasCountableProducts C]
 
 variable (M N) in
-/-- The product of the `m` first objects of `M` and the rest of the rest of `N` -/
+/-- The product of the first `n` objects of `M` and the remaining objects of `N`. -/
 noncomputable def functorObj : ℕ → C :=
   fun n ↦ ∏ᶜ (fun m ↦ if _ : m < n then M m else N m)
 

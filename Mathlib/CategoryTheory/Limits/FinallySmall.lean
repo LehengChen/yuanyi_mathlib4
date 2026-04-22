@@ -44,7 +44,7 @@ class FinallySmall : Prop where
   /-- There is a final functor from a small category. -/
   final_smallCategory : ∃ (S : Type w) (_ : SmallCategory S) (F : S ⥤ J), Final F
 
-/-- Constructor for `FinallySmall C` from an explicit small category witness. -/
+/-- Constructor for `FinallySmall J` from an explicit small category witness. -/
 theorem FinallySmall.mk' {J : Type u} [Category.{v} J] {S : Type w} [SmallCategory S]
     (F : S ⥤ J) [Final F] : FinallySmall.{w} J :=
   ⟨S, _, F, inferInstance⟩
@@ -102,7 +102,7 @@ class InitiallySmall : Prop where
   /-- There is an initial functor from a small category. -/
   initial_smallCategory : ∃ (S : Type w) (_ : SmallCategory S) (F : S ⥤ J), Initial F
 
-/-- Constructor for `InitialSmall C` from an explicit small category witness. -/
+/-- Constructor for `InitiallySmall J` from an explicit small category witness. -/
 theorem InitiallySmall.mk' {J : Type u} [Category.{v} J] {S : Type w} [SmallCategory S]
     (F : S ⥤ J) [Initial F] : InitiallySmall.{w} J :=
   ⟨S, _, F, inferInstance⟩

@@ -109,8 +109,8 @@ theorem BiconeMorphism.ext {c c' : Bicone F} (f g : c ⟶ c') (w : f.hom = g.hom
 
 namespace Bicones
 
-/-- To give an isomorphism between cocones, it suffices to give an
-  isomorphism between their vertices which commutes with the cocone
+/-- To give an isomorphism between bicones, it suffices to give an
+  isomorphism between their vertices which commutes with the bicone
   maps. -/
 @[aesop apply safe (rule_sets := [CategoryTheory]), simps]
 def ext {c c' : Bicone F} (φ : c.pt ≅ c'.pt)
@@ -280,7 +280,7 @@ def whiskerToCone {f : J → C} (c : Bicone f) (g : K ≃ J) :
         (c.toCone.whisker (Discrete.functor (Discrete.mk ∘ g))) :=
   Cone.ext (Iso.refl _) (by simp)
 
-/-- Taking the cocone of a whiskered bicone results in a cone isomorphic to one gained
+/-- Taking the cocone of a whiskered bicone results in a cocone isomorphic to one gained
 by whiskering the cocone and precomposing with a suitable isomorphism. -/
 def whiskerToCocone {f : J → C} (c : Bicone f) (g : K ≃ J) :
     (c.whisker g).toCocone ≅
@@ -326,7 +326,7 @@ attribute [inherit_doc HasBiproduct] HasBiproduct.exists_biproduct
 theorem HasBiproduct.mk {F : J → C} (d : LimitBicone F) : HasBiproduct F :=
   ⟨Nonempty.intro d⟩
 
-/-- Use the axiom of choice to extract explicit `BiproductData F` from `HasBiproduct F`. -/
+/-- Use the axiom of choice to extract explicit `LimitBicone F` data from `HasBiproduct F`. -/
 def getBiproductData (F : J → C) [HasBiproduct F] : LimitBicone F :=
   Classical.choice HasBiproduct.exists_biproduct
 

@@ -144,7 +144,7 @@ theorem inv_hom_hom {M N : Action V G} (f : M ≅ N) :
 
 /-- Construct an isomorphism of `G` actions/representations
 from an isomorphism of the underlying objects,
-where the forward direction commutes with the group action. -/
+where the forward direction commutes with the `G`-action. -/
 @[simps]
 def mkIso {M N : Action V G} (f : M.V ≅ N.V)
     (comm : ∀ g : G, M.ρ g ≫ f.hom = f.hom ≫ N.ρ g := by cat_disch) : M ≅ N where
@@ -276,7 +276,7 @@ instance hasForgetToV {FV : V → V → Type*} {CV : V → Type*} [∀ X Y, FunL
     [ConcreteCategory V FV] : HasForget₂ (Action V G) V where forget₂ := forget V G
 
 /-- The forgetful functor is intertwined by `functorCategoryEquivalence` with
-evaluation at `PUnit.star`. -/
+evaluation at `PUnit.unit`. -/
 def functorCategoryEquivalenceCompEvaluation :
     (functorCategoryEquivalence V G).functor ⋙ (evaluation _ _).obj PUnit.unit ≅ forget V G :=
   Iso.refl _

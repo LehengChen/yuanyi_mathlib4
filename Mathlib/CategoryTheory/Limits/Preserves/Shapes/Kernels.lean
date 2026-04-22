@@ -14,7 +14,7 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Zero
 Constructions to relate the notions of preserving (co)kernels and reflecting (co)kernels
 to concrete (co)forks.
 
-In particular, we show that `kernel_comparison f g G` is an isomorphism iff `G` preserves
+In particular, we show that `kernelComparison f G` is an isomorphism iff `G` preserves
 the limit of the parallel pair `f,0`, as well as the dual result.
 -/
 
@@ -101,8 +101,8 @@ def isLimitForkMapOfIsLimit' [PreservesLimit (parallelPair f 0) G]
 variable (f)
 variable [HasKernel f]
 
-/-- If `G` preserves kernels and `C` has them, then the fork constructed of the mapped morphisms of
-a kernel fork is a limit.
+/-- If `G` preserves kernels and `C` has them, then the fork constructed from the mapped
+kernel inclusion is a limit.
 -/
 def isLimitOfHasKernelOfPreservesLimit [PreservesLimit (parallelPair f 0) G] :
     IsLimit
@@ -205,7 +205,7 @@ variable (G : C ⥤ D) [Functor.PreservesZeroMorphisms G]
 the cokernel cofork consisting of the mapped morphisms is a colimit.
 This essentially lets us commute `CokernelCofork.ofπ` with `Functor.mapCocone`.
 
-This is a variant of `isColimitMapCoconeCoforkEquiv` for equalizers,
+This is a variant of `isColimitMapCoconeCoforkEquiv` for coequalizers,
 which we can't use directly between `G.map 0 = 0` does not hold definitionally.
 -/
 def isColimitMapCoconeCoforkEquiv' :
@@ -217,7 +217,7 @@ def isColimitMapCoconeCoforkEquiv' :
 
 /-- The property of preserving cokernels expressed in terms of cokernel coforks.
 
-This is a variant of `isColimitCoforkMapOfIsColimit` for equalizers,
+This is a variant of `isColimitCoforkMapOfIsColimit` for coequalizers,
 which we can't use directly between `G.map 0 = 0` does not hold definitionally.
 -/
 def isColimitCoforkMapOfIsColimit' [PreservesColimit (parallelPair f 0) G]
@@ -231,8 +231,8 @@ variable (f)
 variable [HasCokernel f]
 
 /--
-If `G` preserves cokernels and `C` has them, then the cofork constructed of the mapped morphisms of
-a cokernel cofork is a colimit.
+If `G` preserves cokernels and `C` has them, then the cofork constructed from the mapped
+cokernel projection is a colimit.
 -/
 def isColimitOfHasCokernelOfPreservesColimit [PreservesColimit (parallelPair f 0) G] :
     IsColimit

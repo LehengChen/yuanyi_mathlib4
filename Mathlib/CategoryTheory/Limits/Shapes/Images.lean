@@ -99,8 +99,8 @@ instance [Mono f] : Inhabited (MonoFactorisation f) := ⟨self f⟩
 
 variable {f}
 
-/-- The morphism `m` in a factorisation `f = e ≫ m` through a monomorphism is uniquely
-determined. -/
+/-- A factorisation `f = e ≫ m` through a monomorphism is determined by the intermediate object
+and the morphism `m`. -/
 @[ext (iff := false)]
 theorem ext {F F' : MonoFactorisation f} (hI : F.I = F'.I)
     (hm : F.m = eqToHom hI ≫ F'.m) : F = F' := by
@@ -706,7 +706,8 @@ theorem ImageMap.factor_map {f g : Arrow C} [HasImage f.hom] [HasImage g.hom] (s
 
 set_option backward.isDefEq.respectTransparency false in
 /-- To give an image map for a commutative square with `f` at the top and `g` at the bottom, it
-suffices to give a map between any mono factorisation of `f` and any image factorisation of `g`. -/
+suffices to give a morphism `map : F.I ⟶ F'.I` from any mono factorisation `F` of `f` to any
+image factorisation `F'` of `g` such that `map ≫ F'.m = F.m ≫ sq.right`. -/
 def ImageMap.transport {f g : Arrow C} [HasImage f.hom] [HasImage g.hom] (sq : f ⟶ g)
     (F : MonoFactorisation f.hom) {F' : MonoFactorisation g.hom} (hF' : IsImage F')
     {map : F.I ⟶ F'.I} (map_ι : map ≫ F'.m = F.m ≫ sq.right) : ImageMap sq where

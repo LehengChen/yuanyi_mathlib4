@@ -101,7 +101,7 @@ def ofOrderIso {J' : Type w'} [LinearOrder J'] [OrderBot J']
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If `f` is a transfinite composition of shape `J`, then `F.map f` also is
-provided `F` preserves suitable colimits. -/
+provided `F` preserves well order continuous functors and colimits of shape `J`. -/
 @[simps]
 noncomputable def map (F : C ⥤ D) [PreservesWellOrderContinuousOfShape J F]
     [PreservesColimitsOfShape J F] :

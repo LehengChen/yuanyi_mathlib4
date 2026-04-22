@@ -37,10 +37,10 @@ This definition is equivalent to left exact functors (functors that preserves fi
 * `preservesFiniteLimits_iff_flat`: If `C` has all finite limits,
   then `F` is flat iff `F` is left exact.
 * `lan_preservesFiniteLimits_of_flat`: If `F : C ⥤ D` is a flat functor between small categories,
-  then the functor `Lan F.op` between presheaves of sets preserves all finite limits.
+  then the functor `Lan F.op : (Cᵒᵖ ⥤ E) ⥤ (Dᵒᵖ ⥤ E)` preserves all finite limits.
 * `flat_iff_lan_flat`: If `C`, `D` are small and `C` has all finite limits, then `F` is flat iff
   `Lan F.op : (Cᵒᵖ ⥤ Type*) ⥤ (Dᵒᵖ ⥤ Type*)` is flat.
-* `preservesFiniteLimits_iff_lanPreservesFiniteLimits`: If `C`, `D` are small and `C` has all
+* `preservesFiniteLimits_iff_lan_preservesFiniteLimits`: If `C`, `D` are small and `C` has all
   finite limits, then `F` preserves finite limits iff `Lan F.op : (Cᵒᵖ ⥤ Type*) ⥤ (Dᵒᵖ ⥤ Type*)`
   does.
 
@@ -321,7 +321,7 @@ variable [ReflectsLimits (forget E)] [PreservesFilteredColimits (forget E)]
 variable [PreservesLimits (forget E)]
 
 /-- If `F : C ⥤ D` is a representably flat functor between small categories, then the functor
-`Lan F.op` that takes presheaves over `C` to presheaves over `D` preserves finite limits.
+`Lan F.op : (Cᵒᵖ ⥤ E) ⥤ (Dᵒᵖ ⥤ E)` preserves finite limits.
 -/
 noncomputable instance lan_preservesFiniteLimits_of_flat (F : C ⥤ D) [RepresentablyFlat F] :
     PreservesFiniteLimits (F.op.lan : _ ⥤ Dᵒᵖ ⥤ E) := by

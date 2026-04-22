@@ -74,7 +74,7 @@ def Q' : C ⥤ W.Localization' := HasLocalization.L
 
 instance : W.Q'.IsLocalization W := HasLocalization.hL
 
-/-- The constructed localized category. -/
+/-- The standard `HasLocalization` data coming from the constructed localized category. -/
 @[implicit_reducible]
 def HasLocalization.standard : HasLocalization.{max u v} W where
   L := W.Q

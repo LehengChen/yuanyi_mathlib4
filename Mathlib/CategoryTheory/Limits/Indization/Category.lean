@@ -262,7 +262,8 @@ instance [HasFiniteCoproducts C] : HasCoproducts.{v} (Ind C) :=
     ⟨fun _ => hasColimitsOfShape_of_equivalence (Discrete.equivalence Equiv.ulift)⟩
   hasCoproducts_of_finite_and_filtered
 
-/-- Given an `IndParallelPairPresentation f g`, we can understand the parallel pair `(f, g)` as
+/-- Given an `IndParallelPairPresentation ((Ind.inclusion C).map f) ((Ind.inclusion C).map g)`,
+we can understand the parallel pair `(f, g)` as
 the colimit of `(P.φ, P.ψ)` in `Ind C`. -/
 noncomputable def IndParallelPairPresentation.parallelPairIsoParallelPairCompIndYoneda
     {A B : Ind C} {f g : A ⟶ B}

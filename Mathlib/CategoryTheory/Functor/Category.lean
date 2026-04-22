@@ -160,7 +160,7 @@ def leftUnitor (F : C ⥤ D) :
   hom := { app := fun X => 𝟙 (F.obj X) }
   inv := { app := fun X => 𝟙 (F.obj X) }
 
-/-- The right unitor, a natural isomorphism `(F ⋙ (𝟭 B)) ≅ F`.
+/-- The right unitor, a natural isomorphism `(F ⋙ (𝟭 D)) ≅ F`.
 -/
 @[simps]
 def rightUnitor (F : C ⥤ D) :

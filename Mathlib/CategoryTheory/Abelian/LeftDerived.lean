@@ -66,9 +66,9 @@ noncomputable def Functor.leftDerivedToHomotopyCategory (F : C ⥤ D) [F.Additiv
     C ⥤ HomotopyCategory D (ComplexShape.down ℕ) :=
   projectiveResolutions C ⋙ F.mapHomotopyCategory _
 
-/-- If `P : ProjectiveResolution Z` and `F : C ⥤ D` is an additive functor, this is
-an isomorphism between `F.leftDerivedToHomotopyCategory.obj X` and the complex
-obtained by applying `F` to `P.complex`. -/
+/-- If `P : ProjectiveResolution X` and `F : C ⥤ D` is an additive functor, this is
+an isomorphism between `F.leftDerivedToHomotopyCategory.obj X` and the image in the
+homotopy category of the complex obtained by applying `F` to `P.complex`. -/
 noncomputable def ProjectiveResolution.isoLeftDerivedToHomotopyCategoryObj {X : C}
     (P : ProjectiveResolution X) (F : C ⥤ D) [F.Additive] :
     F.leftDerivedToHomotopyCategory.obj X ≅

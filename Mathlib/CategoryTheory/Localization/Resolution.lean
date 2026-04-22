@@ -182,7 +182,7 @@ def LeftResolution.op {X₂ : C₂} (L : Φ.LeftResolution X₂) :
   w := L.w.op
   hw := L.hw
 
-/-- The canonical map `Φ.op.LeftResolution X₂ → Φ.RightResolution X₂`. -/
+/-- The canonical map `Φ.op.LeftResolution X₂ → Φ.RightResolution X₂.unop`. -/
 @[simps]
 def LeftResolution.unop {X₂ : C₂ᵒᵖ} (L : Φ.op.LeftResolution X₂) :
     Φ.RightResolution X₂.unop where
@@ -198,7 +198,7 @@ def RightResolution.op {X₂ : C₂} (L : Φ.RightResolution X₂) :
   w := L.w.op
   hw := L.hw
 
-/-- The canonical map `Φ.op.RightResolution X₂ → Φ.LeftResolution X₂`. -/
+/-- The canonical map `Φ.op.RightResolution X₂ → Φ.LeftResolution X₂.unop`. -/
 @[simps]
 def RightResolution.unop {X₂ : C₂ᵒᵖ} (L : Φ.op.RightResolution X₂) :
     Φ.LeftResolution X₂.unop where

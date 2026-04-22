@@ -108,7 +108,7 @@ set_option backward.isDefEq.respectTransparency false in
 /-- The Yoneda pseudofunctor from `B` to `Bᵒᵖ ⥤ᵖ Cat`.
 
 It consists of the following:
-* On objects: sends `x : B` to the pseudofunctor `Bᵒᵖ ⥤ᵖ Cat` given by
+* On objects: sends `x : B` to the pseudofunctor from `Bᵒᵖ` to `Cat` given by
   `a ↦ (a ⟶ x)` on objects and on 1- and 2-morphisms given by "precomposing"
 * On 1- and 2-morphisms it is given by "postcomposing" -/
 @[simps!]

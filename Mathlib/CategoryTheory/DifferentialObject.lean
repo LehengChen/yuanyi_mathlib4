@@ -162,7 +162,8 @@ variable (D : Type u') [Category.{v'} D]
 variable [HasZeroMorphisms D] [HasShift D S]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A functor `F : C ⥤ D` which commutes with shift functors on `C` and `D` and preserves zero
+/-- A functor `F : C ⥤ D` equipped with a natural transformation
+`(shiftFunctor C (1 : S)).comp F ⟶ F.comp (shiftFunctor D (1 : S))` and preserving zero
 morphisms can be lifted to a functor `DifferentialObject S C ⥤ DifferentialObject S D`. -/
 @[simps]
 def mapDifferentialObject (F : C ⥤ D)

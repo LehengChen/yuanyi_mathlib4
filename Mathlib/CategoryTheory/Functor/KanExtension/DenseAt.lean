@@ -70,7 +70,7 @@ def DenseAt.ofNatIso {G : C ⥤ D} (e : F ≅ G) : G.DenseAt Y :=
       (by exact Cocone.ext (Iso.refl _)))
     (hY.whiskerEquivalence (CostructuredArrow.mapNatIso e.symm))
 
-/-- If the canonical functor `CostructuredArrow (G ≫ F) Y ⥤ CostructuredArrow F Y` is final, then
+/-- If the canonical functor `CostructuredArrow (G ⋙ F) Y ⥤ CostructuredArrow F Y` is final, then
 `G ⋙ F` is dense at `Y` if and only if `F` is dense at `Y`. -/
 noncomputable def DenseAt.precompEquivOfFinal
     {C' : Type*} [Category* C'] (G : C' ⥤ C) [(CostructuredArrow.pre G F Y).Final] :
@@ -79,7 +79,7 @@ noncomputable def DenseAt.precompEquivOfFinal
     ((LeftExtension.mk (𝟭 D) F.rightUnitor.inv).coconeAt Y)
 
 /-- If `F : C ⥤ D` is dense at `Y : D`, then so is `G ⋙ F` if
-the canonical functor `CostructuredArrow (G ≫ F) Y ⥤ CostructuredArrow F Y` is final.
+the canonical functor `CostructuredArrow (G ⋙ F) Y ⥤ CostructuredArrow F Y` is final.
 This holds in particular if `G` is an equivalence. -/
 noncomputable def DenseAt.precompOfFinal
     {C' : Type*} [Category* C'] (G : C' ⥤ C) [(CostructuredArrow.pre G F Y).Final] :

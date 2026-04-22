@@ -117,7 +117,7 @@ end MakesOverArrow
 
 /-- This is equivalent to the type `Over.mk s ⟶ Over.mk η`, but that lives in the wrong universe.
 However, if `F = yoneda.obj Y` for some `Y`, then (using that the Yoneda embedding is fully
-faithful) we get a good statement, see `OverArrow.costructuredArrowIso`. -/
+faithful) we get a good statement, see `OverArrows.costructuredArrowIso`. -/
 def OverArrows {F : Cᵒᵖ ⥤ Type v} (η : F ⟶ A) {X : C} (s : yoneda.obj X ⟶ A) : Type v :=
   Subtype (MakesOverArrow η s)
 
@@ -200,7 +200,8 @@ def costructuredArrowIso (s t : CostructuredArrow yoneda A) : OverArrows s.hom t
 
 end OverArrows
 
-/-- This is basically just `yoneda.obj η : (Over A)ᵒᵖ ⥤ Type (max u v)` restricted along the
+/-- This is basically just `yoneda.obj (Over.mk η) : (Over A)ᵒᵖ ⥤ Type (max u v)` restricted
+along the
 forgetful functor `CostructuredArrow yoneda A ⥤ Over A`, but done in a way that we land in a
 smaller universe. -/
 @[simps]
@@ -264,7 +265,8 @@ namespace YonedaCollection
 
 variable {F : (CostructuredArrow yoneda A)ᵒᵖ ⥤ Type v} {X : C}
 
-/-- Given a costructured arrow `s : yoneda.obj X ⟶ A` and an element `x : F.obj s`, construct
+/-- Given a costructured arrow `s : yoneda.obj X ⟶ A` and an element
+`x : F.obj (op (CostructuredArrow.mk s))`, construct
 an element of `YonedaCollection F X`. -/
 def mk (s : yoneda.obj X ⟶ A) (x : F.obj (op (CostructuredArrow.mk s))) : YonedaCollection F X :=
   ⟨yonedaEquiv s, F.map (eqToHom <| by rw [Equiv.symm_apply_apply]) x⟩
