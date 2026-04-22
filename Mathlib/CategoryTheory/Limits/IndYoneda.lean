@@ -76,8 +76,16 @@ lemma colimitHomIsoLimitYoneda_hom_comp_π [HasLimitsOfShape Iᵒᵖ (Type u₂)
     (colimitHomIsoLimitYoneda F A).hom ≫ limit.π (F.op ⋙ yoneda.obj A) ⟨i⟩ =
       (yoneda.obj A).map (colimit.ι F i).op := by
   simp only [colimitHomIsoLimitYoneda, Iso.trans_hom, Iso.app_hom, Category.assoc]
-  erw [limitObjIsoLimitCompEvaluation_hom_π]
-  change ((coyonedaOpColimitIsoLimitCoyoneda F).hom ≫ _).app A = _
+  change
+    (coyonedaOpColimitIsoLimitCoyoneda F).hom.app A ≫
+        (limitObjIsoLimitCompEvaluation (F.op ⋙ coyoneda) A).hom ≫
+          limit.π ((F.op ⋙ coyoneda) ⋙ (evaluation C (Type u₂)).obj A) (op i) =
+      (yoneda.obj A).map (colimit.ι F i).op
+  have h :=
+    congrArg (((coyonedaOpColimitIsoLimitCoyoneda F).hom.app A) ≫ ·)
+      (limitObjIsoLimitCompEvaluation_hom_π (F := F.op ⋙ coyoneda) (j := op i) (k := A))
+  refine h.trans ?_
+  change ((coyonedaOpColimitIsoLimitCoyoneda F).hom ≫ limit.π (F.op ⋙ coyoneda) (op i)).app A = _
   rw [coyonedaOpColimitIsoLimitCoyoneda_hom_comp_π, Functor.flip_map_app]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -127,8 +135,16 @@ lemma colimitHomIsoLimitYoneda'_hom_comp_π [HasLimitsOfShape I (Type u₂)] (A 
       (yoneda.obj A).map (colimit.ι F ⟨i⟩).op := by
   simp only [colimitHomIsoLimitYoneda', Iso.trans_hom,
     Iso.app_hom, Category.assoc]
-  erw [limitObjIsoLimitCompEvaluation_hom_π]
-  change ((coyonedaOpColimitIsoLimitCoyoneda' F).hom ≫ _).app A = _
+  change
+    (coyonedaOpColimitIsoLimitCoyoneda' F).hom.app A ≫
+        (limitObjIsoLimitCompEvaluation (F.rightOp ⋙ coyoneda) A).hom ≫
+          limit.π ((F.rightOp ⋙ coyoneda) ⋙ (evaluation C (Type u₂)).obj A) i =
+      (yoneda.obj A).map (colimit.ι F ⟨i⟩).op
+  have h :=
+    congrArg (((coyonedaOpColimitIsoLimitCoyoneda' F).hom.app A) ≫ ·)
+      (limitObjIsoLimitCompEvaluation_hom_π (F := F.rightOp ⋙ coyoneda) (j := i) (k := A))
+  refine h.trans ?_
+  change ((coyonedaOpColimitIsoLimitCoyoneda' F).hom ≫ limit.π (F.rightOp ⋙ coyoneda) i).app A = _
   rw [coyonedaOpColimitIsoLimitCoyoneda'_hom_comp_π, Functor.flip_map_app]
 
 set_option backward.isDefEq.respectTransparency false in
