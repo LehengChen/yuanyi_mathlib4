@@ -227,14 +227,14 @@ variable [Category.{v₄} D]
       R
 ```
 
-where `U ⋙ R` has a left adjoint, `A` has reflexive coequalizers and `V` has a left adjoint such
-that each component of the counit is a regular epi.
-Then `Q` has a left adjoint.
+where `U` has a left adjoint, `A` has reflexive coequalizers and `V` has a left adjoint such that
+each component of the counit is a regular epi.
+Then `Q` has a left adjoint if `R` has a left adjoint.
 
 See https://ncatlab.org/nlab/show/adjoint+lifting+theorem
 -/
 lemma isRightAdjoint_square_lift (Q : A ⥤ B) (V : B ⥤ D) (U : A ⥤ C) (R : C ⥤ D)
-    (comm : U ⋙ R ≅ Q ⋙ V) [(U ⋙ R).IsRightAdjoint] [V.IsRightAdjoint]
+    (comm : U ⋙ R ≅ Q ⋙ V) [U.IsRightAdjoint] [V.IsRightAdjoint] [R.IsRightAdjoint]
     (h : ∀ X, RegularEpi ((Adjunction.ofIsRightAdjoint V).counit.app X))
     [HasReflexiveCoequalizers A] :
     Q.IsRightAdjoint :=
@@ -251,13 +251,13 @@ lemma isRightAdjoint_square_lift (Q : A ⥤ B) (V : B ⥤ D) (U : A ⥤ C) (R : 
       R
 ```
 
-where `U ⋙ R` has a left adjoint, `A` has reflexive coequalizers and `V` is monadic.
-Then `Q` has a left adjoint.
+where `U` has a left adjoint, `A` has reflexive coequalizers and `V` is monadic.
+Then `Q` has a left adjoint if `R` has a left adjoint.
 
 See https://ncatlab.org/nlab/show/adjoint+lifting+theorem
 -/
 lemma isRightAdjoint_square_lift_monadic (Q : A ⥤ B) (V : B ⥤ D) (U : A ⥤ C) (R : C ⥤ D)
-    (comm : U ⋙ R ≅ Q ⋙ V) [(U ⋙ R).IsRightAdjoint] [MonadicRightAdjoint V]
+    (comm : U ⋙ R ≅ Q ⋙ V) [U.IsRightAdjoint] [MonadicRightAdjoint V] [R.IsRightAdjoint]
     [HasReflexiveCoequalizers A] : Q.IsRightAdjoint :=
   have := ((Adjunction.ofIsRightAdjoint (U ⋙ R)).ofNatIsoRight comm).isRightAdjoint
   isRightAdjoint_triangle_lift_monadic V

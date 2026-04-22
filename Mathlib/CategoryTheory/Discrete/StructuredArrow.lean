@@ -28,28 +28,26 @@ variable {C : Type u} [Category.{v} C] {T : Type w}
 
 namespace Discrete
 
-/-- If `F : C ⥤ Discrete T` is a functor whose values are all `t`,
-then this is the equivalence
+/-- If `F : C ⥤ Discrete T` is a functor with `T` containing
+a unique element `t`, then this is the equivalence
 `StructuredArrow (Discrete.mk t) F ≌ C`. -/
 def structuredArrowEquivalenceOfUnique
-    (F : C ⥤ Discrete T) (t : T)
-    (hF : ∀ X, (F.obj X).as = t := by intro; subsingleton) :
+    (F : C ⥤ Discrete T) (t : T) [Subsingleton T] :
     StructuredArrow (.mk t) F ≌ C where
   functor := StructuredArrow.proj _ _
-  inverse.obj X := StructuredArrow.mk (Y := X) (Discrete.eqToHom (hF X).symm)
+  inverse.obj X := StructuredArrow.mk (Y := X) (eqToHom (by subsingleton))
   inverse.map f := StructuredArrow.homMk f
   unitIso := NatIso.ofComponents (fun _ ↦ StructuredArrow.isoMk (Iso.refl _))
   counitIso := Iso.refl _
 
-/-- If `F : C ⥤ Discrete T` is a functor whose values are all `t`,
-then this is the equivalence
+/-- If `F : C ⥤ Discrete T` is a functor with `T` containing
+a unique element `t`, then this is the equivalence
 `CostructuredArrow F (Discrete.mk t) ≌ C`. -/
 def costructuredArrowEquivalenceOfUnique
-    (F : C ⥤ Discrete T) (t : T)
-    (hF : ∀ X, (F.obj X).as = t := by intro; subsingleton) :
+    (F : C ⥤ Discrete T) (t : T) [Subsingleton T] :
     CostructuredArrow F (.mk t) ≌ C where
   functor := CostructuredArrow.proj _ _
-  inverse.obj X := CostructuredArrow.mk (Y := X) (Discrete.eqToHom (hF X))
+  inverse.obj X := CostructuredArrow.mk (Y := X) (eqToHom (by subsingleton))
   inverse.map f := CostructuredArrow.homMk f
   unitIso := NatIso.ofComponents (fun _ ↦ CostructuredArrow.isoMk (Iso.refl _))
   counitIso := Iso.refl _

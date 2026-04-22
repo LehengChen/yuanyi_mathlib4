@@ -136,28 +136,28 @@ noncomputable def codomainUniqueUpToIso {b' : 𝒳} (φ' : a ⟶ b') [IsCocartes
 
 /-- Postcomposing a co-Cartesian morphism with an isomorphism lifting the identity is
 co-Cartesian. -/
-instance of_comp_iso {b' : 𝒳} (φ' : b ⟶ b') [IsIso φ'] [IsHomLift p (𝟙 S) φ'] :
-    IsCocartesian p f (φ ≫ φ') where
+instance of_comp_iso {b' : 𝒳} (φ' : b ≅ b') [IsHomLift p (𝟙 S) φ'.hom] :
+    IsCocartesian p f (φ ≫ φ'.hom) where
   universal_property := by
     intro c ψ hψ
-    use CategoryTheory.inv φ' ≫ IsCocartesian.map p f φ ψ
+    use φ'.inv ≫ IsCocartesian.map p f φ ψ
     refine ⟨⟨inferInstance, by simp⟩, ?_⟩
     rintro τ ⟨hτ₁, hτ₂⟩
-    rw [IsIso.eq_inv_comp]
+    rw [Iso.eq_inv_comp]
     apply map_uniq
     exact ((assoc φ _ _) ▸ hτ₂)
 
 /-- Precomposing a co-Cartesian morphism with an isomorphism lifting the identity is
 co-Cartesian. -/
-instance of_iso_comp {a' : 𝒳} (φ' : a' ⟶ a) [IsIso φ'] [IsHomLift p (𝟙 R) φ'] :
-    IsCocartesian p f (φ' ≫ φ) where
+instance of_iso_comp {a' : 𝒳} (φ' : a' ≅ a) [IsHomLift p (𝟙 R) φ'.hom] :
+    IsCocartesian p f (φ'.hom ≫ φ) where
   universal_property := by
     intro c ψ hψ
-    use IsCocartesian.map p f φ (CategoryTheory.inv φ' ≫ ψ)
+    use IsCocartesian.map p f φ (φ'.inv ≫ ψ)
     refine ⟨⟨inferInstance, by simp⟩, ?_⟩
     rintro τ ⟨hτ₁, hτ₂⟩
     apply map_uniq
-    simp only [IsIso.eq_inv_comp, ← assoc, hτ₂]
+    simp only [Iso.eq_inv_comp, ← assoc, hτ₂]
 
 end IsCocartesian
 

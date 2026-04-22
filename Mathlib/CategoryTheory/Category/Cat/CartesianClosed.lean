@@ -79,18 +79,13 @@ instance closed : Closed (Cat.of C) where
 instance cartesianClosed : MonoidalClosed Cat.{u, u} where
   closed C := closed C
 
-end
-
-section
-variable (C : Cat.{u, u})
+@[simp]
+lemma ihom_obj (D : Type u) [Category.{u} D] :
+    (ihom (Cat.of C)).obj (Cat.of D) = Cat.of (C ⥤ D) := rfl
 
 @[simp]
-lemma ihom_obj (D : Cat.{u, u}) :
-    (ihom C).obj D = Cat.of (C ⥤ D) := rfl
-
-@[simp]
-lemma ihom_map {D E : Cat.{u, u}} (F : D ⟶ E) :
-    (ihom C).map F = ((whiskeringRight _ _ _).obj F.toFunctor).toCatHom := rfl
+lemma ihom_map {D E : Type u} [Category.{u} D] [Category.{u} E] (F : D ⥤ E) :
+    (ihom (Cat.of C)).map F.toCatHom = ((whiskeringRight _ _ _).obj F).toCatHom := rfl
 
 end
 

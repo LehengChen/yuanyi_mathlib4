@@ -40,29 +40,23 @@ namespace CategoryTheory
 
 open MonoidalCategory ComonObj
 
-variable {C : Type u} [Category.{v} C] [MonoidalCategory.{v} C]
-
-section
-
-variable [CopyDiscardCategory.{v} C]
+variable {C : Type u} [Category.{v} C] [MonoidalCategory.{v} C] [CopyDiscardCategory.{v} C]
 
 /-- A morphism is deterministic if it preserves the comonoid structure.
 
 In probabilistic contexts, these are morphisms without randomness. -/
 abbrev Deterministic {X Y : C} (f : X ⟶ Y) := IsComonHom f
 
-end
-
 namespace Deterministic
 
-variable {X Y : C} [ComonObj X] [ComonObj Y]
+variable {X Y Z : C}
 
 /-- Deterministic morphisms commute with copying. -/
-lemma copy_natural (f : X ⟶ Y) [IsComonHom f] : f ≫ Δ[Y] = Δ[X] ≫ (f ⊗ₘ f) :=
+lemma copy_natural (f : X ⟶ Y) [Deterministic f] : f ≫ Δ[Y] = Δ[X] ≫ (f ⊗ₘ f) :=
   IsComonHom.hom_comul f
 
 /-- Deterministic morphisms commute with discarding. -/
-lemma discard_natural (f : X ⟶ Y) [IsComonHom f] : f ≫ ε[Y] = ε[X] :=
+lemma discard_natural (f : X ⟶ Y) [Deterministic f] : f ≫ ε[Y] = ε[X] :=
   IsComonHom.hom_counit f
 
 end Deterministic

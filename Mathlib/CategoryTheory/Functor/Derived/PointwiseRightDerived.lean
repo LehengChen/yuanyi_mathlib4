@@ -75,22 +75,17 @@ section
 
 variable [F.HasPointwiseRightDerivedFunctor W]
 
-omit [F.HasPointwiseRightDerivedFunctor W] in
-lemma hasPointwiseLeftKanExtension_of_hasPointwiseRightDerivedFunctor [L.IsLocalization W]
-    (hF : ∀ Y : D, ∃ (X : C) (_ : L.obj X ≅ Y),
-      F.HasPointwiseRightDerivedFunctorAt W X) :
+lemma hasPointwiseLeftKanExtension_of_hasPointwiseRightDerivedFunctor [L.IsLocalization W] :
     HasPointwiseLeftKanExtension L F := fun Y ↦ by
-  rcases hF Y with ⟨X, e, hX⟩
-  rw [← hasPointwiseLeftKanExtensionAt_iff_of_iso _ F e,
+  have := Localization.essSurj L W
+  rw [← hasPointwiseLeftKanExtensionAt_iff_of_iso _ F (L.objObjPreimageIso Y),
     ← F.hasPointwiseRightDerivedFunctorAt_iff L W]
-  exact hX
+  infer_instance
 
 lemma hasRightDerivedFunctor_of_hasPointwiseRightDerivedFunctor :
     F.HasRightDerivedFunctor W where
   hasLeftKanExtension' := by
-    have := F.hasPointwiseLeftKanExtension_of_hasPointwiseRightDerivedFunctor W.Q W (fun Y ↦ by
-      have := Localization.essSurj W.Q W
-      exact ⟨W.Q.objPreimage Y, W.Q.objObjPreimageIso Y, inferInstance⟩)
+    have := F.hasPointwiseLeftKanExtension_of_hasPointwiseRightDerivedFunctor W.Q W
     infer_instance
 
 attribute [instance] hasRightDerivedFunctor_of_hasPointwiseRightDerivedFunctor
@@ -102,9 +97,7 @@ there exists a pointwise right derived functor. -/
 noncomputable def isPointwiseLeftKanExtensionOfHasPointwiseRightDerivedFunctor
      [L.IsLocalization W] [F'.IsRightDerivedFunctor α W] :
     (LeftExtension.mk _ α).IsPointwiseLeftKanExtension :=
-  have := hasPointwiseLeftKanExtension_of_hasPointwiseRightDerivedFunctor F L W (fun Y ↦ by
-    have := Localization.essSurj L W
-    exact ⟨L.objPreimage Y, L.objObjPreimageIso Y, inferInstance⟩)
+  have := hasPointwiseLeftKanExtension_of_hasPointwiseRightDerivedFunctor F L
   have := IsRightDerivedFunctor.isLeftKanExtension F' α W
   isPointwiseLeftKanExtensionOfIsLeftKanExtension F' α
 

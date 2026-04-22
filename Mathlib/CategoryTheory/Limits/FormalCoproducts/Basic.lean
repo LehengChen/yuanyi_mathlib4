@@ -314,21 +314,19 @@ def isLimitPullbackCone : IsLimit (pullbackCone f g pb) := by
   rw [← h₁, ← h₂]; rfl
 
 -- Arguments cannot be inferred.
-theorem hasPullback_of_pullbackCone
-    [∀ i : Function.Pullback f.f g.f,
-      HasPullback (f.φ i.1.1 ≫ eqToHom (by rw [i.2])) (g.φ i.1.2)] : HasPullback f g :=
-  ⟨⟨⟨_, isLimitPullbackCone f g
-    (fun _ ↦ pullback.cone _ _) (fun _ ↦ pullback.isLimit _ _)⟩⟩⟩
+include pb hpb in
+theorem hasPullback_of_pullbackCone : HasPullback f g :=
+  ⟨⟨⟨_, isLimitPullbackCone f g pb hpb⟩⟩⟩
 
 include hpb in
 lemma isPullback : IsPullback (pullbackCone f g pb).fst (pullbackCone f g pb).snd f g :=
   ⟨⟨pullbackCone_condition f g pb⟩, ⟨isLimitPullbackCone f g pb hpb⟩⟩
 
-omit pb hpb
+omit pb
 variable [HasPullbacks C]
 
 instance : HasPullback f g :=
-  hasPullback_of_pullbackCone f g
+  hasPullback_of_pullbackCone f g (fun _ ↦ pullback.cone _ _) (fun _ ↦ pullback.isLimit _ _)
 
 instance : HasPullbacks (FormalCoproduct.{w} C) :=
   hasPullbacks_of_hasLimit_cospan _

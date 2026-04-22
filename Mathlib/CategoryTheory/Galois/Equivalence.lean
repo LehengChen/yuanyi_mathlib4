@@ -30,6 +30,8 @@ variable {C : Type u₁} [Category.{u₂} C] {F : C ⥤ FintypeCat.{w}}
 
 namespace PreGaloisCategory
 
+variable [GaloisCategory C] [FiberFunctor F]
+
 open scoped FintypeCatDiscrete
 
 variable (F) in
@@ -38,24 +40,14 @@ variable (F) in
 def functorToContAction : C ⥤ ContAction FintypeCat (Aut F) :=
   ObjectProperty.lift _ (functorToAction F) (fun X ↦ continuousSMul_aut_fiber F X)
 
-instance [F.Faithful] : (functorToContAction F).Faithful := by
-  haveI : (functorToAction F).Faithful := by
-    have : Functor.Faithful (functorToAction F ⋙ forget₂ _ FintypeCat) :=
-      inferInstanceAs <| Functor.Faithful F
-    exact Functor.Faithful.of_comp (functorToAction F) (forget₂ _ FintypeCat)
-  exact inferInstanceAs <| (ObjectProperty.lift _ _ _).Faithful
-
-variable [PreGaloisCategory C] [FiberFunctor F]
+instance : (functorToContAction F).Faithful :=
+  inferInstanceAs <| (ObjectProperty.lift _ _ _).Faithful
 
 instance : (functorToContAction F).Full :=
-  letI : GaloisCategory C :=
-    { hasFiberFunctor := ⟨F ⋙ FintypeCat.uSwitch.{w, u₂}, ⟨FiberFunctor.comp_right _⟩⟩ }
   inferInstanceAs <| (ObjectProperty.lift _ _ _).Full
 
 instance {F : C ⥤ FintypeCat.{u₁}} [FiberFunctor F] : (functorToContAction F).EssSurj where
   mem_essImage X := by
-    letI : GaloisCategory C :=
-      { hasFiberFunctor := ⟨F ⋙ FintypeCat.uSwitch.{u₁, u₂}, ⟨FiberFunctor.comp_right _⟩⟩ }
     have : ContinuousSMul (Aut F) X.obj.V := X.2
     obtain ⟨A, ⟨i⟩⟩ := exists_lift_of_continuous (F := F) X
     exact ⟨A, ⟨ObjectProperty.isoMk _ i⟩⟩

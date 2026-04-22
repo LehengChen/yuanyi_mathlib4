@@ -31,16 +31,10 @@ section
 universe z w v u
 
 variable {C : Type u} [Category.{v} C]
-variable {D : Type w} [Category.{z} D]
+variable {D : Type w} [Category.{z} D] [Abelian D]
 
 namespace FunctorCategory
 
-section
-
-variable [HasZeroMorphisms D] [HasKernels D] [HasCokernels D]
-variable [HasKernels (C ⥤ D)] [HasCokernels (C ⥤ D)]
-variable [∀ X : C, PreservesFiniteLimits ((evaluation C D).obj X)]
-variable [∀ X : C, PreservesFiniteColimits ((evaluation C D).obj X)]
 variable {F G : C ⥤ D} (α : F ⟶ G) (X : C)
 
 /-- The abelian coimage in a functor category can be calculated componentwise. -/
@@ -86,8 +80,7 @@ theorem coimageImageComparison_app' :
   simp only [coimageImageComparison_app, Iso.hom_inv_id_assoc, Iso.hom_inv_id, Category.assoc,
     Category.comp_id]
 
-instance functor_category_isIso_coimageImageComparison
-    [∀ {X Y : D} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f)] :
+instance functor_category_isIso_coimageImageComparison :
     IsIso (Abelian.coimageImageComparison α) := by
   have : ∀ X : C, IsIso ((Abelian.coimageImageComparison α).app X) := by
     intros
@@ -95,11 +88,9 @@ instance functor_category_isIso_coimageImageComparison
     infer_instance
   apply NatIso.isIso_of_isIso_app
 
-end
-
 end FunctorCategory
 
-noncomputable instance functorCategoryAbelian [Abelian D] : Abelian (C ⥤ D) :=
+noncomputable instance functorCategoryAbelian : Abelian (C ⥤ D) :=
   let _ : HasKernels (C ⥤ D) := inferInstance
   let _ : HasCokernels (C ⥤ D) := inferInstance
   Abelian.ofCoimageImageComparisonIsIso

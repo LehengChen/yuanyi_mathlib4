@@ -29,11 +29,7 @@ universe v u
 
 namespace CategoryTheory
 
-variable {C : Type u} [Category.{v} C]
-
-section Abelian
-
-variable [Abelian C]
+variable {C : Type u} [Category.{v} C] [Abelian C]
 
 /-- The preadditive Yoneda functor on `J` preserves homology if `J` is injective. -/
 instance preservesHomology_preadditiveYonedaObj_of_injective (J : C) [hJ : Injective J] :
@@ -47,18 +43,11 @@ instance preservesFiniteColimits_preadditiveYonedaObj_of_injective (J : C) [hP :
     PreservesFiniteColimits (preadditiveYonedaObj J) := by
   apply Functor.preservesFiniteColimits_of_preservesHomology
 
-end Abelian
-
-section Preadditive
-
-variable [Preadditive C]
-
 /-- An object is injective if its preadditive Yoneda functor preserves finite colimits. -/
 theorem injective_of_preservesFiniteColimits_preadditiveYonedaObj (J : C)
     [hP : PreservesFiniteColimits (preadditiveYonedaObj J)] : Injective J := by
   rw [injective_iff_preservesEpimorphisms_preadditive_yoneda_obj']
+  have := Functor.preservesHomologyOfExact (preadditiveYonedaObj J)
   infer_instance
-
-end Preadditive
 
 end CategoryTheory

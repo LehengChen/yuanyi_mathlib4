@@ -334,13 +334,13 @@ variable [HasTensor X₂ X₃] [HasTensor X₁ (tensorObj X₂ X₃)]
 @[ext (iff := false)]
 lemma left_tensor_tensorObj₃_ext {j : I} {A : C} (Z : C)
     (f g : Z ⊗ tensorObj X₁ (tensorObj X₂ X₃) j ⟶ A)
-    {H : IsColimit (((curriedTensor C).obj Z).mapCocone
-      (cofan₃MapBifunctorBifunctor₂₃MapObj (curriedTensor C) (curriedTensor C)
-        ρ₂₃ X₁ X₂ X₃ j))}
+    [H : HasGoodTensorTensor₂₃ X₁ X₂ X₃]
+    [hZ : HasLeftTensor₃ObjExt Z X₁ X₂ X₃ j]
     (h : ∀ (i₁ i₂ i₃ : I) (h : i₁ + i₂ + i₃ = j),
       (_ ◁ ιTensorObj₃ X₁ X₂ X₃ i₁ i₂ i₃ j h) ≫ f =
         (_ ◁ ιTensorObj₃ X₁ X₂ X₃ i₁ i₂ i₃ j h) ≫ g) : f = g := by
-    refine H.hom_ext ?_
+    refine (@isColimitOfPreserves C _ C _ _ _ _ ((curriedTensor C).obj Z) _
+      (isColimitCofan₃MapBifunctorBifunctor₂₃MapObj (H := H) (j := j)) hZ).hom_ext ?_
     intro ⟨⟨i₁, i₂, i₃⟩, hi⟩
     exact h _ _ _ hi
 
@@ -388,10 +388,6 @@ lemma tensorObj₄_ext {j : I} {A : C} (f g : tensorObj X₁ (tensorObj X₂ (te
   apply tensorObj_ext
   intro i₁ i₂₃₄ h'
   apply left_tensor_tensorObj₃_ext
-    (H := by
-      exact @isColimitOfPreserves C _ C _ _ _ _ ((curriedTensor C).obj (X₁ i₁)) _
-        (isColimitCofan₃MapBifunctorBifunctor₂₃MapObj
-          (H := ‹HasGoodTensorTensor₂₃ X₂ X₃ X₄›) (j := i₂₃₄)) (H i₁ i₂₃₄))
   intro i₂ i₃ i₄ h''
   have hj : i₁ + i₂ + i₃ + i₄ = j := by simp only [← h', ← h'', add_assoc]
   simpa only [assoc, ιTensorObj₄_eq X₁ X₂ X₃ X₄ i₁ i₂ i₃ i₄ j hj i₂₃₄ h''] using h i₁ i₂ i₃ i₄ hj

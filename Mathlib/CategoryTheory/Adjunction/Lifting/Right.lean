@@ -32,8 +32,8 @@ The adjoint lifting theorem says that given a commutative square of functors (up
       L
 ```
 
-where `V` is comonadic, `U ⋙ L` has a right adjoint, and `A` has coreflexive equalizers, then `Q`
-has a right adjoint.
+where `V` is comonadic, `U` has a right adjoint, and `A` has coreflexive equalizers, then if `L` has
+a right adjoint then `Q` has a right adjoint.
 
 ## Implementation
 
@@ -218,14 +218,14 @@ variable [Category.{v₄} D]
       L
 ```
 
-where `U ⋙ L` has a right adjoint, `A` has coreflexive equalizers and `V` has a right adjoint such
-that each component of the unit is a regular mono.
-Then `Q` has a right adjoint.
+where `U` has a right adjoint, `A` has coreflexive equalizers and `V` has a right adjoint such that
+each component of the counit is a regular mono.
+Then `Q` has a right adjoint if `L` has a right adjoint.
 
 See https://ncatlab.org/nlab/show/adjoint+lifting+theorem
 -/
 lemma isLeftAdjoint_square_lift (Q : A ⥤ B) (V : B ⥤ D) (U : A ⥤ C) (L : C ⥤ D)
-    (comm : U ⋙ L ≅ Q ⋙ V) [(U ⋙ L).IsLeftAdjoint] [V.IsLeftAdjoint]
+    (comm : U ⋙ L ≅ Q ⋙ V) [U.IsLeftAdjoint] [V.IsLeftAdjoint] [L.IsLeftAdjoint]
     (h : ∀ X, RegularMono ((Adjunction.ofIsLeftAdjoint V).unit.app X))
     [HasCoreflexiveEqualizers A] : Q.IsLeftAdjoint :=
   have := ((Adjunction.ofIsLeftAdjoint (U ⋙ L)).ofNatIsoLeft comm).isLeftAdjoint
@@ -241,13 +241,13 @@ lemma isLeftAdjoint_square_lift (Q : A ⥤ B) (V : B ⥤ D) (U : A ⥤ C) (L : C
       L
 ```
 
-where `U ⋙ L` has a right adjoint, `A` has coreflexive equalizers and `V` is comonadic.
-Then `Q` has a right adjoint.
+where `U` has a right adjoint, `A` has reflexive equalizers and `V` is comonadic.
+Then `Q` has a right adjoint if `L` has a right adjoint.
 
 See https://ncatlab.org/nlab/show/adjoint+lifting+theorem
 -/
 lemma isLeftAdjoint_square_lift_comonadic (Q : A ⥤ B) (V : B ⥤ D) (U : A ⥤ C) (L : C ⥤ D)
-    (comm : U ⋙ L ≅ Q ⋙ V) [(U ⋙ L).IsLeftAdjoint] [ComonadicLeftAdjoint V]
+    (comm : U ⋙ L ≅ Q ⋙ V) [U.IsLeftAdjoint] [ComonadicLeftAdjoint V] [L.IsLeftAdjoint]
     [HasCoreflexiveEqualizers A] : Q.IsLeftAdjoint :=
   have := ((Adjunction.ofIsLeftAdjoint (U ⋙ L)).ofNatIsoLeft comm).isLeftAdjoint
   isLeftAdjoint_triangle_lift_comonadic V

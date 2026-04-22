@@ -127,11 +127,11 @@ lemma PreservesPointwiseLeftKanExtensionAt.mk' (c : C) {E : LeftExtension L F}
         (E'.coconeAtWhiskerRightIso G F L c).symm⟩
 
 instance hasLeftKanExtension_of_preserves [L.HasLeftKanExtension F]
-    [(L.leftKanExtension F ⋙ G).IsLeftKanExtension
-      (whiskerRight (L.leftKanExtensionUnit F) G ≫ (Functor.associator _ _ _).hom)] :
-    L.HasLeftKanExtension (F ⋙ G) :=
-  HasLeftKanExtension.mk (L.leftKanExtension F ⋙ G)
-    (whiskerRight (L.leftKanExtensionUnit F) G ≫ (Functor.associator _ _ _).hom)
+    [PreservesLeftKanExtension G F L] : L.HasLeftKanExtension (F ⋙ G) :=
+  @HasLeftKanExtension.mk _ _ _ _ _ _ _ _ _ _ <|
+    letI : (L.leftKanExtension F).IsLeftKanExtension <| L.leftKanExtensionUnit F := by
+      infer_instance
+    PreservesLeftKanExtension.preserves (L.leftKanExtension F) (L.leftKanExtensionUnit F)
 
 instance hasPointwiseLeftKanExtension_of_preserves [L.HasPointwiseLeftKanExtension F]
     [PreservesPointwiseLeftKanExtension G F L] : L.HasPointwiseLeftKanExtension (F ⋙ G) :=
@@ -380,11 +380,11 @@ lemma PreservesPointwiseRightKanExtensionAt.mk' (c : C) {E : RightExtension L F}
         (E'.coneAtWhiskerRightIso G F L c).symm⟩
 
 instance hasRightKanExtension_of_preserves [L.HasRightKanExtension F]
-    [(L.rightKanExtension F ⋙ G).IsRightKanExtension
-      ((Functor.associator _ _ _).inv ≫ whiskerRight (L.rightKanExtensionCounit F) G)] :
-    L.HasRightKanExtension (F ⋙ G) :=
-  HasRightKanExtension.mk (L.rightKanExtension F ⋙ G)
-    ((Functor.associator _ _ _).inv ≫ whiskerRight (L.rightKanExtensionCounit F) G)
+    [PreservesRightKanExtension G F L] : L.HasRightKanExtension (F ⋙ G) :=
+  @HasRightKanExtension.mk _ _ _ _ _ _ _ _ _ _ <|
+    letI : (L.rightKanExtension F).IsRightKanExtension <| L.rightKanExtensionCounit F := by
+      infer_instance
+    PreservesRightKanExtension.preserves (L.rightKanExtension F) (L.rightKanExtensionCounit F)
 
 instance hasPointwiseRightKanExtension_of_preserves [L.HasPointwiseRightKanExtension F]
     [PreservesPointwiseRightKanExtension G F L] : L.HasPointwiseRightKanExtension (F ⋙ G) :=

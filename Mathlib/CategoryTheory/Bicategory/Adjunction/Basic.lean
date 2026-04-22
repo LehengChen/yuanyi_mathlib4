@@ -206,14 +206,12 @@ instance : IsIso (leftZigzag η.hom ε.hom) := inferInstanceAs <| IsIso (leftZig
 
 instance : IsIso (rightZigzag η.hom ε.hom) := inferInstanceAs <| IsIso (rightZigzagIso η ε).hom
 
-theorem right_triangle_of_left_triangle
-    (η : 𝟙 a ⟶ f ≫ g) (ε : g ≫ f ⟶ 𝟙 b) [Epi (rightZigzag η ε)]
-    (h : leftZigzag η ε = (λ_ f).hom ≫ (ρ_ f).inv) :
-    rightZigzag η ε = (ρ_ g).hom ≫ (λ_ g).inv := by
-  rw [← cancel_epi (rightZigzag η ε ≫ (λ_ g).hom ≫ (ρ_ g).inv)]
+theorem right_triangle_of_left_triangle (h : leftZigzag η.hom ε.hom = (λ_ f).hom ≫ (ρ_ f).inv) :
+    rightZigzag η.hom ε.hom = (ρ_ g).hom ≫ (λ_ g).inv := by
+  rw [← cancel_epi (rightZigzag η.hom ε.hom ≫ (λ_ g).hom ≫ (ρ_ g).inv)]
   calc
-    _ = rightZigzag η ε ⊗≫ rightZigzag η ε := by bicategory
-    _ = rightZigzag η ε := rightZigzag_idempotent_of_left_triangle _ _ h
+    _ = rightZigzag η.hom ε.hom ⊗≫ rightZigzag η.hom ε.hom := by bicategory
+    _ = rightZigzag η.hom ε.hom := rightZigzag_idempotent_of_left_triangle _ _ h
     _ = _ := by simp
 
 /-- An auxiliary definition for `mkOfAdjointifyCounit`. -/
@@ -265,7 +263,7 @@ theorem left_triangle_hom (e : a ≌ b) :
 
 theorem right_triangle (e : a ≌ b) :
     rightZigzagIso e.unit e.counit = ρ_ e.inv ≪≫ (λ_ e.inv).symm :=
-  Iso.ext (right_triangle_of_left_triangle e.unit.hom e.counit.hom e.left_triangle_hom)
+  Iso.ext (right_triangle_of_left_triangle e.unit e.counit e.left_triangle_hom)
 
 theorem right_triangle_hom (e : a ≌ b) :
     rightZigzag e.unit.hom e.counit.hom = (ρ_ e.inv).hom ≫ (λ_ e.inv).inv :=

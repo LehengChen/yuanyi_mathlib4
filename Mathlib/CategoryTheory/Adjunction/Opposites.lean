@@ -110,22 +110,19 @@ instance IsLeftAdjoint.op {F : C ⥤ D} [F.IsLeftAdjoint] : F.op.IsRightAdjoint 
 instance IsRightAdjoint.op {F : C ⥤ D} [F.IsRightAdjoint] : F.op.IsLeftAdjoint :=
   ⟨F.leftAdjoint.op, ⟨.op <| .ofIsRightAdjoint _⟩⟩
 
-instance IsLeftAdjoint.leftOp {F : C ⥤ Dᵒᵖ} [F.op.IsRightAdjoint] :
-    F.leftOp.IsRightAdjoint :=
-  inferInstanceAs (F.op ⋙ (opOpEquivalence D).functor).IsRightAdjoint
+instance IsLeftAdjoint.leftOp {F : C ⥤ Dᵒᵖ} [F.IsLeftAdjoint] : F.leftOp.IsRightAdjoint :=
+  ⟨F.rightAdjoint.rightOp, ⟨.leftOp <| .ofIsLeftAdjoint _⟩⟩
 
 -- TODO: Do we need to introduce `Adjunction.leftUnop`?
-instance IsRightAdjoint.leftOp {F : C ⥤ Dᵒᵖ} [F.op.IsLeftAdjoint] : F.leftOp.IsLeftAdjoint :=
+instance IsRightAdjoint.leftOp {F : C ⥤ Dᵒᵖ} [F.IsRightAdjoint] : F.leftOp.IsLeftAdjoint :=
   inferInstanceAs (F.op ⋙ (opOpEquivalence D).functor).IsLeftAdjoint
 
 -- TODO: Do we need to introduce `Adjunction.rightUnop`?
-instance IsLeftAdjoint.rightOp {F : Cᵒᵖ ⥤ D} [F.op.IsRightAdjoint] :
-    F.rightOp.IsRightAdjoint :=
+instance IsLeftAdjoint.rightOp {F : Cᵒᵖ ⥤ D} [F.IsLeftAdjoint] : F.rightOp.IsRightAdjoint :=
   inferInstanceAs ((opOpEquivalence C).inverse ⋙ F.op).IsRightAdjoint
 
-instance IsRightAdjoint.rightOp {F : Cᵒᵖ ⥤ D} [F.op.IsLeftAdjoint] :
-    F.rightOp.IsLeftAdjoint :=
-  inferInstanceAs ((opOpEquivalence C).inverse ⋙ F.op).IsLeftAdjoint
+instance IsRightAdjoint.rightOp {F : Cᵒᵖ ⥤ D} [F.IsRightAdjoint] : F.rightOp.IsLeftAdjoint :=
+  ⟨F.leftAdjoint.leftOp, ⟨.rightOp <| .ofIsRightAdjoint _⟩⟩
 
 end Functor
 end CategoryTheory
