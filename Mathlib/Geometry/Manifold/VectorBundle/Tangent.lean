@@ -500,9 +500,12 @@ variable {N : Type*}
 /-- The map `inCoordinates` for the tangent bundle is trivial on the model spaces -/
 theorem inCoordinates_tangent_bundle_core_model_space (x₀ x : H) (y₀ y : H') (ϕ : E →L[𝕜] E') :
     inCoordinates E (TangentSpace I) E' (TangentSpace I') x₀ x y₀ y ϕ = ϕ := by
-  erw [VectorBundleCore.inCoordinates_eq] <;> try trivial
+  have h :=
+    (tangentBundleCore I H).inCoordinates_eq (tangentBundleCore I' H') ϕ
+      (x₀ := x₀) (x := x) (y₀ := y₀) (y := y) (by simp) (by simp)
   simp_rw [tangentBundleCore_indexAt, tangentBundleCore_coordChange_model_space,
-    ContinuousLinearMap.id_comp, ContinuousLinearMap.comp_id]
+    ContinuousLinearMap.id_comp, ContinuousLinearMap.comp_id] at h
+  exact h
 
 variable (I I') in
 /-- When `ϕ x` is a continuous linear map that changes vectors in charts around `f x` to vectors
