@@ -16,7 +16,7 @@ This file contains simplifications lemmas for categories
 of categories `Karoubi (HomologicalComplex C c) ≌ HomologicalComplex (Karoubi C) c`.
 
 When the category `C` is idempotent complete, it is shown that
-`HomologicalComplex (Karoubi C) c` is also idempotent complete.
+`HomologicalComplex C c` is also idempotent complete.
 
 -/
 
