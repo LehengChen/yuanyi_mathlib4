@@ -142,11 +142,7 @@ theorem Prefunctor.symmetrifyStar (u : U) :
       (Quiver.symmetrifyStar _).symm ∘ Sum.map (φ.star u) (φ.costar u) ∘
         Quiver.symmetrifyStar u := by
   rw [Equiv.eq_symm_comp (e := Quiver.symmetrifyStar (φ.obj u))]
-  ext ⟨v, f | g⟩ <;>
-    -- Porting note (https://github.com/leanprover-community/mathlib4/issues/10745): was `simp [Quiver.symmetrifyStar]`
-    simp only [Quiver.symmetrifyStar, Function.comp_apply] <;>
-    erw [Equiv.sigmaSumDistrib_apply, Equiv.sigmaSumDistrib_apply] <;>
-    simp
+  ext ⟨v, f | g⟩ <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
 protected theorem Prefunctor.symmetrifyCostar (u : U) :
@@ -154,11 +150,7 @@ protected theorem Prefunctor.symmetrifyCostar (u : U) :
       (Quiver.symmetrifyCostar _).symm ∘
         Sum.map (φ.costar u) (φ.star u) ∘ Quiver.symmetrifyCostar u := by
   rw [Equiv.eq_symm_comp (e := Quiver.symmetrifyCostar (φ.obj u))]
-  ext ⟨v, f | g⟩ <;>
-    -- Porting note (https://github.com/leanprover-community/mathlib4/issues/10745): was `simp [Quiver.symmetrifyCostar]`
-    simp only [Quiver.symmetrifyCostar, Function.comp_apply] <;>
-    erw [Equiv.sigmaSumDistrib_apply, Equiv.sigmaSumDistrib_apply] <;>
-    simp
+  ext ⟨v, f | g⟩ <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
 protected theorem Prefunctor.IsCovering.symmetrify (hφ : φ.IsCovering) :
