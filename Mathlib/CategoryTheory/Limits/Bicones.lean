@@ -14,8 +14,8 @@ public import Mathlib.Data.Finset.Lattice.Lemmas
 
 Given a category `J`, a walking `Bicone J` is a category whose objects are the objects of `J` and
 two extra vertices `Bicone.left` and `Bicone.right`. The morphisms are the morphisms of `J` and
-`left ⟶ j`, `right ⟶ j` for each `j : J` such that `(· ⟶ j)` and `(· ⟶ k)` commutes with each
-`f : j ⟶ k`.
+`left ⟶ j`, `right ⟶ j` for each `j : J`, with the triangles
+`left ⟶ j ⟶ k` and `right ⟶ j ⟶ k` commuting for each `f : j ⟶ k`.
 
 Given a diagram `F : J ⥤ C` and two `Cone F`s, we can join them into a diagram `Bicone J ⥤ C` via
 `biconeMk`.
@@ -36,7 +36,8 @@ namespace CategoryTheory
 
 section Bicone
 
-/-- Given a category `J`, construct a walking `Bicone J` by adjoining two elements. -/
+/-- Given a type `J`, construct the object type of a walking `Bicone J`
+by adjoining two elements. -/
 inductive Bicone (J : Type u₁)
   | left : Bicone J
   | right : Bicone J
