@@ -14,8 +14,8 @@ In this file, we construct an extension `functorExtension₁`
 of functors `C ⥤ Karoubi D` to functors `Karoubi C ⥤ Karoubi D`. This results in an
 equivalence `karoubiUniversal₁ C D : (C ⥤ Karoubi D) ≌ (Karoubi C ⥤ Karoubi D)`.
 
-We also construct an extension `functorExtension₂` of functors
-`(C ⥤ D) ⥤ (Karoubi C ⥤ Karoubi D)`. Moreover,
+We also construct a functor `functorExtension₂ :
+(C ⥤ D) ⥤ (Karoubi C ⥤ Karoubi D)` extending functors `C ⥤ D`. Moreover,
 when `D` is idempotent complete, we get equivalences
 `karoubiUniversal₂ C D : C ⥤ D ≌ Karoubi C ⥤ Karoubi D`
 and `karoubiUniversal C D : C ⥤ D ≌ Karoubi C ⥤ D`.
@@ -177,7 +177,7 @@ def functorExtension₂ : (C ⥤ D) ⥤ Karoubi C ⥤ Karoubi D :=
   (whiskeringRight C D (Karoubi D)).obj (toKaroubi D) ⋙ functorExtension₁ C D
 
 /-- The natural isomorphism expressing that functors `Karoubi C ⥤ Karoubi D` obtained
-using `functorExtension₂` actually extend the original functors `C ⥤ D`. -/
+using `functorExtension₂` extend the original functors `C ⥤ D` via `toKaroubi D`. -/
 @[simps!]
 def functorExtension₂CompWhiskeringLeftToKaroubiIso :
     functorExtension₂ C D ⋙ (whiskeringLeft C (Karoubi C) (Karoubi D)).obj (toKaroubi C) ≅
