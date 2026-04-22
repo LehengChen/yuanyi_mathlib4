@@ -84,7 +84,7 @@ noncomputable def colimitLimitToLimitColimit :
             rw [map_id_right_eq_curry_swap_map, limit.w_assoc] } }
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Since `colimit_limit_to_limit_colimit` is a morphism from a colimit to a limit,
+/-- Since `colimitLimitToLimitColimit` is a morphism from a colimit to a limit,
 this lemma characterises it.
 -/
 @[reassoc (attr := simp)]
@@ -103,7 +103,7 @@ theorem ι_colimitLimitToLimitColimit_π_apply [Small.{v} J] [Small.{v} K] (F : 
   simp
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The map `colimit_limit_to_limit_colimit` realized as a map of cones. -/
+/-- The map `colimitLimitToLimitColimit` realized as a map of cones. -/
 @[simps]
 noncomputable def colimitLimitToLimitColimitCone (G : J ⥤ K ⥤ C) [HasLimit G] :
     colim.mapCone (limit.cone G) ⟶ limit.cone (G ⋙ colim) where
