@@ -95,33 +95,39 @@ theorem isIntegralClosure_adjoin_singleton_of_prime_pow [hcycl : IsCyclotomicExt
   replace H := Subalgebra.smul_mem _ H u.inv
   rw [← smul_assoc, ← smul_mul_assoc, Units.inv_eq_val_inv, zsmul_eq_mul, ← Int.cast_mul,
     Units.inv_mul, Int.cast_one, one_mul, smul_def, map_pow] at H
-  cases k
-  · haveI : IsCyclotomicExtension {1} ℚ K := by simpa using hcycl
-    have : x ∈ (⊥ : Subalgebra ℚ K) := by
-      rw [singleton_one ℚ K]
-      exact mem_top
-    obtain ⟨y, rfl⟩ := mem_bot.1 this
-    replace h := (isIntegral_algebraMap_iff (algebraMap ℚ K).injective).1 h
-    obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.1 h
-    rw [← hz, ← IsScalarTower.algebraMap_apply]
-    exact Subalgebra.algebraMap_mem _ _
-  · have hmin : (minpoly ℤ B.gen).IsEisensteinAt (Submodule.span ℤ {(p : ℤ)}) := by
-      have h₁ := minpoly.isIntegrallyClosed_eq_field_fractions' ℚ hint
-      have h₂ := hζ.minpoly_sub_one_eq_cyclotomic_comp (cyclotomic.irreducible_rat (NeZero.pos _))
-      rw [IsPrimitiveRoot.subOnePowerBasis_gen] at h₁
-      #adaptation_note /-- After https://github.com/leanprover/lean4/pull/12179
-      we needed to change the next line from `rw` to `erw`. -/
-      erw [h₁, ← map_cyclotomic_int, show Int.castRingHom ℚ = algebraMap ℤ ℚ by rfl,
-        show X + 1 = map (algebraMap ℤ ℚ) (X + 1) by simp, ← map_comp] at h₂
-      rw [IsPrimitiveRoot.subOnePowerBasis_gen,
-        map_injective (algebraMap ℤ ℚ) (algebraMap ℤ ℚ).injective_int h₂]
-      exact cyclotomic_prime_pow_comp_X_add_one_isEisensteinAt p _
-    refine
-      adjoin_le ?_
-        (mem_adjoin_of_smul_prime_pow_smul_of_minpoly_isEisensteinAt (n := n)
-          (Nat.prime_iff_prime_int.1 hp.out) hint h (by simpa using H) hmin)
-    simp only [Set.singleton_subset_iff, SetLike.mem_coe]
-    exact Subalgebra.sub_mem _ (self_mem_adjoin_singleton ℤ _) (Subalgebra.one_mem _)
+  cases k with
+  | zero =>
+      haveI : IsCyclotomicExtension {1} ℚ K := by simpa using hcycl
+      have : x ∈ (⊥ : Subalgebra ℚ K) := by
+        rw [singleton_one ℚ K]
+        exact mem_top
+      obtain ⟨y, rfl⟩ := mem_bot.1 this
+      replace h := (isIntegral_algebraMap_iff (algebraMap ℚ K).injective).1 h
+      obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.1 h
+      rw [← hz, ← IsScalarTower.algebraMap_apply]
+      exact Subalgebra.algebraMap_mem _ _
+  | succ k =>
+      have hmin : (minpoly ℤ B.gen).IsEisensteinAt (Submodule.span ℤ {(p : ℤ)}) := by
+        have h₁ := minpoly.isIntegrallyClosed_eq_field_fractions' ℚ hint
+        have h₂ :=
+          hζ.minpoly_sub_one_eq_cyclotomic_comp (cyclotomic.irreducible_rat (NeZero.pos _))
+        rw [IsPrimitiveRoot.subOnePowerBasis_gen] at h₁
+        have h₁' : minpoly ℚ (ζ - 1) = map (Int.castRingHom ℚ) (minpoly ℤ (ζ - 1)) := by
+          exact h₁
+        have hcycl_map := (map_cyclotomic_int (p ^ (k + 1)) ℚ).symm
+        rw [h₁', hcycl_map, show X + 1 = map (Int.castRingHom ℚ) (X + 1) by simp,
+          ← map_comp] at h₂
+        rw [IsPrimitiveRoot.subOnePowerBasis_gen,
+          map_injective (Int.castRingHom ℚ) (by
+            intro a b h
+            exact Int.cast_inj.mp h) h₂]
+        exact cyclotomic_prime_pow_comp_X_add_one_isEisensteinAt p _
+      refine
+        adjoin_le ?_
+          (mem_adjoin_of_smul_prime_pow_smul_of_minpoly_isEisensteinAt (n := n)
+            (Nat.prime_iff_prime_int.1 hp.out) hint h (by simpa using H) hmin)
+      simp only [Set.singleton_subset_iff, SetLike.mem_coe]
+      exact Subalgebra.sub_mem _ (self_mem_adjoin_singleton ℤ _) (Subalgebra.one_mem _)
 
 theorem isIntegralClosure_adjoin_singleton_of_prime [hcycl : IsCyclotomicExtension {p} ℚ K]
     (hζ : IsPrimitiveRoot ζ p) : IsIntegralClosure (adjoin ℤ ({ζ} : Set K)) ℤ K := by
