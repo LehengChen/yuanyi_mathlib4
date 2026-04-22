@@ -127,14 +127,26 @@ instance instMonoidalCategory : MonoidalCategory (QuadraticModuleCat.{u} R) :=
         simp only [forget₂_obj, forget₂_map, Iso.refl_symm, Iso.trans_assoc, Iso.trans_hom,
           Iso.refl_hom, MonoidalCategory.tensorIso_hom, MonoidalCategory.tensorHom_id]
         dsimp only [toModuleCat_tensor, ModuleCat.of_coe]
-        erw [MonoidalCategory.id_whiskerRight]
+        have h :
+            𝟙 (𝟙_ (ModuleCat R)) ▷ X.toModuleCat =
+              𝟙 (((𝟙_ (QuadraticModuleCat R)).toModuleCat) ⊗ X.toModuleCat) := by
+          simpa only [forget₂_obj, ModuleCat.of_coe] using
+            (MonoidalCategory.id_whiskerRight
+              (C := ModuleCat R) (X := 𝟙_ (ModuleCat R)) (Y := X.toModuleCat))
+        rw [h]
         simp
         rfl
       rightUnitor_eq := fun X => by
         simp only [forget₂_obj, forget₂_map, Iso.refl_symm, Iso.trans_assoc, Iso.trans_hom,
           Iso.refl_hom, MonoidalCategory.tensorIso_hom, MonoidalCategory.id_tensorHom]
         dsimp only [toModuleCat_tensor, ModuleCat.of_coe]
-        erw [MonoidalCategory.whiskerLeft_id]
+        have h :
+            X.toModuleCat ◁ 𝟙 (𝟙_ (ModuleCat R)) =
+              𝟙 (X.toModuleCat ⊗ (𝟙_ (QuadraticModuleCat R)).toModuleCat) := by
+          simpa only [forget₂_obj, ModuleCat.of_coe] using
+            (MonoidalCategory.whiskerLeft_id
+              (C := ModuleCat R) (X := X.toModuleCat) (Y := 𝟙_ (ModuleCat R)))
+        rw [h]
         simp
         rfl
       associator_eq := fun X Y Z => by
