@@ -24,7 +24,7 @@ of the vanishing of `Φ.r` on `Φ.quotient`.
 
 ## Main definitions
 
-* `Preradical.IsRadical` :
+* `Preradical.isRadical` :
   The property that a preradical `Φ` is radical, i.e. that `(Φ.colon Φ) ≅ Φ`.
 
 * `Radical C` :
