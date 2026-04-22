@@ -24,7 +24,11 @@ namespace CategoryTheory
 
 open Limits
 
-variable {J : Type*} [Category* J]
+variable {J : Type*}
+
+section
+
+variable [Category* J]
 
 /--
 We say that a functor `F` to `Type*` is locally directed if for every `x ∈ F.obj k`, the
@@ -49,6 +53,8 @@ class Functor.IsLocallyDirected (F : J ⥤ Type*) : Prop where
       F.map fli x = xi ∧ F.map flj x = xj
 
 alias Functor.exists_map_eq_of_isLocallyDirected := Functor.IsLocallyDirected.cond
+
+end
 
 instance (F : Discrete J ⥤ Type*) : F.IsLocallyDirected := by
   constructor

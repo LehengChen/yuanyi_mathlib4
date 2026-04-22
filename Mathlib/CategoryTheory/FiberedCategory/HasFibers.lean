@@ -233,11 +233,11 @@ It can be factorized as
   R ====== R --f--> S
 ```
 with `ψ` Cartesian over `f` and `τ` a map in `Fib p R`. -/
-lemma fiber_factorization (ha : p.obj a = S) {b : Fib p R} (f : R ⟶ S) (φ : (ι R).obj b ⟶ a)
+lemma fiber_factorization {b : Fib p R} (f : R ⟶ S) (φ : (ι R).obj b ⟶ a)
     [IsHomLift p f φ] : ∃ (b' : Fib p R) (τ : b ⟶ b') (ψ : (ι R).obj b' ⟶ a),
       IsStronglyCartesian p f ψ ∧ (((ι R).map τ) ≫ ψ = φ) :=
-  let ψ := pullbackMap f ha
-  ⟨mkPullback f ha, inducedMap f ψ φ, ψ, inferInstance, inducedMap_comp f ψ φ⟩
+  let ψ := pullbackMap f (codomain_eq p f φ)
+  ⟨mkPullback f (codomain_eq p f φ), inducedMap f ψ φ, ψ, inferInstance, inducedMap_comp f ψ φ⟩
 
 end
 

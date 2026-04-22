@@ -166,13 +166,13 @@ lemma natTransEquiv_symm_app_app_apply (F G : C ⥤ D) (f : F ⟶ G)
     ((natTransEquiv.symm f).app X a).app Y φ = f.app Y := rfl
 
 @[simp]
-lemma natTransEquiv_symm_whiskerRight_functorHom_app (K L : C ⥤ D) (X : C) (f : K ⟶ K)
-    (x : 𝟙_ _ ⊗ (K.functorHom L).obj X) :
-    ((natTransEquiv.symm f ▷ K.functorHom L).app X x) =
+lemma natTransEquiv_symm_whiskerRight_functorHom_app (K L M : C ⥤ D) (X : C)
+    (f : K ⟶ L) (x : 𝟙_ _ ⊗ (L.functorHom M).obj X) :
+    ((natTransEquiv.symm f ▷ L.functorHom M).app X x) =
     (HomObj.ofNatTrans f, x.2) := rfl
 
 @[simp]
-lemma functorHom_whiskerLeft_natTransEquiv_symm_app (K L : C ⥤ D) (X : C) (f : L ⟶ L)
+lemma functorHom_whiskerLeft_natTransEquiv_symm_app (K L M : C ⥤ D) (X : C) (f : L ⟶ M)
     (x : (K.functorHom L).obj X ⊗ 𝟙_ _) :
     ((K.functorHom L ◁ natTransEquiv.symm f).app X x) =
     (x.1, HomObj.ofNatTrans f) := rfl

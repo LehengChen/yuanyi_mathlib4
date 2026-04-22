@@ -106,7 +106,7 @@ lemma opEquiv_inverse_map_inclLeft_op {d d' : D} (f : d ⟶ d') :
     (opEquiv C D).inverse.map ((inclLeft Dᵒᵖ Cᵒᵖ).map f.op) = op ((inclRight _ _).map f) :=
   rfl
 
-variable {D} in
+variable {C} in
 @[simp]
 lemma opEquiv_inverse_map_inclRight_op {c c' : C} (f : c ⟶ c') :
     (opEquiv C D).inverse.map ((inclRight Dᵒᵖ Cᵒᵖ).map f.op) = op ((inclLeft _ _).map f) :=

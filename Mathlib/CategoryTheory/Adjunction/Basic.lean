@@ -188,7 +188,10 @@ namespace Adjunction
 set_option backward.isDefEq.respectTransparency false in
 @[ext]
 lemma ext {F : C ⥤ D} {G : D ⥤ C} {adj adj' : F ⊣ G}
-    (h : adj.unit = adj'.unit) : adj = adj' := by
+    (h : ∀ X, adj.unit.app X = adj'.unit.app X) : adj = adj' := by
+  have h_unit : adj.unit = adj'.unit := by
+    ext X
+    exact h X
   suffices h' : adj.counit = adj'.counit by cases adj; cases adj'; aesop
   ext X
   apply (adj.homEquiv _ _).injective

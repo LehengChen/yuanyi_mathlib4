@@ -197,12 +197,12 @@ lemma map₂_inv_hom_isIso {f g : a ⟶ b} (η : f ⟶ g) [IsIso η] :
 
 end
 
-lemma map₂_eqToHom {x y : B} (f g : x ⟶ y) (hfg : f = g) :
+lemma map₂_eqToHom {x y : B} {f g : x ⟶ y} (hfg : f = g) :
     F.map₂ (eqToHom hfg) = eqToHom (by rw [← hfg]) := by
   subst hfg
   simp
 
-lemma map₂Iso_eqToIso {x y : B} (f g : x ⟶ y) (hfg : f = g) :
+lemma map₂Iso_eqToIso {x y : B} {f g : x ⟶ y} (hfg : f = g) :
     F.map₂Iso (eqToIso hfg) = eqToIso (by rw [← hfg]) := by
   subst hfg
   simp
