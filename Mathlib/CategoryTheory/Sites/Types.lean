@@ -173,7 +173,9 @@ noncomputable def typeEquiv : Type u ≌ Sheaf typesGrothendieckTopology (Type u
     ext1
     apply yonedaEquiv.injective
     dsimp [yoneda', yonedaEquiv, evalEquiv]
-    erw [typesGlue_eval]
+    exact typesGlue_eval (S := yoneda.obj X)
+      (hs := (isSheaf_iff_isSheaf_of_type _ _).1 <| Presheaf.isSheaf_yoneda' (α := X))
+      (α := X) (s := 𝟙 X)
 
 instance subcanonical_typesGrothendieckTopology : typesGrothendieckTopology.{u}.Subcanonical :=
   GrothendieckTopology.Subcanonical.of_isSheaf_yoneda_obj _ fun _ => Presieve.isSheaf_yoneda'
