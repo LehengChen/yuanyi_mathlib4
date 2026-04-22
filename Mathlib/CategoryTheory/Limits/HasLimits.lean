@@ -388,7 +388,8 @@ variable (D : L ⥤ K)
 theorem limit.pre_pre [h : HasLimit (D ⋙ E ⋙ F)] : haveI : HasLimit ((D ⋙ E) ⋙ F) := h
     limit.pre F E ≫ limit.pre (E ⋙ F) D = limit.pre F (D ⋙ E) := by
   haveI : HasLimit ((D ⋙ E) ⋙ F) := h
-  ext j; erw [assoc, limit.pre_π, limit.pre_π, limit.pre_π]; rfl
+  simpa [limit.pre] using
+    (limit.lift_pre (F := E ⋙ F) (E := D) (c := (limit.cone F).whisker E))
 
 variable {E F}
 
@@ -433,7 +434,8 @@ theorem limit.post_post {E : Type u''} [Category.{v''} E] (H : D ⥤ E) [h : Has
     haveI : HasLimit (F ⋙ G ⋙ H) := h
     H.map (limit.post F G) ≫ limit.post (F ⋙ G) H = limit.post F (G ⋙ H) := by
   haveI : HasLimit (F ⋙ G ⋙ H) := h
-  ext; erw [assoc, limit.post_π, ← H.map_comp, limit.post_π, limit.post_π]; rfl
+  simpa [limit.post] using
+    (limit.lift_post (F := F ⋙ G) (G := H) (c := G.mapCone (limit.cone F)))
 
 end Post
 
@@ -445,7 +447,17 @@ theorem limit.pre_post {D : Type u'} [Category.{v'} D] (E : K ⥤ J) (F : J ⥤ 
     haveI : HasLimit (E ⋙ F ⋙ G) := h
     G.map (limit.pre F E) ≫ limit.post (E ⋙ F) G = limit.post F G ≫ limit.pre (F ⋙ G) E := by
   haveI : HasLimit (E ⋙ F ⋙ G) := h
-  ext; erw [assoc, limit.post_π, ← G.map_comp, limit.pre_π, assoc, limit.pre_π, limit.post_π]
+  ext j
+  calc
+    (G.map (limit.pre F E) ≫ limit.post (E ⋙ F) G) ≫ limit.π ((E ⋙ F) ⋙ G) j =
+        G.map (limit.pre F E ≫ limit.π (E ⋙ F) j) := by
+      rw [assoc, limit.post_π, ← G.map_comp]
+    _ = G.map (limit.π F (E.obj j)) := by
+      rw [limit.pre_π]
+    _ = limit.post F G ≫ limit.π (F ⋙ G) (E.obj j) := by
+      rw [(limit.post_π (F := F) (G := G) (j := E.obj j)).symm]
+    _ = (limit.post F G ≫ limit.pre (F ⋙ G) E) ≫ limit.π (E ⋙ F ⋙ G) j := by
+      rw [assoc, limit.pre_π]
 
 open CategoryTheory.Equivalence
 
@@ -1024,10 +1036,18 @@ theorem colimit.pre_post {D : Type u'} [Category.{v'} D] (E : K ⥤ J) (F : J �
     haveI : HasColimit (E ⋙ F ⋙ G) := h
     colimit.post (E ⋙ F) G ≫ G.map (colimit.pre F E) =
       colimit.pre (F ⋙ G) E ≫ colimit.post F G := by
+  haveI : HasColimit (E ⋙ F ⋙ G) := h
   ext j
   rw [← assoc, colimit.ι_post, ← G.map_comp, colimit.ι_pre, ← assoc]
-  haveI : HasColimit (E ⋙ F ⋙ G) := h
-  erw [colimit.ι_pre (F ⋙ G) E j, colimit.ι_post]
+  calc
+    G.map (colimit.ι F (E.obj j)) =
+        colimit.ι (F ⋙ G) (E.obj j) ≫ colimit.post F G := by
+      exact (colimit.ι_post F G (E.obj j)).symm
+    _ = (colimit.ι ((E ⋙ F) ⋙ G) j ≫ colimit.pre (F ⋙ G) E) ≫ colimit.post F G := by
+      rw [← colimit.ι_pre (F := F ⋙ G) (E := E) (k := j)]
+      change
+        (colimit.ι (E ⋙ F ⋙ G) j ≫ colimit.pre (F ⋙ G) E) ≫ colimit.post F G = _
+      rfl
 
 open CategoryTheory.Equivalence
 
