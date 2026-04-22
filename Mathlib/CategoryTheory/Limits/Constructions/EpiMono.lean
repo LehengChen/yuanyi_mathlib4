@@ -30,7 +30,7 @@ open Category Limits
 variable {C : Type u₁} {D : Type u₂} [Category.{v₁} C] [Category.{v₂} D]
 variable (F : C ⥤ D)
 
-/-- If `F` preserves pullbacks, then it preserves monomorphisms. -/
+/-- If `F` preserves the pullback of `f` with itself, then `F.map f` is a monomorphism. -/
 theorem preserves_mono_of_preservesLimit {X Y : C} (f : X ⟶ Y) [PreservesLimit (cospan f f) F]
     [Mono f] : Mono (F.map f) := by
   have := isLimitPullbackConeMapOfIsLimit F _ (PullbackCone.isLimitMkIdId f)
@@ -41,7 +41,8 @@ instance (priority := 100) preservesMonomorphisms_of_preservesLimitsOfShape
     [PreservesLimitsOfShape WalkingCospan F] : F.PreservesMonomorphisms where
   preserves f _ := preserves_mono_of_preservesLimit F f
 
-/-- If `F` reflects pullbacks, then it reflects monomorphisms. -/
+/-- If `F` reflects the pullback of `f` with itself, then `f` is a monomorphism whenever
+`F.map f` is. -/
 theorem reflects_mono_of_reflectsLimit {X Y : C} (f : X ⟶ Y) [ReflectsLimit (cospan f f) F]
     [Mono (F.map f)] : Mono f := by
   have := PullbackCone.isLimitMkIdId (F.map f)
@@ -52,7 +53,7 @@ instance (priority := 100) reflectsMonomorphisms_of_reflectsLimitsOfShape
     [ReflectsLimitsOfShape WalkingCospan F] : F.ReflectsMonomorphisms where
   reflects f _ := reflects_mono_of_reflectsLimit F f
 
-/-- If `F` preserves pushouts, then it preserves epimorphisms. -/
+/-- If `F` preserves the pushout of `f` with itself, then `F.map f` is an epimorphism. -/
 theorem preserves_epi_of_preservesColimit {X Y : C} (f : X ⟶ Y) [PreservesColimit (span f f) F]
     [Epi f] : Epi (F.map f) := by
   have := isColimitPushoutCoconeMapOfIsColimit F _ (PushoutCocone.isColimitMkIdId f)
@@ -63,7 +64,8 @@ instance (priority := 100) preservesEpimorphisms_of_preservesColimitsOfShape
     [PreservesColimitsOfShape WalkingSpan F] : F.PreservesEpimorphisms where
   preserves f _ := preserves_epi_of_preservesColimit F f
 
-/-- If `F` reflects pushouts, then it reflects epimorphisms. -/
+/-- If `F` reflects the pushout of `f` with itself, then `f` is an epimorphism whenever
+`F.map f` is. -/
 theorem reflects_epi_of_reflectsColimit {X Y : C} (f : X ⟶ Y) [ReflectsColimit (span f f) F]
     [Epi (F.map f)] : Epi f := by
   have := PushoutCocone.isColimitMkIdId (F.map f)
