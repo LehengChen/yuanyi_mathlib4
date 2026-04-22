@@ -86,7 +86,7 @@ theorem isColimit_iff_coconeTypesIsColimit {F : J ⥤ Type u} (c : Cocone F) :
   simp only [Functor.CoconeTypes.isColimit_iff, Equiv.apply_symm_apply]
 
 /-- (internal implementation) the colimit cocone of a functor,
-implemented as a quotient of a sigma type
+implemented using a shrunk copy of a quotient of a sigma type
 -/
 noncomputable abbrev colimitCocone (F : J ⥤ Type u) [Small.{u} F.ColimitType] : Cocone F :=
   F.coconeTypesEquiv (F.coconeTypes.postcomp (equivShrink.{u} F.ColimitType))
