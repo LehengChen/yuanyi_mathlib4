@@ -13,7 +13,8 @@ public meta import Mathlib.Tactic.ToDual
 /-!
 # Functors
 
-Defines a functor between categories, extending a `Prefunctor` between quivers.
+Defines a functor between categories, together with its underlying `Prefunctor`
+between quivers.
 
 Introduces, in the `CategoryTheory` scope, notations `C ⥤ D` for the type of all functors
 from `C` to `D`, `𝟭` for the identity functor and `⋙` for functor composition.
