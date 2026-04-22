@@ -65,7 +65,13 @@ theorem decomposition_id (Δ : SimplexCategoryᵒᵖ) :
   apply s.hom_ext'
   intro A
   dsimp
-  erw [comp_id, comp_sum, Finset.sum_eq_single A, cofan_inj_πSummand_eq_id_assoc]
+  have hcomp : (s.cofan Δ).inj A ≫ 𝟙 (X.obj Δ) = (s.cofan Δ).inj A := by
+    convert (Category.comp_id ((s.cofan Δ).inj A)) using 1
+  rw [comp_sum, Finset.sum_eq_single A]
+  · trans (s.cofan Δ).inj A
+    · exact hcomp
+    · symm
+      exact s.cofan_inj_πSummand_eq_id_assoc A ((s.cofan Δ).inj A)
   · intro B _ h₂
     rw [s.cofan_inj_πSummand_eq_zero_assoc _ _ h₂, zero_comp]
   · simp
@@ -240,8 +246,24 @@ noncomputable def nondegComplexFunctor : Split C ⥤ ChainComplex C ℕ where
     { f := Φ.f
       comm' := fun i j _ => by
         dsimp
-        erw [← cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋i⦌)),
-          ((alternatingFaceMapComplex C).map Φ.F).comm_assoc i j]
+        have hcofan :
+            Φ.f i ≫ (S₂.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫
+                K[S₂.X].d i j ≫ S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) =
+              (S₁.s.cofan (op ⦋i⦌)).inj (Splitting.IndexSet.id (op ⦋i⦌)) ≫
+                Φ.F.app (op ⦋i⦌) ≫ K[S₂.X].d i j ≫
+                  S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) := by
+          simpa using
+            (cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋i⦌))
+              (K[S₂.X].d i j ≫ S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)))).symm
+        have hcomm :
+            Φ.F.app (op ⦋i⦌) ≫ K[S₂.X].d i j ≫
+                S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) =
+              K[S₁.X].d i j ≫ Φ.F.app (op ⦋j⦌) ≫
+                S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌)) := by
+          simpa using
+            (((alternatingFaceMapComplex C).map Φ.F).comm_assoc i j
+              (S₂.s.πSummand (Splitting.IndexSet.id (op ⦋j⦌))))
+        rw [hcofan, hcomm]
         simp only [assoc]
         congr 2
         apply S₁.s.hom_ext'
@@ -264,11 +286,18 @@ defined as a formal direct factor of the alternating face map complex. -/
 @[simps!]
 noncomputable def toKaroubiNondegComplexFunctorIsoN₁ :
     nondegComplexFunctor ⋙ toKaroubi (ChainComplex C ℕ) ≅ forget C ⋙ DoldKan.N₁ :=
-  NatIso.ofComponents (fun S => S.s.toKaroubiNondegComplexIsoN₁) fun Φ => by
+  NatIso.ofComponents (fun S => S.s.toKaroubiNondegComplexIsoN₁) fun {X Y} Φ => by
     ext n
     dsimp
     simp only [assoc, PInfty_f_idem_assoc]
-    erw [← Split.cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋n⦌))]
+    have hcofan :
+        Φ.f n ≫ (Y.s.cofan (op ⦋n⦌)).inj (Splitting.IndexSet.id (op ⦋n⦌)) ≫ PInfty.f n =
+          (X.s.cofan (op ⦋n⦌)).inj (Splitting.IndexSet.id (op ⦋n⦌)) ≫
+            Φ.F.app (op ⦋n⦌) ≫ PInfty.f n := by
+      simpa using
+        (Split.cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋n⦌))
+          (PInfty.f n)).symm
+    rw [hcofan]
     rw [PInfty_f_naturality]
 
 end Split
