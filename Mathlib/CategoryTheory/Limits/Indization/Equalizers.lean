@@ -46,9 +46,9 @@ the limit of this diagram is an ind-object.
 
 This theorem will be used to construct equalizers in the category of ind-objects. It can be
 interpreted as saying that ind-objects are closed under finite limits as long as the diagram
-we are taking the limit of comes from a diagram in a functor category `I ⥤ C`. We will show (TODO)
-that this is the case for any parallel pair of morphisms in `Ind C` and deduce that ind-objects
-are closed under equalizers.
+we are taking the limit of comes from a diagram in a functor category `I ⥤ C`. The next result
+shows that this is the case for any parallel pair of morphisms in `Ind C`, yielding that
+ind-objects are closed under equalizers.
 
 This is Proposition 6.1.16(i) in [Kashiwara2006].
 -/
