@@ -12,9 +12,9 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Limits
 # (Co)limits in functor categories.
 
 We show that if `D` has limits, then the functor category `C ⥤ D` also has limits
-(`CategoryTheory.Limits.functorCategoryHasLimits`),
+(`CategoryTheory.Limits.functorCategoryHasLimitsOfSize`),
 and the evaluation functors preserve limits
-(`CategoryTheory.Limits.evaluation_preservesLimits`)
+(`CategoryTheory.Limits.evaluationPreservesLimits`)
 (and similarly for colimits).
 
 We also show that `F : D ⥤ K ⥤ C` preserves (co)limits if it does so for each `k : K`
@@ -69,7 +69,7 @@ def evaluationJointlyReflectsLimits {F : J ⥤ K ⥤ C} (c : Cone F)
 set_option backward.isDefEq.respectTransparency false in
 /-- Given a functor `F` and a collection of limit cones for each diagram `X ↦ F X k`, we can stitch
 them together to give a cone for the diagram `F`.
-`combinedIsLimit` shows that the new cone is limiting, and `evalCombined` shows it is
+`combinedIsLimit` shows that the new cone is limiting, and `evaluateCombinedCones` shows it is
 (essentially) made up of the original cones.
 -/
 @[simps]
@@ -121,8 +121,8 @@ set_option backward.isDefEq.respectTransparency false in
 /--
 Given a functor `F` and a collection of colimit cocones for each diagram `X ↦ F X k`, we can stitch
 them together to give a cocone for the diagram `F`.
-`combinedIsColimit` shows that the new cocone is colimiting, and `evalCombined` shows it is
-(essentially) made up of the original cocones.
+`combinedIsColimit` shows that the new cocone is colimiting, and
+`evaluateCombinedCocones` shows it is (essentially) made up of the original cocones.
 -/
 @[simps]
 def combineCocones (F : J ⥤ K ⥤ C) (c : ∀ k : K, ColimitCocone (F.flip.obj k)) : Cocone F where
