@@ -79,7 +79,15 @@ instance : (lim (J := J) (C := C)).LaxMonoidal :=
       dsimp
       simp only [tensorHom_def, id_whiskerLeft, Category.assoc,
         Iso.inv_hom_id, Category.comp_id, ← comp_whiskerRight_assoc]
-      erw [limit.lift_π]
+      have h :
+          limit.lift ((Functor.const J).obj (𝟙_ C))
+              { pt := 𝟙_ C
+                π := { app := fun _ => 𝟙 (𝟙_ C)
+                       naturality := by simp } } ≫
+            limit.π (𝟙_ (J ⥤ C)) j =
+          𝟙 _ := by
+        exact limit.lift_π _ _
+      rw [h]
       rw [id_whiskerRight, Category.id_comp]))
     (right_unitality := fun F ↦ limit.hom_ext (fun j ↦ by
       dsimp
@@ -87,7 +95,15 @@ instance : (lim (J := J) (C := C)).LaxMonoidal :=
       dsimp
       simp only [tensorHom_def, ← whisker_exchange, whiskerRight_id, Category.assoc, Iso.inv_hom_id,
         Category.comp_id, ← whiskerLeft_comp_assoc]
-      erw [limit.lift_π]
+      have h :
+          limit.lift ((Functor.const J).obj (𝟙_ C))
+              { pt := 𝟙_ C
+                π := { app := fun _ => 𝟙 (𝟙_ C)
+                       naturality := by simp } } ≫
+            limit.π (𝟙_ (J ⥤ C)) j =
+          𝟙 _ := by
+        exact limit.lift_π _ _
+      rw [h]
       rw [whiskerLeft_id, Category.id_comp]))
 
 @[reassoc (attr := simp)]
