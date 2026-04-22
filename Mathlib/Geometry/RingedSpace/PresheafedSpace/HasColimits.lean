@@ -304,17 +304,36 @@ def colimitPresheafObjIsoComponentwiseLimit (F : J ⥤ PresheafedSpace.{_, _, v}
     simp only [Functor.op_obj, op_inj_iff, Opens.map_coe, SetLike.ext'_iff,
       Set.preimage_preimage]
     refine congr_arg (Set.preimage · U.1) (funext fun x => ?_)
-    erw [← TopCat.comp_app]
-    congr
-    exact ι_preservesColimitIso_inv (forget C) F (unop X)
+    exact ConcreteCategory.congr_hom (ι_preservesColimitIso_inv (forget C) F (unop X)) x
   · intro X Y f
     change ((F.map f.unop).c.app _ ≫ _ ≫ _) ≫ (F.obj (unop Y)).presheaf.map _ = _ ≫ _
     rw [TopCat.Presheaf.Pushforward.comp_inv_app]
-    erw [Category.id_comp]
-    rw [Category.assoc]
-    erw [← (F.obj (unop Y)).presheaf.map_comp, (F.map f.unop).c.naturality_assoc,
-      ← (F.obj (unop Y)).presheaf.map_comp]
-    rfl
+    have eX :
+        op
+            ((Opens.map (colimit.ι (F ⋙ forget C) (unop X))).obj
+              ((Opens.map
+                    (colimit.isoColimitCocone {
+                        cocone := colimitCocone F
+                        isColimit := colimitCoconeIsColimit F
+                      }).inv.base).obj
+                U)) =
+          op ((Opens.map (colimit.ι F (unop X)).base).obj U) := by
+      simp only [op_inj_iff, Opens.map_coe, SetLike.ext'_iff, Set.preimage_preimage]
+      refine congr_arg (Set.preimage · U.1) (funext fun x => ?_)
+      exact ConcreteCategory.congr_hom (ι_preservesColimitIso_inv (forget C) F (unop X)) x
+    have eY :
+        (((pushforward C (F.map f.unop).base).obj (F.obj (unop Y)).presheaf).obj
+          (op ((Opens.map (colimit.ι F (unop X)).base).obj U))) =
+          (F.obj (unop Y)).presheaf.obj (op ((Opens.map (colimit.ι F (unop Y)).base).obj U)) := by
+      have eY' :
+          (Opens.map (F.map f.unop).base).op.obj
+              (op ((Opens.map (colimit.ι F (unop X)).base).obj U)) =
+            op ((Opens.map (colimit.ι F (unop Y)).base).obj U) := by
+        apply congr_arg op
+        rw [← Opens.map_comp_obj, ← PresheafedSpace.comp_base, colimit.w]
+      exact congrArg (fun V => (F.obj (unop Y)).presheaf.obj V) eY'
+    simpa [Category.assoc, componentwiseDiagram] using
+      ((F.map f.unop).c.naturality_assoc (eqToHom eX) (eqToHom eY)).symm
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -329,7 +348,10 @@ theorem colimitPresheafObjIsoComponentwiseLimit_inv_ι_app (F : J ⥤ Presheafed
   rw [map_id, comp_id, assoc, assoc, assoc, NatTrans.naturality,
       ← comp_c_app_assoc,
       congr_app (colimit.isoColimitCocone_ι_hom _ _), assoc]
-  erw [limitObjIsoLimitCompEvaluation_inv_π_app_assoc, limMap_π_assoc]
+  simp only [colimit_carrier, colimit_presheaf, colimitCocone_pt, colimitCocone_ι_app_base,
+    pushforward_obj_obj, colimitCocone_ι_app_c, const_obj_obj, comp_base, Opens.map_comp_obj,
+    op_obj, eqToHom_map, pushforward_obj_map, eqToHom_unop, eqToHom_op, eqToHom_trans]
+  rw [limitObjIsoLimitCompEvaluation_inv_π_app_assoc, limMap_π_assoc]
   simp
 
 set_option backward.isDefEq.respectTransparency false in
