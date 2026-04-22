@@ -40,18 +40,22 @@ section Mono
 
 variable {c : PullbackCone f f}
 
-lemma mono_iff_fst_eq_snd (hc : IsLimit c) : Mono f ↔ c.fst = c.snd := by
+lemma mono_iff_fst_eq_snd
+    (hc : ∀ {Z : C} (g g' : Z ⟶ X), g ≫ f = g' ≫ f →
+      { φ : Z ⟶ c.pt // φ ≫ c.fst = g ∧ φ ≫ c.snd = g' }) :
+    Mono f ↔ c.fst = c.snd := by
   constructor
   · intro hf
     simpa only [← cancel_mono f] using c.condition
   · intro hf
     constructor
     intro Z g g' h
-    obtain ⟨φ, rfl, rfl⟩ := PullbackCone.IsLimit.lift' hc g g' h
+    obtain ⟨φ, rfl, rfl⟩ := hc g g' h
     rw [hf]
 
 lemma mono_iff_isIso_fst (hc : IsLimit c) : Mono f ↔ IsIso c.fst := by
-  rw [mono_iff_fst_eq_snd hc]
+  rw [mono_iff_fst_eq_snd (c := c) (fun {Z} g g' h =>
+    PullbackCone.IsLimit.lift' hc (W := Z) g g' h)]
   constructor
   · intro h
     obtain ⟨φ, hφ₁, hφ₂⟩ := PullbackCone.IsLimit.lift' hc (𝟙 X) (𝟙 X) (by simp)
@@ -74,7 +78,8 @@ lemma mono_iff_isPullback : Mono f ↔ IsPullback (𝟙 X) (𝟙 X) f f := by
   · intro
     exact IsPullback.of_isLimit (PullbackCone.isLimitMkIdId f)
   · intro hf
-    exact (mono_iff_fst_eq_snd hf.isLimit).2 rfl
+    exact (mono_iff_fst_eq_snd (fun {Z} g g' h =>
+      PullbackCone.IsLimit.lift' hf.isLimit (W := Z) g g' h)).2 rfl
 
 end Mono
 
@@ -82,18 +87,22 @@ section Epi
 
 variable {c : PushoutCocone f f}
 
-lemma epi_iff_inl_eq_inr (hc : IsColimit c) : Epi f ↔ c.inl = c.inr := by
+lemma epi_iff_inl_eq_inr
+    (hc : ∀ {Z : C} (g g' : Y ⟶ Z), f ≫ g = f ≫ g' →
+      { φ : c.pt ⟶ Z // c.inl ≫ φ = g ∧ c.inr ≫ φ = g' }) :
+    Epi f ↔ c.inl = c.inr := by
   constructor
   · intro hf
     simpa only [← cancel_epi f] using c.condition
   · intro hf
     constructor
     intro Z g g' h
-    obtain ⟨φ, rfl, rfl⟩ := PushoutCocone.IsColimit.desc' hc g g' h
+    obtain ⟨φ, rfl, rfl⟩ := hc g g' h
     rw [hf]
 
 lemma epi_iff_isIso_inl (hc : IsColimit c) : Epi f ↔ IsIso c.inl := by
-  rw [epi_iff_inl_eq_inr hc]
+  rw [epi_iff_inl_eq_inr (c := c) (fun {Z} g g' h =>
+    PushoutCocone.IsColimit.desc' hc (W := Z) g g' h)]
   constructor
   · intro h
     obtain ⟨φ, hφ₁, hφ₂⟩ := PushoutCocone.IsColimit.desc' hc (𝟙 Y) (𝟙 Y) (by simp)
@@ -116,7 +125,8 @@ lemma epi_iff_isPushout : Epi f ↔ IsPushout f f (𝟙 Y) (𝟙 Y) := by
   · intro
     exact IsPushout.of_isColimit (PushoutCocone.isColimitMkIdId f)
   · intro hf
-    exact (epi_iff_inl_eq_inr hf.isColimit).2 rfl
+    exact (epi_iff_inl_eq_inr (fun {Z} g g' h =>
+      PushoutCocone.IsColimit.desc' hf.isColimit (W := Z) g g' h)).2 rfl
 
 end Epi
 

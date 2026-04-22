@@ -150,9 +150,11 @@ noncomputable def pullbackAssoc [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂)
     (pullbackPullbackRightIsPullback f₁ f₂ f₃ f₄)
 
 @[reassoc (attr := simp)]
-theorem pullbackAssoc_inv_fst_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
-    [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
+theorem pullbackAssoc_inv_fst_fst
+    [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄] :
+    letI := hasPullback_assoc f₁ f₂ f₃ f₄
     (pullbackAssoc f₁ f₂ f₃ f₄).inv ≫ pullback.fst _ _ ≫ pullback.fst _ _ = pullback.fst _ _ := by
+  letI := hasPullback_assoc f₁ f₂ f₃ f₄
   trans l₁' ≫ pullback.fst _ _
   · rw [← Category.assoc]
     congr 1
@@ -160,15 +162,20 @@ theorem pullbackAssoc_inv_fst_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X�
   · exact pullback.lift_fst _ _ _
 
 @[reassoc (attr := simp)]
-theorem pullbackAssoc_hom_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
-    [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
+theorem pullbackAssoc_hom_fst
+    [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄] :
+    letI := hasPullback_assoc f₁ f₂ f₃ f₄
     (pullbackAssoc f₁ f₂ f₃ f₄).hom ≫ pullback.fst _ _ = pullback.fst _ _ ≫ pullback.fst _ _ := by
+  letI := hasPullback_assoc f₁ f₂ f₃ f₄
   rw [← Iso.eq_inv_comp, pullbackAssoc_inv_fst_fst]
 
 @[reassoc (attr := simp)]
-theorem pullbackAssoc_hom_snd_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
-    [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] : (pullbackAssoc f₁ f₂ f₃ f₄).hom ≫
+theorem pullbackAssoc_hom_snd_fst
+    [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄] :
+    letI := hasPullback_assoc f₁ f₂ f₃ f₄
+    (pullbackAssoc f₁ f₂ f₃ f₄).hom ≫
     pullback.snd _ _ ≫ pullback.fst _ _ = pullback.fst _ _ ≫ pullback.snd _ _ := by
+  letI := hasPullback_assoc f₁ f₂ f₃ f₄
   trans l₂ ≫ pullback.fst _ _
   · rw [← Category.assoc]
     congr 1
@@ -176,9 +183,11 @@ theorem pullbackAssoc_hom_snd_fst [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X�
   · exact pullback.lift_fst _ _ _
 
 @[reassoc (attr := simp)]
-theorem pullbackAssoc_hom_snd_snd [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
-    [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
+theorem pullbackAssoc_hom_snd_snd
+    [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄] :
+    letI := hasPullback_assoc f₁ f₂ f₃ f₄
     (pullbackAssoc f₁ f₂ f₃ f₄).hom ≫ pullback.snd _ _ ≫ pullback.snd _ _ = pullback.snd _ _ := by
+  letI := hasPullback_assoc f₁ f₂ f₃ f₄
   trans l₂ ≫ pullback.snd _ _
   · rw [← Category.assoc]
     congr 1
@@ -186,15 +195,20 @@ theorem pullbackAssoc_hom_snd_snd [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X�
   · exact pullback.lift_snd _ _ _
 
 @[reassoc (attr := simp)]
-theorem pullbackAssoc_inv_fst_snd [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
-    [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
+theorem pullbackAssoc_inv_fst_snd
+    [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄] :
+    letI := hasPullback_assoc f₁ f₂ f₃ f₄
     (pullbackAssoc f₁ f₂ f₃ f₄).inv ≫ pullback.fst _ _ ≫ pullback.snd _ _ =
-    pullback.snd _ _ ≫ pullback.fst _ _ := by rw [Iso.inv_comp_eq, pullbackAssoc_hom_snd_fst]
+    pullback.snd _ _ ≫ pullback.fst _ _ := by
+  letI := hasPullback_assoc f₁ f₂ f₃ f₄
+  rw [Iso.inv_comp_eq, pullbackAssoc_hom_snd_fst]
 
 @[reassoc (attr := simp)]
-theorem pullbackAssoc_inv_snd [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄]
-    [HasPullback f₁ ((pullback.fst _ _ : Z₂ ⟶ X₂) ≫ f₂)] :
+theorem pullbackAssoc_inv_snd
+    [HasPullback ((pullback.snd _ _ : Z₁ ⟶ X₂) ≫ f₃) f₄] :
+    letI := hasPullback_assoc f₁ f₂ f₃ f₄
     (pullbackAssoc f₁ f₂ f₃ f₄).inv ≫ pullback.snd _ _ = pullback.snd _ _ ≫ pullback.snd _ _ := by
+  letI := hasPullback_assoc f₁ f₂ f₃ f₄
   rw [Iso.inv_comp_eq, pullbackAssoc_hom_snd_snd]
 
 end PullbackAssoc
@@ -322,9 +336,11 @@ noncomputable def pushoutAssoc [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶
     (pushoutPushoutRightIsPushout g₁ g₂ g₃ g₄)
 
 @[reassoc (attr := simp)]
-theorem inl_inl_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
-    [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
+theorem inl_inl_pushoutAssoc_hom
+    [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄] :
+    letI := hasPushout_assoc g₁ g₂ g₃ g₄
     pushout.inl _ _ ≫ pushout.inl _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).hom = pushout.inl _ _ := by
+  letI := hasPushout_assoc g₁ g₂ g₃ g₄
   trans f₁ ≫ l₁
   · congr 1
     exact
@@ -333,10 +349,12 @@ theorem inl_inl_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ �
   · exact pushout.inl_desc _ _ _
 
 @[reassoc (attr := simp)]
-theorem inr_inl_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
-    [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
+theorem inr_inl_pushoutAssoc_hom
+    [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄] :
+    letI := hasPushout_assoc g₁ g₂ g₃ g₄
     pushout.inr _ _ ≫ pushout.inl _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).hom =
       pushout.inl _ _ ≫ pushout.inr _ _ := by
+  letI := hasPushout_assoc g₁ g₂ g₃ g₄
   trans f₂ ≫ l₁
   · congr 1
     exact
@@ -345,9 +363,11 @@ theorem inr_inl_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ �
   · exact pushout.inr_desc _ _ _
 
 @[reassoc (attr := simp)]
-theorem inr_inr_pushoutAssoc_inv [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
-    [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
+theorem inr_inr_pushoutAssoc_inv
+    [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄] :
+    letI := hasPushout_assoc g₁ g₂ g₃ g₄
     pushout.inr _ _ ≫ pushout.inr _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).inv = pushout.inr _ _ := by
+  letI := hasPushout_assoc g₁ g₂ g₃ g₄
   trans f₄ ≫ l₂'
   · congr 1
     exact
@@ -356,22 +376,28 @@ theorem inr_inr_pushoutAssoc_inv [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ �
   · exact pushout.inr_desc _ _ _
 
 @[reassoc (attr := simp)]
-theorem inl_pushoutAssoc_inv [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
-    [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
+theorem inl_pushoutAssoc_inv
+    [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄] :
+    letI := hasPushout_assoc g₁ g₂ g₃ g₄
     pushout.inl _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).inv = pushout.inl _ _ ≫ pushout.inl _ _ := by
+  letI := hasPushout_assoc g₁ g₂ g₃ g₄
   rw [Iso.comp_inv_eq, Category.assoc, inl_inl_pushoutAssoc_hom]
 
 @[reassoc (attr := simp)]
-theorem inl_inr_pushoutAssoc_inv [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
-    [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
+theorem inl_inr_pushoutAssoc_inv
+    [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄] :
+    letI := hasPushout_assoc g₁ g₂ g₃ g₄
     pushout.inl _ _ ≫ pushout.inr _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).inv =
       pushout.inr _ _ ≫ pushout.inl _ _ := by
+  letI := hasPushout_assoc g₁ g₂ g₃ g₄
   rw [← Category.assoc, Iso.comp_inv_eq, Category.assoc, inr_inl_pushoutAssoc_hom]
 
 @[reassoc (attr := simp)]
-theorem inr_pushoutAssoc_hom [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄]
-    [HasPushout g₁ (g₂ ≫ (pushout.inl _ _ : X₂ ⟶ Y₂))] :
+theorem inr_pushoutAssoc_hom
+    [HasPushout (g₃ ≫ (pushout.inr _ _ : X₂ ⟶ Y₁)) g₄] :
+    letI := hasPushout_assoc g₁ g₂ g₃ g₄
     pushout.inr _ _ ≫ (pushoutAssoc g₁ g₂ g₃ g₄).hom = pushout.inr _ _ ≫ pushout.inr _ _ := by
+  letI := hasPushout_assoc g₁ g₂ g₃ g₄
   rw [← Iso.eq_comp_inv, Category.assoc, inr_inr_pushoutAssoc_inv]
 
 end PushoutAssoc

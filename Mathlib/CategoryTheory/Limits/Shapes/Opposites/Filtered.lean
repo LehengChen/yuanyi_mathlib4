@@ -36,15 +36,23 @@ instance has_cofiltered_limits_op_of_has_filtered_colimits [HasFilteredColimitsO
     HasCofilteredLimitsOfSize.{v₂, u₂} Cᵒᵖ where
   HasLimitsOfShape _ _ _ := hasLimitsOfShape_op_of_hasColimitsOfShape
 
-theorem has_cofiltered_limits_of_has_filtered_colimits_op [HasFilteredColimitsOfSize.{v₂, u₂} Cᵒᵖ] :
+theorem has_cofiltered_limits_of_has_filtered_colimits_op
+    (h : ∀ (I : Type u₂) [Category.{v₂} I] [IsCofiltered I],
+      HasColimitsOfShape Iᵒᵖ Cᵒᵖ) :
     HasCofilteredLimitsOfSize.{v₂, u₂} C :=
-  { HasLimitsOfShape := fun _ _ _ => hasLimitsOfShape_of_hasColimitsOfShape_op }
+  { HasLimitsOfShape := fun I _ _ =>
+      haveI : HasColimitsOfShape Iᵒᵖ Cᵒᵖ := h I
+      hasLimitsOfShape_of_hasColimitsOfShape_op }
 
 instance has_filtered_colimits_op_of_has_cofiltered_limits [HasCofilteredLimitsOfSize.{v₂, u₂} C] :
     HasFilteredColimitsOfSize.{v₂, u₂} Cᵒᵖ where HasColimitsOfShape _ _ _ := inferInstance
 
-theorem has_filtered_colimits_of_has_cofiltered_limits_op [HasCofilteredLimitsOfSize.{v₂, u₂} Cᵒᵖ] :
+theorem has_filtered_colimits_of_has_cofiltered_limits_op
+    (h : ∀ (I : Type u₂) [Category.{v₂} I] [IsFiltered I],
+      HasLimitsOfShape Iᵒᵖ Cᵒᵖ) :
     HasFilteredColimitsOfSize.{v₂, u₂} C :=
-  { HasColimitsOfShape := fun _ _ _ => hasColimitsOfShape_of_hasLimitsOfShape_op }
+  { HasColimitsOfShape := fun I _ _ =>
+      haveI : HasLimitsOfShape Iᵒᵖ Cᵒᵖ := h I
+      hasColimitsOfShape_of_hasLimitsOfShape_op }
 
 end CategoryTheory.Limits

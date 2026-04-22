@@ -31,8 +31,8 @@ is of cardinality `< κ`. -/
 protected abbrev HasCardinalLT (P : MorphismProperty C) (κ : Cardinal.{w}) :=
     _root_.HasCardinalLT P.toSet κ
 
-lemma hasCardinalLT_ofHoms {C : Type*} [Category* C]
-    {ι : Type*} {X Y : ι → C} (f : ∀ i, X i ⟶ Y i) {κ : Cardinal}
+lemma hasCardinalLT_ofHoms
+    {ι : Type*} {X Y : ι → C} (f : ∀ i, X i ⟶ Y i) {κ : Cardinal.{w}}
     (h : HasCardinalLT ι κ) : (MorphismProperty.ofHoms f).HasCardinalLT κ :=
   h.of_surjective (fun i ↦ ⟨Arrow.mk (f i), ⟨i⟩⟩) (by
     rintro ⟨f, hf⟩

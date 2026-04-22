@@ -37,12 +37,12 @@ namespace CategoryTheory.MorphismProperty
 
 variable {C : Type*} [Category* C]
 
-variable {P : MorphismProperty C} {S : C} [P.IsStableUnderComposition]
+variable {P : MorphismProperty C} {S : C} [P.RespectsRight P]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma exists_map_eq_of_presieve (K : Precoverage C) (H : K ≤ P.precoverage)
+lemma exists_map_eq_of_presieve
     {X : P.Over ⊤ S} {R : Presieve ((MorphismProperty.Over.forget P ⊤ S).obj X)}
-    (hR : R ∈ (K.comap <| CategoryTheory.Over.forget S) _) :
+    (hR : R ∈ (P.precoverage.comap <| CategoryTheory.Over.forget S) _) :
     ∃ T : Presieve X, T.map (MorphismProperty.Over.forget P ⊤ S) = R := by
   rw [Precoverage.mem_iff_exists_zeroHypercover] at hR
   obtain ⟨𝒰, rfl⟩ := hR
@@ -52,7 +52,7 @@ lemma exists_map_eq_of_presieve (K : Precoverage C) (H : K ≤ P.precoverage)
     rw [Presieve.map_ofArrows]
     rfl
   · rw [← CategoryTheory.Over.w (𝒰.f i)]
-    exact P.comp_mem _ _ (H _ 𝒰.mem₀ ⟨⟨i⟩⟩) X.prop
+    exact RespectsRight.postcomp _ X.prop _ (𝒰.mem₀ ⟨⟨i⟩⟩)
 
 variable (K : Precoverage C) [K.HasIsos] [K.IsStableUnderBaseChange] [K.IsStableUnderComposition]
   [K.HasPullbacks]
@@ -62,7 +62,7 @@ lemma locallyCoverDense_forget_of_le (H : K ≤ P.precoverage) :
   rw [over_toGrothendieck_eq_toGrothendieck_comap_forget]
   apply Precoverage.locallyCoverDense_of_map_functorPullback_mem
   intro X R hR
-  obtain ⟨R, rfl⟩ := MorphismProperty.exists_map_eq_of_presieve _ H hR
+  obtain ⟨R, rfl⟩ := MorphismProperty.exists_map_eq_of_presieve (P := P) (S := S) (H _ hR)
   simpa
 
 lemma toGrothendieck_comap_forget_eq_inducedTopology
@@ -78,7 +78,7 @@ lemma toGrothendieck_comap_forget_eq_inducedTopology
   simp_rw [over_toGrothendieck_eq_toGrothendieck_comap_forget]
   apply Precoverage.toGrothendieck_comap_eq_inducedTopology
   intro X R hR
-  obtain ⟨T, rfl⟩ := MorphismProperty.exists_map_eq_of_presieve K H hR
+  obtain ⟨T, rfl⟩ := MorphismProperty.exists_map_eq_of_presieve (P := P) (S := S) (H _ hR)
   simpa
 
 end CategoryTheory.MorphismProperty
