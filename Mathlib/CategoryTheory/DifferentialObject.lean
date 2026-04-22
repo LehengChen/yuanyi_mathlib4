@@ -268,9 +268,10 @@ def shiftFunctor (n : S) : DifferentialObject S C ⥤ DifferentialObject S C whe
       comm := by
         dsimp
         rw [Category.assoc]
-        erw [shiftComm_hom_comp]
-        rw [← Functor.map_comp_assoc, f.comm, Functor.map_comp_assoc]
-        rfl }
+        have h := shiftComm_hom_comp f.f (1 : S) n
+        dsimp [shiftComm] at h
+        rw [h]
+        rw [← Functor.map_comp_assoc, f.comm, Functor.map_comp_assoc] }
   map_id X := by ext1; dsimp; rw [Functor.map_id]
   map_comp f g := by ext1; dsimp; rw [Functor.map_comp]
 
@@ -297,9 +298,9 @@ set_option backward.isDefEq.respectTransparency false in
 @[simps!]
 def shiftZero : shiftFunctor C (0 : S) ≅ 𝟭 (DifferentialObject S C) := by
   refine NatIso.ofComponents (fun X => mkIso ((shiftFunctorZero C S).app X.obj) ?_) (fun f => ?_)
-  · erw [← NatTrans.naturality]
-    dsimp
-    simp only [shiftFunctorZero_hom_app_shift, Category.assoc]
+  · dsimp
+    rw [Category.assoc, ← shiftFunctorZero_hom_app_shift]
+    exact (shiftFunctorZero C S).hom.naturality X.d
   · cat_disch
 
 end
