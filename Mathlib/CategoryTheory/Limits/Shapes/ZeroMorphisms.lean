@@ -91,7 +91,7 @@ private theorem ext_aux (I J : HasZeroMorphisms C)
 carefully consider whether you've made a mistake in allowing two
 instances of `HasZeroMorphisms` to exist at all.
 
-See, particularly, the note on `zeroMorphismsOfZeroObject` below.
+See, particularly, the note on `HasZeroObject.zeroMorphismsOfZeroObject` below.
 -/
 theorem ext (I J : HasZeroMorphisms C) : I = J := by
   apply ext_aux
@@ -218,7 +218,7 @@ end IsZero
 
 It is rarely a good idea to use this. Many categories that have a zero object have zero
 morphisms for some other reason, for example from additivity. Library code that uses
-`zeroMorphismsOfZeroObject` will then be incompatible with these categories because
+`HasZeroObject.zeroMorphismsOfZeroObject` will then be incompatible with these categories because
 the `HasZeroMorphisms` instances will not be definitionally equal. For this reason library
 code should generally ask for an instance of `HasZeroMorphisms` separately, even if it already
 asks for an instance of `HasZeroObject`. -/
@@ -621,7 +621,7 @@ lemma IsColimit.isZero_pt {c : Cocone F} (hc : IsColimit c) (hF : IsZero F) : Is
   (isZero_zero C).of_iso (IsColimit.coconePointUniqueUpToIso hc
     (IsColimit.ofIsZero (Cocone.mk 0 0) hF (isZero_zero C)))
 
-/-- Given a functor `F : D ⥤ C`, zero morphisms on `C` induce zero morphisms on
+/-- Given a fully faithful functor `F : D ⥤ C`, zero morphisms on `C` induce zero morphisms on
 `D` by taking preimages. -/
 @[reducible]
 def _root_.CategoryTheory.Functor.FullyFaithful.hasZeroMorphisms (hF : F.FullyFaithful) :
