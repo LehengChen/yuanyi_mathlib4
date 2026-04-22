@@ -135,7 +135,7 @@ variable {U} in
 /-- For (U : Comonad C), morphisms `c ⟶ c'` in the Cokleisli category of `U` are
 morphisms ` U.obj c ⟶ c'` in `C`. -/
 structure Hom (c c' : Cokleisli U) where
-  /-- The morphism in C underlying the morphism in the Kleisli category. -/
+  /-- The morphism in C underlying the morphism in the co-Kleisli category. -/
   of : U.obj c.of ⟶ c'.of
 
 instance [Inhabited C] (U : Comonad C) : Inhabited (Cokleisli U) := ⟨.mk U default⟩
