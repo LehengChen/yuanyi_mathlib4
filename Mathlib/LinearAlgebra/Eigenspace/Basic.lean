@@ -746,15 +746,20 @@ theorem genEigenspace_restrict (f : End R M) (p : Submodule R M) (k : ℕ∞) (�
       Submodule.comap p.subtype (f.genEigenspace μ l) by
     simp_rw [mem_genEigenspace, ← mem_genEigenspace_nat, this,
       Submodule.mem_comap, mem_genEigenspace (k := k), mem_genEigenspace_nat]
+  have hcomm :
+      (f - μ • 1).comp p.subtype = p.subtype.comp (LinearMap.restrict f hfp - μ • 1) := by
+    ext x
+    rfl
   intro l
-  simp only [genEigenspace_nat, ← LinearMap.ker_comp]
-  induction l with
-  | zero =>
-    rw [pow_zero, pow_zero, Module.End.one_eq_id]
-    apply (Submodule.ker_subtype _).symm
-  | succ l ih =>
-    erw [pow_succ, pow_succ, LinearMap.ker_comp, LinearMap.ker_comp, ih, ← LinearMap.ker_comp,
-      LinearMap.comp_assoc]
+  rw [genEigenspace_nat, genEigenspace_nat]
+  calc
+    LinearMap.ker ((LinearMap.restrict f hfp - μ • 1) ^ l) =
+        LinearMap.ker (p.subtype.comp ((LinearMap.restrict f hfp - μ • 1) ^ l)) := by
+          rw [(LinearMap.ker_comp_of_ker_eq_bot _ (Submodule.ker_subtype p)).symm]
+    _ = LinearMap.ker (((f - μ • 1) ^ l).comp p.subtype) := by
+          rw [← commute_pow_left_of_commute hcomm l]
+    _ = Submodule.comap p.subtype (LinearMap.ker ((f - μ • 1) ^ l)) := by
+          rw [LinearMap.ker_comp]
 
 lemma _root_.Submodule.inf_genEigenspace (f : End R M) (p : Submodule R M) {k : ℕ∞} {μ : R}
     (hfp : ∀ x : M, x ∈ p → f x ∈ p) :
