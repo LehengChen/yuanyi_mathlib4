@@ -145,7 +145,14 @@ lemma GrothendieckTopology.preservesSheafification_iff_of_adjunctions
     rw [J.W_iff_isIso_map_of_adjunction adj₁] at hf
     dsimp [MorphismProperty.inverseImage]
     rw [← (W _).postcomp_iff _ _ (h P₂), ← whiskerRight_comp]
-    erw [adj₁.unit.naturality f]
+    have hnat :
+        whiskerRight (f ≫ adj₁.unit.app P₂) F =
+          whiskerRight (adj₁.unit.app P₁ ≫ (G₁ ⋙ sheafToPresheaf J A).map f) F := by
+      ext X
+      have hX := NatTrans.congr_app (adj₁.unit.naturality f) X
+      dsimp at hX ⊢
+      rw [hX]
+    rw [hnat]
     dsimp only [Functor.comp_map]
     rw [whiskerRight_comp, (W _).precomp_iff _ _ (h P₁)]
     apply ObjectProperty.isLocal_of_isIso
@@ -163,13 +170,27 @@ def sheafComposeNatTrans :
   app P := (adj₂.homEquiv _ _).symm (whiskerRight (adj₁.unit.app P) F)
   naturality {P Q} f := by
     dsimp
-    erw [← adj₂.homEquiv_naturality_left_symm,
-      ← adj₂.homEquiv_naturality_right_symm]
-    congr 1
-    ext X
-    have := NatTrans.congr_app (adj₁.unit.naturality f) X
-    dsimp at this ⊢
-    grind
+    calc
+      G₂.map (whiskerRight f F) ≫
+          (adj₂.homEquiv (Q ⋙ F) ((sheafCompose J F).obj (G₁.obj Q))).symm
+            (whiskerRight (adj₁.unit.app Q) F) =
+        (adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj Q))).symm
+          (whiskerRight f F ≫ whiskerRight (adj₁.unit.app Q) F) := by
+            rw [← adj₂.homEquiv_naturality_left_symm]
+      _ =
+        (adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj Q))).symm
+          (whiskerRight (adj₁.unit.app P) F ≫
+            (sheafToPresheaf J B).map ((sheafCompose J F).map (G₁.map f))) := by
+            congr 1
+            ext X
+            have hX := NatTrans.congr_app (adj₁.unit.naturality f) X
+            dsimp at hX ⊢
+            grind
+      _ =
+        (adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj P))).symm
+          (whiskerRight (adj₁.unit.app P) F) ≫ (sheafCompose J F).map (G₁.map f) := by
+            rw [← adj₂.homEquiv_naturality_right_symm]
+            rfl
 
 set_option backward.isDefEq.respectTransparency false in
 lemma sheafComposeNatTrans_fac (P : Cᵒᵖ ⥤ A) :
@@ -187,9 +208,19 @@ lemma sheafComposeNatTrans_app_uniq (P : Cᵒᵖ ⥤ A)
     α = (sheafComposeNatTrans J F adj₁ adj₂).app P := by
   apply (adj₂.homEquiv _ _).injective
   dsimp [sheafComposeNatTrans]
-  erw [Equiv.apply_symm_apply]
-  rw [← hα]
-  apply adj₂.homEquiv_unit
+  calc
+    (adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj P))) α =
+        adj₂.unit.app (P ⋙ F) ≫ (sheafToPresheaf J B).map α := by
+          rw [adj₂.homEquiv_unit]
+    _ = whiskerRight (adj₁.unit.app P) F := hα
+    _ =
+        (adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj P)))
+          ((adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj P))).symm
+            (whiskerRight (adj₁.unit.app P) F)) := by
+              exact
+                (Equiv.apply_symm_apply
+                  (adj₂.homEquiv (P ⋙ F) ((sheafCompose J F).obj (G₁.obj P)))
+                  (whiskerRight (adj₁.unit.app P) F)).symm
 
 set_option backward.isDefEq.respectTransparency false in
 lemma GrothendieckTopology.preservesSheafification_iff_of_adjunctions_of_hasSheafCompose :
