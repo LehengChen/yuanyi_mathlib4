@@ -58,7 +58,7 @@ set_option backward.isDefEq.respectTransparency false in
       rw [← Subobject.pullback_comp, ← Subobject.pullback_comp] at this
       convert this using 3 <;> simp
 
-/-- The unit for the tensor `X ⊗ Y` in `Dial C`. -/
+/-- The unit object for the tensor product in `Dial C`. -/
 @[simps] def tensorUnitImpl : Dial C := { src := ⊤_ _, tgt := ⊤_ _, rel := ⊤ }
 
 set_option backward.isDefEq.respectTransparency false in
