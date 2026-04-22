@@ -291,7 +291,7 @@ structure RightAdjoint (left : a ⟶ b) where
   /-- The adjunction between `left` and `right`. -/
   adj : left ⊣ right
 
-/-- The existence of a right adjoint of `f`. -/
+/-- The existence of a right adjoint of `left`. -/
 class IsLeftAdjoint (left : a ⟶ b) : Prop where mk' ::
   nonempty : Nonempty (RightAdjoint left)
 
