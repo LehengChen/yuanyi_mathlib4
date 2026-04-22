@@ -26,8 +26,7 @@ Similarly, if it preserves all finite products and equalizers, then it preserves
 
 ## TODO
 
-Provide the dual results.
-Show the analogous results for functors which reflect or create (co)limits.
+Show the analogous results for functors which reflect (co)limits.
 -/
 
 @[expose] public section
