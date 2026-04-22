@@ -17,7 +17,7 @@ This category is classically equivalent to the category of pointed types. The re
 constructively stems from the difference between `Part` and `Option`. Both can model partial
 functions, but the latter forces a decidable domain.
 
-Precisely, `PartialFunToPointed` turns a partial function `α →. β` into a function
+Precisely, `partialFunToPointed` turns a partial function `α →. β` into a function
 `Option α → Option β` by sending to `none` the undefined values (and `none` to `none`). But being
 defined is (generally) undecidable while being sent to `none` is decidable. So it can't be
 constructive.
@@ -83,7 +83,7 @@ instance : typeToPartialFun.Faithful where
 
 -- b ∈ PFun.toSubtype (fun x ↦ x ≠ X.point) Subtype.val a ↔ b ∈ Part.some a
 /-- The functor which deletes the point of a pointed type. In return, this makes the maps partial.
-This is the computable part of the equivalence `PartialFunEquivPointed`. -/
+This is the computable part of the equivalence `partialFunEquivPointed`. -/
 @[simps obj map]
 def pointedToPartialFun : Pointed.{u} ⥤ PartialFun where
   obj X := { x : X // x ≠ X.point }
@@ -101,7 +101,7 @@ def pointedToPartialFun : Pointed.{u} ⥤ PartialFun where
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor which maps undefined values to a new point. This makes the maps total and creates
-pointed types. This is the noncomputable part of the equivalence `PartialFunEquivPointed`. It can't
+pointed types. This is the noncomputable part of the equivalence `partialFunEquivPointed`. It can't
 be computable because `= Option.none` is decidable while the domain of a general `Part` isn't. -/
 @[simps obj map]
 noncomputable def partialFunToPointed : PartialFun ⥤ Pointed := by
@@ -117,7 +117,7 @@ noncomputable def partialFunToPointed : PartialFun ⥤ Pointed := by
         rw [Part.bind_toOption g (f a), Option.elim'_eq_elim] }
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The equivalence induced by `PartialFunToPointed` and `PointedToPartialFun`.
+/-- The equivalence induced by `partialFunToPointed` and `pointedToPartialFun`.
 `Part.equivOption` made functorial. -/
 @[simps!]
 noncomputable def partialFunEquivPointed : PartialFun.{u} ≌ Pointed where
