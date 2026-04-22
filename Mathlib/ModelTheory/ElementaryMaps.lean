@@ -84,10 +84,9 @@ theorem map_boundedFormula (f : M ↪ₑ[L] N) {α : Type*} {n : ℕ} (φ : L.Bo
       _root_.Equiv.symm_comp_self, Function.comp_id, Function.comp_assoc, Sum.elim_comp_inl,
       Function.comp_assoc _ _ Sum.inr, Sum.elim_comp_inr, ← Function.comp_assoc] at h
     refine h.trans ?_
-    erw [Function.comp_assoc _ _ (Fintype.equivFin _), _root_.Equiv.symm_comp_self,
-      Function.comp_id, Sum.elim_comp_inl, Sum.elim_comp_inr (v ∘ Subtype.val) xs,
-      ← Set.inclusion_eq_id (s := (BoundedFormula.freeVarFinset φ : Set α)) Set.Subset.rfl,
-      BoundedFormula.realize_restrictFreeVar' Set.Subset.rfl]
+    rw [Function.comp_assoc _ _ (Fintype.equivFin _), _root_.Equiv.symm_comp_self,
+      Function.comp_id, Sum.elim_comp_inl, Sum.elim_comp_inr (v ∘ Subtype.val) xs]
+    exact propext (BoundedFormula.realize_restrictFreeVar' (φ := φ) Set.Subset.rfl)
 
 @[simp]
 theorem map_formula (f : M ↪ₑ[L] N) {α : Type*} (φ : L.Formula α) (x : α → M) :
@@ -259,7 +258,7 @@ theorem isElementary_of_exists (f : M ↪[L] N)
     simp [BoundedFormula.Realize, ← Sum.comp_elim, HomClass.realize_term]
   · intros
     simp only [BoundedFormula.Realize, ← Sum.comp_elim, HomClass.realize_term]
-    erw [map_rel f]
+    exact map_rel f _ _
   · intro _ _ _ ih1 ih2 _
     simp [ih1, ih2]
   · intro n φ ih xs
