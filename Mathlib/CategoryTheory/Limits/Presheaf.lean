@@ -518,9 +518,23 @@ lemma uliftYonedaEquiv_ι_presheafHom (P : Cᵒᵖ ⥤ Type max w v₁ v₂) {X 
     uliftYonedaEquiv (f ≫ presheafHom.{w} φ P) =
       (G.map f).app (Opposite.op (F.obj X)) ((φ.app X).app _ (ULift.up (𝟙 _))) := by
   obtain ⟨x, rfl⟩ := uliftYonedaEquiv.symm.surjective f
-  erw [(colimitOfRepresentable P).fac _ (Opposite.op (P.elementsMk _ x))]
-  dsimp only [coconeApp]
-  apply Equiv.apply_symm_apply
+  let s : Cocone (functorToRepresentables P) :=
+    { pt := F.op ⋙ G.obj P
+      ι :=
+        { app := fun y ↦ coconeApp.{w} φ y.unop
+          naturality := by
+            intro j j' f
+            simpa using coconeApp_naturality (φ := φ) f.unop } }
+  have h := congrArg uliftYonedaEquiv
+    ((colimitOfRepresentable P).fac s (Opposite.op (P.elementsMk _ x)))
+  have h' :
+      uliftYonedaEquiv (s.ι.app (Opposite.op (P.elementsMk _ x))) =
+        (G.map (uliftYonedaEquiv.symm x)).app (Opposite.op (F.obj X))
+          ((φ.app X).app _ (ULift.up (𝟙 _))) := by
+    dsimp [s, coconeApp]
+    exact Equiv.apply_symm_apply _ _
+  exact by
+    simpa [presheafHom, coconeOfRepresentable, s] using h.trans h'
 
 lemma uliftYonedaEquiv_presheafHom_uliftYoneda_obj (X : C) :
     uliftYonedaEquiv.{max w v₂} (presheafHom.{w} φ (uliftYoneda.{max w v₂}.obj X)) =
