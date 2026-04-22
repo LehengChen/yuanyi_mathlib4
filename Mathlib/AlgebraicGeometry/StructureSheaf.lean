@@ -612,8 +612,15 @@ def modulePresheafStalkIso (x : PrimeSpectrum.Top R) :
     rw [← map_smul]
     refine (this _).trans ?_
     dsimp [toStalk]
-    erw [this]
-    exact ((structurePresheafInModuleCat R M).germ U x hxU).hom.map_smul _ _
+    have hs :
+        (Limits.colimit.isoColimitCocone ⟨_, Limits.isColimitOfPreserves (forget₂ (ModuleCat R) Ab)
+          (Limits.colimit.isColimit ((OpenNhds.inclusion x).op ⋙
+            structurePresheafInModuleCat R M))⟩:).addCommGroupIsoToAddEquiv
+          (TopCat.Presheaf.germ (moduleStructurePresheaf R M).presheaf U x hxU s) =
+        (structurePresheafInModuleCat R M).germ U x hxU s := by
+      simpa [α, Iso.addCommGroupIsoToAddEquiv_apply] using this s
+    exact (((structurePresheafInModuleCat R M).germ U x hxU).hom.map_smul _ _).trans
+      (congrArg (fun t => r • t) hs.symm)
 
 instance (x : PrimeSpectrum.Top R) :
     Module ((structurePresheafInCommRingCat R).stalk x)
@@ -841,9 +848,7 @@ def commRingCatStalkEquivModuleStalk (x : PrimeSpectrum.Top R) :
     refine congr($this _).trans ?_
     refine (((structurePresheafInCommRingCat R).germ U x hxU).hom.map_mul _ _).trans ?_
     congr 1
-    · dsimp [toStalk]
-      erw [← (structurePresheafInCommRingCat R).germ_res_apply (homOfLE (le_top : U ≤ ⊤)) _ hxU]
-      rfl
+    · exact algebraMap_germ_apply U x hxU r
     · exact congr($this _).symm
 
 public instance (x : PrimeSpectrum.Top R) :
