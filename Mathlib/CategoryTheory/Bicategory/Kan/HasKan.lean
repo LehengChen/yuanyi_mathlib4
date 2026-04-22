@@ -170,7 +170,8 @@ theorem lanCompIsoWhisker_inv_right :
     (lanCompIsoWhisker f g h).inv.right = (isKan f g h).desc (lanLeftExtension f (g ≫ h)) :=
   rfl
 
-/-- The 1-morphism `h` commutes with the left Kan extension `f⁺ g`. -/
+/-- The comparison isomorphism `f⁺ (g ≫ h) ≅ f⁺ g ≫ h` induced by the fact that `h`
+commutes with the left Kan extension `f⁺ g`. -/
 @[simps!]
 def lanCompIso : f⁺ (g ≫ h) ≅ f⁺ g ≫ h := Comma.rightIso <| lanCompIsoWhisker f g h
 
@@ -316,7 +317,8 @@ theorem lanLiftCompIsoWhisker_inv_right :
     (lanLiftCompIsoWhisker f g h).inv.right = (isKan f g h).desc (lanLiftLeftLift f (h ≫ g)) :=
   rfl
 
-/-- The 1-morphism `h` commutes with the left Kan lift `f₊ g`. -/
+/-- The comparison isomorphism `f₊ (h ≫ g) ≅ h ≫ f₊ g` induced by the fact that `h`
+commutes with the left Kan lift `f₊ g`. -/
 @[simps!]
 def lanLiftCompIso : f₊ (h ≫ g) ≅ h ≫ f₊ g := Comma.rightIso <| lanLiftCompIsoWhisker f g h
 
