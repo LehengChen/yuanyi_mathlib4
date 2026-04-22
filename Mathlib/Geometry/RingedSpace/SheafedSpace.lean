@@ -257,8 +257,17 @@ lemma hom_stalk_ext {X Y : SheafedSpace C} (f g : X ⟶ Y) (h : f.hom.base = g.h
   ext U s
   refine section_ext X.sheaf _ _ _ fun x hx ↦
     show X.presheaf.germ _ x _ _ = X.presheaf.germ _ x _ _ from ?_
-  erw [← PresheafedSpace.stalkMap_germ_apply ⟨f, fc⟩, ← PresheafedSpace.stalkMap_germ_apply ⟨f, gc⟩]
-  simp [h']
+  have h'' : PresheafedSpace.Hom.stalkMap ⟨f, fc⟩ x = PresheafedSpace.Hom.stalkMap ⟨f, gc⟩ x := by
+    simpa using h' x
+  calc
+    X.presheaf.germ ((Opens.map f).obj U) x hx (fc.app (op U) s) =
+        PresheafedSpace.Hom.stalkMap ⟨f, fc⟩ x (Y.presheaf.germ U (f x) hx s) := by
+          symm
+          exact PresheafedSpace.stalkMap_germ_apply ⟨f, fc⟩ U x hx s
+    _ = PresheafedSpace.Hom.stalkMap ⟨f, gc⟩ x (Y.presheaf.germ U (f x) hx s) := by
+          rw [h'']
+    _ = X.presheaf.germ ((Opens.map f).obj U) x hx (gc.app (op U) s) := by
+          exact PresheafedSpace.stalkMap_germ_apply ⟨f, gc⟩ U x hx s
 
 attribute [local ext] DFunLike.ext in
 include instCC in
