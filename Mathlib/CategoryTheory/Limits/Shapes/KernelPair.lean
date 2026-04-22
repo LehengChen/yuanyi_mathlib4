@@ -71,7 +71,7 @@ instance [Mono f] : Inhabited (IsKernelPair f (𝟙 _) (𝟙 _)) :=
 variable {f a b}
 
 /--
-Given a pair of morphisms `p`, `q` to `X` which factor through `f`, they factor through any kernel
+Given a pair of morphisms `p`, `q` to `X` whose composites with `f` agree, they factor through any kernel
 pair of `f`.
 -/
 noncomputable def lift {S : C} (k : IsKernelPair f a b) (p q : S ⟶ X) (w : p ≫ f = q ≫ f) :
@@ -89,7 +89,7 @@ lemma lift_snd {S : C} (k : IsKernelPair f a b) (p q : S ⟶ X) (w : p ≫ f = q
   PullbackCone.IsLimit.lift_snd _ _ _ _
 
 /--
-Given a pair of morphisms `p`, `q` to `X` which factor through `f`, they factor through any kernel
+Given a pair of morphisms `p`, `q` to `X` whose composites with `f` agree, they factor through any kernel
 pair of `f`.
 -/
 noncomputable def lift' {S : C} (k : IsKernelPair f a b) (p q : S ⟶ X) (w : p ≫ f = q ≫ f) :
