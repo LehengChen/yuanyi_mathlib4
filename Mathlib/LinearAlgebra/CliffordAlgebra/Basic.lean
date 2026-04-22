@@ -103,12 +103,15 @@ def ι : M →ₗ[R] CliffordAlgebra Q :=
 /-- As well as being linear, `ι Q` squares to the quadratic form -/
 @[simp]
 theorem ι_sq_scalar (m : M) : ι Q m * ι Q m = algebraMap R _ (Q m) := by
-  rw [ι]
-  erw [LinearMap.comp_apply]
-  rw [AlgHom.toLinearMap_apply]
-  erw [← map_mul (RingQuot.mkAlgHom R (Rel Q))]
-  rw [RingQuot.mkAlgHom_rel R (Rel.of m), AlgHom.commutes]
-  rfl
+  calc
+    ι Q m * ι Q m
+        = RingQuot.mkAlgHom R (Rel Q) ((TensorAlgebra.ι R) m) *
+            RingQuot.mkAlgHom R (Rel Q) ((TensorAlgebra.ι R) m) := by
+              rfl
+    _ = RingQuot.mkAlgHom R (Rel Q) ((TensorAlgebra.ι R) m * (TensorAlgebra.ι R) m) := by
+      rw [← map_mul]
+    _ = algebraMap R _ (Q m) := by
+      rw [RingQuot.mkAlgHom_rel R (Rel.of m), AlgHom.commutes]
 
 variable {Q} {A : Type*} [Semiring A] [Algebra R A]
 
