@@ -69,8 +69,36 @@ theorem coimageImageComparison_app :
   simp only [coimage_image_factorisation, PreservesKernel.iso_hom, Category.assoc,
     kernel.lift_ι, Category.comp_id, PreservesCokernel.iso_inv,
     cokernel.π_desc_assoc, Category.id_comp]
-  erw [kernelComparison_comp_ι _ ((evaluation C D).obj X)]
-  erw [π_comp_cokernelComparison_assoc _ ((evaluation C D).obj X)]
+  change α.app X =
+    cokernel.π (((evaluation C D).obj X).map (kernel.ι α)) ≫
+      cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+        ((coimageImageComparison α).app X ≫
+          (kernelComparison (cokernel.π α) ((evaluation C D).obj X) ≫
+            kernel.ι (((evaluation C D).obj X).map (cokernel.π α))))
+  have h₁ :
+      cokernel.π (((evaluation C D).obj X).map (kernel.ι α)) ≫
+          cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+            ((coimageImageComparison α).app X ≫
+              (kernelComparison (cokernel.π α) ((evaluation C D).obj X) ≫
+                kernel.ι (((evaluation C D).obj X).map (cokernel.π α)))) =
+        cokernel.π (((evaluation C D).obj X).map (kernel.ι α)) ≫
+          cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+            ((coimageImageComparison α).app X ≫
+              ((evaluation C D).obj X).map (kernel.ι (cokernel.π α))) := by
+    exact congrArg
+      (fun t =>
+        cokernel.π (((evaluation C D).obj X).map (kernel.ι α)) ≫
+          cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+            ((coimageImageComparison α).app X ≫ t))
+      (kernelComparison_comp_ι (f := cokernel.π α) ((evaluation C D).obj X))
+  rw [h₁]
+  change α.app X =
+    cokernel.π (((evaluation C D).obj X).map (kernel.ι α)) ≫
+      cokernelComparison (kernel.ι α) ((evaluation C D).obj X) ≫
+        ((coimageImageComparison α).app X ≫
+          ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)))
+  rw [π_comp_cokernelComparison_assoc (f := kernel.ι α) ((evaluation C D).obj X)
+    (((coimageImageComparison α).app X) ≫ ((evaluation C D).obj X).map (kernel.ι (cokernel.π α)))]
   conv_lhs => rw [← coimage_image_factorisation α]
   rfl
 
