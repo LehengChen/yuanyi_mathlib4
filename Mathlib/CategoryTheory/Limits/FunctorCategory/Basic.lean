@@ -106,10 +106,18 @@ def evaluationJointlyReflectsColimits {F : J ⥤ K ⥤ C} (c : Cocone F)
     { app := fun k => (t k).desc ⟨s.pt.obj k, whiskerRight s.ι ((evaluation K C).obj k)⟩
       naturality := fun X Y f =>
         (t X).hom_ext fun j => by
-          rw [(t X).fac_assoc _ j]
-          erw [← (c.ι.app j).naturality_assoc f]
-          erw [(t Y).fac ⟨s.pt.obj _, whiskerRight s.ι _⟩ j]
-          simp }
+          let sX : Cocone (F ⋙ (evaluation K C).obj X) :=
+            ⟨s.pt.obj X, whiskerRight s.ι ((evaluation K C).obj X)⟩
+          let sY : Cocone (F ⋙ (evaluation K C).obj Y) :=
+            ⟨s.pt.obj Y, whiskerRight s.ι ((evaluation K C).obj Y)⟩
+          rw [(t X).fac_assoc sX j]
+          have h :
+              (((evaluation K C).obj X).mapCocone c).ι.app j ≫ c.pt.map f ≫ (t Y).desc sY =
+                (F.obj j).map f ≫ (((evaluation K C).obj Y).mapCocone c).ι.app j ≫
+                  (t Y).desc sY := by
+            simp [sY]
+          rw [h, (t Y).fac sY j]
+          simp [sX, sY] }
   fac s j := by ext k; exact (t k).fac _ j
   uniq s m w := by
     ext x
