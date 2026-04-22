@@ -33,7 +33,7 @@ variable {X Y : C} (f : X ⟶ Y)
 section Images
 
 variable [HasCokernel f] [HasKernel (cokernel.π f)] [PreservesColimit (parallelPair f 0) F]
-  [PreservesLimit (parallelPair (cokernel.π f) 0) F] [HasCokernel (F.map f)]
+  [PreservesLimit (parallelPair (cokernel.π f) 0) F]
   [HasKernel (cokernel.π (F.map f))]
 
 /-- If a functor preserves kernels and cokernels, it preserves abelian images. -/
@@ -67,7 +67,7 @@ end Images
 section Coimages
 
 variable [HasKernel f] [HasCokernel (kernel.ι f)] [PreservesLimit (parallelPair f 0) F]
-  [PreservesColimit (parallelPair (kernel.ι f) 0) F] [HasKernel (F.map f)]
+  [PreservesColimit (parallelPair (kernel.ι f) 0) F]
   [HasCokernel (kernel.ι (F.map f))]
 
 /-- If a functor preserves kernels and cokernels, it preserves abelian coimages. -/
