@@ -761,16 +761,47 @@ homeomorphism of topological spaces. -/
 def homeoIccQuot [TopologicalSpace 𝕜] [OrderTopology 𝕜] : 𝕋 ≃ₜ Quot (EndpointIdent p a) where
   toEquiv := equivIccQuot p a
   continuous_toFun := by
+    have hIoc :
+        (equivIccQuot p a).toFun ∘ (QuotientAddGroup.mk' (zmultiples p) : 𝕜 → 𝕋) =
+          fun y : 𝕜 ↦
+          (Quot.mk (EndpointIdent p a)
+            ⟨toIocMod hp.out a y, Ioc_subset_Icc_self <| toIocMod_mem_Ioc _ _ y⟩ :
+              Quot (EndpointIdent p a)) := by
+      simpa using equivIccQuot_comp_mk_eq_toIocMod (p := p) (a := a)
+    have hIco :
+        (equivIccQuot p a).toFun ∘ (QuotientAddGroup.mk' (zmultiples p) : 𝕜 → 𝕋) =
+          fun y : 𝕜 ↦
+          (Quot.mk (EndpointIdent p a)
+            ⟨toIcoMod hp.out a y, Ico_subset_Icc_self <| toIcoMod_mem_Ico _ _ y⟩ :
+              Quot (EndpointIdent p a)) := by
+      simpa using equivIccQuot_comp_mk_eq_toIcoMod (p := p) (a := a)
     simp_rw [isQuotientMap_quotient_mk'.continuous_iff, continuous_iff_continuousAt,
       continuousAt_iff_continuous_left_right]
     intro x; constructor
-    on_goal 1 => erw [equivIccQuot_comp_mk_eq_toIocMod]
-    on_goal 2 => erw [equivIccQuot_comp_mk_eq_toIcoMod]
-    all_goals
-      apply continuous_quot_mk.continuousAt.comp_continuousWithinAt
-      rw [IsInducing.subtypeVal.continuousWithinAt_iff]
-    · apply continuousWithinAt_toIocMod_Iic
-    · apply continuousWithinAt_toIcoMod_Ici
+    · have h :
+          ContinuousWithinAt (fun y : 𝕜 ↦
+            (Quot.mk (EndpointIdent p a)
+              ⟨toIocMod hp.out a y, Ioc_subset_Icc_self <| toIocMod_mem_Ioc _ _ y⟩ :
+                Quot (EndpointIdent p a)))
+            (Iic x) x := by
+          apply continuous_quot_mk.continuousAt.comp_continuousWithinAt
+          rw [IsInducing.subtypeVal.continuousWithinAt_iff]
+          exact continuousWithinAt_toIocMod_Iic hp.out a x
+      have hcont := hIoc ▸ h
+      rw [QuotientAddGroup.coe_mk' (N := zmultiples p)] at hcont
+      exact hcont
+    · have h :
+          ContinuousWithinAt (fun y : 𝕜 ↦
+            (Quot.mk (EndpointIdent p a)
+              ⟨toIcoMod hp.out a y, Ico_subset_Icc_self <| toIcoMod_mem_Ico _ _ y⟩ :
+                Quot (EndpointIdent p a)))
+            (Ici x) x := by
+          apply continuous_quot_mk.continuousAt.comp_continuousWithinAt
+          rw [IsInducing.subtypeVal.continuousWithinAt_iff]
+          exact continuousWithinAt_toIcoMod_Ici hp.out a x
+      have hcont := hIco ▸ h
+      rw [QuotientAddGroup.coe_mk' (N := zmultiples p)] at hcont
+      exact hcont
   continuous_invFun :=
     continuous_quot_lift _ ((AddCircle.continuous_mk' p).comp continuous_subtype_val)
 
