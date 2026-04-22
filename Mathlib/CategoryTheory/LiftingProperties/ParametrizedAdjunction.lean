@@ -16,7 +16,8 @@ If we have a parametrized adjunction `adj₂ : F ⊣₂ G`,
 `sq₁₂ : F.PushoutObjObj f₁ f₂` and `sq₁₃ : G.PullbackObjObj f₁ f₃`,
 we show that `sq₁₂.ι` has the left lifting property with respect to
 `f₃` if and only if `f₂` has the left lifting property with respect
-to `sq₁₃.π`: this is the lemma `ParametrizedAdjunction.hasLiftingProperty_iff`.
+to `sq₁₃.π`: this is the lemma
+`CategoryTheory.ParametrizedAdjunction.hasLiftingProperty_iff`.
 
 -/
 
