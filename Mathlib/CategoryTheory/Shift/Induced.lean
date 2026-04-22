@@ -112,8 +112,14 @@ noncomputable def induced : HasShift D A :=
         simp only [Induced.add_hom_app_obj, eq, shiftFunctorAdd_zero_add_hom_app,
           Functor.map_comp, eqToHom_map, Category.assoc, eqToHom_trans_assoc,
           eqToHom_refl, Category.id_comp, eqToHom_app, Induced.zero_inv_app_obj]
-        erw [← NatTrans.naturality_assoc, Iso.hom_inv_id_app_assoc]
-        rfl
+        have hnat :
+            (i n).hom.app X ≫ F.map ((shiftFunctor C n).map ((shiftFunctorZero C A).inv.app X)) ≫
+              (i n).inv.app ((shiftFunctor C 0).obj X) ≫ (s n).map ((i 0).inv.app X) =
+            (s n).map (F.map ((shiftFunctorZero C A).inv.app X)) ≫ (s n).map ((i 0).inv.app X) := by
+          simpa only [Functor.comp_map, Category.assoc, Iso.hom_inv_id_app_assoc] using
+            ((i n).hom.naturality_assoc ((shiftFunctorZero C A).inv.app X)
+              ((i n).inv.app ((shiftFunctor C 0).obj X) ≫ (s n).map ((i 0).inv.app X))).symm
+        rw [hnat]
       add_zero_hom_app := fun n => by
         suffices (Induced.add F s i n 0).hom =
             eqToHom (by rw [add_zero]; rfl) ≫ whiskerLeft (s n) (Induced.zero F s i).inv by
@@ -122,13 +128,15 @@ noncomputable def induced : HasShift D A :=
         apply ((whiskeringLeft C D D).obj F).map_injective
         ext X
         dsimp
-        erw [Induced.add_hom_app_obj, dcongr_arg (fun a => (i a).hom.app X) (add_zero n),
+        rw [Induced.add_hom_app_obj, dcongr_arg (fun a => (i a).hom.app X) (add_zero n),
           ← cancel_mono ((s 0).map ((i n).hom.app X)), Category.assoc,
           Category.assoc, Category.assoc, Category.assoc, Category.assoc,
-          Category.assoc, ← (s 0).map_comp, Iso.inv_hom_id_app, Functor.map_id, Category.comp_id,
-          ← NatTrans.naturality, Induced.zero_inv_app_obj,
-          shiftFunctorAdd_add_zero_hom_app]
-        simp [eqToHom_map, eqToHom_app]
+          Category.assoc, ← (s 0).map_comp, Iso.inv_hom_id_app]
+        dsimp
+        rw [(s 0).map_id, Category.comp_id, ← NatTrans.naturality,
+          Induced.zero_inv_app_obj, shiftFunctorAdd_add_zero_hom_app, Functor.map_comp,
+          eqToHom_map, eqToHom_app]
+        simp [Category.assoc]
       assoc_hom_app := fun m₁ m₂ m₃ => by
         suffices (Induced.add F s i (m₁ + m₂) m₃).hom ≫
             whiskerRight (Induced.add F s i m₁ m₂).hom (s m₃) =
@@ -148,16 +156,30 @@ noncomputable def induced : HasShift D A :=
         rw [← cancel_mono ((s m₃).map ((s m₂).map ((i m₁).hom.app X)))]
         simp only [Induced.add_hom_app_obj, Category.assoc, Functor.map_comp]
         slice_lhs 4 5 =>
-          erw [← Functor.map_comp, Iso.inv_hom_id_app, Functor.map_id]
-        erw [Category.id_comp]
+          rw [← (s m₃).map_comp, Iso.inv_hom_id_app]
+          dsimp
+          simp only [(s m₃).map_id]
+        simp only [Functor.comp_obj, Category.id_comp, Category.assoc, eqToHom_app,
+          NatTrans.naturality_assoc, Induced.add_hom_app_obj, Functor.comp_map,
+          Iso.inv_hom_id_app_assoc]
         slice_lhs 6 7 =>
-          erw [← Functor.map_comp, ← Functor.map_comp, Iso.inv_hom_id_app,
-            (s m₂).map_id, (s m₃).map_id]
-        erw [Category.comp_id, ← NatTrans.naturality_assoc, reassoc_of% eq,
+          rw [← Functor.map_comp, ← Functor.map_comp, Iso.inv_hom_id_app]
+          dsimp
+          simp only [(s m₂).map_id, (s m₃).map_id]
+        have hnat :
+            (i m₃).inv.app ((shiftFunctor C (m₁ + m₂)).obj X) ≫
+              (s m₃).map (F.map ((shiftFunctorAdd C m₁ m₂).hom.app X)) ≫
+              (s m₃).map ((i m₂).inv.app ((shiftFunctor C m₁).obj X)) =
+            F.map ((shiftFunctor C m₃).map ((shiftFunctorAdd C m₁ m₂).hom.app X)) ≫
+              (i m₃).inv.app ((shiftFunctor C m₂).obj ((shiftFunctor C m₁).obj X)) ≫
+              (s m₃).map ((i m₂).inv.app ((shiftFunctor C m₁).obj X)) := by
+          simpa only [Functor.comp_map] using
+            ((i m₃).inv.naturality_assoc ((shiftFunctorAdd C m₁ m₂).hom.app X)
+              ((s m₃).map ((i m₂).inv.app ((shiftFunctor C m₁).obj X)))).symm
+        rw [Category.comp_id, hnat, reassoc_of% eq,
           dcongr_arg (fun a => (i a).hom.app X) (add_assoc m₁ m₂ m₃).symm]
-        simp only [Functor.comp_obj, eqToHom_map, eqToHom_app, NatTrans.naturality_assoc,
-          Induced.add_hom_app_obj, Functor.comp_map, Category.assoc, Iso.inv_hom_id_app_assoc,
-          eqToHom_trans_assoc, eqToHom_refl, Category.id_comp, Category.comp_id,
+        simp only [Functor.comp_obj, eqToHom_map, Category.assoc, eqToHom_trans_assoc,
+          eqToHom_refl, Category.id_comp, Category.comp_id,
           ← Functor.map_comp, Iso.inv_hom_id_app, Functor.map_id] }
 
 end HasShift
