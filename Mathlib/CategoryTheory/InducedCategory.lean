@@ -39,8 +39,8 @@ variable {C : Type u₁} (D : Type u₂) [Category.{v} D]
 variable (F : C → D)
 
 /-- `InducedCategory D F`, where `F : C → D`, is a typeclass synonym for `C`,
-which provides a category structure so that the morphisms `X ⟶ Y` are the morphisms
-in `D` from `F X` to `F Y`.
+which provides a category structure so that the morphisms `X ⟶ Y` correspond to
+morphisms in `D` from `F X` to `F Y`.
 -/
 @[nolint unusedArguments]
 def InducedCategory (_F : C → D) : Type u₁ :=
