@@ -127,10 +127,9 @@ lemma evaluation_naturality {V : Opens Y} (x : (Opens.map f.base).obj V) :
     LocallyRingedSpace.residueFieldMap]
   rw [Category.assoc]
   ext a
-  simp only [CommRingCat.comp_apply]
-  erw [IsLocalRing.ResidueField.map_residue]
-  rw [LocallyRingedSpace.stalkMap_germ_apply]
-  rfl
+  simpa only [CommRingCat.comp_apply, LocallyRingedSpace.stalkMap_germ_apply] using
+    IsLocalRing.ResidueField.map_residue (CommRingCat.Hom.hom (Hom.stalkMap f x.val))
+      ((ConcreteCategory.hom (Y.presheaf.germ V (f.base x) x.property)) a)
 
 lemma evaluation_naturality_apply {V : Opens Y} (x : (Opens.map f.base).obj V)
     (a : Y.presheaf.obj (op V)) :
