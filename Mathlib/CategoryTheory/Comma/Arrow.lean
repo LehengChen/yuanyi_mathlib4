@@ -383,7 +383,7 @@ end Functor
 
 variable {C D : Type*} [Category* C] [Category* D]
 
-/-- The images of `f : Arrow C` by two isomorphic functors `F : C ⥤ D` are
+/-- The images of `f : Arrow C` by two isomorphic functors `F, G : C ⥤ D` are
 isomorphic arrows in `D`. -/
 def Arrow.isoOfNatIso {F G : C ⥤ D} (e : F ≅ G)
     (f : Arrow C) : F.mapArrow.obj f ≅ G.mapArrow.obj f :=
