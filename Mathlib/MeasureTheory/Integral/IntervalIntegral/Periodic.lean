@@ -123,7 +123,9 @@ theorem volume_closedBall {x : AddCircle T} (ε : ℝ) :
 instance : IsUnifLocDoublingMeasure (volume : Measure (AddCircle T)) := by
   refine ⟨⟨Real.toNNReal 2, Filter.Eventually.of_forall fun ε x => ?_⟩⟩
   simp only [volume_closedBall]
-  erw [← ENNReal.ofReal_mul zero_le_two]
+  have htwo : (↑(Real.toNNReal 2) : ℝ≥0∞) = ENNReal.ofReal 2 := by
+    norm_num
+  rw [htwo, ← ENNReal.ofReal_mul zero_le_two]
   apply ENNReal.ofReal_le_ofReal
   rw [mul_min_of_nonneg _ _ (zero_le_two : (0 : ℝ) ≤ 2)]
   exact min_le_min (by linarith [hT.out]) (le_refl _)
