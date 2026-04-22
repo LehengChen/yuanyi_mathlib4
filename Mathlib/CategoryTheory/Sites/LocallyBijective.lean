@@ -63,8 +63,15 @@ private lemma isLocallyBijective_iff_isIso' :
       have eq₃ := congr_arg (G.obj.map g₁.op) (Presheaf.app_localPreimage f.hom s _ hf₁)
       have eq₄ := congr_arg (G.obj.map g₂.op) (Presheaf.app_localPreimage f.hom s _ hf₂)
       refine eq₁.trans (eq₃.trans (Eq.trans ?_ (eq₄.symm.trans eq₂.symm)))
-      erw [← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply]
-      simp only [← op_comp, w]
+      have hw : f₁.op ≫ g₁.op = f₂.op ≫ g₂.op := by
+        simpa [← op_comp] using congrArg Quiver.Hom.op w
+      calc
+        G.obj.map g₁.op ((G.obj.map f₁.op) s) = G.obj.map (f₁.op ≫ g₁.op) s := by
+          rw [← FunctorToTypes.map_comp_apply]
+        _ = G.obj.map (f₂.op ≫ g₂.op) s := by
+          exact congrArg (fun k => G.obj.map k s) hw
+        _ = G.obj.map g₂.op ((G.obj.map f₂.op) s) := by
+          rw [← FunctorToTypes.map_comp_apply]
     refine ⟨H.amalgamate t ht, ?_⟩
     · apply (((isSheaf_iff_isSheaf_of_type J G.obj).1 G.property).isSeparated _
         (Presheaf.imageSieve_mem J f.hom s)).ext
