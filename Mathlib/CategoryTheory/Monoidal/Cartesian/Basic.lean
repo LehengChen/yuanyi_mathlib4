@@ -848,12 +848,10 @@ lemma lift_δ (f : X ⟶ Y) (g : X ⟶ Z) : F.map (lift f g) ≫ δ F _ _ = lift
 lemma δ_of_cartesianMonoidalCategory (X Y : C) :
     δ F X Y = CartesianMonoidalCategory.prodComparison F X Y := by cat_disch
 
-variable [PreservesFiniteProducts F]
-
-instance : IsIso (η F) :=
+instance [PreservesLimit (Functor.empty.{0} C) F] : IsIso (η F) :=
   η_of_cartesianMonoidalCategory F ▸ terminalComparison_isIso_of_preservesLimits F
 
-instance (X Y : C) : IsIso (δ F X Y) :=
+instance (X Y : C) [PreservesLimit (pair X Y) F] : IsIso (δ F X Y) :=
   δ_of_cartesianMonoidalCategory F X Y ▸ isIso_prodComparison_of_preservesLimit_pair F X Y
 
 omit [F.OplaxMonoidal] in
@@ -906,12 +904,12 @@ attribute [-instance] Functor.LaxMonoidal.comp Functor.Monoidal.instComp in
 lemma μ_comp [(F ⋙ G).Monoidal] (X Y : C) : μ (F ⋙ G) X Y = μ G _ _ ≫ G.map (μ F X Y) := by
   rw [← cancel_mono (μIso _ _ _).inv]; ext <;> simp [← Functor.comp_obj, ← Functor.map_comp]
 
-variable [PreservesFiniteProducts F]
-
-lemma ε_of_cartesianMonoidalCategory : ε F = (preservesTerminalIso F).inv := by
+lemma ε_of_cartesianMonoidalCategory [PreservesLimit (Functor.empty.{0} C) F] :
+    ε F = (preservesTerminalIso F).inv := by
   change (εIso F).symm.inv = _; congr; ext
 
-lemma μ_of_cartesianMonoidalCategory (X Y : C) : μ F X Y = (prodComparisonIso F X Y).inv := by
+lemma μ_of_cartesianMonoidalCategory (X Y : C) [PreservesLimit (pair X Y) F] :
+    μ F X Y = (prodComparisonIso F X Y).inv := by
   change (μIso F X Y).symm.inv = _; congr; ext : 1; simpa using δ_of_cartesianMonoidalCategory F X Y
 
 attribute [local instance] Functor.OplaxMonoidal.ofChosenFiniteProducts in

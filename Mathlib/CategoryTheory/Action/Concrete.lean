@@ -29,7 +29,7 @@ open CategoryTheory Limits
 namespace Action
 
 section
-variable {G : Type u} [Group G] {A : Action (Type u) G}
+variable {G : Type u} [Group G] {A : Action (Type v) G}
 
 @[simp]
 theorem ρ_inv_self_apply (g : G) (x : A.V) :

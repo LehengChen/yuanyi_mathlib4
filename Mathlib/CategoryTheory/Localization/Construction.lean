@@ -229,12 +229,14 @@ theorem morphismProperty_eq_top (P : MorphismProperty W.Localization)
 
 /-- A `MorphismProperty` in `W.Localization` is satisfied by all
 morphisms in the localized category if it contains the image of the
-morphisms in the original category, if is stable under composition
-and if the property is stable by passing to inverses. -/
+morphisms in the original category, if it is stable under composition,
+and if the property passes to the inverses of the isomorphisms associated
+to morphisms in `W`. -/
 theorem morphismProperty_eq_top' (P : MorphismProperty W.Localization)
     [P.IsStableUnderComposition] (hP₁ : ∀ ⦃X Y : C⦄ (f : X ⟶ Y), P (W.Q.map f))
-    (hP₂ : ∀ ⦃X Y : W.Localization⦄ (e : X ≅ Y) (_ : P e.hom), P e.inv) : P = ⊤ :=
-  morphismProperty_eq_top P hP₁ (fun _ _ w _ => hP₂ _ (hP₁ w))
+    (hP₂ : ∀ ⦃X Y : C⦄ (w : X ⟶ Y) (hw : W w), P (W.Q.map w) → P (wInv w hw)) :
+    P = ⊤ :=
+  morphismProperty_eq_top P hP₁ (fun _ _ w hw => hP₂ w hw (hP₁ w))
 
 @[deprecated (since := "2025-10-21")] alias morphismProperty_is_top' := morphismProperty_eq_top'
 
@@ -268,7 +270,8 @@ def natTransExtension {F₁ F₂ : W.Localization ⥤ D} (τ : W.Q ⋙ F₁ ⟶ 
       simpa only [← this] using MorphismProperty.top_apply f
     refine morphismProperty_eq_top'
       (MorphismProperty.naturalityProperty (NatTransExtension.app τ))
-      ?_ (MorphismProperty.naturalityProperty.stableUnderInverse _)
+      ?_ (fun _ _ w hw h =>
+        MorphismProperty.naturalityProperty.stableUnderInverse _ (wIso w hw) h)
     intro X Y f
     dsimp
     simpa only [NatTransExtension.app_eq] using τ.naturality f

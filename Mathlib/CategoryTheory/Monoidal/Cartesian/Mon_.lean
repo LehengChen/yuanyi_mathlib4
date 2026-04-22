@@ -24,15 +24,22 @@ open CategoryTheory MonoidalCategory Limits Opposite CartesianMonoidalCategory M
 
 namespace CategoryTheory
 
-section SemiCartesianMonoidalCategory
+section TerminalTensorUnit
 
-variable {D : Type*} [Category* D] [SemiCartesianMonoidalCategory D]
+variable {D : Type*} [Category* D] [MonoidalCategory D] [∀ X : D, Unique (X ⟶ 𝟙_ D)]
 
 @[to_additive (attr := simps)]
 instance Mon.uniqueHomToTrivial (A : Mon D) : Unique (A ⟶ Mon.trivial D) where
-  default.hom := toUnit A.X
-  default.isMonHom_hom.mul_hom := toUnit_unique _ _
-  uniq f := Mon.Hom.ext (toUnit_unique _ _)
+  default.hom := (default : A.X ⟶ 𝟙_ D)
+  default.isMonHom_hom.one_hom := by
+    dsimp only [Mon.trivial_X]
+    apply Subsingleton.elim
+  default.isMonHom_hom.mul_hom := by
+    dsimp only [Mon.trivial_X]
+    apply Subsingleton.elim
+  uniq f := Mon.Hom.ext (by
+    dsimp only [Mon.trivial_X]
+    apply Subsingleton.elim)
 
 @[deprecated (since := "2026-03-20")] alias uniqueHomToTrivial := Mon.uniqueHomToTrivial
 
@@ -45,21 +52,38 @@ instance : HasZeroObject (Mon D) where
 @[to_additive instHasZeroMorphismsAddMon]
 noncomputable instance : HasZeroMorphisms (Mon D) := HasZeroObject.zeroMorphismsOfZeroObject
 
-end SemiCartesianMonoidalCategory
+end TerminalTensorUnit
 
 universe w v u
-variable {C D : Type*} [Category.{v} C] [CartesianMonoidalCategory C]
-  [Category.{w} D] [CartesianMonoidalCategory D]
-  {M N O X Y : C} [MonObj M] [MonObj N] [MonObj O]
+variable {C D : Type*} [Category.{v} C] [Category.{w} D]
 
 namespace MonObj
+
+section MonoidalCategory
+
+variable [MonoidalCategory C] {M : C} [MonObj M]
+
+@[to_additive]
+instance : IsMonHom η[M] where
+  mul_hom := by simp [unitors_equal]
+
+end MonoidalCategory
+
+section SemiCartesianMonoidalCategory
+
+variable [SemiCartesianMonoidalCategory C] {M : C} [MonObj M]
 
 @[to_additive]
 instance : IsMonHom (toUnit M) where
 
-@[to_additive]
-instance : IsMonHom η[M] where
-  mul_hom := by simp [toUnit_unique (ρ_ (𝟙_ C)).hom (λ_ (𝟙_ C)).hom]
+end SemiCartesianMonoidalCategory
+
+end MonObj
+
+variable [CartesianMonoidalCategory C] [CartesianMonoidalCategory D]
+  {M N O X Y : C} [MonObj M] [MonObj N] [MonObj O]
+
+namespace MonObj
 
 @[to_additive]
 theorem lift_lift_assoc {A : C} {B : C} [MonObj B] (f g h : A ⟶ B) :

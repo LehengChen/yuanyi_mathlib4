@@ -876,10 +876,22 @@ instance isLeftKanExtensionAlongEquivalence (α : F₀ ≅ L.functor ⋙ F₁) :
 
 set_option backward.isDefEq.respectTransparency false in
 instance isLeftKanExtensionAlongEquivalence' (L : C ⥤ D) (α : F₀ ⟶ L ⋙ F₁)
-    [IsEquivalence L] [IsIso α] :
-    F₁.IsLeftKanExtension α :=
-  inferInstanceAs <|
-    F₁.IsLeftKanExtension (asIso α : F₀ ≅ (asEquivalence L).functor ⋙ F₁).hom
+    [Full ((whiskeringLeft C D H).obj L)] [Faithful ((whiskeringLeft C D H).obj L)]
+    [IsIso α] :
+    F₁.IsLeftKanExtension α := by
+  let W := (whiskeringLeft C D H).obj L
+  refine ⟨⟨?_⟩⟩
+  refine IsInitial.ofUniqueHom (fun y ↦ ?_) ?_
+  · refine StructuredArrow.homMk (W.preimage (CategoryTheory.inv α ≫ y.hom)) ?_
+    change α ≫ W.map (W.preimage (CategoryTheory.inv α ≫ y.hom)) = y.hom
+    simp
+  · intro y m
+    ext1
+    apply W.map_injective
+    change W.map m.right = W.map (W.preimage (CategoryTheory.inv α ≫ y.hom))
+    simp only [W.map_preimage]
+    rw [IsIso.eq_inv_comp]
+    simpa using m.w.symm
 
 set_option backward.isDefEq.respectTransparency false in
 instance isRightKanExtensionAlongEquivalence (α : L.functor ⋙ F₁ ≅ F₀) :
@@ -895,10 +907,22 @@ instance isRightKanExtensionAlongEquivalence (α : L.functor ⋙ F₁ ≅ F₀) 
 
 set_option backward.isDefEq.respectTransparency false in
 instance isRightKanExtensionAlongEquivalence' (L : C ⥤ D) (α : L ⋙ F₁ ⟶ F₀)
-    [IsEquivalence L] [IsIso α] :
-    F₁.IsRightKanExtension α :=
-  inferInstanceAs <|
-    F₁.IsRightKanExtension (asIso α : (asEquivalence L).functor ⋙ F₁ ≅ F₀).hom
+    [Full ((whiskeringLeft C D H).obj L)] [Faithful ((whiskeringLeft C D H).obj L)]
+    [IsIso α] :
+    F₁.IsRightKanExtension α := by
+  let W := (whiskeringLeft C D H).obj L
+  refine ⟨⟨?_⟩⟩
+  refine IsTerminal.ofUniqueHom (fun y ↦ ?_) ?_
+  · refine CostructuredArrow.homMk (W.preimage (y.hom ≫ CategoryTheory.inv α)) ?_
+    change W.map (W.preimage (y.hom ≫ CategoryTheory.inv α)) ≫ α = y.hom
+    simp
+  · intro y m
+    ext1
+    apply W.map_injective
+    change W.map m.left = W.map (W.preimage (y.hom ≫ CategoryTheory.inv α))
+    simp only [W.map_preimage]
+    rw [IsIso.eq_comp_inv]
+    simpa using m.w
 
 end
 

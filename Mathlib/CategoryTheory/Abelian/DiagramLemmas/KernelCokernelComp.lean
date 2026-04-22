@@ -211,8 +211,17 @@ instance : Epi ((kernelCokernelCompSequence f g).map' 4 5) := by
   dsimp [ComposableArrows.Precomp.map]
   infer_instance
 
-lemma kernelCokernelCompSequence_exact :
-    (kernelCokernelCompSequence f g).Exact :=
-  (snakeInput f g).snake_lemma
+omit [Abelian C] in
+lemma kernelCokernelCompSequence_exact [Preadditive C] [IsNormalMonoCategory C]
+    [IsNormalEpiCategory C] [HasFiniteProducts C] [HasKernels C] [HasCokernels C] :
+    (@kernelCokernelCompSequence C _ ({
+      has_finite_products := inferInstance
+      has_kernels := inferInstance
+      has_cokernels := inferInstance } : Abelian C) X Y Z f g).Exact := by
+  letI : Abelian C := {
+    has_finite_products := inferInstance
+    has_kernels := inferInstance
+    has_cokernels := inferInstance }
+  exact (snakeInput f g).snake_lemma
 
 end CategoryTheory

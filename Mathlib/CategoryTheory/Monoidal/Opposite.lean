@@ -153,26 +153,21 @@ instance {X Y : Cᴹᵒᵖ} (f : X ⟶ Y) [IsIso f] : IsIso f.unmop :=
 
 end IsIso
 
-variable [MonoidalCategory.{v₁} C]
-
 open Opposite MonoidalCategory Functor LaxMonoidal OplaxMonoidal
 
-instance monoidalCategoryOp : MonoidalCategory Cᵒᵖ where
+section MonoidalCategoryStruct
+
+variable [MonoidalCategoryStruct.{v₁} C]
+
+instance monoidalCategoryStructOp : MonoidalCategoryStruct Cᵒᵖ where
   tensorObj X Y := op (unop X ⊗ unop Y)
   whiskerLeft X _ _ f := (X.unop ◁ f.unop).op
   whiskerRight f X := (f.unop ▷ X.unop).op
   tensorHom f g := (f.unop ⊗ₘ g.unop).op
-  tensorHom_def _ _ := Quiver.Hom.unop_inj (tensorHom_def' _ _)
-  tensorHom_comp_tensorHom _ _ _ _ := Quiver.Hom.unop_inj <| by simp
   tensorUnit := op (𝟙_ C)
   associator X Y Z := (α_ (unop X) (unop Y) (unop Z)).symm.op
   leftUnitor X := (λ_ (unop X)).symm.op
   rightUnitor X := (ρ_ (unop X)).symm.op
-  associator_naturality f g h := Quiver.Hom.unop_inj <| by simp
-  leftUnitor_naturality f := Quiver.Hom.unop_inj <| by simp
-  rightUnitor_naturality f := Quiver.Hom.unop_inj <| by simp
-  triangle X Y := Quiver.Hom.unop_inj <| by dsimp; monoidal_coherence
-  pentagon W X Y Z := Quiver.Hom.unop_inj <| by dsimp; monoidal_coherence
 
 section OppositeLemmas
 
@@ -237,22 +232,15 @@ theorem op_tensor_op {W X Y Z : C} (f : W ⟶ X) (g : Y ⟶ Z) : f.op ⊗ₘ g.o
 theorem unop_tensor_unop {W X Y Z : Cᵒᵖ} (f : W ⟶ X) (g : Y ⟶ Z) :
     f.unop ⊗ₘ g.unop = (f ⊗ₘ g).unop := rfl
 
-instance monoidalCategoryMop : MonoidalCategory Cᴹᵒᵖ where
+instance monoidalCategoryStructMop : MonoidalCategoryStruct Cᴹᵒᵖ where
   tensorObj X Y := mop (unmop Y ⊗ unmop X)
   whiskerLeft X _ _ f := (f.unmop ▷ X.unmop).mop
   whiskerRight f X := (X.unmop ◁ f.unmop).mop
   tensorHom f g := (g.unmop ⊗ₘ f.unmop).mop
-  tensorHom_def _ _ := Quiver.Hom.unmop_inj (tensorHom_def' _ _)
-  tensorHom_comp_tensorHom _ _ _ _ := Quiver.Hom.unmop_inj <| by simp
   tensorUnit := mop (𝟙_ C)
   associator X Y Z := (α_ (unmop Z) (unmop Y) (unmop X)).symm.mop
   leftUnitor X := (ρ_ (unmop X)).mop
   rightUnitor X := (λ_ (unmop X)).mop
-  associator_naturality f g h := Quiver.Hom.unmop_inj <| by simp
-  leftUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
-  rightUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
-  triangle X Y := Quiver.Hom.unmop_inj <| by dsimp; monoidal_coherence
-  pentagon W X Y Z := Quiver.Hom.unmop_inj <| by dsimp; monoidal_coherence
 
 -- it would be nice if we could autogenerate all of these somehow
 section MonoidalOppositeLemmas
@@ -312,6 +300,36 @@ section MonoidalOppositeLemmas
 @[simp] lemma unmop_inv_rightUnitor (X : Cᴹᵒᵖ) : (ρ_ X).inv.unmop = (λ_ (unmop X)).inv := rfl
 
 end MonoidalOppositeLemmas
+
+end MonoidalCategoryStruct
+
+variable [MonoidalCategory.{v₁} C]
+
+instance monoidalCategoryOp : MonoidalCategory Cᵒᵖ where
+  __ := monoidalCategoryStructOp
+  tensorHom_def _ _ := Quiver.Hom.unop_inj (tensorHom_def' _ _)
+  id_tensorHom_id X Y := Quiver.Hom.unop_inj <| by simp
+  tensorHom_comp_tensorHom _ _ _ _ := Quiver.Hom.unop_inj <| by simp
+  whiskerLeft_id X Y := Quiver.Hom.unop_inj <| by simp
+  id_whiskerRight X Y := Quiver.Hom.unop_inj <| by simp
+  associator_naturality f g h := Quiver.Hom.unop_inj <| by simp
+  leftUnitor_naturality f := Quiver.Hom.unop_inj <| by simp
+  rightUnitor_naturality f := Quiver.Hom.unop_inj <| by simp
+  triangle X Y := Quiver.Hom.unop_inj <| by dsimp; monoidal_coherence
+  pentagon W X Y Z := Quiver.Hom.unop_inj <| by dsimp; monoidal_coherence
+
+instance monoidalCategoryMop : MonoidalCategory Cᴹᵒᵖ where
+  __ := monoidalCategoryStructMop
+  tensorHom_def _ _ := Quiver.Hom.unmop_inj (tensorHom_def' _ _)
+  id_tensorHom_id X Y := Quiver.Hom.unmop_inj <| by simp
+  tensorHom_comp_tensorHom _ _ _ _ := Quiver.Hom.unmop_inj <| by simp
+  whiskerLeft_id X Y := Quiver.Hom.unmop_inj <| by simp
+  id_whiskerRight X Y := Quiver.Hom.unmop_inj <| by simp
+  associator_naturality f g h := Quiver.Hom.unmop_inj <| by simp
+  leftUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
+  rightUnitor_naturality f := Quiver.Hom.unmop_inj <| by simp
+  triangle X Y := Quiver.Hom.unmop_inj <| by dsimp; monoidal_coherence
+  pentagon W X Y Z := Quiver.Hom.unmop_inj <| by dsimp; monoidal_coherence
 
 variable (C)
 

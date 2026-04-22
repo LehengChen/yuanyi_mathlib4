@@ -122,8 +122,9 @@ def beckCoequalizer : IsColimit (beckCofork X) :=
   (beckSplitCoequalizer X).isCoequalizer
 
 @[simp]
-theorem beckCoequalizer_desc (s : Cofork (T.toFunctor.map X.a) (T.μ.app X.A)) :
-    (beckCoequalizer X).desc s = T.η.app _ ≫ s.π :=
+theorem beckCoequalizer_desc {W : C} (π : T.obj X.A ⟶ W)
+    {hπ : T.map X.a ≫ π = T.μ.app X.A ≫ π} :
+    Cofork.IsColimit.desc (beckCoequalizer X) π hπ = T.η.app _ ≫ π :=
   rfl
 
 end Monad

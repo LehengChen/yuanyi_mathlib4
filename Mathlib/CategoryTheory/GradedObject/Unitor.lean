@@ -335,8 +335,10 @@ variable {C₁ C₂ C₃ D I₁ I₂ I₃ J : Type*} [Category* C₁] [Category*
 
 set_option backward.isDefEq.respectTransparency false in
 lemma mapBifunctor_triangle
-    (triangle : ∀ (X₁ : C₁) (X₃ : C₃), ((associator.hom.app X₁).app X₂).app X₃ ≫
-    (G.obj X₁).map (e₂.hom.app X₃) = (G.map (e₁.hom.app X₁)).app X₃) :
+    (triangle : ∀ (i₁ : I₁) (i₃ : I₃),
+      ((associator.hom.app (X₁ i₁)).app X₂).app (X₃ i₃) ≫
+        (G.obj (X₁ i₁)).map (e₂.hom.app (X₃ i₃)) =
+      (G.map (e₁.hom.app (X₁ i₁))).app (X₃ i₃)) :
     (mapBifunctorAssociator associator τ.ρ₁₂ τ.ρ₂₃ X₁ ((single₀ I₂).obj X₂) X₃).hom ≫
     mapBifunctorMapMap G π (𝟙 X₁) (mapBifunctorLeftUnitor F₂ X₂ e₂ τ.p₂₃ τ.h₃ X₃).hom =
       mapBifunctorMapMap G π (mapBifunctorRightUnitor F₁ X₂ e₁ τ.p₁₂ τ.h₁ X₁).hom (𝟙 X₃) := by
@@ -358,7 +360,7 @@ lemma mapBifunctor_triangle
     ι_mapBifunctorLeftUnitor_hom_apply F₂ X₂ e₂ τ.p₂₃ τ.h₃ X₃ i₃,
     ι_mapBifunctorRightUnitor_hom_apply F₁ X₂ e₁ τ.p₁₂ τ.h₁ X₁ i₁]
   dsimp
-  simp only [Functor.map_comp, NatTrans.comp_app, ← triangle (X₁ i₁) (X₃ i₃), ← assoc]
+  simp only [Functor.map_comp, NatTrans.comp_app, ← triangle i₁ i₃, ← assoc]
   congr 2
   symm
   apply NatTrans.naturality_app (associator.hom.app (X₁ i₁))

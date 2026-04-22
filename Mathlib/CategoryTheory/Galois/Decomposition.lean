@@ -74,7 +74,9 @@ private lemma has_decomp_connected_components_aux_initial (X : C) (h : IsInitial
     (fun s m _ ↦ IsInitial.hom_ext h m _)
   exact ⟨by simp only [IsEmpty.forall_iff], inferInstance⟩
 
-variable [GaloisCategory C]
+section FixedFiberDecomposition
+
+variable [PreGaloisCategory C]
 
 /- Show decomposition by inducting on `Nat.card (F.obj X)`. -/
 private lemma has_decomp_connected_components_aux (F : C ⥤ FintypeCat.{w}) [FiberFunctor F]
@@ -113,6 +115,12 @@ private lemma has_decomp_connected_components_aux (F : C ⥤ FintypeCat.{w}) [Fi
     obtain ⟨hi⟩ := nhi
     exact has_decomp_connected_components_aux_initial X hi
 
+end FixedFiberDecomposition
+
+section GaloisDecomposition
+
+variable [GaloisCategory C]
+
 /-- In a Galois category, every object is the sum of connected objects. -/
 theorem has_decomp_connected_components (X : C) :
     ∃ (ι : Type) (f : ι → C) (g : (i : ι) → f i ⟶ X) (_ : IsColimit (Cofan.mk X g)),
@@ -126,15 +134,22 @@ theorem has_decomp_connected_components' (X : C) :
   obtain ⟨ι, f, g, hl, hc, hf⟩ := has_decomp_connected_components X
   exact ⟨ι, hf, f, colimit.isoColimitCocone ⟨Cofan.mk X g, hl⟩, hc⟩
 
+end GaloisDecomposition
+
+section FixedFiberComponents
+
+variable [PreGaloisCategory C]
 variable (F : C ⥤ FintypeCat.{w}) [FiberFunctor F]
 
 /-- Every element in the fiber of `X` lies in some connected component of `X`. -/
 lemma fiber_in_connected_component (X : C) (x : F.obj X) : ∃ (Y : C) (i : Y ⟶ X) (y : F.obj Y),
     F.map i y = x ∧ IsConnected Y ∧ Mono i := by
-  obtain ⟨ι, f, g, hl, hc, he⟩ := has_decomp_connected_components X
+  obtain ⟨ι, f, g, hl, hc, he⟩ :=
+    has_decomp_connected_components_aux F (Nat.card <| F.obj X) X rfl
   let s : Cocone (Discrete.functor f ⋙ F) := F.mapCocone (Cofan.mk X g)
   let s' : IsColimit s := isColimitOfPreserves F hl
   obtain ⟨⟨j⟩, z, h⟩ := Concrete.isColimit_exists_rep _ s' x
+  haveI : MonoCoprod C := MonoCoprod.monoCoprod_of_preservesCoprod_of_reflectsMono F
   refine ⟨f j, g j, z, ⟨?_, hc j, MonoCoprod.mono_inj _ (Cofan.mk X g) hl j⟩⟩
   subst h
   rfl
@@ -162,6 +177,8 @@ lemma connected_component_unique {X A B : C} [IsConnected A] [IsConnected B] (a 
   change (F.map u ≫ F.map _) y = F.map v y
   simp only [← F.map_comp, Iso.trans_hom, Iso.symm_hom, asIso_inv, asIso_hom,
     IsIso.hom_inv_id_assoc]
+
+end FixedFiberComponents
 
 end Decomposition
 
@@ -308,11 +325,12 @@ lemma exists_hom_from_galois_of_fiber_nonempty (X : C) (h : Nonempty (F.obj X)) 
   obtain ⟨A, f, a, h1, _⟩ := exists_hom_from_galois_of_fiber F X x
   exact ⟨A, f, h1⟩
 
-include F in
+omit [FiberFunctor F] in
 /-- Any connected object admits a hom from a Galois object. -/
-lemma exists_hom_from_galois_of_connected (X : C) [IsConnected X] :
-    ∃ (A : C) (_ : A ⟶ X), IsGalois A :=
-  exists_hom_from_galois_of_fiber_nonempty F X inferInstance
+lemma exists_hom_from_galois_of_connected (_F : C ⥤ FintypeCat.{w}) (X : C) [IsConnected X] :
+    ∃ (A : C) (_ : A ⟶ X), IsGalois A := by
+  let F := GaloisCategory.getFiberFunctor C
+  exact exists_hom_from_galois_of_fiber_nonempty F X inferInstance
 
 /-- To check equality of natural transformations `F ⟶ G`, it suffices to check it on
 Galois objects. -/

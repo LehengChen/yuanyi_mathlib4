@@ -40,31 +40,32 @@ monoid of endomorphisms. -/
 def conj : End X ≃* End Y :=
   { homCongr α α with map_mul' := fun f g => homCongr_comp α α α g f }
 
-theorem conj_apply (f : End X) : α.conj f = α.inv ≫ f ≫ α.hom :=
+theorem conj_apply (f : X ⟶ X) : α.conj f = α.inv ≫ f ≫ α.hom :=
   rfl
 
 @[simp]
-theorem conj_comp (f g : End X) : α.conj (f ≫ g) = α.conj f ≫ α.conj g :=
-  map_mul α.conj g f
+theorem conj_comp (f g : X ⟶ X) : α.conj (f ≫ g) = α.conj f ≫ α.conj g :=
+  homCongr_comp α α α f g
 
 @[simp]
 theorem conj_id : α.conj (𝟙 X) = 𝟙 Y :=
   map_one α.conj
 
 @[simp]
-theorem refl_conj (f : End X) : (Iso.refl X).conj f = f := by
+theorem refl_conj (f : X ⟶ X) : (Iso.refl X).conj f = f := by
   rw [conj_apply, Iso.refl_inv, Iso.refl_hom, Category.id_comp, Category.comp_id]
 
 @[simp]
-theorem trans_conj {Z : C} (β : Y ≅ Z) (f : End X) : (α ≪≫ β).conj f = β.conj (α.conj f) :=
+theorem trans_conj {Z : C} (β : Y ≅ Z) (f : X ⟶ X) :
+    (α ≪≫ β).conj f = β.conj (α.conj f) :=
   homCongr_trans α α β β f
 
 @[simp]
-theorem symm_self_conj (f : End X) : α.symm.conj (α.conj f) = f := by
+theorem symm_self_conj (f : X ⟶ X) : α.symm.conj (α.conj f) = f := by
   rw [← trans_conj, α.self_symm_id, refl_conj]
 
 @[simp]
-theorem self_symm_conj (f : End Y) : α.conj (α.symm.conj f) = f :=
+theorem self_symm_conj (f : Y ⟶ Y) : α.conj (α.symm.conj f) = f :=
   α.symm.symm_self_conj f
 
 @[simp]
@@ -76,14 +77,14 @@ theorem conj_pow (f : End X) (n : ℕ) : α.conj (f ^ n) = α.conj f ^ n :=
 def conjAut : Aut X ≃* Aut Y :=
   (Aut.unitsEndEquivAut X).symm.trans <| (Units.mapEquiv α.conj).trans <| Aut.unitsEndEquivAut Y
 
-theorem conjAut_apply (f : Aut X) : α.conjAut f = α.symm ≪≫ f ≪≫ α := by cat_disch
+theorem conjAut_apply (f : X ≅ X) : α.conjAut f = α.symm ≪≫ f ≪≫ α := by cat_disch
 
 @[simp]
-theorem conjAut_hom (f : Aut X) : (α.conjAut f).hom = α.conj f.hom :=
+theorem conjAut_hom (f : X ≅ X) : (α.conjAut f).hom = α.conj f.hom :=
   rfl
 
 @[simp]
-theorem trans_conjAut {Z : C} (β : Y ≅ Z) (f : Aut X) :
+theorem trans_conjAut {Z : C} (β : Y ≅ Z) (f : X ≅ X) :
     (α ≪≫ β).conjAut f = β.conjAut (α.conjAut f) := by
   simp only [conjAut_apply, Iso.trans_symm, Iso.trans_assoc]
 
@@ -92,8 +93,10 @@ theorem conjAut_mul (f g : Aut X) : α.conjAut (f * g) = α.conjAut f * α.conjA
   map_mul α.conjAut f g
 
 @[simp]
-theorem conjAut_trans (f g : Aut X) : α.conjAut (f ≪≫ g) = α.conjAut f ≪≫ α.conjAut g :=
-  conjAut_mul α g f
+theorem conjAut_trans (f g : X ≅ X) : α.conjAut (f ≪≫ g) = α.conjAut f ≪≫ α.conjAut g := by
+  rw [conjAut_apply, conjAut_apply, conjAut_apply]
+  simp only [Iso.trans_assoc]
+  rw [← Iso.trans_assoc α α.symm, α.self_symm_id, Iso.refl_trans]
 
 @[simp]
 theorem conjAut_pow (f : Aut X) (n : ℕ) : α.conjAut (f ^ n) = α.conjAut f ^ n :=
@@ -111,11 +114,11 @@ universe v₁ u₁
 
 variable {C : Type u} [Category.{v} C] {D : Type u₁} [Category.{v₁} D] (F : C ⥤ D)
 
-theorem map_conj {X Y : C} (α : X ≅ Y) (f : End X) :
+theorem map_conj {X Y : C} (α : X ≅ Y) (f : X ⟶ X) :
     F.map (α.conj f) = (F.mapIso α).conj (F.map f) :=
   map_homCongr F α α f
 
-theorem map_conjAut (F : C ⥤ D) {X Y : C} (α : X ≅ Y) (f : Aut X) :
+theorem map_conjAut (F : C ⥤ D) {X Y : C} (α : X ≅ Y) (f : X ≅ X) :
     F.mapIso (α.conjAut f) = (F.mapIso α).conjAut (F.mapIso f) := by
   ext; simp only [mapIso_hom, Iso.conjAut_hom, F.map_conj]
 

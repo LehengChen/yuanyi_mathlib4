@@ -458,12 +458,17 @@ instance category : Category (EnrichedFunctor V C D) where
 
 @[ext]
 lemma hom_ext {F G : EnrichedFunctor V C D} {α β : F ⟶ G}
-    (h : ∀ X : C, α.out.app X = β.out.app X) : α = β := by
+    (h : ∀ X : C, ForgetEnrichment.homTo V (α.out.app X) =
+      ForgetEnrichment.homTo V (β.out.app X)) : α = β := by
   rcases α with ⟨α⟩
   rcases β with ⟨β⟩
   congr
-  ext
-  apply h
+  ext X
+  apply_fun ForgetEnrichment.homTo V
+  · simpa using h (ForgetEnrichment.to V X)
+  · intro f g w
+    apply_fun ForgetEnrichment.homOf V at w
+    simpa using w
 
 /-- To construct an isomorphism between enriched functors `F` and `G`, it suffices to construct
 a natural isomorphism between `F.forget` and `G.forget`. -/

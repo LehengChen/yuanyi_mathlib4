@@ -18,8 +18,9 @@ and `Triple F G R` accessible as `Quadruple.leftTriple` and `Quadruple.rightTrip
 Currently the only two results are the following:
 * When `F` and `R` are fully faithful, the components of the induced natural transformation `G ⟶ L`
   are epimorphisms iff the components of the natural transformation `F ⟶ R` are monomorphisms.
-* When `L` and `G` are fully faithful, the components of the induced natural transformation `L ⟶ G`
-  are epimorphisms iff the components of the natural transformation `R ⟶ F` are monomorphisms.
+* When `G` (and hence `L`) is fully faithful, the components of the induced natural transformation
+  `L ⟶ G` are epimorphisms iff the components of the natural transformation `R ⟶ F` are
+  monomorphisms.
 
 This is in particular relevant for the adjoint quadruples `π₀ ⊣ disc ⊣ Γ ⊣ codisc` that appear in
 cohesive topoi, and can be found e.g. as proposition 2.7
@@ -115,23 +116,39 @@ end RightFullyFaithful
 
 section LeftFullyFaithful
 
-variable [L.Full] [L.Faithful] [G.Full] [G.Faithful]
+variable [G.Full] [G.Faithful]
 
-/-- For an adjoint quadruple `L ⊣ F ⊣ G ⊣ R` where `L` and `G` are fully faithful, all components
-of the natural transformation `L ⟶ G` are epimorphisms iff all components of the natural
-transformation `R ⟶ F` are monomorphisms. -/
+/-- For an adjoint quadruple `L ⊣ F ⊣ G ⊣ R` where `G` (and hence also `L`) is fully
+faithful, all components of the natural transformation `L ⟶ G` are epimorphisms iff all components
+of the natural transformation `R ⟶ F` are monomorphisms. -/
 lemma epi_leftTriple_leftToRight_app_iff_mono_rightTriple_rightToLeft_app :
+    letI : L.Full :=
+      (q.leftTriple.fullyFaithfulEquiv.symm (FullyFaithful.ofFullyFaithful G)).full
+    letI : L.Faithful :=
+      (q.leftTriple.fullyFaithfulEquiv.symm (FullyFaithful.ofFullyFaithful G)).faithful
     (∀ X, Epi (q.leftTriple.leftToRight.app X)) ↔ ∀ X, Mono (q.rightTriple.rightToLeft.app X) := by
+  let hL : L.FullyFaithful :=
+    q.leftTriple.fullyFaithfulEquiv.symm (FullyFaithful.ofFullyFaithful G)
+  letI : L.Full := hL.full
+  letI : L.Faithful := hL.faithful
   have h := q.op.epi_leftTriple_rightToLeft_app_iff_mono_rightTriple_leftToRight_app
   rw [← (Opposite.equivToOpposite (α := C)).forall_congr_right] at h
   rw [← (Opposite.equivToOpposite (α := D)).forall_congr_right] at h
   simpa using h.symm
 
-/-- For an adjoint quadruple `L ⊣ F ⊣ G ⊣ R` where `L` and `G` are fully faithful and their domain
-and codomain have all pullbacks resp. pushouts, the natural transformation `L ⟶ G` is an
-epimorphism iff the natural transformation `R ⟶ F` is a monomorphism. -/
+/-- For an adjoint quadruple `L ⊣ F ⊣ G ⊣ R` where `G` (and hence also `L`) is fully faithful
+and their domain and codomain have all pullbacks resp. pushouts, the natural transformation
+`L ⟶ G` is an epimorphism iff the natural transformation `R ⟶ F` is a monomorphism. -/
 lemma epi_leftTriple_leftToRight_iff_mono_rightTriple_rightToLeft [HasPullbacks C] [HasPushouts D] :
+    letI : L.Full :=
+      (q.leftTriple.fullyFaithfulEquiv.symm (FullyFaithful.ofFullyFaithful G)).full
+    letI : L.Faithful :=
+      (q.leftTriple.fullyFaithfulEquiv.symm (FullyFaithful.ofFullyFaithful G)).faithful
     Epi q.leftTriple.leftToRight ↔ Mono q.rightTriple.rightToLeft := by
+  let hL : L.FullyFaithful :=
+    q.leftTriple.fullyFaithfulEquiv.symm (FullyFaithful.ofFullyFaithful G)
+  letI : L.Full := hL.full
+  letI : L.Faithful := hL.faithful
   rw [NatTrans.epi_iff_epi_app, NatTrans.mono_iff_mono_app]
   exact q.epi_leftTriple_leftToRight_app_iff_mono_rightTriple_rightToLeft_app
 

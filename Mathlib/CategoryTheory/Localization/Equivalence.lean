@@ -37,9 +37,13 @@ namespace Localization
 variable
   (L₁ : C₁ ⥤ D₁) (W₁ : MorphismProperty C₁) [L₁.IsLocalization W₁]
   (L₂ : C₂ ⥤ D₂) (W₂ : MorphismProperty C₂) [L₂.IsLocalization W₂]
-  (G : C₁ ⥤ D₂) (G' : D₁ ⥤ D₂) [Lifting L₁ W₁ G G']
-  (F : C₂ ⥤ D₁) (F' : D₂ ⥤ D₁) [Lifting L₂ W₂ F F']
+  (G : C₁ ⥤ D₂) (G' : D₁ ⥤ D₂)
+  (F : C₂ ⥤ D₁) (F' : D₂ ⥤ D₁)
   (α : G ⋙ F' ≅ L₁) (β : F ⋙ G' ≅ L₂)
+
+section Equivalence
+
+variable [Lifting L₁ W₁ G G'] [Lifting L₂ W₂ F F']
 
 /-- Basic constructor of an equivalence between localized categories -/
 noncomputable def equivalence : D₁ ≌ D₂ :=
@@ -56,10 +60,21 @@ lemma equivalence_counitIso_app (X : C₂) :
   dsimp [Lifting.iso]
   rw [comp_id]
 
+end Equivalence
+
+section IsEquivalence
+
+variable [hGF' : Lifting L₁ W₁ (G ⋙ F') (G' ⋙ F')]
+  [hFG' : Lifting L₂ W₂ (F ⋙ G') (F' ⋙ G')]
+
 include L₁ W₁ L₂ W₂ G F F' α β in
 /-- Basic constructor of an equivalence between localized categories -/
 lemma isEquivalence : G'.IsEquivalence :=
-  (equivalence L₁ W₁ L₂ W₂ G G' F F' α β).isEquivalence_functor
+  (Equivalence.mk G' F'
+    (liftNatIso L₁ W₁ L₁ (G ⋙ F') (𝟭 D₁) (G' ⋙ F') (h₂ := hGF') α.symm)
+    (liftNatIso L₂ W₂ (F ⋙ G') L₂ (F' ⋙ G') (𝟭 D₂) (h₁ := hFG') β)).isEquivalence_functor
+
+end IsEquivalence
 
 end Localization
 

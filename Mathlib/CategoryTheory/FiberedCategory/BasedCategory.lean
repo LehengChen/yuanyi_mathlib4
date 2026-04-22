@@ -151,8 +151,12 @@ section
 variable {F G : 𝒳 ⥤ᵇ 𝒴} (α : BasedNatTrans F G)
 
 @[ext]
-lemma ext (β : BasedNatTrans F G) (h : α.toNatTrans = β.toNatTrans) : α = β := by
-  cases α; subst h; rfl
+lemma ext (β : BasedNatTrans F G) (h : ∀ a, α.app a = β.app a) : α = β := by
+  cases α
+  cases β
+  congr
+  ext a
+  exact h a
 
 instance app_isHomLift (a : 𝒳.obj) : IsHomLift 𝒴.p (𝟙 (𝒳.p.obj a)) (α.toNatTrans.app a) :=
   α.isHomLift' a
@@ -187,7 +191,7 @@ instance homCategory (𝒳 : BasedCategory.{v₂, u₂} 𝒮) (𝒴 : BasedCateg
   comp := BasedNatTrans.comp
 
 @[ext]
-lemma homCategory.ext {F G : 𝒳 ⥤ᵇ 𝒴} (α β : F ⟶ G) (h : α.toNatTrans = β.toNatTrans) : α = β :=
+lemma homCategory.ext {F G : 𝒳 ⥤ᵇ 𝒴} (α β : F ⟶ G) (h : ∀ a, α.app a = β.app a) : α = β :=
   BasedNatTrans.ext α β h
 
 /-- The forgetful functor from the category of based functors `𝒳 ⥤ᵇ 𝒴` to the category of

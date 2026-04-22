@@ -193,7 +193,10 @@ lemma pushouts_ofLE_le_largerSubobject (A : Subobject X) :
     exact Arrow.isoMk (Iso.refl _)
       (Subobject.isoOfEq _ _ ((by simp [largerSubobject, dif_neg hA])))
 
-variable [IsGrothendieckAbelian.{w} C]
+section Cardinality
+
+variable [LocallySmall.{w} C] [WellPowered.{w} C] [HasWidePullbacks.{w} C]
+  [HasCoproducts.{w} C]
 
 lemma top_mem_range (A₀ : Subobject X) {J : Type w} [LinearOrder J] [OrderBot J] [SuccOrder J]
     [WellFoundedLT J] (hJ : HasCardinalLT (Subobject X) (Cardinal.mk J)) :
@@ -208,6 +211,10 @@ lemma exists_ordinal (A₀ : Subobject X) :
     simp only [ne_eq, Cardinal.ord_eq_zero]
     apply Cardinal.succ_ne_zero)
   exact ⟨κ.ord, top_mem_range hG A₀ (lt_of_lt_of_le (Order.lt_succ _) (by simp [κ]))⟩
+
+end Cardinality
+
+variable [IsGrothendieckAbelian.{w} C]
 
 section
 

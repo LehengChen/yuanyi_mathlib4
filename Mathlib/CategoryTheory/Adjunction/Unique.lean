@@ -77,19 +77,20 @@ theorem leftAdjointUniq_inv_app {F F' : C ⥤ D} {G : D ⥤ C} (adj1 : F ⊣ G) 
   rfl
 
 @[reassoc (attr := simp)]
-theorem leftAdjointUniq_trans {F F' F'' : C ⥤ D} {G : D ⥤ C} (adj1 : F ⊣ G) (adj2 : F' ⊣ G)
-    (adj3 : F'' ⊣ G) :
-    (leftAdjointUniq adj1 adj2).hom ≫ (leftAdjointUniq adj2 adj3).hom =
-      (leftAdjointUniq adj1 adj3).hom := by
-  simp [leftAdjointUniq]
+theorem leftAdjointUniq_trans {F F' F'' : C ⥤ D} {G G' G'' : D ⥤ C} (adj1 : F ⊣ G)
+    (adj2 : F' ⊣ G') (adj3 : F'' ⊣ G'') (e12 : G ≅ G') (e23 : G' ≅ G'') :
+    (((conjugateIsoEquiv adj1 adj2).symm e12).symm).hom ≫
+      (((conjugateIsoEquiv adj2 adj3).symm e23).symm).hom =
+      (((conjugateIsoEquiv adj1 adj3).symm (e12.trans e23)).symm).hom := by
+  simp
 
 @[reassoc (attr := simp)]
 theorem leftAdjointUniq_trans_app {F F' F'' : C ⥤ D} {G : D ⥤ C} (adj1 : F ⊣ G) (adj2 : F' ⊣ G)
     (adj3 : F'' ⊣ G) (x : C) :
     (leftAdjointUniq adj1 adj2).hom.app x ≫ (leftAdjointUniq adj2 adj3).hom.app x =
       (leftAdjointUniq adj1 adj3).hom.app x := by
-  rw [← leftAdjointUniq_trans adj1 adj2 adj3]
-  rfl
+  have h := congr_app (leftAdjointUniq_trans adj1 adj2 adj3 (Iso.refl G) (Iso.refl G)) x
+  simpa only [leftAdjointUniq, Iso.trans_refl] using h
 
 @[simp]
 theorem leftAdjointUniq_refl {F : C ⥤ D} {G : D ⥤ C} (adj1 : F ⊣ G) :
@@ -141,19 +142,20 @@ theorem rightAdjointUniq_inv_app {F : C ⥤ D} {G G' : D ⥤ C} (adj1 : F ⊣ G)
   rfl
 
 @[reassoc (attr := simp)]
-theorem rightAdjointUniq_trans {F : C ⥤ D} {G G' G'' : D ⥤ C} (adj1 : F ⊣ G) (adj2 : F ⊣ G')
-    (adj3 : F ⊣ G'') :
-    (rightAdjointUniq adj1 adj2).hom ≫ (rightAdjointUniq adj2 adj3).hom =
-      (rightAdjointUniq adj1 adj3).hom := by
-  simp [rightAdjointUniq]
+theorem rightAdjointUniq_trans {F F' F'' : C ⥤ D} {G G' G'' : D ⥤ C} (adj1 : F ⊣ G)
+    (adj2 : F' ⊣ G') (adj3 : F'' ⊣ G'') (e12 : F' ≅ F) (e23 : F'' ≅ F') :
+    ((conjugateIsoEquiv adj1 adj2) e12).hom ≫
+      ((conjugateIsoEquiv adj2 adj3) e23).hom =
+      ((conjugateIsoEquiv adj1 adj3) (e23.trans e12)).hom := by
+  simp
 
 @[reassoc (attr := simp)]
 theorem rightAdjointUniq_trans_app {F : C ⥤ D} {G G' G'' : D ⥤ C} (adj1 : F ⊣ G) (adj2 : F ⊣ G')
     (adj3 : F ⊣ G'') (x : D) :
     (rightAdjointUniq adj1 adj2).hom.app x ≫ (rightAdjointUniq adj2 adj3).hom.app x =
       (rightAdjointUniq adj1 adj3).hom.app x := by
-  rw [← rightAdjointUniq_trans adj1 adj2 adj3]
-  rfl
+  have h := congr_app (rightAdjointUniq_trans adj1 adj2 adj3 (Iso.refl F) (Iso.refl F)) x
+  simpa only [rightAdjointUniq, Iso.trans_refl] using h
 
 
 @[simp]

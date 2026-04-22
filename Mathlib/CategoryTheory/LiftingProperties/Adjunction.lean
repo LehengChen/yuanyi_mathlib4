@@ -36,16 +36,15 @@ section
 variable {A B : C} {X Y : D} {i : A ⟶ B} {p : X ⟶ Y} {u : G.obj A ⟶ X} {v : G.obj B ⟶ Y}
 
 set_option backward.isDefEq.respectTransparency false in
-/-- When we have an adjunction `G ⊣ F`, any commutative square where the left
-map is of the form `G.map i` and the right map is `p` has an "adjoint" commutative
-square whose left map is `i` and whose right map is `F.map p`. -/
-theorem right_adjoint (sq : CommSq u (G.map i) p v) (adj : G ⊣ F) :
+/-- When we have a natural hom equivalence between `G` and `F`, any commutative square
+where the left map is of the form `G.map i` and the right map is `p` has an "adjoint"
+commutative square whose left map is `i` and whose right map is `F.map p`. -/
+theorem right_adjoint (sq : CommSq u (G.map i) p v) (adj : Adjunction.CoreHomEquiv G F) :
     CommSq (adj.homEquiv _ _ u) i (F.map p) (adj.homEquiv _ _ v) :=
   ⟨by
-    simp only [Adjunction.homEquiv_unit, assoc, ← F.map_comp, sq.w]
-    rw [F.map_comp, Adjunction.unit_naturality_assoc]⟩
+    rw [← adj.homEquiv_naturality_right, sq.w, adj.homEquiv_naturality_left]⟩
 
-variable (sq : CommSq u (G.map i) p v) (adj : G ⊣ F)
+variable (sq : CommSq u (G.map i) p v) (adj : Adjunction.CoreHomEquiv G F)
 
 /-- The liftings of a commutative are in bijection with the liftings of its (right)
 adjoint square. -/
@@ -53,14 +52,14 @@ def rightAdjointLiftStructEquiv : sq.LiftStruct ≃ (sq.right_adjoint adj).LiftS
   toFun l :=
     { l := adj.homEquiv _ _ l.l
       fac_left := by rw [← adj.homEquiv_naturality_left, l.fac_left]
-      fac_right := by rw [← Adjunction.homEquiv_naturality_right, l.fac_right] }
+      fac_right := by rw [← adj.homEquiv_naturality_right, l.fac_right] }
   invFun l :=
     { l := (adj.homEquiv _ _).symm l.l
       fac_left := by
-        rw [← Adjunction.homEquiv_naturality_left_symm, l.fac_left]
+        rw [← adj.homEquiv_naturality_left_symm, l.fac_left]
         apply (adj.homEquiv _ _).left_inv
       fac_right := by
-        rw [← Adjunction.homEquiv_naturality_right_symm, l.fac_right]
+        rw [← adj.homEquiv_naturality_right_symm, l.fac_right]
         apply (adj.homEquiv _ _).left_inv }
   left_inv := by cat_disch
   right_inv := by cat_disch
@@ -81,16 +80,15 @@ section
 variable {A B : C} {X Y : D} {i : A ⟶ B} {p : X ⟶ Y} {u : A ⟶ F.obj X} {v : B ⟶ F.obj Y}
 
 set_option backward.isDefEq.respectTransparency false in
-/-- When we have an adjunction `G ⊣ F`, any commutative square where the left
-map is of the form `i` and the right map is `F.map p` has an "adjoint" commutative
-square whose left map is `G.map i` and whose right map is `p`. -/
-theorem left_adjoint (sq : CommSq u i (F.map p) v) (adj : G ⊣ F) :
+/-- When we have a natural hom equivalence between `G` and `F`, any commutative square
+where the left map is of the form `i` and the right map is `F.map p` has an "adjoint"
+commutative square whose left map is `G.map i` and whose right map is `p`. -/
+theorem left_adjoint (sq : CommSq u i (F.map p) v) (adj : Adjunction.CoreHomEquiv G F) :
     CommSq ((adj.homEquiv _ _).symm u) (G.map i) p ((adj.homEquiv _ _).symm v) :=
   ⟨by
-    simp only [Adjunction.homEquiv_counit, assoc, ← G.map_comp_assoc, ← sq.w]
-    rw [G.map_comp, assoc, Adjunction.counit_naturality]⟩
+    rw [← adj.homEquiv_naturality_right_symm, sq.w, adj.homEquiv_naturality_left_symm]⟩
 
-variable (sq : CommSq u i (F.map p) v) (adj : G ⊣ F)
+variable (sq : CommSq u i (F.map p) v) (adj : Adjunction.CoreHomEquiv G F)
 
 /-- The liftings of a commutative are in bijection with the liftings of its (left)
 adjoint square. -/
@@ -128,10 +126,14 @@ namespace Adjunction
 
 theorem hasLiftingProperty_iff (adj : G ⊣ F) {A B : C} {X Y : D} (i : A ⟶ B) (p : X ⟶ Y) :
     HasLiftingProperty (G.map i) p ↔ HasLiftingProperty i (F.map p) := by
+  let adj' : CoreHomEquiv G F :=
+    { homEquiv := adj.homEquiv
+      homEquiv_naturality_left_symm := fun f g => adj.homEquiv_naturality_left_symm f g
+      homEquiv_naturality_right := fun f g => adj.homEquiv_naturality_right f g }
   constructor <;> intro <;> constructor <;> intro f g sq
-  · rw [← sq.left_adjoint_hasLift_iff adj]
+  · rw [← sq.left_adjoint_hasLift_iff adj']
     infer_instance
-  · rw [← sq.right_adjoint_hasLift_iff adj]
+  · rw [← sq.right_adjoint_hasLift_iff adj']
     infer_instance
 
 end Adjunction

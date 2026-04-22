@@ -94,23 +94,23 @@ section
 attribute [local instance] monoidalOppositeLeftAction
 variable [MonoidalRightAction C D]
 
-lemma monoidalOppositeLeftAction_actionObj_mop (c : C) (d : D) :
-    mop c ⊙ₗ d = d ⊙ᵣ c := rfl
+lemma monoidalOppositeLeftAction_actionObj_mop (c : Cᴹᵒᵖ) (d : D) :
+    c ⊙ₗ d = d ⊙ᵣ c.unmop := rfl
 
 lemma monoidalOppositeLeftAction_actionHomLeft_mop
-    {c c' : C} (f : c ⟶ c') (d : D) :
-    f.mop ⊵ₗ d = d ⊴ᵣ f := rfl
+    {c c' : Cᴹᵒᵖ} (f : c ⟶ c') (d : D) :
+    f ⊵ₗ d = d ⊴ᵣ f.unmop := rfl
 
 lemma monoidalOppositeLeftAction_actionRight_mop
-    (c : C) {d d' : D} (f : d ⟶ d') :
-    mop c ⊴ₗ f = f ⊵ᵣ c := rfl
+    (c : Cᴹᵒᵖ) {d d' : D} (f : d ⟶ d') :
+    c ⊴ₗ f = f ⊵ᵣ c.unmop := rfl
 
 lemma monoidalOppositeLeftAction_actionHom_mop_mop
-    {c c' : C} {d d' : D} (f : c ⟶ c') (g : d ⟶ d') :
-    f.mop ⊙ₗₘ g = g ⊙ᵣₘ f := rfl
+    {c c' : Cᴹᵒᵖ} {d d' : D} (f : c ⟶ c') (g : d ⟶ d') :
+    f ⊙ₗₘ g = g ⊙ᵣₘ f.unmop := rfl
 
-lemma monoidalOppositeLeftAction_actionAssocIso_mop_mop (c c' : C) (d : D) :
-    αₗ (mop c) (mop c') d = αᵣ d c' c := rfl
+lemma monoidalOppositeLeftAction_actionAssocIso_mop_mop (c c' : Cᴹᵒᵖ) (d : D) :
+    αₗ c c' d = αᵣ d c'.unmop c.unmop := rfl
 
 end
 
@@ -203,23 +203,23 @@ section
 attribute [local instance] oppositeLeftAction
 variable [MonoidalLeftAction C D]
 
-lemma oppositeLeftAction_actionObj_op (c : C) (d : D) :
-    (op c) ⊙ₗ (op d) = op (c ⊙ₗ d) := rfl
+lemma oppositeLeftAction_actionObj_op (c : Cᵒᵖ) (d : Dᵒᵖ) :
+    c ⊙ₗ d = op (c.unop ⊙ₗ d.unop) := rfl
 
 lemma oppositeLeftAction_actionHomLeft_op
-    {c c' : C} (f : c ⟶ c') (d : D) :
-    f.op ⊵ₗ op d = op (f ⊵ₗ d) := rfl
+    {c c' : Cᵒᵖ} (f : c ⟶ c') (d : Dᵒᵖ) :
+    f ⊵ₗ d = op (f.unop ⊵ₗ d.unop) := rfl
 
 lemma oppositeLeftAction_actionRight_op
-    (c : C) {d d' : D} (f : d ⟶ d') :
-    op c ⊴ₗ f.op = op (c ⊴ₗ f) := rfl
+    (c : Cᵒᵖ) {d d' : Dᵒᵖ} (f : d ⟶ d') :
+    c ⊴ₗ f = op (c.unop ⊴ₗ f.unop) := rfl
 
 lemma oppositeLeftAction_actionHom_op
-    {c c' : C} {d d' : D} (f : c ⟶ c') (g : d ⟶ d') :
-    f.op ⊙ₗₘ g.op = op (f ⊙ₗₘ g) := rfl
+    {c c' : Cᵒᵖ} {d d' : Dᵒᵖ} (f : c ⟶ c') (g : d ⟶ d') :
+    f ⊙ₗₘ g = op (f.unop ⊙ₗₘ g.unop) := rfl
 
-lemma oppositeLeftAction_actionAssocIso_op (c c' : C) (d : D) :
-    αₗ (op c) (op c') (op d) = (αₗ c c' d).symm.op := rfl
+lemma oppositeLeftAction_actionAssocIso_op (c c' : Cᵒᵖ) (d : Dᵒᵖ) :
+    αₗ c c' d = (αₗ c.unop c'.unop d.unop).symm.op := rfl
 
 end
 
@@ -306,23 +306,23 @@ section
 attribute [local instance] monoidalOppositeRightAction
 variable [MonoidalLeftAction C D]
 
-lemma monoidalOppositeRightAction_actionObj_mop (c : C) (d : D) :
-    d ⊙ᵣ mop c = c ⊙ₗ d := rfl
+lemma monoidalOppositeRightAction_actionObj_mop (c : Cᴹᵒᵖ) (d : D) :
+    d ⊙ᵣ c = c.unmop ⊙ₗ d := rfl
 
 lemma monoidalOppositeRightAction_actionHomRight_mop
-    {c c' : C} (f : c ⟶ c') (d : D) :
-    d ⊴ᵣ f.mop = f ⊵ₗ d := rfl
+    {c c' : Cᴹᵒᵖ} (f : c ⟶ c') (d : D) :
+    d ⊴ᵣ f = f.unmop ⊵ₗ d := rfl
 
 lemma monoidalOppositeRightAction_actionRight_mop
-    (c : C) {d d' : D} (f : d ⟶ d') :
-    f ⊵ᵣ mop c = c ⊴ₗ f := rfl
+    (c : Cᴹᵒᵖ) {d d' : D} (f : d ⟶ d') :
+    f ⊵ᵣ c = c.unmop ⊴ₗ f := rfl
 
 lemma monoidalOppositeRightAction_actionHom_mop_mop
-    {c c' : D} {d d' : C} (f : c ⟶ c') (g : d ⟶ d') :
-    f ⊙ᵣₘ g.mop = g ⊙ₗₘ f := rfl
+    {c c' : D} {d d' : Cᴹᵒᵖ} (f : c ⟶ c') (g : d ⟶ d') :
+    f ⊙ᵣₘ g = g.unmop ⊙ₗₘ f := rfl
 
-lemma monoidalOppositeRightAction_actionAssocIso_mop_mop (c c' : C) (d : D) :
-    αᵣ d (mop c) (mop c') = αₗ c' c d := rfl
+lemma monoidalOppositeRightAction_actionAssocIso_mop_mop (c c' : Cᴹᵒᵖ) (d : D) :
+    αᵣ d c c' = αₗ c'.unmop c.unmop d := rfl
 
 end
 
@@ -415,23 +415,23 @@ section
 attribute [local instance] oppositeRightAction
 variable [MonoidalRightAction C D]
 
-lemma oppositeRightAction_actionObj_op (d : D) (c : C) :
-    op d ⊙ᵣ op c = op (d ⊙ᵣ c) := rfl
+lemma oppositeRightAction_actionObj_op (d : Dᵒᵖ) (c : Cᵒᵖ) :
+    d ⊙ᵣ c = op (d.unop ⊙ᵣ c.unop) := rfl
 
 lemma oppositeRightAction_actionHomLeft_op
-    {d d' : D} (f : d ⟶ d') (c : C) :
-    f.op ⊵ᵣ op c = op (f ⊵ᵣ c) := rfl
+    {d d' : Dᵒᵖ} (f : d ⟶ d') (c : Cᵒᵖ) :
+    f ⊵ᵣ c = op (f.unop ⊵ᵣ c.unop) := rfl
 
 lemma oppositeRightAction_actionRight_op
-    (d : D) {c c' : C} (f : c ⟶ c') :
-    op d ⊴ᵣ f.op = op (d ⊴ᵣ f) := rfl
+    (d : Dᵒᵖ) {c c' : Cᵒᵖ} (f : c ⟶ c') :
+    d ⊴ᵣ f = op (d.unop ⊴ᵣ f.unop) := rfl
 
 lemma oppositeRightAction_actionHom_op
-    {d d' : D} {c c' : C} (f : d ⟶ d') (g : c ⟶ c') :
-    f.op ⊙ᵣₘ g.op = op (f ⊙ᵣₘ g) := rfl
+    {d d' : Dᵒᵖ} {c c' : Cᵒᵖ} (f : d ⟶ d') (g : c ⟶ c') :
+    f ⊙ᵣₘ g = op (f.unop ⊙ᵣₘ g.unop) := rfl
 
-lemma oppositeRightAction_actionAssocIso_op (d : D) (c c' : C) :
-    αᵣ (op d) (op c) (op c') = (αᵣ d c c').symm.op := rfl
+lemma oppositeRightAction_actionAssocIso_op (d : Dᵒᵖ) (c c' : Cᵒᵖ) :
+    αᵣ d c c' = (αᵣ d.unop c.unop c'.unop).symm.op := rfl
 
 end
 

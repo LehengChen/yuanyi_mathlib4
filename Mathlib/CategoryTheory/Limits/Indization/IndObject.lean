@@ -143,8 +143,9 @@ variable {A : Cᵒᵖ ⥤ Type v}
 theorem map {A B : Cᵒᵖ ⥤ Type v} (η : A ⟶ B) [IsIso η] : IsIndObject A → IsIndObject B
   | ⟨⟨P⟩⟩ => ⟨⟨P.extend η⟩⟩
 
-theorem iff_of_iso {A B : Cᵒᵖ ⥤ Type v} (η : A ⟶ B) [IsIso η] : IsIndObject A ↔ IsIndObject B :=
-  ⟨.map η, .map (inv η)⟩
+theorem iff_of_iso {A B : Cᵒᵖ ⥤ Type v} (h : Nonempty (A ≅ B)) :
+    IsIndObject A ↔ IsIndObject B :=
+  h.elim fun η => ⟨.map η.hom, .map η.inv⟩
 
 instance : ObjectProperty.IsClosedUnderIsomorphisms (IsIndObject (C := C)) where
   of_iso i h := h.map i.hom

@@ -28,28 +28,39 @@ variable {A : Type u₁} {B : Type u₂} {T : Type u₃}
   [Category.{v₁} A] [Category.{v₂} B] [Category.{v₃} T]
 
 instance Comma.locallySmall
-    (L : A ⥤ T) (R : B ⥤ T) [LocallySmall.{w} A] [LocallySmall.{w} B] :
+    (L : A ⥤ T) (R : B ⥤ T)
+    [∀ X Y : Comma L R, Small.{w} ((X.left ⟶ Y.left) × (X.right ⟶ Y.right))] :
     LocallySmall.{w} (Comma L R) where
   hom_small X Y := small_of_injective.{w}
-      (f := fun g ↦ (⟨g.left, g.right⟩ : _ × _))
+      (f := fun g ↦ (⟨g.left, g.right⟩ : (X.left ⟶ Y.left) × (X.right ⟶ Y.right)))
         (fun _ _ _ ↦ by aesop)
 
 instance StructuredArrow.locallySmall (S : T) (T : B ⥤ T)
-    [LocallySmall.{w} B] :
-    LocallySmall.{w} (StructuredArrow S T) :=
-  Comma.locallySmall _ _
+    [∀ X Y : StructuredArrow S T, Small.{w} (X.right ⟶ Y.right)] :
+    LocallySmall.{w} (StructuredArrow S T) where
+  hom_small _ _ := small_of_injective.{w}
+      (f := fun f ↦ f.right)
+      (fun _ _ h ↦ StructuredArrow.hom_ext _ _ h)
 
 instance CostructuredArrow.locallySmall (S : A ⥤ T) (X : T)
-    [LocallySmall.{w} A] :
-    LocallySmall.{w} (CostructuredArrow S X) :=
-  Comma.locallySmall _ _
+    [∀ Y Z : CostructuredArrow S X, Small.{w} (Y.left ⟶ Z.left)] :
+    LocallySmall.{w} (CostructuredArrow S X) where
+  hom_small _ _ := small_of_injective.{w}
+      (f := fun f ↦ f.left)
+      (fun _ _ h ↦ CostructuredArrow.hom_ext _ _ h)
 
-instance Over.locallySmall (X : T) [LocallySmall.{w} T] :
-    LocallySmall.{w} (Over X) :=
-  CostructuredArrow.locallySmall _ _
+instance Over.locallySmall (X : T)
+    [∀ Y Z : Over X, Small.{w} (Y.left ⟶ Z.left)] :
+    LocallySmall.{w} (Over X) where
+  hom_small _ _ := small_of_injective.{w}
+      (f := fun f ↦ f.left)
+      (fun _ _ h ↦ Over.OverMorphism.ext h)
 
-instance Under.locallySmall (X : T) [LocallySmall.{w} T] :
-    LocallySmall.{w} (Under X) :=
-  StructuredArrow.locallySmall _ _
+instance Under.locallySmall (X : T)
+    [∀ Y Z : Under X, Small.{w} (Y.right ⟶ Z.right)] :
+    LocallySmall.{w} (Under X) where
+  hom_small _ _ := small_of_injective.{w}
+      (f := fun f ↦ f.right)
+      (fun _ _ h ↦ Under.UnderMorphism.ext h)
 
 end CategoryTheory

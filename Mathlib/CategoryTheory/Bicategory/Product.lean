@@ -89,10 +89,10 @@ end Prod
 
 section
 
-variable (B : Type u₁) [Bicategory.{w₁, v₁} B] (C : Type u₁) [Bicategory.{w₁, v₁} C]
+variable (B : Type u₁) [Bicategory.{w₁, v₁} B] (C : Type u₂) [Bicategory.{w₁, v₁} C]
 
 /-- `Bicategory.uniformProd B C` is an additional instance specialised so both factors have the same
-universe levels. This helps typeclass resolution.
+hom and 2-morphism universe levels. This helps typeclass resolution.
 -/
 instance uniformProd : Bicategory (B × C) :=
   Bicategory.prod B C

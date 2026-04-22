@@ -298,9 +298,11 @@ instance isIso_actionHomLeft {x y : C} (f : x ⟶ y) [IsIso f] (z : D) :
   ⟨inv f ⊵ₗ z, by simp⟩
 
 instance isIso_actionHom {x y : C} {x' y' : D}
-    (f : x ⟶ y) (g : x' ⟶ y') [IsIso f] [IsIso g] :
+    (f : x ⟶ y) (g : x' ⟶ y') [IsIso (f ⊵ₗ x')] [IsIso (y ⊴ₗ g)] :
     IsIso (f ⊙ₗₘ g) :=
-  ⟨(inv f) ⊙ₗₘ (inv g), by simp [← actionHom_comp]⟩
+  by
+    rw [actionHom_def]
+    infer_instance
 
 @[simp]
 lemma inv_actionHomLeft {x y : C} (f : x ⟶ y) [IsIso f] (z : D) :
@@ -608,9 +610,11 @@ instance isIso_actionHomRight (x : D) {y z : C} (f : y ⟶ z) [IsIso f] :
   ⟨x ⊴ᵣ inv f, by simp⟩
 
 instance isIso_actionHom {x y : D} {x' y' : C}
-    (f : x ⟶ y) (g : x' ⟶ y') [IsIso f] [IsIso g] :
+    (f : x ⟶ y) (g : x' ⟶ y') [IsIso (f ⊵ᵣ x')] [IsIso (y ⊴ᵣ g)] :
     IsIso (f ⊙ᵣₘ g) :=
-  ⟨(inv f) ⊙ᵣₘ (inv g), by simp [← actionHom_comp]⟩
+  by
+    rw [actionHom_def]
+    infer_instance
 
 @[simp]
 lemma inv_actionHomLeft {x y : D} (f : x ⟶ y) [IsIso f] (z : C) :

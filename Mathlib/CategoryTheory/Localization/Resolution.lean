@@ -266,38 +266,58 @@ section
 
 variable (L₂ : C₂ ⥤ D₂) [L₂.IsLocalization W₂]
 
-lemma essSurj_of_hasRightResolutions [Φ.HasRightResolutions] : (Φ.functor ⋙ L₂).EssSurj where
+lemma essSurj_of_hasRightResolutions
+    (hΦ : ∀ X₂ : D₂, ∃ Y₂ : C₂,
+      Nonempty (Φ.RightResolution Y₂) ∧ Nonempty (L₂.obj Y₂ ≅ X₂) := by
+      intro X₂
+      have := Localization.essSurj L₂ W₂
+      exact ⟨L₂.objPreimage X₂, inferInstance, ⟨L₂.objObjPreimageIso X₂⟩⟩) :
+    (Φ.functor ⋙ L₂).EssSurj where
   mem_essImage X₂ := by
-    have := Localization.essSurj L₂ W₂
-    have R : Φ.RightResolution (L₂.objPreimage X₂) := Classical.arbitrary _
-    exact ⟨R.X₁, ⟨(Localization.isoOfHom L₂ W₂ _ R.hw).symm ≪≫ L₂.objObjPreimageIso X₂⟩⟩
+    obtain ⟨_, ⟨R⟩, ⟨e⟩⟩ := hΦ X₂
+    exact ⟨R.X₁, ⟨(Localization.isoOfHom L₂ W₂ _ R.hw).symm ≪≫ e⟩⟩
 
-lemma isIso_iff_of_hasRightResolutions [Φ.HasRightResolutions] {F G : D₂ ⥤ H} (α : F ⟶ G) :
+lemma isIso_iff_of_hasRightResolutions {F G : D₂ ⥤ H} (α : F ⟶ G)
+    (hΦ : ∀ X₂ : D₂, ∃ Y₂ : C₂,
+      Nonempty (Φ.RightResolution Y₂) ∧ Nonempty (L₂.obj Y₂ ≅ X₂) := by
+      intro X₂
+      have := Localization.essSurj L₂ W₂
+      exact ⟨L₂.objPreimage X₂, inferInstance, ⟨L₂.objObjPreimageIso X₂⟩⟩) :
     IsIso α ↔ ∀ (X₁ : C₁), IsIso (α.app (L₂.obj (Φ.functor.obj X₁))) := by
   constructor
   · intros
     infer_instance
   · intro hα
     have : ∀ (X₂ : D₂), IsIso (α.app X₂) := fun X₂ => by
-      have := Φ.essSurj_of_hasRightResolutions L₂
+      have := Φ.essSurj_of_hasRightResolutions L₂ hΦ
       rw [← NatTrans.isIso_app_iff_of_iso α ((Φ.functor ⋙ L₂).objObjPreimageIso X₂)]
       apply hα
     exact NatIso.isIso_of_isIso_app α
 
-lemma essSurj_of_hasLeftResolutions [Φ.HasLeftResolutions] : (Φ.functor ⋙ L₂).EssSurj where
+lemma essSurj_of_hasLeftResolutions
+    (hΦ : ∀ X₂ : D₂, ∃ Y₂ : C₂,
+      Nonempty (Φ.LeftResolution Y₂) ∧ Nonempty (L₂.obj Y₂ ≅ X₂) := by
+      intro X₂
+      have := Localization.essSurj L₂ W₂
+      exact ⟨L₂.objPreimage X₂, inferInstance, ⟨L₂.objObjPreimageIso X₂⟩⟩) :
+    (Φ.functor ⋙ L₂).EssSurj where
   mem_essImage X₂ := by
-    have := Localization.essSurj L₂ W₂
-    have L : Φ.LeftResolution (L₂.objPreimage X₂) := Classical.arbitrary _
-    exact ⟨L.X₁, ⟨Localization.isoOfHom L₂ W₂ _ L.hw ≪≫ L₂.objObjPreimageIso X₂⟩⟩
+    obtain ⟨_, ⟨L⟩, ⟨e⟩⟩ := hΦ X₂
+    exact ⟨L.X₁, ⟨Localization.isoOfHom L₂ W₂ _ L.hw ≪≫ e⟩⟩
 
-lemma isIso_iff_of_hasLeftResolutions [Φ.HasLeftResolutions] {F G : D₂ ⥤ H} (α : F ⟶ G) :
+lemma isIso_iff_of_hasLeftResolutions {F G : D₂ ⥤ H} (α : F ⟶ G)
+    (hΦ : ∀ X₂ : D₂, ∃ Y₂ : C₂,
+      Nonempty (Φ.LeftResolution Y₂) ∧ Nonempty (L₂.obj Y₂ ≅ X₂) := by
+      intro X₂
+      have := Localization.essSurj L₂ W₂
+      exact ⟨L₂.objPreimage X₂, inferInstance, ⟨L₂.objObjPreimageIso X₂⟩⟩) :
     IsIso α ↔ ∀ (X₁ : C₁), IsIso (α.app (L₂.obj (Φ.functor.obj X₁))) := by
   constructor
   · intros
     infer_instance
   · intro hα
     have : ∀ (X₂ : D₂), IsIso (α.app X₂) := fun X₂ => by
-      have := Φ.essSurj_of_hasLeftResolutions L₂
+      have := Φ.essSurj_of_hasLeftResolutions L₂ hΦ
       rw [← NatTrans.isIso_app_iff_of_iso α ((Φ.functor ⋙ L₂).objObjPreimageIso X₂)]
       apply hα
     exact NatIso.isIso_of_isIso_app α

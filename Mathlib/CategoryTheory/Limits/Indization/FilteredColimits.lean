@@ -80,12 +80,12 @@ theorem exists_nonempty_limit_obj_of_colimit [IsFiltered K]
   exact (lim.mapIso y).hom z
 
 theorem exists_nonempty_limit_obj_of_isColimit [IsFiltered K] {c : Cocone H} (hc : IsColimit c)
-    (T : Over (colimit F)) (hT : c.pt ≅ T)
+    (T : Over (colimit F)) (hT : T ⟶ c.pt)
     (h : Nonempty <| limit <| 𝒢 ⋙ yoneda.obj T) :
     ∃ k, Nonempty <| limit <| 𝒢 ⋙ yoneda.obj (H.obj k) := by
   refine exists_nonempty_limit_obj_of_colimit F G H ?_
-  suffices T ≅ colimit H from Nonempty.map (lim.map (whiskerLeft 𝒢 (yoneda.map this.hom))) h
-  refine hT.symm ≪≫ IsColimit.coconePointUniqueUpToIso hc (colimit.isColimit _)
+  let e := IsColimit.coconePointUniqueUpToIso hc (colimit.isColimit _)
+  exact Nonempty.map (lim.map (whiskerLeft 𝒢 (yoneda.map (hT ≫ e.hom)))) h
 
 end Interchange
 
@@ -108,7 +108,7 @@ theorem isFiltered [IsFiltered I] (hF : ∀ i, IsIndObject (F.obj i)) :
   --   `colim_i lim_j Hom_{Over (colimit F)}(yGj, colimit.ι F i)`, and so we find `i` such that
   -- the limit is non-empty.
   obtain ⟨i, hi⟩ := exists_nonempty_limit_obj_of_isColimit F G _
-    (colimit.isColimitToOver F) _ (Iso.refl _) h₁
+    (colimit.isColimitToOver F) _ (𝟙 _) h₁
   -- `F.obj i` is a small filtered colimit of representables, say of the functor `H : K ⥤ C`, so
   -- `𝟙 (F.obj i)` is the colimit of the arrows of the form `yHk ⟶ Fi` in `Over Fi`.
   -- Then `colimit.ι F i` is the colimit of the arrows of the form
@@ -124,7 +124,7 @@ theorem isFiltered [IsFiltered I] (hF : ∀ i, IsIndObject (F.obj i)) :
       yoneda.obj ((CostructuredArrow.toOver yoneda (colimit F)).obj <|
         (CostructuredArrow.pre P.F yoneda (colimit F)).obj <|
           (map (colimit.ι F i)).obj <| mk _))) :=
-    exists_nonempty_limit_obj_of_isColimit F G _ hc _ (Iso.refl _) hi
+    exists_nonempty_limit_obj_of_isColimit F G _ hc _ (𝟙 _) hi
   have htO : (CostructuredArrow.toOver yoneda (colimit F)).FullyFaithful := .ofFullyFaithful _
   -- Since the inclusion `y : CostructuredArrow yoneda (colimit F) ⥤ Over (colimit F)` is fully
   -- faithful, `lim_j Hom_{Over (colimit F)}(yGj, yHk) ≅`

@@ -49,21 +49,21 @@ instance tensoringLeft_linear (X : C) : ((tensoringLeft C).obj X).Linear R where
 
 instance tensoringRight_linear (X : C) : ((tensoringRight C).obj X).Linear R where
 
-/-- A faithful linear monoidal functor to a linear monoidal category
+/-- A faithful additive linear monoidal functor to a linear monoidal category
 ensures that the domain is linear monoidal. -/
 theorem MonoidalLinear.ofFaithful {D : Type*} [Category* D] [Preadditive D] [Linear R D]
-    [MonoidalCategory D] [MonoidalPreadditive D] (F : D ⥤ C) [F.Monoidal] [F.Faithful]
-    [F.Linear R] : MonoidalLinear R D :=
-  { whiskerLeft_smul := by
-      intro X Y Z r f
-      apply F.map_injective
-      rw [Functor.Monoidal.map_whiskerLeft]
-      simp
-    smul_whiskerRight := by
-      intro r X Y f Z
-      apply F.map_injective
-      rw [Functor.Monoidal.map_whiskerRight]
-      simp }
+    [MonoidalCategory D] (F : D ⥤ C) [F.Monoidal] [F.Faithful] [F.Additive]
+    [F.Linear R] : letI : MonoidalPreadditive D := monoidalPreadditive_of_faithful F
+      MonoidalLinear R D := by
+  refine @MonoidalLinear.mk R _ D _ _ _ _ (monoidalPreadditive_of_faithful F) ?_ ?_
+  · intro X Y Z r f
+    apply F.map_injective
+    rw [Functor.Monoidal.map_whiskerLeft]
+    simp
+  · intro r X Y f Z
+    apply F.map_injective
+    rw [Functor.Monoidal.map_whiskerRight]
+    simp
 
 @[deprecated (since := "2025-10-17")] alias monoidalLinearOfFaithful := MonoidalLinear.ofFaithful
 

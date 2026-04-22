@@ -29,7 +29,7 @@ they are def-eqs, perhaps constructing it from specified `MorphismProperty`s.
 
 namespace CategoryTheory.Bicategory
 
-variable {B : Type*} (C : Type*) [Bicategory C] (F : B → C)
+variable {B : Type*} (C : Type*) (F : B → C)
 
 /-- `InducedBicategory B C`, where `F : B → C`, is a typeclass synonym for `B`. This is given
 a bicategory structure where the 1-morphisms `X ⟶ Y` are the 1-morphisms in `C` from `F X` to
@@ -45,6 +45,10 @@ variable {C F}
 
 instance hasCoeToSort {α : Sort*} [CoeSort C α] : CoeSort (InducedBicategory C F) α :=
   ⟨fun c => F c⟩
+
+section CategoryStruct
+
+variable [CategoryStruct C]
 
 set_option backward.privateInPublic true in
 /-- `InducedBicategory.Hom X Y` is a type-alias for morphisms between `X Y : B` viewed as objects
@@ -73,6 +77,12 @@ abbrev mkHom {X Y : InducedBicategory C F} (f : F X ⟶ F Y) : X ⟶ Y :=
 @[ext]
 lemma hom_ext {X Y : InducedBicategory C F} {f g : X ⟶ Y} (h : f.hom = g.hom) : f = g :=
   Hom.ext h
+
+end CategoryStruct
+
+section HomCategory
+
+variable [CategoryStruct C] [∀ X Y : C, Category (X ⟶ Y)]
 
 /-- `InducedBicategory.Hom₂ f g` is a type-alias for 2-morphisms between `f g : X ⟶ Y`, where
 `f` and `g` are 1-morphisms for the induced bicategory structure on `B`.
@@ -105,6 +115,22 @@ def isoMk {X Y : InducedBicategory C F} {f g : X ⟶ Y} (φ : f.hom ≅ g.hom) :
   hom := ⟨φ.hom⟩
   inv := ⟨φ.inv⟩
 
+@[simp]
+lemma eqToHom_hom {X Y : InducedBicategory C F} {f g : X ⟶ Y} (h : f = g) :
+    (eqToHom h).hom = eqToHom (h ▸ rfl) := by
+  subst h; simp only [eqToHom_refl, Hom.category_id_hom]
+
+@[simp]
+lemma mkHom_eqToHom {X Y : InducedBicategory C F} {f g : F X ⟶ F Y} (h : f = g) :
+    mkHom₂ (eqToHom h) = eqToHom (h ▸ rfl) := by
+  ext; subst h; simp only [eqToHom_refl, Hom.category_id_hom]
+
+end HomCategory
+
+section Bicategory
+
+variable [Bicategory C]
+
 @[simps!]
 instance bicategory : Bicategory (InducedBicategory C F) where
   whiskerLeft {_ _ _} h {_ _} η := mkHom₂ <| h.hom ◁ Hom₂.hom η
@@ -132,16 +158,6 @@ end
 
 section
 
-@[simp]
-lemma eqToHom_hom {X Y : InducedBicategory C F} {f g : X ⟶ Y} (h : f = g) :
-    (eqToHom h).hom = eqToHom (h ▸ rfl) := by
-  subst h; simp only [eqToHom_refl, Hom.category_id_hom]
-
-@[simp]
-lemma mkHom_eqToHom {X Y : InducedBicategory C F} {f g : F X ⟶ F Y} (h : f = g) :
-    mkHom₂ (eqToHom h) = eqToHom (h ▸ rfl) := by
-  ext; subst h; simp only [eqToHom_refl, Hom.category_id_hom]
-
 variable [Strict C]
 
 attribute [local simp] Strict.leftUnitor_eqToIso Strict.rightUnitor_eqToIso
@@ -150,6 +166,8 @@ attribute [local simp] Strict.leftUnitor_eqToIso Strict.rightUnitor_eqToIso
 instance : Strict (InducedBicategory C F) where
 
 end
+
+end Bicategory
 
 end InducedBicategory
 

@@ -12,7 +12,7 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Basic
 /-!
 # Preservation of well order continuous functors
 
-Given a well-ordered type `J` and a functor `G : C ⥤ D`,
+Given a preordered type `J` and a functor `G : C ⥤ D`,
 we define a type class `PreservesWellOrderContinuousOfShape J G`
 saying that `G` preserves colimits of shape `Set.Iio j`
 for any limit element `j : J`. It follows that if
@@ -30,7 +30,10 @@ namespace Limits
 
 variable {C : Type u} {D : Type u'} {E : Type u''}
   [Category.{v} C] [Category.{v'} D] [Category.{v''} E]
-  (J : Type w) [LinearOrder J]
+
+section Preorder
+
+variable (J : Type w) [Preorder J]
 
 /-- A functor `G : C ⥤ D` satisfies `PreservesWellOrderContinuousOfShape J G`
 if for any limit element `j` in the preordered type `J`, the functor `G`
@@ -46,13 +49,6 @@ lemma preservesColimitsOfShape_of_preservesWellOrderContinuousOfShape (G : C ⥤
     PreservesColimitsOfShape (Set.Iio j) G :=
   PreservesWellOrderContinuousOfShape.preservesColimitsOfShape j hj
 
-instance (F : J ⥤ C) (G : C ⥤ D) [F.IsWellOrderContinuous]
-    [PreservesWellOrderContinuousOfShape J G] :
-    (F ⋙ G).IsWellOrderContinuous where
-  nonempty_isColimit j hj := ⟨by
-    have := preservesColimitsOfShape_of_preservesWellOrderContinuousOfShape G j hj
-    exact isColimitOfPreserves G (F.isColimitOfIsWellOrderContinuous j hj)⟩
-
 instance (G₁ : C ⥤ D) (G₂ : D ⥤ E)
     [PreservesWellOrderContinuousOfShape J G₁]
     [PreservesWellOrderContinuousOfShape J G₂] :
@@ -61,6 +57,25 @@ instance (G₁ : C ⥤ D) (G₂ : D ⥤ E)
     have := preservesColimitsOfShape_of_preservesWellOrderContinuousOfShape G₁ j hj
     have := preservesColimitsOfShape_of_preservesWellOrderContinuousOfShape G₂ j hj
     infer_instance
+
+end Preorder
+
+section PartialOrder
+
+variable (J : Type w) [PartialOrder J]
+
+instance (F : J ⥤ C) (G : C ⥤ D) [F.IsWellOrderContinuous]
+    [PreservesWellOrderContinuousOfShape J G] :
+    (F ⋙ G).IsWellOrderContinuous where
+  nonempty_isColimit j hj := ⟨by
+    have := preservesColimitsOfShape_of_preservesWellOrderContinuousOfShape G j hj
+    exact isColimitOfPreserves G (F.isColimitOfIsWellOrderContinuous j hj)⟩
+
+end PartialOrder
+
+section LinearOrder
+
+variable (J : Type w) [LinearOrder J]
 
 instance [HasIterationOfShape J C] (K : Type*) [Category* K] (X : K) :
     PreservesWellOrderContinuousOfShape J ((evaluation K C).obj X) where
@@ -79,6 +94,8 @@ instance [HasIterationOfShape J C] :
   preservesColimitsOfShape j hj := by
     have := hasColimitsOfShape_of_isSuccLimit C j hj
     infer_instance
+
+end LinearOrder
 
 end Limits
 

@@ -43,14 +43,20 @@ def structuredArrowEquiv (c : C) : StructuredArrow (left c) (inclRight C D) ≌ 
   unitIso := NatIso.ofComponents (fun _ ↦ StructuredArrow.isoMk (Iso.refl _))
   counitIso := NatIso.ofComponents (fun _ ↦ Iso.refl _)
 
-instance [IsConnected C] : (inclLeft C D).Initial where
+instance [IsPreconnected C] [Nonempty (D → C)] : (inclLeft C D).Initial where
   out x := match x with
     | .left _ => isConnected_of_isTerminal _ CostructuredArrow.mkIdTerminal
-    | .right d => isConnected_of_equivalent (costructuredArrowEquiv C D d).symm
+    | .right d => by
+        haveI : Nonempty C := ⟨Classical.choice (inferInstance : Nonempty (D → C)) d⟩
+        haveI : IsConnected C := { }
+        exact isConnected_of_equivalent (costructuredArrowEquiv C D d).symm
 
-instance [IsConnected D] : (inclRight C D).Final where
+instance [IsPreconnected D] [Nonempty (C → D)] : (inclRight C D).Final where
   out x := match x with
-    | .left c => isConnected_of_equivalent (structuredArrowEquiv C D c).symm
+    | .left c => by
+        haveI : Nonempty D := ⟨Classical.choice (inferInstance : Nonempty (C → D)) c⟩
+        haveI : IsConnected D := { }
+        exact isConnected_of_equivalent (structuredArrowEquiv C D c).symm
     | .right _ => isConnected_of_isInitial _ (StructuredArrow.mkIdInitial (T := inclRight C D))
 
 end CategoryTheory.Join

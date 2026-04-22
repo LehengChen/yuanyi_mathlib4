@@ -157,18 +157,20 @@ instance [HasLimitsOfShape WalkingParallelPair C] :
     HasLimitsOfShape WalkingParallelPair (Ind C) :=
   hasLimitsOfShape_of_hasLimitsOfShape_createsLimitsOfShape (Ind.inclusion C)
 
-noncomputable instance [HasFiniteLimits C] : CreatesFiniteLimits (Ind.inclusion C) :=
+noncomputable instance [HasFiniteProducts C] [HasEqualizers C] :
+    CreatesFiniteLimits (Ind.inclusion C) :=
   letI _ : CreatesFiniteProducts (Ind.inclusion C) :=
     { creates _ _ := createsLimitsOfShapeOfEquiv (Discrete.equivalence Equiv.ulift) _ }
   createsFiniteLimitsOfCreatesEqualizersAndFiniteProducts (Ind.inclusion C)
 
-instance [HasFiniteLimits C] : HasFiniteLimits (Ind C) :=
+instance [HasFiniteProducts C] [HasEqualizers C] : HasFiniteLimits (Ind C) :=
   hasFiniteLimits_of_hasLimitsLimits_of_createsFiniteLimits (Ind.inclusion C)
 
-noncomputable instance [HasLimits C] : CreatesLimitsOfSize.{v, v} (Ind.inclusion C) :=
+noncomputable instance [HasProducts.{v} C] [HasEqualizers C] :
+    CreatesLimitsOfSize.{v, v} (Ind.inclusion C) :=
   createsLimitsOfSizeOfCreatesEqualizersAndProducts.{v, v} (Ind.inclusion C)
 
-instance [HasLimits C] : HasLimits (Ind C) :=
+instance [HasProducts.{v} C] [HasEqualizers C] : HasLimits (Ind C) :=
   hasLimits_of_hasLimits_createsLimits (Ind.inclusion C)
 
 instance : PreservesLimits (Ind.yoneda (C := C)) :=
@@ -226,14 +228,14 @@ noncomputable def Ind.limCompInclusion {I : Type v} [SmallCategory I] [IsFiltere
   _ ≅ (whiskeringRight _ _ _).obj yoneda ⋙ colim :=
     isoWhiskerRight ((whiskeringRight _ _ _).mapIso (Ind.yonedaCompInclusion)) colim
 
-instance {α : Type w} [SmallCategory α] [FinCategory α] [HasLimitsOfShape α C] {I : Type v}
+instance {α : Type w} [Category α] [FinCategory α] [HasLimitsOfShape α C] {I : Type v}
     [SmallCategory I] [IsFiltered I] :
     PreservesLimitsOfShape α (Ind.lim I : (I ⥤ C) ⥤ _) :=
   haveI : PreservesLimitsOfShape α (Ind.lim I ⋙ Ind.inclusion C) :=
     preservesLimitsOfShape_of_natIso Ind.limCompInclusion.symm
   preservesLimitsOfShape_of_reflects_of_preserves _ (Ind.inclusion C)
 
-instance {α : Type w} [SmallCategory α] [FinCategory α] [HasColimitsOfShape α C] {I : Type v}
+instance {α : Type w} [Category α] [FinCategory α] [HasColimitsOfShape α C] {I : Type v}
     [SmallCategory I] [IsFiltered I] :
     PreservesColimitsOfShape α (Ind.lim I : (I ⥤ C) ⥤ _) :=
   inferInstanceAs (PreservesColimitsOfShape α (_ ⋙ colim))
@@ -281,7 +283,7 @@ instance [HasColimitsOfShape WalkingParallelPair C] :
     (Ind.inclusion _ |>.map <| F.map WalkingParallelPairHom.right)
   exact hasColimit_of_iso (diagramIsoParallelPair _ ≪≫ P.parallelPairIsoParallelPairCompIndYoneda)
 
-instance [HasFiniteColimits C] : HasColimits (Ind C) :=
+instance [HasFiniteCoproducts C] [HasCoequalizers C] : HasColimits (Ind C) :=
   has_colimits_of_hasCoequalizers_and_coproducts
 
 /-- A way to understand morphisms in `Ind C`: every morphism is induced by a natural transformation

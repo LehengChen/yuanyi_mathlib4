@@ -117,13 +117,13 @@ lemma homIsOver_of_isOverTower [OverClass X S] [OverClass X S'] [OverClass Y S]
   rw [← comp_over (Y ↘ S), comp_over_assoc f, comp_over]
 
 instance [CanonicallyOverClass X S]
-    [OverClass X S'] [OverClass Y S] [OverClass Y S'] [OverClass S S']
-    [IsOverTower X S S'] [IsOverTower Y S S'] [HomIsOver f S] : HomIsOver f S' :=
+    [OverClass Y S] [OverClass Y S'] [OverClass S S']
+    [IsOverTower Y S S'] [HomIsOver f S] : HomIsOver f S' :=
   homIsOver_of_isOverTower f S S'
 
 instance [OverClass X S]
-    [OverClass X S'] [CanonicallyOverClass Y S] [OverClass Y S'] [OverClass S S']
-    [IsOverTower X S S'] [IsOverTower Y S S'] [HomIsOver f S] : HomIsOver f S' :=
+    [OverClass X S'] [CanonicallyOverClass Y S] [OverClass S S']
+    [IsOverTower X S S'] [HomIsOver f S] : HomIsOver f S' :=
   homIsOver_of_isOverTower f S S'
 
 variable (X) in

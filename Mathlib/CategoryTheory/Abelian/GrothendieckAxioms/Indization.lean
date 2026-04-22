@@ -29,21 +29,23 @@ section
 
 variable {C : Type u} [Category.{v} C]
 
-instance {J : Type v} [SmallCategory J] [IsFiltered J] [HasFiniteLimits C] :
+instance {J : Type v} [SmallCategory J] [IsFiltered J] [HasFiniteLimits (Ind C)]
+    [PreservesFiniteLimits (Ind.inclusion C)] :
     HasExactColimitsOfShape J (Ind C) :=
   HasExactColimitsOfShape.domain_of_functor J (Ind.inclusion C)
 
-instance [HasFiniteLimits C] : AB5 (Ind C) where
+instance [HasFiniteLimits (Ind C)] [PreservesFiniteLimits (Ind.inclusion C)] : AB5 (Ind C) where
   ofShape _ _ _ := inferInstance
 
 end
 
 section
 
-variable {C : Type u} [SmallCategory C] [Abelian C]
+variable {C : Type u} [SmallCategory C] [Abelian (Ind C)]
+    [PreservesFiniteLimits (Ind.inclusion C)] [HasCoproduct (Ind.yoneda : C ⥤ _).obj]
 
 instance isGrothendieckAbelian_ind : IsGrothendieckAbelian.{u} (Ind C) where
-  hasSeparator := ⟨⟨_, Ind.isSeparator_range_yoneda⟩⟩
+  hasSeparator := ⟨⟨_, Ind.isSeparating_range_yoneda.isSeparator_coproduct⟩⟩
 
 end
 

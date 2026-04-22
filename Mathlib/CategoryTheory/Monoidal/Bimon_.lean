@@ -58,6 +58,19 @@ end BimonObj
 class IsBimonHom {M N : C} [BimonObj M] [BimonObj N] (f : M ⟶ N) : Prop extends
     IsMonHom f, IsComonHom f
 
+attribute [local instance] ComonObj.instTensorUnit in
+instance (M : C) [BimonObj M] : IsComonHom η[M] where
+  hom_counit := by simp
+  hom_comul := by simp [MonObj.tensorObj.one_def]
+
+instance (M : C) [BimonObj M] : IsMonHom ε[M] where
+  one_hom := by simp
+  mul_hom := by simp [Comon.tensorObj_counit]
+
+instance (M : C) [BimonObj M] : IsMonHom Δ[M] where
+  one_hom := by simp [MonObj.tensorObj.one_def]
+  mul_hom := by simp [MonObj.tensorObj.mul_def]
+
 variable (C) in
 /--
 A bimonoid object in a braided category `C` is a comonoid object in the (monoidal)
@@ -261,25 +274,29 @@ instance (M : Bimon C) : BimonObj M.X.X where
     simp_rw [← BimonObjAux_comul, ComonObj.comul_assoc]
 
 attribute [local simp] MonObj.tensorObj.one_def in
+attribute [local instance] ComonObj.instTensorUnit in
+omit [BraidedCategory C] in
 @[reassoc]
-theorem one_comul (M : C) [BimonObj M] :
+theorem one_comul (M : C) [MonObj M] [ComonObj M] [IsComonHom η[M]] :
     η[M] ≫ Δ[M] = (λ_ _).inv ≫ (η[M] ⊗ₘ η[M]) := by
   simp
 
+omit [BraidedCategory C] in
 @[reassoc]
-theorem mul_counit (M : C) [BimonObj M] :
+theorem mul_counit (M : C) [MonObj M] [ComonObj M] [IsMonHom ε[M]] :
     μ[M] ≫ ε[M] = (ε[M] ⊗ₘ ε[M]) ≫ (λ_ _).hom := by
   simp
 
 /-- Compatibility of the monoid and comonoid structures, in terms of morphisms in `C`. -/
-@[reassoc (attr := simp)] theorem compatibility (M : C) [BimonObj M] :
+@[reassoc (attr := simp)] theorem compatibility (M : C) [MonObj M] [ComonObj M]
+    [IsMonHom Δ[M]] :
     (Δ[M] ⊗ₘ Δ[M]) ≫
       (α_ _ _ (M ⊗ M)).hom ≫ M ◁ (α_ _ _ _).inv ≫
       M ◁ (β_ M M).hom ▷ M ≫
       M ◁ (α_ _ _ _).hom ≫ (α_ _ _ _).inv ≫
       (μ[M] ⊗ₘ μ[M]) =
     μ[M] ≫ Δ[M] := by
-  simp only [BimonObj.mul_comul, tensorμ, Category.assoc]
+  simp [MonObj.tensorObj.mul_def, tensorμ, Category.assoc]
 
 /-- Auxiliary definition for `Bimon.mk'`. -/
 @[simps X]

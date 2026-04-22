@@ -13,6 +13,7 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Filtered
 public import Mathlib.CategoryTheory.Limits.Preserves.FunctorCategory
 public import Mathlib.CategoryTheory.Limits.Bicones
 public import Mathlib.CategoryTheory.Limits.Comma
+public import Mathlib.CategoryTheory.Limits.FunctorCategory.Finite
 public import Mathlib.CategoryTheory.Limits.Preserves.Finite
 public import Mathlib.CategoryTheory.Limits.Preserves.Opposites
 public import Mathlib.CategoryTheory.Limits.Shapes.FiniteLimits
@@ -316,16 +317,17 @@ noncomputable def lanEvaluationIsoColim (F : C ⥤ D) (X : D)
       rfl)
 
 variable {FE : E → E → Type*} {CE : E → Type u₁} [∀ X Y, FunLike (FE X Y) (CE X) (CE Y)]
-    [ConcreteCategory E FE] [HasLimits E] [HasColimits E]
-variable [ReflectsLimits (forget E)] [PreservesFilteredColimits (forget E)]
-variable [PreservesLimits (forget E)]
+    [ConcreteCategory E FE] [HasFiniteLimits E] [HasColimits E]
+variable [ReflectsFiniteLimits (forget E)]
+variable [PreservesFiniteLimits (forget E)]
 
 /-- If `F : C ⥤ D` is a representably flat functor between small categories, then the functor
 `Lan F.op` that takes presheaves over `C` to presheaves over `D` preserves finite limits.
 -/
-noncomputable instance lan_preservesFiniteLimits_of_flat (F : C ⥤ D) [RepresentablyFlat F] :
+noncomputable instance lan_preservesFiniteLimits_of_flat (F : C ⥤ D) [RepresentablyFlat F]
+    [∀ K : Dᵒᵖ, PreservesColimitsOfShape (CostructuredArrow F.op K) (forget E)] :
     PreservesFiniteLimits (F.op.lan : _ ⥤ Dᵒᵖ ⥤ E) := by
-  apply preservesFiniteLimits_of_preservesFiniteLimitsOfSize.{u₁}
+  apply preservesFiniteLimits_of_preservesFiniteLimitsOfSize.{0}
   intro J _ _
   apply preservesLimitsOfShape_of_evaluation (F.op.lan : (Cᵒᵖ ⥤ E) ⥤ Dᵒᵖ ⥤ E) J
   intro K
@@ -333,14 +335,17 @@ noncomputable instance lan_preservesFiniteLimits_of_flat (F : C ⥤ D) [Represen
     IsFiltered.of_equivalence (structuredArrowOpEquivalence F (unop K))
   exact preservesLimitsOfShape_of_natIso (lanEvaluationIsoColim _ _ _).symm
 
-instance lan_flat_of_flat (F : C ⥤ D) [RepresentablyFlat F] :
+instance lan_flat_of_flat (F : C ⥤ D) [RepresentablyFlat F]
+    [∀ K : Dᵒᵖ, PreservesColimitsOfShape (CostructuredArrow F.op K) (forget E)] :
     RepresentablyFlat (F.op.lan : _ ⥤ Dᵒᵖ ⥤ E) :=
   flat_of_preservesFiniteLimits _
 
 variable [HasFiniteLimits C]
 
 instance lan_preservesFiniteLimits_of_preservesFiniteLimits (F : C ⥤ D)
-    [PreservesFiniteLimits F] : PreservesFiniteLimits (F.op.lan : _ ⥤ Dᵒᵖ ⥤ E) := by
+    [PreservesFiniteLimits F]
+    [∀ K : Dᵒᵖ, PreservesColimitsOfShape (CostructuredArrow F.op K) (forget E)] :
+    PreservesFiniteLimits (F.op.lan : _ ⥤ Dᵒᵖ ⥤ E) := by
   haveI := flat_of_preservesFiniteLimits F
   infer_instance
 

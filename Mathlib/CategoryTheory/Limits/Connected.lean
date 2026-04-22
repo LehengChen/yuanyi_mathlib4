@@ -212,6 +212,8 @@ end ProdPreservesConnectedLimits
 
 open ProdPreservesConnectedLimits
 
+variable {J : Type u₁} [Category.{v₁} J]
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor `(X × -)` preserves any connected limit.
 Note that this functor does not preserve the two most obvious disconnected limits - that is,
@@ -221,20 +223,25 @@ to `X ⨯ (A ⨯ B)` and `X ⨯ 1` is not isomorphic to `1`.
 lemma prod_preservesConnectedLimits [IsConnected J] (X : C) :
     PreservesLimitsOfShape J (prod.functor.obj X) where
   preservesLimit {K} :=
+    let γ₂ : K ⋙ prod.functor.obj X ⟶ K := { app _ := Limits.prod.snd }
+    let γ₁ : K ⋙ prod.functor.obj X ⟶ (Functor.const J).obj X := { app _ := Limits.prod.fst }
+    let forgetCone (s : Cone (K ⋙ prod.functor.obj X)) : Cone K :=
+      { pt := s.pt
+        π := s.π ≫ γ₂ }
     { preserves := fun {c} l => ⟨{
           lift := fun s =>
             prod.lift (s.π.app (Classical.arbitrary _) ≫ Limits.prod.fst) (l.lift (forgetCone s))
           fac := fun s j => by
             apply Limits.prod.hom_ext
             · erw [assoc, limMap_π, comp_id, limit.lift_π]
-              exact (nat_trans_from_is_connected (s.π ≫ γ₁ X) j (Classical.arbitrary _)).symm
-            · simp
+              exact (nat_trans_from_is_connected (s.π ≫ γ₁) j (Classical.arbitrary _)).symm
+            · simp [forgetCone, γ₂]
           uniq := fun s m L => by
             apply Limits.prod.hom_ext
             · simp [← L]
             · rw [limit.lift_π]
               apply l.uniq (forgetCone s)
               intro j
-              simp [← L j] }⟩ }
+              simp [forgetCone, γ₂, ← L j] }⟩ }
 
 end CategoryTheory

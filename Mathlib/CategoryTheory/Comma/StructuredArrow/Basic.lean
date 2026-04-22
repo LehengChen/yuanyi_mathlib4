@@ -275,10 +275,10 @@ instance (S : D) (F : B ⥤ C) (G : C ⥤ D) [F.Full] : (pre S F G).Full :=
 instance (S : D) (F : B ⥤ C) (G : C ⥤ D) [F.EssSurj] : (pre S F G).EssSurj :=
   show (Comma.preRight _ _ _).EssSurj from inferInstance
 
-/-- If `F` is an equivalence, then so is the functor `(S, F ⋙ G) ⥤ (S, G)`. -/
-instance isEquivalence_pre (S : D) (F : B ⥤ C) (G : C ⥤ D) [F.IsEquivalence] :
-    (pre S F G).IsEquivalence :=
-  Comma.isEquivalence_preRight _ _ _
+/-- If `F` is full, faithful and essentially surjective, then so is the functor
+`(S, F ⋙ G) ⥤ (S, G)`. -/
+instance isEquivalence_pre (S : D) (F : B ⥤ C) (G : C ⥤ D)
+    [F.Faithful] [F.Full] [F.EssSurj] : (pre S F G).IsEquivalence where
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor `(S, F) ⥤ (G(S), F ⋙ G)`. -/
@@ -325,9 +325,8 @@ instance essSurj_map₂ [F.EssSurj] [G.Full] [IsIso α] [IsIso β] : (map₂ α 
 
 set_option backward.isDefEq.respectTransparency false in
 noncomputable instance isEquivalenceMap₂
-    [F.IsEquivalence] [G.Faithful] [G.Full] [IsIso α] [IsIso β] :
-    (map₂ α β).IsEquivalence := by
-  apply Comma.isEquivalenceMap
+    [F.Faithful] [F.Full] [F.EssSurj] [G.Faithful] [G.Full] [IsIso α] [IsIso β] :
+    (map₂ α β).IsEquivalence where
 
 /-- The composition of two applications of `map₂` is naturally isomorphic to a single such one. -/
 def map₂CompMap₂Iso {C' : Type u₆} [Category.{v₆} C'] {D' : Type u₅} [Category.{v₅} D']
@@ -636,10 +635,10 @@ instance (F : B ⥤ C) (G : C ⥤ D) (S : D) [F.Full] : (pre F G S).Full :=
 instance (F : B ⥤ C) (G : C ⥤ D) (S : D) [F.EssSurj] : (pre F G S).EssSurj :=
   show (Comma.preLeft _ _ _).EssSurj from inferInstance
 
-/-- If `F` is an equivalence, then so is the functor `(F ⋙ G, S) ⥤ (G, S)`. -/
-instance isEquivalence_pre (F : B ⥤ C) (G : C ⥤ D) (S : D) [F.IsEquivalence] :
-    (pre F G S).IsEquivalence :=
-  Comma.isEquivalence_preLeft _ _ _
+/-- If `F` is full, faithful and essentially surjective, then so is the functor
+`(F ⋙ G, S) ⥤ (G, S)`. -/
+instance isEquivalence_pre (F : B ⥤ C) (G : C ⥤ D) (S : D)
+    [F.Faithful] [F.Full] [F.EssSurj] : (pre F G S).IsEquivalence where
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor `(F, S) ⥤ (F ⋙ G, G(S))`. -/
@@ -686,9 +685,8 @@ instance essSurj_map₂ [F.EssSurj] [G.Full] [IsIso α] [IsIso β] : (map₂ α 
 
 set_option backward.isDefEq.respectTransparency false in
 noncomputable instance isEquivalenceMap₂
-    [F.IsEquivalence] [G.Faithful] [G.Full] [IsIso α] [IsIso β] :
-    (map₂ α β).IsEquivalence := by
-  apply Comma.isEquivalenceMap
+    [F.Faithful] [F.Full] [F.EssSurj] [G.Faithful] [G.Full] [IsIso α] [IsIso β] :
+    (map₂ α β).IsEquivalence where
 
 end
 

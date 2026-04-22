@@ -61,11 +61,14 @@ lemma rlp_eq_of_wfs : W₁.rlp = W₂ := IsWeakFactorizationSystem.rlp
 
 lemma llp_eq_of_wfs : W₂.llp = W₁ := IsWeakFactorizationSystem.llp
 
-variable {W₁ W₂} in
-lemma hasLiftingProperty_of_wfs {A B X Y : C} (i : A ⟶ B) (p : X ⟶ Y)
-    (hi : W₁ i) (hp : W₂ p) : HasLiftingProperty i p :=
-  (llp_eq_of_wfs W₁ W₂ ▸ hi) p hp
+instance llp_eq_fact_of_wfs : Fact (W₂.llp = W₁) :=
+  ⟨llp_eq_of_wfs W₁ W₂⟩
 
 end
+
+variable {W₁ W₂} in
+lemma hasLiftingProperty_of_wfs [Fact (W₂.llp = W₁)] {A B X Y : C} (i : A ⟶ B) (p : X ⟶ Y)
+    (hi : W₁ i) (hp : W₂ p) : HasLiftingProperty i p :=
+  ((Fact.out : W₂.llp = W₁) ▸ hi) p hp
 
 end CategoryTheory.MorphismProperty

@@ -31,11 +31,21 @@ namespace CategoryTheory.Functor.IsLocalization
 instance pi {J : Type w} [Finite J] {C : J → Type u₁} {D : J → Type u₂}
     [∀ j, Category.{v₁} (C j)] [∀ j, Category.{v₂} (D j)]
     (L : ∀ j, C j ⥤ D j) (W : ∀ j, MorphismProperty (C j))
-    [∀ j, (W j).ContainsIdentities] [∀ j, (L j).IsLocalization (W j)] :
+    [(MorphismProperty.pi W).ContainsIdentities] [∀ j, (L j).IsLocalization (W j)] :
     (Functor.pi L).IsLocalization (MorphismProperty.pi W) := by
   revert J
   apply Finite.induction_empty_option
   · intro J₁ J₂ e hJ₁ C₂ D₂ _ _ L₂ W₂ _ _
+    haveI : (MorphismProperty.pi (fun j => W₂ (e j))).ContainsIdentities := by
+      constructor
+      intro X j
+      let Y : ∀ i : J₂, C₂ i := Equiv.piCongrLeft C₂ e X
+      have hY : ∀ i, W₂ i (𝟙 (Y i)) :=
+        MorphismProperty.id_mem (MorphismProperty.pi W₂) Y
+      have hobj : Y (e j) = X j := by simp [Y]
+      have h := hY (e j)
+      rw [hobj] at h
+      exact h
     let L₁ := fun j => (L₂ (e j))
     let E := Pi.equivalenceOfEquiv C₂ e
     let E' := Pi.equivalenceOfEquiv D₂ e
@@ -58,20 +68,49 @@ instance pi {J : Type w} [Finite J] {C : J → Type u₁} {D : J → Type u₂}
     rw [MorphismProperty.isomorphisms.iff, isIso_pi_iff]
     rintro ⟨⟩
   · intro J _ hJ C D _ _ L W _ _
-    let L₁ := (L none).prod (Functor.pi (fun j => L (some j)))
-    haveI : CatCommSq (Pi.optionEquivalence C).symm.functor L₁ (Functor.pi L)
-      (Pi.optionEquivalence D).symm.functor :=
-        ⟨NatIso.pi' (by rintro (_ | i) <;> apply Iso.refl)⟩
-    refine IsLocalization.of_equivalences L₁
-      ((W none).prod (MorphismProperty.pi (fun j => W (some j)))) (Functor.pi L) _
-      (Pi.optionEquivalence C).symm (Pi.optionEquivalence D).symm ?_ ?_
-    · intro ⟨X₁, X₂⟩ ⟨Y₁, Y₂⟩ f ⟨hf₁, hf₂⟩
-      refine ⟨_, _, (Pi.optionEquivalence C).inverse.map f, ?_, ⟨Iso.refl _⟩⟩
-      rintro (_ | i)
-      · exact hf₁
-      · apply hf₂
-    · apply MorphismProperty.IsInvertedBy.pi
-      rintro (_ | i) <;> apply Localization.inverts
+    by_cases hC : Nonempty (∀ i : Option J, C i)
+    · obtain ⟨X₀⟩ := hC
+      haveI : (W none).ContainsIdentities := by
+        constructor
+        intro X
+        let X' : ∀ i : Option J, C i := fun
+          | none => X
+          | some j => X₀ (some j)
+        exact MorphismProperty.id_mem (MorphismProperty.pi W) X' none
+      haveI : (MorphismProperty.pi (fun j => W (some j))).ContainsIdentities := by
+        constructor
+        intro X j
+        let X' : ∀ i : Option J, C i := fun
+          | none => X₀ none
+          | some j => X j
+        exact MorphismProperty.id_mem (MorphismProperty.pi W) X' (some j)
+      let L₁ := (L none).prod (Functor.pi (fun j => L (some j)))
+      haveI : CatCommSq (Pi.optionEquivalence C).symm.functor L₁ (Functor.pi L)
+        (Pi.optionEquivalence D).symm.functor :=
+          ⟨NatIso.pi' (by rintro (_ | i) <;> apply Iso.refl)⟩
+      refine IsLocalization.of_equivalences L₁
+        ((W none).prod (MorphismProperty.pi (fun j => W (some j)))) (Functor.pi L) _
+        (Pi.optionEquivalence C).symm (Pi.optionEquivalence D).symm ?_ ?_
+      · intro ⟨X₁, X₂⟩ ⟨Y₁, Y₂⟩ f ⟨hf₁, hf₂⟩
+        refine ⟨_, _, (Pi.optionEquivalence C).inverse.map f, ?_, ⟨Iso.refl _⟩⟩
+        rintro (_ | i)
+        · exact hf₁
+        · apply hf₂
+      · apply MorphismProperty.IsInvertedBy.pi
+        rintro (_ | i) <;> apply Localization.inverts
+    · haveI : IsEmpty (∀ i : Option J, C i) := ⟨fun X => hC ⟨X⟩⟩
+      classical
+      haveI : IsEmpty (∀ i : Option J, D i) := ⟨fun Y =>
+        IsEmpty.false (fun i =>
+          letI : (L i).EssSurj := Localization.essSurj (L i) (W i)
+          (L i).objPreimage (Y i))⟩
+      haveI : (Functor.pi L).IsEquivalence :=
+        { faithful := ⟨fun {X Y} _ _ _ => False.elim (IsEmpty.false X)⟩
+          full := ⟨fun {X Y} _ => False.elim (IsEmpty.false X)⟩
+          essSurj := ⟨fun Y => False.elim (IsEmpty.false Y)⟩ }
+      refine IsLocalization.of_isEquivalence _ _ ?_
+      intro X Y f hf
+      exact False.elim (IsEmpty.false X)
 
 /-- If `L : C ⥤ D` is a localization functor for `W : MorphismProperty C`, then
 the induced functor `(Discrete J ⥤ C) ⥤ (Discrete J ⥤ D)` is also a localization

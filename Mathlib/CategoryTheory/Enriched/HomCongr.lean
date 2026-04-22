@@ -66,34 +66,27 @@ lemma eHomCongr_trans {X₁ Y₁ X₂ Y₂ X₃ Y₃ : C} (α₁ : X₁ ≅ X₂
 lemma eHomCongr_symm {X Y X₁ Y₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁) :
     (eHomCongr V α β).symm = eHomCongr V α.symm β.symm := rfl
 
-/-- `eHomCongr` respects composition of morphisms. Recall that for any
-composable pair of arrows `f : X ⟶ Y` and `g : Y ⟶ Z` in `C`, the composite
-`f ≫ g` in `C` defines a morphism `𝟙_ V ⟶ (X ⟶[V] Z)` in `V`. Composing with
-the isomorphism `eHomCongr V α γ` yields a morphism in `V` that can be factored
-through the enriched composition map as shown:
-`𝟙_ V ⟶ 𝟙_ V ⊗ 𝟙_ V ⟶ (X₁ ⟶[V] Y₁) ⊗ (Y₁ ⟶[V] Z₁) ⟶ (X₁ ⟶[V] Z₁)`. -/
+/-- `eHomCongr` respects enriched composition. -/
 @[reassoc]
-lemma eHomCongr_comp {X Y Z X₁ Y₁ Z₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁) (γ : Z ≅ Z₁)
-    (f : X ⟶ Y) (g : Y ⟶ Z) :
-    eHomEquiv V (f ≫ g) ≫ (eHomCongr V α γ).hom =
-      (λ_ _).inv ≫ (eHomEquiv V f ≫ (eHomCongr V α β).hom) ▷ _ ≫
-        _ ◁ (eHomEquiv V g ≫ (eHomCongr V β γ).hom) ≫ eComp V X₁ Y₁ Z₁ := by
-  simp only [eHomCongr, MonoidalCategory.whiskerRight_id, assoc,
+lemma eHomCongr_comp {X Y Z X₁ Y₁ Z₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁)
+    (γ : Z ≅ Z₁) :
+    eComp V X Y Z ≫ (eHomCongr V α γ).hom =
+      (eHomCongr V α β).hom ▷ _ ≫
+        _ ◁ (eHomCongr V β γ).hom ≫ eComp V X₁ Y₁ Z₁ := by
+  simp only [eHomCongr, assoc, MonoidalCategory.comp_whiskerRight,
     MonoidalCategory.whiskerLeft_comp]
-  rw [rightUnitor_inv_naturality_assoc, rightUnitor_inv_naturality_assoc,
-    rightUnitor_inv_naturality_assoc, hom_inv_id_assoc, ← whisker_exchange_assoc,
-    ← whisker_exchange_assoc, ← eComp_eHomWhiskerLeft, eHom_whisker_cancel_assoc,
-    ← eComp_eHomWhiskerRight_assoc, ← tensorHom_def_assoc,
-    ← eHomEquiv_comp_assoc]
+  rw [eComp_eHomWhiskerRight_assoc]
+  slice_rhs 4 5 => rw [← eComp_eHomWhiskerLeft]
+  slice_rhs 2 4 => rw [eHom_whisker_cancel]
 
-/-- The inverse map defined by `eHomCongr` respects composition of morphisms. -/
+/-- The inverse map defined by `eHomCongr` respects enriched composition. -/
 @[reassoc]
 lemma eHomCongr_inv_comp {X Y Z X₁ Y₁ Z₁ : C} (α : X ≅ X₁) (β : Y ≅ Y₁)
-    (γ : Z ≅ Z₁) (f : X₁ ⟶ Y₁) (g : Y₁ ⟶ Z₁) :
-    eHomEquiv V (f ≫ g) ≫ (eHomCongr V α γ).inv =
-      (λ_ _).inv ≫ (eHomEquiv V f ≫ (eHomCongr V α β).inv) ▷ _ ≫
-        _ ◁ (eHomEquiv V g ≫ (eHomCongr V β γ).inv) ≫ eComp V X Y Z :=
-  eHomCongr_comp V α.symm β.symm γ.symm f g
+    (γ : Z ≅ Z₁) :
+    eComp V X₁ Y₁ Z₁ ≫ (eHomCongr V α γ).inv =
+      (eHomCongr V α β).inv ▷ _ ≫
+        _ ◁ (eHomCongr V β γ).inv ≫ eComp V X Y Z :=
+  eHomCongr_comp V α.symm β.symm γ.symm
 
 end Iso
 end CategoryTheory

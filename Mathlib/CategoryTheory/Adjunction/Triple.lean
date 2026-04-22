@@ -277,11 +277,15 @@ lemma mono_leftToRight_app_iff_mono_adj₂_unit_app {X : C} :
   rw [← leftToRight_app_map_adj₁_unit_app, mono_comp_iff_of_mono]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For an adjoint triple `F ⊣ G ⊣ H` where `F` and `H` are fully faithful, the natural
+omit [H.Full] [H.Faithful] in
+/-- For an adjoint triple `F ⊣ G ⊣ H` where `F` is fully faithful, the natural
 transformation `F ⟶ H` is monic at `X` iff the counit of the adjunction `F ⊣ G` is monic
 at `H.obj X`. -/
 lemma mono_leftToRight_app_iff_mono_adj₁_counit_app {X : C} :
     Mono (t.leftToRight.app X) ↔ Mono (t.adj₁.counit.app (H.obj X)) := by
+  haveI : IsIso t.adj₂.counit := by
+    rw [← t.isIso_unit_iff_isIso_counit]
+    infer_instance
   rw [← map_adj₂_counit_app_leftToRight_app, mono_comp_iff_of_isIso]
 
 set_option backward.isDefEq.respectTransparency false in

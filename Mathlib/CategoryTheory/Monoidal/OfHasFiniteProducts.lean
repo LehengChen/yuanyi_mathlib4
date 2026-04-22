@@ -294,8 +294,9 @@ lemma δ_eq (X Y : C) :
     let : CartesianMonoidalCategory D := .ofHasFiniteProducts
     δ F X Y = prodComparison F X Y := rfl
 
+section
+
 variable [PreservesLimit (Functor.empty.{0} C) F]
-  [PreservesLimitsOfShape (Discrete WalkingPair) F]
 
 set_option linter.deprecated false in
 @[deprecated inferInstance (since := "2025-10-19")]
@@ -306,6 +307,12 @@ instance :
     let : CartesianMonoidalCategory D := .ofHasFiniteProducts
     IsIso (η F) := by dsimp [η_eq]; infer_instance
 
+end
+
+section
+
+variable [PreservesLimitsOfShape (Discrete WalkingPair) F]
+
 set_option linter.deprecated false in
 @[deprecated inferInstance (since := "2025-10-19")]
 instance (X Y : C) :
@@ -314,6 +321,11 @@ instance (X Y : C) :
     let : CartesianMonoidalCategory C := .ofHasFiniteProducts
     let : CartesianMonoidalCategory D := .ofHasFiniteProducts
     IsIso (δ F X Y) := by dsimp [δ_eq]; infer_instance
+
+end
+
+variable [PreservesLimit (Functor.empty.{0} C) F]
+  [PreservesLimitsOfShape (Discrete WalkingPair) F]
 
 /-- Promote a functor that preserves finite products to a monoidal functor between
 categories equipped with the monoidal category structure given by finite products. -/

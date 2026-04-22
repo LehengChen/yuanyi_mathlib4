@@ -108,14 +108,45 @@ noncomputable def limitConeOfEqualizerAndProduct (F : J ⥤ C) [HasLimit (Discre
       (limit.isLimit _) (limit.isLimit _) (limit.isLimit _)
 
 /--
-Given the existence of the appropriate (possibly finite) products and equalizers, we know a limit of
+Given the existence of the appropriate (possibly finite) products and equalizer, we know a limit of
 `F` exists.
-(This assumes the existence of all equalizers, which is technically stronger than needed.)
 -/
 theorem hasLimit_of_equalizer_and_product (F : J ⥤ C) [HasLimit (Discrete.functor F.obj)]
-    [HasLimit (Discrete.functor fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.2)] [HasEqualizers C] :
-    HasLimit F :=
-  HasLimit.mk (limitConeOfEqualizerAndProduct F)
+    [HasLimit (Discrete.functor fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.2)]
+    [hasEqualizer : HasLimit (parallelPair
+      (Pi.lift fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+        limit.π (Discrete.functor F.obj) ⟨f.1.1⟩ ≫ F.map f.2)
+      (Pi.lift fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+        limit.π (Discrete.functor F.obj) ⟨f.1.2⟩))] :
+    HasLimit F := by
+  let s : (∏ᶜ fun j => F.obj j) ⟶
+      (∏ᶜ fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.2) :=
+    Pi.lift fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+      limit.π (Discrete.functor F.obj) ⟨f.1.1⟩ ≫ F.map f.2
+  let t : (∏ᶜ fun j => F.obj j) ⟶
+      (∏ᶜ fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.2) :=
+    Pi.lift fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+      limit.π (Discrete.functor F.obj) ⟨f.1.2⟩
+  haveI : HasLimit (parallelPair s t) := by
+    simpa [s, t] using hasEqualizer
+  exact
+    HasLimit.mk
+      { cone := _
+        isLimit :=
+          buildIsLimit s t
+            (by
+              intro f
+              simpa [s] using
+                (Pi.lift_π (f := fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.2)
+                  (fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+                    limit.π (Discrete.functor F.obj) ⟨f.1.1⟩ ≫ F.map f.2) f))
+            (by
+              intro f
+              simpa [t] using
+                (Pi.lift_π (f := fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.2)
+                  (fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+                    limit.π (Discrete.functor F.obj) ⟨f.1.2⟩) f))
+            (limit.isLimit _) (limit.isLimit _) (limit.isLimit (parallelPair s t)) }
 
 /-- A limit can be realised as a subobject of a product. -/
 noncomputable def limitSubobjectProduct [HasLimitsOfSize.{w, w} C] (F : J ⥤ C) :
@@ -382,14 +413,45 @@ noncomputable def colimitCoconeOfCoequalizerAndCoproduct (F : J ⥤ C)
       (Sigma.desc fun f => colimit.ι (Discrete.functor F.obj) ⟨f.1.1⟩) (by simp) (by simp)
       (colimit.isColimit _) (colimit.isColimit _) (colimit.isColimit _)
 
-/-- Given the existence of the appropriate (possibly finite) coproducts and coequalizers,
+/-- Given the existence of the appropriate (possibly finite) coproducts and coequalizer,
 we know a colimit of `F` exists.
-(This assumes the existence of all coequalizers, which is technically stronger than needed.)
 -/
 theorem hasColimit_of_coequalizer_and_coproduct (F : J ⥤ C) [HasColimit (Discrete.functor F.obj)]
     [HasColimit (Discrete.functor fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.1)]
-    [HasCoequalizers C] : HasColimit F :=
-  HasColimit.mk (colimitCoconeOfCoequalizerAndCoproduct F)
+    [hasCoequalizer : HasColimit (parallelPair
+      (Sigma.desc fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+        F.map f.2 ≫ colimit.ι (Discrete.functor F.obj) ⟨f.1.2⟩)
+      (Sigma.desc fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+        colimit.ι (Discrete.functor F.obj) ⟨f.1.1⟩))] : HasColimit F :=
+  by
+  let s : (∐ fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.1) ⟶
+      (∐ fun j => F.obj j) :=
+    Sigma.desc fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+      F.map f.2 ≫ colimit.ι (Discrete.functor F.obj) ⟨f.1.2⟩
+  let t : (∐ fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.1) ⟶
+      (∐ fun j => F.obj j) :=
+    Sigma.desc fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+      colimit.ι (Discrete.functor F.obj) ⟨f.1.1⟩
+  haveI : HasColimit (parallelPair s t) := by
+    simpa [s, t] using hasCoequalizer
+  exact
+    HasColimit.mk
+      { cocone := _
+        isColimit :=
+          buildIsColimit s t
+            (by
+              intro f
+              simpa [s] using
+                (Sigma.ι_desc (f := fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.1)
+                  (fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+                    F.map f.2 ≫ colimit.ι (Discrete.functor F.obj) ⟨f.1.2⟩) f))
+            (by
+              intro f
+              simpa [t] using
+                (Sigma.ι_desc (f := fun f : Σ p : J × J, p.1 ⟶ p.2 => F.obj f.1.1)
+                  (fun f : Σ p : J × J, p.1 ⟶ p.2 =>
+                    colimit.ι (Discrete.functor F.obj) ⟨f.1.1⟩) f))
+            (colimit.isColimit _) (colimit.isColimit _) (colimit.isColimit (parallelPair s t)) }
 
 /-- A colimit can be realised as a quotient of a coproduct. -/
 noncomputable def colimitQuotientCoproduct [HasColimitsOfSize.{w, w} C] (F : J ⥤ C) :

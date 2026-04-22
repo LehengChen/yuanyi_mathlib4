@@ -203,7 +203,7 @@ lemma whiskerRight_coprod_inr_rightDistrib_inv [IsMonoidalRightDistrib C] {X Y Z
   apply (cancel_iso_hom_right _ _ (∂R X Y Z)).mp
   rw [assoc, Iso.inv_hom_id, comp_id, coprod_inr_rightDistrib_hom]
 
-/-- In a symmetric monoidal category, the left distributivity is equal to
+/-- In a braided monoidal category, the left distributivity is equal to
 the right distributivity up to braiding isomorphisms. -/
 @[simp]
 lemma coprodComparison_tensorLeft_braiding_hom [BraidedCategory C] {X Y Z : C} :
@@ -211,17 +211,17 @@ lemma coprodComparison_tensorLeft_braiding_hom [BraidedCategory C] {X Y Z : C} :
     (coprod.map (β_ X Y).hom (β_ X Z).hom) ≫ (coprodComparison (tensorRight X) Y Z) := by
   simp [coprodComparison]
 
-/-- In a symmetric monoidal category, the right distributivity is equal to
+/-- In a braided monoidal category, the right distributivity is equal to
 the left distributivity up to braiding isomorphisms. -/
 @[simp]
-lemma coprodComparison_tensorRight_braiding_hom [SymmetricCategory C] {X Y Z : C} :
+lemma coprodComparison_tensorRight_braiding_hom [BraidedCategory C] {X Y Z : C} :
     (coprodComparison (tensorRight X) Y Z) ≫ (β_ (Y ⨿ Z) X).hom =
     (coprod.map (β_ Y X).hom (β_ Z X).hom) ≫ (coprodComparison (tensorLeft X) Y Z) := by
   simp [coprodComparison]
 
-/-- A left distributive symmetric monoidal category is distributive. -/
+/-- A left distributive braided monoidal category is distributive. -/
 lemma SymmetricCategory.isMonoidalDistrib_of_isMonoidalLeftDistrib
-    [SymmetricCategory C] [IsMonoidalLeftDistrib C] : IsMonoidalDistrib C where
+    [BraidedCategory C] [IsMonoidalLeftDistrib C] : IsMonoidalDistrib C where
       preservesBinaryCoproducts_tensorRight X :=
     preservesColimitsOfShape_of_natIso (BraidedCategory.tensorLeftIsoTensorRight X)
 
@@ -239,13 +239,13 @@ instance MonoidalClosed.isMonoidalLeftDistrib [MonoidalClosed C] :
   preservesBinaryCoproducts_tensorLeft X := by
     infer_instance
 
-instance isMonoidalDistrib.of_symmetric_monoidal_closed [SymmetricCategory C] [MonoidalClosed C] :
+instance isMonoidalDistrib.of_symmetric_monoidal_closed [BraidedCategory C] [MonoidalClosed C] :
     IsMonoidalDistrib C := by
   apply SymmetricCategory.isMonoidalDistrib_of_isMonoidalLeftDistrib
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The inverse of distributivity isomorphism from the closed monoidal structure -/
-lemma MonoidalClosed.leftDistrib_inv [MonoidalClosed C] {X Y Z : C} :
+/-- The inverse of the left distributivity isomorphism when the tensoring object is closed. -/
+lemma MonoidalClosed.leftDistrib_inv [IsMonoidalLeftDistrib C] {X Y Z : C} [Closed X] :
     (leftDistrib X Y Z).inv =
       uncurry (coprod.desc (curry coprod.inl) (curry coprod.inr)) := by
   rw [← curry_eq_iff]

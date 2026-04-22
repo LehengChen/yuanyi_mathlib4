@@ -57,14 +57,20 @@ lemma localization_mul :
     (r * s).localization L W = r.localization L W * s.localization L W :=
   ext_of_localization L W _ _ (fun X => by simp)
 
-section Preadditive
+section ZeroMorphisms
 
-variable [Preadditive C] [Preadditive D] [L.Additive]
+variable [Preadditive C] [Preadditive D] [L.PreservesZeroMorphisms]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma localization_zero :
     (0 : CatCenter C).localization L W = 0 :=
   ext_of_localization L W _ _ (fun X => by simp)
+
+end ZeroMorphisms
+
+section Preadditive
+
+variable [Preadditive C] [Preadditive D] [L.Additive]
 
 lemma localization_add :
     (r + s).localization L W = r.localization L W + s.localization L W :=

@@ -246,7 +246,7 @@ def mkIso {ψ ψ' : CatCospanTransform F G F' G'}
 section Iso
 
 variable {ψ ψ' : CatCospanTransform F G F' G'}
-  (f : ψ' ⟶ ψ') [IsIso f] (e : ψ ≅ ψ')
+  (f : ψ ⟶ ψ') [IsIso f] (e : ψ ≅ ψ')
 
 instance isIso_left : IsIso f.left :=
   ⟨(inv f).left, by simp [← CatCospanTransform.category_comp_left]⟩

@@ -18,7 +18,7 @@ proper subobject `A ⊂ X`, there exists a morphism `G ⟶ X` which does not fac
 through `A` from an object satisfying `P`.
 
 The main result is the lemma `isStrongGenerator_iff_exists_extremalEpi` which
-says that if `P` is `w`-small, `C` is locally `w`-small and
+says that if `P` is essentially `w`-small, `C` is locally `w`-small and
 has coproducts of size `w`, then `P` is a strong generator iff any
 object of `C` is the target of an extremal epimorphism from a coproduct of
 objects satisfying `P`.
@@ -126,18 +126,35 @@ lemma extremalEpi_coproductFrom
 end IsStrongGenerator
 
 lemma isStrongGenerator_iff_exists_extremalEpi
-    [HasCoproducts.{w} C] [LocallySmall.{w} C] [ObjectProperty.Small.{w} P] :
+    [HasCoproducts.{w} C] [LocallySmall.{w} C] [ObjectProperty.EssentiallySmall.{w} P] :
     P.IsStrongGenerator ↔
       ∀ (X : C), ∃ (ι : Type w) (s : ι → C) (_ : ∀ i, P (s i)) (c : Cofan s) (_ : IsColimit c)
         (p : c.pt ⟶ X), ExtremalEpi p := by
-  refine ⟨fun hP X ↦ ?_, fun hP ↦ .mk_of_exists_extremalEpi hP⟩
-  have := hasCoproductsOfShape_of_small.{w} C (CostructuredArrow P.ι X)
-  have := (coproductIsCoproduct (P.coproductFromFamily X)).whiskerEquivalence
+  refine ⟨fun hP ↦ ?_, fun hP ↦ .mk_of_exists_extremalEpi hP⟩
+  obtain ⟨Q, hQsmall, hQP, hPQ⟩ := ObjectProperty.EssentiallySmall.exists_small_le.{w} P
+  letI := hQsmall
+  have hQ : Q.IsStrongGenerator := by
+    refine ⟨?_, ?_⟩
+    · intro X Y f g hfg
+      refine hP.isSeparating f g (fun G hG h ↦ ?_)
+      obtain ⟨G', hG', ⟨e⟩⟩ := hPQ G hG
+      calc
+        h ≫ f = e.hom ≫ ((e.inv ≫ h) ≫ f) := by simp [Category.assoc]
+        _ = e.hom ≫ ((e.inv ≫ h) ≫ g) := by rw [hfg G' hG' (e.inv ≫ h)]
+        _ = h ≫ g := by simp [Category.assoc]
+    · intro X A hA
+      refine hP.subobject_eq_top (fun G hG f ↦ ?_)
+      obtain ⟨G', hG', ⟨e⟩⟩ := hPQ G hG
+      simpa [Category.assoc] using
+        Subobject.factors_of_factors_right e.hom (hA G' hG' (e.inv ≫ f))
+  intro X
+  have := hasCoproductsOfShape_of_small.{w} C (CostructuredArrow Q.ι X)
+  have := (coproductIsCoproduct (Q.coproductFromFamily X)).whiskerEquivalence
     (Discrete.equivalence (equivShrink.{w} _)).symm
-  refine ⟨_, fun j ↦ ((equivShrink.{w} (CostructuredArrow P.ι X)).symm j).left.1,
-    fun j ↦ ((equivShrink.{w} _).symm j).1.2, _,
-    (coproductIsCoproduct (P.coproductFromFamily X)).whiskerEquivalence
-    (Discrete.equivalence (equivShrink.{w} _)).symm, _, hP.extremalEpi_coproductFrom X⟩
+  refine ⟨_, fun j ↦ ((equivShrink.{w} (CostructuredArrow Q.ι X)).symm j).left.1,
+    fun j ↦ hQP _ (((equivShrink.{w} (CostructuredArrow Q.ι X)).symm j).left.2), _,
+    (coproductIsCoproduct (Q.coproductFromFamily X)).whiskerEquivalence
+    (Discrete.equivalence (equivShrink.{w} _)).symm, _, hQ.extremalEpi_coproductFrom X⟩
 
 set_option backward.isDefEq.respectTransparency false in
 lemma IsStrongGenerator.mk_of_exists_colimitsOfShape

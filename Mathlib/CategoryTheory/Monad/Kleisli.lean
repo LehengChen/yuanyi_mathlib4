@@ -128,7 +128,9 @@ namespace Cokleisli
 
 variable (U : Comonad C)
 
+variable {U : Comonad C} in
 @[simp] lemma mk_of (c : Cokleisli U) : Cokleisli.mk U c.of = c := rfl
+variable {U : Comonad C} in
 lemma of_mk (c : C) : (Cokleisli.mk U c).of = c := rfl
 
 variable {U} in
@@ -148,7 +150,7 @@ instance category : Category (Cokleisli U) where
   id X := .mk <| U.ε.app X.of
   comp f g := .mk <| U.δ.app _ ≫ (U : C ⥤ C).map f.of ≫ g.of
 
-variable {T} in
+variable {U : Comonad C} in
 attribute [local ext] Hom in
 @[ext]
 lemma hom_ext {x y : Cokleisli U} {f g : x ⟶ y} (h : f.of = g.of) : f = g :=

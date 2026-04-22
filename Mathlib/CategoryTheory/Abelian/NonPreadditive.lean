@@ -217,7 +217,8 @@ is the canonical projection into the cokernel. -/
 abbrev r (A : C) : A ⟶ cokernel (diag A) :=
   prod.lift (𝟙 A) 0 ≫ cokernel.π (diag A)
 
-instance mono_Δ {A : C} : Mono (diag A) :=
+instance mono_Δ {C : Type u} [Category.{v} C] {A : C} [HasBinaryProduct A A] :
+    Mono (diag A) :=
   mono_of_mono_fac <| prod.lift_fst _ _
 
 instance mono_r {A : C} : Mono (r A) := by
@@ -281,7 +282,8 @@ theorem diag_σ {X : C} : diag X ≫ σ = 0 := by rw [cokernel.condition_assoc, 
 theorem lift_σ {X : C} : prod.lift (𝟙 X) 0 ≫ σ = 𝟙 X := by rw [← Category.assoc, IsIso.hom_inv_id]
 
 @[reassoc]
-theorem lift_map {X Y : C} (f : X ⟶ Y) :
+theorem lift_map {C : Type u} [Category.{v} C] [HasZeroMorphisms C]
+    {X Y : C} [HasBinaryProduct X X] [HasBinaryProduct Y Y] (f : X ⟶ Y) :
     prod.lift (𝟙 X) 0 ≫ Limits.prod.map f f = f ≫ prod.lift (𝟙 Y) 0 := by simp
 
 /-- σ is a cokernel of Δ X. -/

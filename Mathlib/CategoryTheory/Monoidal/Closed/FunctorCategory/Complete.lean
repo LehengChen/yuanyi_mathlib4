@@ -41,6 +41,8 @@ variable [∀ (F : Discrete I ⥤ C), (Discrete.functor id).HasRightKanExtension
 
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
+omit [MonoidalCategory C] [MonoidalClosed C]
+    [∀ (F : Discrete I ⥤ C), (Discrete.functor id).HasRightKanExtension F] in
 instance : ReflectsIsomorphisms <| (whiskeringLeft _ _ C).obj (incl I) where
   reflects f h := by
     simp only [NatTrans.isIso_iff_isIso_app] at *
@@ -51,17 +53,22 @@ variable [HasLimitsOfShape WalkingParallelPair C]
 
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
+omit [MonoidalCategory C] [MonoidalClosed C]
+    [∀ (F : Discrete I ⥤ C), (Discrete.functor id).HasRightKanExtension F] in
 instance : Comonad.PreservesLimitOfIsCoreflexivePair ((whiskeringLeft _ _ C).obj (incl I)) :=
   ⟨inferInstance⟩
 
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
+omit [MonoidalCategory C] [MonoidalClosed C] in
 instance : ComonadicLeftAdjoint ((whiskeringLeft _ _ C).obj (incl I)) :=
   Comonad.comonadicOfHasPreservesCoreflexiveEqualizersOfReflectsIsomorphisms
     ((incl I).ranAdjunction C)
 
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
+omit [∀ (F : Discrete I ⥤ C), (Discrete.functor id).HasRightKanExtension F]
+    [HasLimitsOfShape WalkingParallelPair C] in
 instance (F : I ⥤ C) : IsLeftAdjoint (tensorLeft (incl I ⋙ F)) :=
   (ihom.adjunction (incl I ⋙ F)).isLeftAdjoint
 

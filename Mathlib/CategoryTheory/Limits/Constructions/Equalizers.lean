@@ -88,43 +88,109 @@ theorem hasEqualizers_of_hasPullbacks_and_binary_products [HasBinaryProducts C] 
         { cone := equalizerCone F
           isLimit := equalizerConeIsLimit F } }
 
-attribute [local instance] hasPullback_of_preservesPullback
-
 set_option backward.isDefEq.respectTransparency false in
 /-- A functor that preserves pullbacks and binary products also preserves equalizers. -/
 lemma preservesEqualizers_of_preservesPullbacks_and_binaryProducts
-    [HasBinaryProducts C] [HasPullbacks C]
+    [HasBinaryProducts C]
     [PreservesLimitsOfShape (Discrete WalkingPair) G] [PreservesLimitsOfShape WalkingCospan G] :
     PreservesLimitsOfShape WalkingParallelPair G :=
   ⟨fun {K} =>
-    preservesLimit_of_preserves_limit_cone (equalizerConeIsLimit K) <|
-      { lift := fun c => by
-          refine pullback.lift ?_ ?_ ?_ ≫ (PreservesPullback.iso _ _ _ ).inv
-          · exact c.π.app WalkingParallelPair.zero
-          · exact c.π.app WalkingParallelPair.zero
-          apply (mapIsLimitOfPreservesOfIsLimit G _ _ (prodIsProd _ _)).hom_ext
+    ⟨fun {s} hs =>
+      ⟨by
+        let f := prod.lift (𝟙 (K.obj WalkingParallelPair.zero))
+          (K.map WalkingParallelPairHom.left)
+        let g := prod.lift (𝟙 (K.obj WalkingParallelPair.zero))
+          (K.map WalkingParallelPairHom.right)
+        have hpb : IsLimit (PullbackCone.mk (s.π.app WalkingParallelPair.zero)
+            (s.π.app WalkingParallelPair.zero) (f := f) (g := g) (by
+              apply prod.hom_ext
+              · simp [f, g]
+              · simp only [Category.assoc, prod.lift_snd, f, g]
+                exact
+                  (s.π.naturality WalkingParallelPairHom.left).symm.trans
+                    (s.π.naturality WalkingParallelPairHom.right))) := by
+          refine PullbackCone.IsLimit.mk _ (fun c =>
+              hs.lift (Cone.ofFork (Fork.ofι c.fst ?_))) ?_ ?_ ?_
+          · have hfst_snd : c.fst = c.snd := by
+              simpa only [Category.assoc, prod.lift_fst, Category.comp_id, f, g] using
+                congrArg (fun e => e ≫ prod.fst) c.condition
+            have hleft_right : c.fst ≫ K.map WalkingParallelPairHom.left =
+                c.snd ≫ K.map WalkingParallelPairHom.right := by
+              simpa only [Category.assoc, prod.lift_snd, f, g] using
+                congrArg (fun e => e ≫ prod.snd) c.condition
+            rw [← hfst_snd] at hleft_right
+            exact hleft_right
+          · intro c
+            simp
+          · intro c
+            have hfst_snd : c.fst = c.snd := by
+              simpa only [Category.assoc, prod.lift_fst, Category.comp_id, f, g] using
+                congrArg (fun e => e ≫ prod.fst) c.condition
+            rw [← hfst_snd]
+            simp
+          · intro c m hfst hsnd
+            apply hs.uniq (Cone.ofFork (Fork.ofι c.fst _)) m
+            rintro (_ | _)
+            · simpa using hfst
+            · calc
+                m ≫ s.π.app WalkingParallelPair.one =
+                    m ≫ s.π.app WalkingParallelPair.zero ≫
+                      K.map WalkingParallelPairHom.left := by
+                  simp
+                _ = c.fst ≫ K.map WalkingParallelPairHom.left := by
+                  simpa [Category.assoc] using
+                    congrArg (fun e => e ≫ K.map WalkingParallelPairHom.left) hfst
+                _ = (Cone.ofFork (Fork.ofι c.fst _)).π.app WalkingParallelPair.one := by
+                  simp
+        have hpb_map := isLimitPullbackConeMapOfIsLimit G _ hpb
+        refine
+          { lift := fun c =>
+              PullbackCone.IsLimit.lift hpb_map (c.π.app WalkingParallelPair.zero)
+                (c.π.app WalkingParallelPair.zero) ?_
+            fac := ?_
+            uniq := ?_ }
+        · apply (mapIsLimitOfPreservesOfIsLimit G _ _ (prodIsProd _ _)).hom_ext
           rintro (_ | _)
           · simp only [Category.assoc, ← G.map_comp, prod.lift_fst, BinaryFan.π_app_left,
-              BinaryFan.mk_fst]
+              BinaryFan.mk_fst, f, g]
           · simp only [BinaryFan.π_app_right, BinaryFan.mk_snd, Category.assoc, ← G.map_comp,
-              prod.lift_snd]
+              prod.lift_snd, f, g]
             exact
               (c.π.naturality WalkingParallelPairHom.left).symm.trans
                 (c.π.naturality WalkingParallelPairHom.right)
-        fac := fun c j => by
-          rcases j with (_ | _) <;>
-            simp only [Category.comp_id, PreservesPullback.iso_inv_fst, Cone.ofFork_π, G.map_comp,
-              PreservesPullback.iso_inv_fst_assoc, Functor.mapCone_π_app, eqToHom_refl,
-              Category.assoc, Fork.ofι_π_app, pullback.lift_fst, pullback.lift_fst_assoc]
-          exact (c.π.naturality WalkingParallelPairHom.left).symm.trans (Category.id_comp _)
-        uniq := fun s m h => by
-          rw [Iso.eq_comp_inv]
-          have := h WalkingParallelPair.zero
-          dsimp [equalizerCone] at this
-          ext <;>
-            simp only [PreservesPullback.iso_hom_snd, Category.assoc,
-              PreservesPullback.iso_hom_fst, pullback.lift_fst, pullback.lift_snd,
-              Category.comp_id, ← pullbackFst_eq_pullback_snd, ← this] }⟩
+        · intro c j
+          rcases j with (_ | _)
+          · exact PullbackCone.IsLimit.lift_fst hpb_map _ _ _
+          · let l := PullbackCone.IsLimit.lift hpb_map (c.π.app WalkingParallelPair.zero)
+                (c.π.app WalkingParallelPair.zero) (by
+                  apply (mapIsLimitOfPreservesOfIsLimit G _ _ (prodIsProd _ _)).hom_ext
+                  rintro (_ | _)
+                  · simp only [Category.assoc, ← G.map_comp, prod.lift_fst,
+                      BinaryFan.π_app_left, BinaryFan.mk_fst, f, g]
+                  · simp only [BinaryFan.π_app_right, BinaryFan.mk_snd, Category.assoc,
+                      ← G.map_comp, prod.lift_snd, f, g]
+                    exact
+                      (c.π.naturality WalkingParallelPairHom.left).symm.trans
+                        (c.π.naturality WalkingParallelPairHom.right))
+            have h₀ : l ≫ G.map (s.π.app WalkingParallelPair.zero) =
+                c.π.app WalkingParallelPair.zero := PullbackCone.IsLimit.lift_fst hpb_map _ _ _
+            calc
+              l ≫ (G.mapCone s).π.app WalkingParallelPair.one =
+                  l ≫ G.map (s.π.app WalkingParallelPair.zero) ≫
+                    G.map (K.map WalkingParallelPairHom.left) := by
+                simp [l, ← G.map_comp]
+              _ = c.π.app WalkingParallelPair.zero ≫
+                    G.map (K.map WalkingParallelPairHom.left) := by
+                simpa [Category.assoc] using
+                  congrArg (fun e => e ≫ G.map (K.map WalkingParallelPairHom.left)) h₀
+              _ = c.π.app WalkingParallelPair.one := by
+                simpa using (c.π.naturality WalkingParallelPairHom.left).symm
+        · intro c m h
+          apply PullbackCone.IsLimit.hom_ext hpb_map
+          · exact (h WalkingParallelPair.zero).trans
+              (PullbackCone.IsLimit.lift_fst hpb_map _ _ _).symm
+          · exact (h WalkingParallelPair.zero).trans
+              (PullbackCone.IsLimit.lift_snd hpb_map _ _ _).symm⟩⟩⟩
 
 -- We hide the "implementation details" inside a namespace
 namespace HasCoequalizersOfHasPushoutsAndBinaryCoproducts
@@ -185,41 +251,110 @@ theorem hasCoequalizers_of_hasPushouts_and_binary_coproducts [HasBinaryCoproduct
         { cocone := coequalizerCocone F
           isColimit := coequalizerCoconeIsColimit F } }
 
-attribute [local instance] hasPushout_of_preservesPushout
-
 set_option backward.isDefEq.respectTransparency false in
 /-- A functor that preserves pushouts and binary coproducts also preserves coequalizers. -/
 lemma preservesCoequalizers_of_preservesPushouts_and_binaryCoproducts [HasBinaryCoproducts C]
-    [HasPushouts C] [PreservesColimitsOfShape (Discrete WalkingPair) G]
+    [PreservesColimitsOfShape (Discrete WalkingPair) G]
     [PreservesColimitsOfShape WalkingSpan G] : PreservesColimitsOfShape WalkingParallelPair G :=
   ⟨fun {K} =>
-    preservesColimit_of_preserves_colimit_cocone (coequalizerCoconeIsColimit K) <|
-      { desc := fun c => by
-          refine (PreservesPushout.iso _ _ _).inv ≫ pushout.desc ?_ ?_ ?_
-          · exact c.ι.app WalkingParallelPair.one
-          · exact c.ι.app WalkingParallelPair.one
-          apply (mapIsColimitOfPreservesOfIsColimit G _ _ (coprodIsCoprod _ _)).hom_ext
-          rintro (_ | _)
-          · simp only [BinaryCofan.ι_app_left, BinaryCofan.mk_inl, ←
-              G.map_comp_assoc, coprod.inl_desc]
-          · simp only [BinaryCofan.ι_app_right, BinaryCofan.mk_inr, ←
-              G.map_comp_assoc, coprod.inr_desc]
-            exact
-              (c.ι.naturality WalkingParallelPairHom.left).trans
-                (c.ι.naturality WalkingParallelPairHom.right).symm
-        fac := fun c j => by
-          rcases j with (_ | _) <;>
-            simp only [Functor.mapCocone_ι_app, Cocone.ofCofork_ι, Category.id_comp,
-              eqToHom_refl, Category.assoc, Functor.map_comp, Cofork.ofπ_ι_app, pushout.inl_desc,
-              PreservesPushout.inl_iso_inv_assoc]
-          exact (c.ι.naturality WalkingParallelPairHom.left).trans (Category.comp_id _)
-        uniq := fun s m h => by
-          rw [Iso.eq_inv_comp]
-          have := h WalkingParallelPair.one
-          dsimp [coequalizerCocone] at this
-          ext <;>
-            simp only [PreservesPushout.inl_iso_hom_assoc, Category.id_comp, pushout.inl_desc,
-              pushout.inr_desc, PreservesPushout.inr_iso_hom_assoc, ← pushoutInl_eq_pushout_inr, ←
-              this] }⟩
+    ⟨fun {s} hs =>
+      ⟨by
+        let f := coprod.desc (𝟙 (K.obj WalkingParallelPair.one))
+          (K.map WalkingParallelPairHom.left)
+        let g := coprod.desc (𝟙 (K.obj WalkingParallelPair.one))
+          (K.map WalkingParallelPairHom.right)
+        have hpo : IsColimit (PushoutCocone.mk (s.ι.app WalkingParallelPair.one)
+            (s.ι.app WalkingParallelPair.one) (f := f) (g := g) (by
+              apply coprod.hom_ext
+              · simp [f, g]
+              · simp only [← Category.assoc, coprod.inr_desc, f, g]
+                exact
+                  (s.ι.naturality WalkingParallelPairHom.left).trans
+                    (s.ι.naturality WalkingParallelPairHom.right).symm)) := by
+          refine PushoutCocone.IsColimit.mk _ (fun c =>
+              hs.desc (Cocone.ofCofork (Cofork.ofπ c.inl ?_))) ?_ ?_ ?_
+          · have hinl_inr : c.inl = c.inr := by
+              simpa only [← Category.assoc, coprod.inl_desc, Category.id_comp, f, g] using
+                congrArg (fun e => coprod.inl ≫ e) c.condition
+            have hleft_right : K.map WalkingParallelPairHom.left ≫ c.inl =
+                K.map WalkingParallelPairHom.right ≫ c.inr := by
+              simpa only [← Category.assoc, coprod.inr_desc, f, g] using
+                congrArg (fun e => coprod.inr ≫ e) c.condition
+            rw [← hinl_inr] at hleft_right
+            exact hleft_right
+          · intro c
+            simp
+          · intro c
+            have hinl_inr : c.inl = c.inr := by
+              simpa only [← Category.assoc, coprod.inl_desc, Category.id_comp, f, g] using
+                congrArg (fun e => coprod.inl ≫ e) c.condition
+            rw [← hinl_inr]
+            simp
+          · intro c m hinl hinr
+            apply hs.uniq (Cocone.ofCofork (Cofork.ofπ c.inl _)) m
+            rintro (_ | _)
+            · calc
+                s.ι.app WalkingParallelPair.zero ≫ m =
+                    K.map WalkingParallelPairHom.left ≫
+                      s.ι.app WalkingParallelPair.one ≫ m := by
+                  simp
+                _ = K.map WalkingParallelPairHom.left ≫ c.inl := by
+                  simpa [Category.assoc] using
+                    congrArg (fun e => K.map WalkingParallelPairHom.left ≫ e) hinl
+                _ = (Cocone.ofCofork (Cofork.ofπ c.inl _)).ι.app
+                    WalkingParallelPair.zero := by
+                  simp
+            · simpa using hinl
+        have hpo_map := isColimitPushoutCoconeMapOfIsColimit G _ hpo
+        let desc (c : Cocone (K ⋙ G)) :=
+          PushoutCocone.IsColimit.desc hpo_map (c.ι.app WalkingParallelPair.one)
+            (c.ι.app WalkingParallelPair.one) (by
+              apply (mapIsColimitOfPreservesOfIsColimit G _ _ (coprodIsCoprod _ _)).hom_ext
+              rintro (_ | _)
+              · simp only [BinaryCofan.ι_app_left, BinaryCofan.mk_inl, ←
+                  G.map_comp_assoc, coprod.inl_desc, f, g]
+              · simp only [BinaryCofan.ι_app_right, BinaryCofan.mk_inr, ←
+                  G.map_comp_assoc, coprod.inr_desc, f, g]
+                exact
+                  (c.ι.naturality WalkingParallelPairHom.left).trans
+                    (c.ι.naturality WalkingParallelPairHom.right).symm)
+        refine
+          { desc := desc
+            fac := ?_
+            uniq := ?_ }
+        · intro c j
+          rcases j with (_ | _)
+          · let d := desc c
+            change (G.mapCocone s).ι.app WalkingParallelPair.zero ≫ d =
+              c.ι.app WalkingParallelPair.zero
+            have h₁ : G.map (s.ι.app WalkingParallelPair.one) ≫ d =
+                c.ι.app WalkingParallelPair.one := by
+              exact PushoutCocone.IsColimit.inl_desc hpo_map _ _ _
+            calc
+              (G.mapCocone s).ι.app WalkingParallelPair.zero ≫ d =
+                  G.map (K.map WalkingParallelPairHom.left) ≫
+                    G.map (s.ι.app WalkingParallelPair.one) ≫ d := by
+                have hnat := G.congr_map (s.ι.naturality WalkingParallelPairHom.left)
+                simp only [G.map_comp, Functor.const_obj_map] at hnat
+                simpa [Category.assoc] using congrArg (fun e => e ≫ d) hnat.symm
+              _ = G.map (K.map WalkingParallelPairHom.left) ≫
+                    c.ι.app WalkingParallelPair.one := by
+                simpa [Category.assoc] using
+                  congrArg (fun e => G.map (K.map WalkingParallelPairHom.left) ≫ e) h₁
+              _ = c.ι.app WalkingParallelPair.zero := by
+                simpa using c.ι.naturality WalkingParallelPairHom.left
+          · change G.map (s.ι.app WalkingParallelPair.one) ≫ desc c =
+              c.ι.app WalkingParallelPair.one
+            exact PushoutCocone.IsColimit.inl_desc hpo_map _ _ _
+        · intro c m h
+          apply PushoutCocone.IsColimit.hom_ext hpo_map
+          · change G.map (s.ι.app WalkingParallelPair.one) ≫ m =
+              G.map (s.ι.app WalkingParallelPair.one) ≫ desc c
+            exact (h WalkingParallelPair.one).trans
+              (PushoutCocone.IsColimit.inl_desc hpo_map _ _ _).symm
+          · change G.map (s.ι.app WalkingParallelPair.one) ≫ m =
+              G.map (s.ι.app WalkingParallelPair.one) ≫ desc c
+            exact (h WalkingParallelPair.one).trans
+              (PushoutCocone.IsColimit.inr_desc hpo_map _ _ _).symm⟩⟩⟩
 
 end CategoryTheory.Limits

@@ -97,68 +97,126 @@ theorem finite_coproduct_eq_finset_sup [SemilatticeSup α] [OrderBot α] {ι : T
   rfl
 
 -- see Note [lower instance priority]
-instance (priority := 100) [SemilatticeInf α] [OrderTop α] : HasBinaryProducts α := by
-  have : ∀ x y : α, HasLimit (pair x y) := by
-    letI := hasFiniteLimits_of_hasFiniteLimits_of_size.{u} α
-    infer_instance
-  apply hasBinaryProducts_of_hasLimit_pair
+instance (priority := 100) [SemilatticeInf α] : HasBinaryProducts α := by
+  haveI : ∀ {x y : α}, HasLimit (pair x y) := by
+    intro x y
+    refine HasLimit.mk ?_
+    let c : BinaryFan x y := BinaryFan.mk (homOfLE inf_le_left) (homOfLE inf_le_right)
+    exact
+      { cone := c
+        isLimit :=
+          BinaryFan.isLimitMk
+            (fun s => homOfLE (le_inf s.fst.le s.snd.le))
+            (fun s => by rfl)
+            (fun s => by rfl)
+            (fun s m hfst hsnd => by rfl) }
+  exact hasBinaryProducts_of_hasLimit_pair α
 
-/-- The binary product in the category of a `SemilatticeInf` with `OrderTop` is the same as the
-infimum.
+/-- The binary product in the category of a `SemilatticeInf` is the same as the infimum.
 -/
 @[simp]
-theorem prod_eq_inf [SemilatticeInf α] [OrderTop α] (x y : α) : Limits.prod x y = x ⊓ y :=
-  calc
-    Limits.prod x y = limit (pair x y) := rfl
-    _ = Finset.univ.inf (pair x y).obj := by rw [finite_limit_eq_finset_univ_inf (pair.{u} x y)]
-    _ = x ⊓ (y ⊓ ⊤) := rfl
-    -- Note: finset.inf is realized as a fold, hence the definitional equality
-    _ = x ⊓ y := by rw [inf_top_eq]
+theorem prod_eq_inf [SemilatticeInf α] (x y : α) : Limits.prod x y = x ⊓ y := by
+  let c : BinaryFan x y := BinaryFan.mk (homOfLE inf_le_left) (homOfLE inf_le_right)
+  have hc : IsLimit c :=
+    BinaryFan.isLimitMk
+      (fun s => homOfLE (le_inf s.fst.le s.snd.le))
+      (fun s => by rfl)
+      (fun s => by rfl)
+      (fun s m hfst hsnd => by rfl)
+  exact (IsLimit.conePointUniqueUpToIso (limit.isLimit (pair x y)) hc).to_eq
 
 -- see Note [lower instance priority]
-instance (priority := 100) [SemilatticeSup α] [OrderBot α] : HasBinaryCoproducts α := by
-  have : ∀ x y : α, HasColimit (pair x y) := by
-    letI := hasFiniteColimits_of_hasFiniteColimits_of_size.{u} α
-    infer_instance
-  apply hasBinaryCoproducts_of_hasColimit_pair
+instance (priority := 100) [SemilatticeSup α] : HasBinaryCoproducts α := by
+  haveI : ∀ {x y : α}, HasColimit (pair x y) := by
+    intro x y
+    refine HasColimit.mk ?_
+    let c : BinaryCofan x y := BinaryCofan.mk (homOfLE le_sup_left) (homOfLE le_sup_right)
+    exact
+      { cocone := c
+        isColimit :=
+          BinaryCofan.isColimitMk
+            (fun s => homOfLE (sup_le s.inl.le s.inr.le))
+            (fun s => by rfl)
+            (fun s => by rfl)
+            (fun s m hfst hsnd => by rfl) }
+  exact hasBinaryCoproducts_of_hasColimit_pair α
 
-/-- The binary coproduct in the category of a `SemilatticeSup` with `OrderBot` is the same as the
-supremum.
+/-- The binary coproduct in the category of a `SemilatticeSup` is the same as the supremum.
 -/
 @[simp]
-theorem coprod_eq_sup [SemilatticeSup α] [OrderBot α] (x y : α) : Limits.coprod x y = x ⊔ y :=
-  calc
-    Limits.coprod x y = colimit (pair x y) := rfl
-    _ = Finset.univ.sup (pair x y).obj := by rw [finite_colimit_eq_finset_univ_sup (pair x y)]
-    _ = x ⊔ (y ⊔ ⊥) := rfl
-    -- Note: Finset.sup is realized as a fold, hence the definitional equality
-    _ = x ⊔ y := by rw [sup_bot_eq]
+theorem coprod_eq_sup [SemilatticeSup α] (x y : α) : Limits.coprod x y = x ⊔ y := by
+  let c : BinaryCofan x y := BinaryCofan.mk (homOfLE le_sup_left) (homOfLE le_sup_right)
+  have hc : IsColimit c :=
+    BinaryCofan.isColimitMk
+      (fun s => homOfLE (sup_le s.inl.le s.inr.le))
+      (fun s => by rfl)
+      (fun s => by rfl)
+      (fun s m hfst hsnd => by rfl)
+  exact (IsColimit.coconePointUniqueUpToIso (colimit.isColimit (pair x y)) hc).to_eq
 
-/-- The pullback in the category of a `SemilatticeInf` with `OrderTop` is the same as the infimum
-over the objects.
+-- see Note [lower instance priority]
+instance (priority := 100) [SemilatticeInf α] : HasPullbacks α := by
+  haveI : ∀ {x y z : α} {f : x ⟶ z} {g : y ⟶ z}, HasLimit (cospan f g) := by
+    intro x y z f g
+    refine HasLimit.mk ?_
+    let c : PullbackCone f g :=
+      PullbackCone.mk (homOfLE inf_le_left) (homOfLE inf_le_right) (by rfl)
+    exact
+      { cone := c
+        isLimit :=
+          PullbackCone.IsLimit.mk (by rfl)
+            (fun s => homOfLE (le_inf s.fst.le s.snd.le))
+            (fun s => by rfl)
+            (fun s => by rfl)
+            (fun s m hfst hsnd => by rfl) }
+  exact hasPullbacks_of_hasLimit_cospan α
+
+/-- The pullback in the category of a `SemilatticeInf` is the same as the infimum over the objects.
 -/
 @[simp]
-theorem pullback_eq_inf [SemilatticeInf α] [OrderTop α] {x y z : α} (f : x ⟶ z) (g : y ⟶ z) :
-    pullback f g = x ⊓ y :=
-  calc
-    pullback f g = limit (cospan f g) := rfl
-    _ = Finset.univ.inf (cospan f g).obj := by rw [finite_limit_eq_finset_univ_inf]
-    _ = z ⊓ (x ⊓ (y ⊓ ⊤)) := rfl
-    _ = z ⊓ (x ⊓ y) := by rw [inf_top_eq]
-    _ = x ⊓ y := inf_eq_right.mpr (inf_le_of_left_le f.le)
+theorem pullback_eq_inf [SemilatticeInf α] {x y z : α} (f : x ⟶ z) (g : y ⟶ z) :
+    pullback f g = x ⊓ y := by
+  let c : PullbackCone f g :=
+    PullbackCone.mk (homOfLE inf_le_left) (homOfLE inf_le_right) (by rfl)
+  have hc : IsLimit c :=
+    PullbackCone.IsLimit.mk (by rfl)
+      (fun s => homOfLE (le_inf s.fst.le s.snd.le))
+      (fun s => by rfl)
+      (fun s => by rfl)
+      (fun s m hfst hsnd => by rfl)
+  exact (IsLimit.conePointUniqueUpToIso (limit.isLimit (cospan f g)) hc).to_eq
 
-/-- The pushout in the category of a `SemilatticeSup` with `OrderBot` is the same as the supremum
-over the objects.
+-- see Note [lower instance priority]
+instance (priority := 100) [SemilatticeSup α] : HasPushouts α := by
+  haveI : ∀ {x y z : α} {f : x ⟶ y} {g : x ⟶ z}, HasColimit (span f g) := by
+    intro x y z f g
+    refine HasColimit.mk ?_
+    let c : PushoutCocone f g :=
+      PushoutCocone.mk (homOfLE le_sup_left) (homOfLE le_sup_right) (by rfl)
+    exact
+      { cocone := c
+        isColimit :=
+          PushoutCocone.IsColimit.mk (by rfl)
+            (fun s => homOfLE (sup_le s.inl.le s.inr.le))
+            (fun s => by rfl)
+            (fun s => by rfl)
+            (fun s m hfst hsnd => by rfl) }
+  exact hasPushouts_of_hasColimit_span α
+
+/-- The pushout in the category of a `SemilatticeSup` is the same as the supremum over the objects.
 -/
 @[simp]
-theorem pushout_eq_sup [SemilatticeSup α] [OrderBot α] (x y z : α) (f : z ⟶ x) (g : z ⟶ y) :
-    pushout f g = x ⊔ y :=
-  calc
-    pushout f g = colimit (span f g) := rfl
-    _ = Finset.univ.sup (span f g).obj := by rw [finite_colimit_eq_finset_univ_sup]
-    _ = z ⊔ (x ⊔ (y ⊔ ⊥)) := rfl
-    _ = z ⊔ (x ⊔ y) := by rw [sup_bot_eq]
-    _ = x ⊔ y := sup_eq_right.mpr (le_sup_of_le_left f.le)
+theorem pushout_eq_sup [SemilatticeSup α] (x y z : α) (f : z ⟶ x) (g : z ⟶ y) :
+    pushout f g = x ⊔ y := by
+  let c : PushoutCocone f g :=
+    PushoutCocone.mk (homOfLE le_sup_left) (homOfLE le_sup_right) (by rfl)
+  have hc : IsColimit c :=
+    PushoutCocone.IsColimit.mk (by rfl)
+      (fun s => homOfLE (sup_le s.inl.le s.inr.le))
+      (fun s => by rfl)
+      (fun s => by rfl)
+      (fun s m hfst hsnd => by rfl)
+  exact (IsColimit.coconePointUniqueUpToIso (colimit.isColimit (span f g)) hc).to_eq
 
 end Semilattice
 
@@ -194,14 +252,36 @@ instance (priority := 100) hasLimits_of_completeLattice : HasLimitsOfSize.{w, w'
 instance (priority := 100) hasColimits_of_completeLattice : HasColimitsOfSize.{w, w'} α where
   has_colimits_of_shape _ := { has_colimit := fun F => HasColimit.mk (colimitCocone F) }
 
-/-- The limit of a functor into a complete lattice is the infimum of the objects in the image.
--/
-theorem limit_eq_iInf (F : J ⥤ α) : limit F = iInf F.obj :=
-  (IsLimit.conePointUniqueUpToIso (limit.isLimit F) (limitCone F).isLimit).to_eq
+section CompleteSemilattice
 
-/-- The colimit of a functor into a complete lattice is the supremum of the objects in the image.
+variable {β : Type u} {K : Type w} [Category.{w'} K]
+
+/-- The limit of a functor into a complete inf-semilattice is the infimum of the objects in the
+image.
 -/
-theorem colimit_eq_iSup (F : J ⥤ α) : colimit F = iSup F.obj :=
-  (IsColimit.coconePointUniqueUpToIso (colimit.isColimit F) (colimitCocone F).isColimit).to_eq
+theorem limit_eq_iInf [CompleteSemilatticeInf β] (F : K ⥤ β) [HasLimit F] :
+    limit F = iInf F.obj := by
+  let c : Cone F :=
+    { pt := iInf F.obj
+      π := { app := fun _ => homOfLE (sInf_le (Set.mem_range_self _)) } }
+  have hc : IsLimit c :=
+    { lift := fun s =>
+        homOfLE (le_sInf (by rintro _ ⟨j, rfl⟩; exact (s.π.app j).le)) }
+  exact (IsLimit.conePointUniqueUpToIso (limit.isLimit F) hc).to_eq
+
+/-- The colimit of a functor into a complete sup-semilattice is the supremum of the objects in the
+image.
+-/
+theorem colimit_eq_iSup [CompleteSemilatticeSup β] (F : K ⥤ β) [HasColimit F] :
+    colimit F = iSup F.obj := by
+  let c : Cocone F :=
+    { pt := iSup F.obj
+      ι := { app := fun _ => homOfLE (le_sSup (Set.mem_range_self _)) } }
+  have hc : IsColimit c :=
+    { desc := fun s =>
+        homOfLE (sSup_le (by rintro _ ⟨j, rfl⟩; exact (s.ι.app j).le)) }
+  exact (IsColimit.coconePointUniqueUpToIso (colimit.isColimit F) hc).to_eq
+
+end CompleteSemilattice
 
 end CategoryTheory.Limits.CompleteLattice

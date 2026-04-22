@@ -18,7 +18,8 @@ between the localized categories. Assume moreover that `W₂` contains identitie
 Then, `Φ` is a right derivability structure
 (`LocalizerMorphism.IsRightDerivabilityStructure.mk'`) if it satisfies the
 two following conditions:
-* for any `X₂ : C₂`, the category `Φ.RightResolution X₂` of resolutions of `X₂` is connected
+* for any `X₂ : C₂`, the category `Φ.RightResolution X₂` of resolutions of `X₂`
+  is preconnected
 * any arrow in `C₂` admits a resolution (i.e. `Φ.arrow.HasRightResolutions` holds, where
   `Φ.arrow` is the induced localizer morphism on categories of arrows in `C₁` and `C₂`)
 
@@ -48,7 +49,6 @@ namespace IsRightDerivabilityStructure
 section
 
 variable (Φ : LocalizerMorphism W₁ W₂)
-  [∀ X₂, IsConnected (Φ.RightResolution X₂)]
   [Φ.arrow.HasRightResolutions] [W₂.ContainsIdentities]
 
 namespace Constructor
@@ -74,10 +74,14 @@ noncomputable def fromRightResolution :
       φ.comm, isoOfHom_hom_inv_id_assoc])
 
 set_option backward.isDefEq.respectTransparency false in
-lemma isConnected :
+lemma isConnected [IsPreconnected (Φ.RightResolution X₂)]
+    [∀ X₁ : C₁, IsPreconnected (Φ.RightResolution (Φ.functor.obj X₁))] :
     IsConnected ((TwoSquare.mk Φ.functor (Φ.functor ⋙ L) L (𝟭 _)
       (Functor.rightUnitor _).inv).CostructuredArrowDownwards y) := by
   let w := (TwoSquare.mk Φ.functor (Φ.functor ⋙ L) L (𝟭 _) (Functor.rightUnitor _).inv)
+  have : Nonempty (Φ.RightResolution X₂) := by
+    let ρ : Φ.arrow.RightResolution (Arrow.mk (𝟙 X₂)) := Classical.arbitrary _
+    exact ⟨RightResolution.mk ρ.w.right ρ.hw.2⟩
   have : Nonempty (w.CostructuredArrowDownwards y) :=
     ⟨(fromRightResolution Φ L y).obj (Classical.arbitrary _)⟩
   suffices ∀ (X : w.CostructuredArrowDownwards y),
@@ -106,22 +110,27 @@ lemma isConnected :
 end Constructor
 
 /-- If a localizer morphism `Φ` is a localized equivalence, then it is a right
-derivability structure if the categories of right resolutions are connected and the
+derivability structure if the categories of right resolutions are preconnected and the
 categories of right resolutions of arrows are nonempty. -/
-lemma mk' [Φ.IsLocalizedEquivalence] : Φ.IsRightDerivabilityStructure := by
+lemma mk' [∀ X₂, IsPreconnected (Φ.RightResolution X₂)]
+    [Φ.IsLocalizedEquivalence] : Φ.IsRightDerivabilityStructure := by
+  haveI : Φ.HasRightResolutions := fun X₂ => by
+    let ρ : Φ.arrow.RightResolution (Arrow.mk (𝟙 X₂)) := Classical.arbitrary _
+    exact ⟨RightResolution.mk ρ.w.right ρ.hw.2⟩
   rw [Φ.isRightDerivabilityStructure_iff (Φ.functor ⋙ W₂.Q) W₂.Q (𝟭 _)
     (Functor.rightUnitor _).symm, TwoSquare.guitartExact_iff_isConnected_downwards]
-  apply Constructor.isConnected
+  intro X₂ X₃ g
+  exact Constructor.isConnected Φ W₂.Q g
 
 end
 
 end IsRightDerivabilityStructure
 
 /-- If a localizer morphism `Φ` is a localized equivalence, then it is a left
-derivability structure if the categories of left resolutions are connected and the
+derivability structure if the categories of left resolutions are preconnected and the
 categories of left resolutions of arrows are nonempty. -/
 lemma IsLeftDerivabilityStructure.mk' (Φ : LocalizerMorphism W₁ W₂)
-    [∀ X₂, IsConnected (Φ.LeftResolution X₂)]
+    [∀ X₂, IsPreconnected (Φ.LeftResolution X₂)]
     [Φ.arrow.HasLeftResolutions] [W₂.ContainsIdentities]
     [Φ.IsLocalizedEquivalence] :
     Φ.IsLeftDerivabilityStructure := by
@@ -132,8 +141,8 @@ lemma IsLeftDerivabilityStructure.mk' (Φ : LocalizerMorphism W₁ W₂)
       X₁ := Arrow.mk R.X₁.hom.op
       w := Arrow.homMk R.w.right.op R.w.left.op (Quiver.Hom.unop_inj R.w.w.symm)
       hw := ⟨R.hw.right, R.hw.left⟩ }⟩
-  have (X₂ : C₂ᵒᵖ) : IsConnected (Φ.op.RightResolution X₂) :=
-    isConnected_of_equivalent (LeftResolution.opEquivalence Φ X₂.unop)
+  have (X₂ : C₂ᵒᵖ) : IsPreconnected (Φ.op.RightResolution X₂) :=
+    isPreconnected_of_equivalent (LeftResolution.opEquivalence Φ X₂.unop)
   exact IsRightDerivabilityStructure.mk' _
 
 end LocalizerMorphism

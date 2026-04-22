@@ -26,7 +26,7 @@ namespace CategoryTheory
 
 universe v u
 
-variable {C : Type u} [Category.{v} C]
+variable {C : Type u} [CategoryStruct.{v} C]
 
 set_option linter.style.whitespace false in -- manual alignment is not recognised
 /-- Factorisations of a morphism `f` as a structure, containing, one object, two morphisms,
@@ -41,7 +41,7 @@ structure Factorisation {X Y : C} (f : X ⟶ Y) where
   /-- The factorisation condition. -/
   ι_π : ι ≫ π = f := by cat_disch
 
-attribute [reassoc (attr := simp)] Factorisation.ι_π
+attribute [simp] Factorisation.ι_π
 
 namespace Factorisation
 
@@ -58,10 +58,35 @@ protected structure Hom (d e : Factorisation f) : Type (max u v) where
   /-- The right commuting triangle of the factorization morphism. -/
   h_π : h ≫ e.π = d.π := by cat_disch
 
-attribute [reassoc (attr := simp)] Factorisation.Hom.ι_h Factorisation.Hom.h_π
+attribute [simp] Factorisation.Hom.ι_h Factorisation.Hom.h_π
 
 instance : Quiver (Factorisation f) where
   Hom d e := Factorisation.Hom d e
+
+end Factorisation
+
+variable {C : Type u} [Category.{v} C]
+
+namespace Factorisation
+
+variable {X Y : C} {f : X ⟶ Y}
+
+@[simp]
+theorem ι_π_assoc (d : Factorisation f) {Z : C} (h : Y ⟶ Z) :
+    d.ι ≫ (d.π ≫ h) = f ≫ h := by
+  rw [← Category.assoc, d.ι_π]
+
+@[simp]
+theorem Hom.ι_h_assoc {d e : Factorisation f} (g : d.Hom e) {Z : C}
+    (h : e.mid ⟶ Z) :
+    d.ι ≫ (g.h ≫ h) = e.ι ≫ h := by
+  rw [← Category.assoc, g.ι_h]
+
+@[simp]
+theorem Hom.h_π_assoc {d e : Factorisation f} (g : d.Hom e) {Z : C}
+    (h : Y ⟶ Z) :
+    g.h ≫ (e.π ≫ h) = d.π ≫ h := by
+  rw [← Category.assoc, g.h_π]
 
 @[simps]
 instance : Category.{max u v} (Factorisation f) where

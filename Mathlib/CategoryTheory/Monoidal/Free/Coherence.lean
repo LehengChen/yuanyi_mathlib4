@@ -229,8 +229,9 @@ section
 
 variable {C}
 
-theorem normalizeObj_congr (n : NormalMonoidalObject C) {X Y : F C} (f : X ⟶ Y) :
+theorem normalizeObj_congr (n : NormalMonoidalObject C) {X Y : F C} (h : Nonempty (X ⟶ Y)) :
     normalizeObj X n = normalizeObj Y n := by
+  rcases h with ⟨f⟩
   rcases f with ⟨f'⟩
   apply @congr_fun _ _ fun n => normalizeObj X n
   clear n f
@@ -246,7 +247,7 @@ theorem normalizeObj_congr (n : NormalMonoidalObject C) {X Y : F C} (f : X ⟶ Y
 theorem normalize_naturality (n : NormalMonoidalObject C) {X Y : F C} (f : X ⟶ Y) :
     inclusionObj n ◁ f ≫ (normalizeIsoApp' C Y n).hom =
       (normalizeIsoApp' C X n).hom ≫
-        inclusion.map (eqToHom (Discrete.ext (normalizeObj_congr n f))) := by
+        inclusion.map (eqToHom (Discrete.ext (normalizeObj_congr n ⟨f⟩))) := by
   revert n
   induction f using Hom.inductionOn
   case comp f g ihf ihg => simp [ihg, reassoc_of% (ihf _)]
@@ -261,7 +262,7 @@ theorem normalize_naturality (n : NormalMonoidalObject C) {X Y : F C} (f : X ⟶
     dsimp only [normalizeObj_tensor, normalizeIsoApp', tensor_eq_tensor, Iso.trans_hom,
       Iso.symm_hom, whiskerRightIso_hom, Function.comp_apply, inclusion_obj]
     rw [associator_inv_naturality_middle_assoc, ← comp_whiskerRight_assoc, ih]
-    have := dcongr_arg (fun x => (normalizeIsoApp' C η' x).hom) (normalizeObj_congr n h)
+    have := dcongr_arg (fun x => (normalizeIsoApp' C η' x).hom) (normalizeObj_congr n ⟨h⟩)
     simp [this]
   all_goals simp
 

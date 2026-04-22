@@ -114,6 +114,8 @@ def isLimitOfHasKernelOfPreservesLimit [PreservesLimit (parallelPair f 0) G] :
 instance [PreservesLimit (parallelPair f 0) G] : HasKernel (G.map f) where
   exists_limit := ⟨⟨_, isLimitOfHasKernelOfPreservesLimit G f⟩⟩
 
+section OfIsoComparison
+
 variable [HasKernel (G.map f)]
 
 /-- If the kernel comparison map for `G` at `f` is an isomorphism, then `G` preserves the
@@ -124,6 +126,8 @@ lemma PreservesKernel.of_iso_comparison [i : IsIso (kernelComparison f G)] :
   apply preservesLimit_of_preserves_limit_cone (kernelIsKernel f)
   apply (isLimitMapConeForkEquiv' G (kernel.condition f)).symm _
   exact @IsLimit.ofPointIso _ _ _ _ _ _ _ (kernelIsKernel (G.map f)) i
+
+end OfIsoComparison
 
 variable [PreservesLimit (parallelPair f 0) G]
 
@@ -151,7 +155,7 @@ instance : IsIso (kernelComparison f G) := by
 
 @[reassoc]
 theorem kernel_map_comp_preserves_kernel_iso_inv {X' Y' : C} (g : X' ⟶ Y') [HasKernel g]
-    [HasKernel (G.map g)] [PreservesLimit (parallelPair g 0) G] (p : X ⟶ X') (q : Y ⟶ Y')
+    [PreservesLimit (parallelPair g 0) G] (p : X ⟶ X') (q : Y ⟶ Y')
     (hpq : f ≫ q = p ≫ g) :
     kernel.map (G.map f) (G.map g) (G.map p) (G.map q) (by rw [← G.map_comp, hpq, G.map_comp]) ≫
         (PreservesKernel.iso G _).inv =
@@ -244,6 +248,8 @@ def isColimitOfHasCokernelOfPreservesColimit [PreservesColimit (parallelPair f 0
 instance [PreservesColimit (parallelPair f 0) G] : HasCokernel (G.map f) where
   exists_colimit := ⟨⟨_, isColimitOfHasCokernelOfPreservesColimit G f⟩⟩
 
+section OfIsoComparison
+
 variable [HasCokernel (G.map f)]
 
 /-- If the cokernel comparison map for `G` at `f` is an isomorphism, then `G` preserves the
@@ -254,6 +260,8 @@ lemma PreservesCokernel.of_iso_comparison [i : IsIso (cokernelComparison f G)] :
   apply preservesColimit_of_preserves_colimit_cocone (cokernelIsCokernel f)
   apply (isColimitMapCoconeCoforkEquiv' G (cokernel.condition f)).symm _
   exact @IsColimit.ofPointIso _ _ _ _ _ _ _ (cokernelIsCokernel (G.map f)) i
+
+end OfIsoComparison
 
 variable [PreservesColimit (parallelPair f 0) G]
 
@@ -281,7 +289,7 @@ instance : IsIso (cokernelComparison f G) := by
 
 @[reassoc]
 theorem preserves_cokernel_iso_comp_cokernel_map {X' Y' : C} (g : X' ⟶ Y') [HasCokernel g]
-    [HasCokernel (G.map g)] [PreservesColimit (parallelPair g 0) G] (p : X ⟶ X') (q : Y ⟶ Y')
+    [PreservesColimit (parallelPair g 0) G] (p : X ⟶ X') (q : Y ⟶ Y')
     (hpq : f ≫ q = p ≫ g) :
     (PreservesCokernel.iso G _).hom ≫
         cokernel.map (G.map f) (G.map g) (G.map p) (G.map q)

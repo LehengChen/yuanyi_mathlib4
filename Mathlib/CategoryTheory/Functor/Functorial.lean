@@ -51,7 +51,8 @@ instance (F : C ⥤ D) : Functorial.{v₁, v₂} F.obj :=
   { F with map := F.map }
 
 @[simp, grind =]
-theorem map_functorial_obj (F : C ⥤ D) {X Y : C} (f : X ⟶ Y) : map F.obj f = F.map f :=
+theorem map_functorial_obj (F : C ⥤ D) {X Y : C} :
+    (map F.obj : (X ⟶ Y) → (F.obj X ⟶ F.obj Y)) = F.map :=
   rfl
 
 instance functorial_id : Functorial.{v₁, v₁} (id : C → C) where map f := f

@@ -245,7 +245,6 @@ statement in `mk_comp` above. -/
 abbrev homMk {X Y : F C} (f : X ⟶ᵐ Y) : X ⟶ Y := ⟦f⟧
 
 theorem Hom.inductionOn {motive : {X Y : F C} → (X ⟶ Y) → Prop} {X Y : F C} (t : X ⟶ Y)
-    (id : (X : F C) → motive (𝟙 X))
     (α_hom : (X Y Z : F C) → motive (α_ X Y Z).hom)
     (α_inv : (X Y Z : F C) → motive (α_ X Y Z).inv)
     (l_hom : (X : F C) → motive (λ_ X).hom)
@@ -258,7 +257,9 @@ theorem Hom.inductionOn {motive : {X Y : F C} → (X ⟶ Y) → Prop} {X Y : F C
     motive t := by
   induction t using Quotient.inductionOn with | _ f
   induction f with
-  | id X => exact id X
+  | id X =>
+      rw [mk_id, ← Iso.inv_hom_id (λ_ X)]
+      exact comp _ _ (l_inv X) (l_hom X)
   | α_hom X Y Z => exact α_hom X Y Z
   | α_inv X Y Z => exact α_inv X Y Z
   | l_hom X => exact l_hom X

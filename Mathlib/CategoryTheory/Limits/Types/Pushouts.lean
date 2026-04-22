@@ -300,27 +300,31 @@ l|     |r  \
 ```
 Let `k : X₄ ⟶ X₅`, `r' : X₂ ⟶ X₅` and `b' : X₃ ⟶ X₅` be such
 that `r ≫ k = r'` and `b ≫ k = b'`. Assume that
-the outer square is a pullback, that `r'` is a monomorphism
-and that `b'` is injective on the complement of the range of `l`,
-then `k : X₄ ⟶ X₅` is a monomorphism. -/
+the outer square is a pullback, that `r'` is injective on fibers
+whose image is not in the range of `b'`, and that `b'` is injective
+on the complement of the range of `l`, then `k : X₄ ⟶ X₅` is a monomorphism. -/
 lemma mono_of_isPushout_of_isPullback {k : X₄ ⟶ X₅} (h₁ : IsPushout t l r b)
     {r' : X₂ ⟶ X₅} {b' : X₃ ⟶ X₅} (h₂ : IsPullback t l r' b')
-    (facr : r ≫ k = r') (facb : b ≫ k = b') [hr' : Mono r']
+    (facr : r ≫ k = r') (facb : b ≫ k = b')
+    (Hr : ∀ (x₂ y₂ : X₂) (_ : r' x₂ ∉ Set.range b'), r' x₂ = r' y₂ → x₂ = y₂)
     (H : ∀ (x₃ y₃ : X₃) (_ : x₃ ∉ Set.range l) (_ : y₃ ∉ Set.range l),
       b' x₃ = b' y₃ → x₃ = y₃) :
     Mono k := by
   subst facr facb
-  have : Function.Injective l :=
-    fun x₁ y₁ h ↦ ext_of_isPullback h₂ ((mono_iff_injective _).1 hr'
-      ((congr_fun h₂.w x₁).trans (Eq.trans (by simp [h]) (congr_fun h₂.w.symm y₁)))) h
-  rw [mono_iff_injective] at hr' ⊢
+  rw [mono_iff_injective]
   have w := congr_fun h₁.w
   dsimp at w
   intro x₃ y₃ eq
   obtain (⟨x₂, rfl⟩ | ⟨x₃, rfl, hx₃⟩) := eq_or_eq_of_isPushout' h₁ x₃ <;>
   obtain (⟨y₂, rfl⟩ | ⟨y₃, rfl, hy₃⟩) := eq_or_eq_of_isPushout' h₁ y₃
-  · obtain rfl : x₂ = y₂ := hr' eq
-    rfl
+  · by_cases hx₂ : (r ≫ k) x₂ ∈ Set.range (b ≫ k)
+    · obtain ⟨x₃, hx₃⟩ := hx₂
+      obtain ⟨x₁, rfl, rfl⟩ := exists_of_isPullback h₂ x₂ x₃ hx₃.symm
+      obtain ⟨y₁, rfl, hy₁⟩ := exists_of_isPullback h₂ y₂ (l x₁)
+        (eq.symm.trans hx₃.symm)
+      rw [w, w, hy₁]
+    · obtain rfl : x₂ = y₂ := Hr x₂ y₂ hx₂ eq
+      rfl
   · obtain ⟨x₁, rfl, rfl⟩ := exists_of_isPullback h₂ x₂ y₃ eq
     rw [w]
   · obtain ⟨x₁, rfl, rfl⟩ := exists_of_isPullback h₂ y₂ x₃ eq.symm
@@ -340,12 +344,14 @@ l|     |r  \
    \ b'     v v
     \______> X₅
 ```
-Assume that `r'` and `k` are monomorphisms, that `r` and `b` are jointly surjective,
-and that `b'` is injective on the complement of the range of `l`, then
-the top-left square is a pushout. -/
+Assume that `k` is a monomorphism, that `r'` is injective on fibers
+whose image is not in the range of `b'`, that `r` and `b` are jointly
+surjective, and that `b'` is injective on the complement of the range of `l`,
+then the top-left square is a pushout. -/
 lemma isPushout_of_isPullback_of_mono {k : X₄ ⟶ X₅}
     {r' : X₂ ⟶ X₅} {b' : X₃ ⟶ X₅} (h₁ : IsPullback t l r' b')
-    (facr : r ≫ k = r') (facb : b ≫ k = b') [Mono r'] [Mono k]
+    (facr : r ≫ k = r') (facb : b ≫ k = b') [Mono k]
+    (Hr : ∀ (x₂ y₂ : X₂) (_ : r' x₂ ∉ Set.range b'), r' x₂ = r' y₂ → x₂ = y₂)
     (h₂ : Set.range r ⊔ Set.range b = Set.univ)
     (H : ∀ (x₃ y₃ : X₃) (_ : x₃ ∉ Set.range l) (_ : y₃ ∉ Set.range l),
       b' x₃ = b' y₃ → x₃ = y₃) :
@@ -353,7 +359,7 @@ lemma isPushout_of_isPullback_of_mono {k : X₄ ⟶ X₅}
   obtain ⟨φ, hφ₁, hφ₂⟩ := pushout.exists_desc t l r b
     (by simp only [← cancel_mono k, Category.assoc, facr, facb, h₁.w])
   have := mono_of_isPushout_of_isPullback (IsPushout.of_hasPushout t l) h₁
-    (k := φ ≫ k) (by cat_disch) (by cat_disch) H
+    (k := φ ≫ k) (by cat_disch) (by cat_disch) Hr H
   have : IsIso φ := by
     rw [isIso_iff_bijective]
     refine ⟨(mono_iff_injective _).1 (mono_of_mono φ k), fun x₄ ↦ ?_⟩
@@ -366,17 +372,18 @@ lemma isPushout_of_isPullback_of_mono {k : X₄ ⟶ X₅}
     (Iso.refl _) (Iso.refl _) (Iso.refl _) (asIso φ) (by simp) (by simp)
     (by simpa) (by simpa)
 
-/-- Consider a pullback square of types where the right map is a monomorphism.
-If the right and bottom map are jointly surjective, and the bottom map
-is injective on the complement on the range of the left map, then the square
-is a pushout square. -/
+/-- Consider a pullback square of types where the right map is injective on fibers
+whose image is not in the range of the bottom map. If the right and bottom map
+are jointly surjective, and the bottom map is injective on the complement on the
+range of the left map, then the square is a pushout square. -/
 lemma isPushout_of_isPullback_of_mono'
-    (h₁ : IsPullback t l r b) [Mono r]
+    (h₁ : IsPullback t l r b)
+    (Hr : ∀ (x₂ y₂ : X₂) (_ : r x₂ ∉ Set.range b), r x₂ = r y₂ → x₂ = y₂)
     (h₂ : Set.range r ⊔ Set.range b = Set.univ)
     (H : ∀ (x₃ y₃ : X₃) (_ : x₃ ∉ Set.range l) (_ : y₃ ∉ Set.range l),
       b x₃ = b y₃ → x₃ = y₃) :
     IsPushout t l r b :=
-  isPushout_of_isPullback_of_mono (k := 𝟙 _) h₁ (by simp) (by simp) h₂ H
+  isPushout_of_isPullback_of_mono (k := 𝟙 _) h₁ (by simp) (by simp) Hr h₂ H
 
 end
 

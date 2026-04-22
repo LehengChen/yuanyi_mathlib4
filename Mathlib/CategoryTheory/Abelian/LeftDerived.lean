@@ -161,16 +161,14 @@ to a chain map between chosen projective resolutions.
 -/
 theorem Functor.leftDerived_map_eq (F : C ⥤ D) [F.Additive] (n : ℕ) {X Y : C} (f : X ⟶ Y)
     {P : ProjectiveResolution X} {Q : ProjectiveResolution Y} (g : P.complex ⟶ Q.complex)
-    (w : g ≫ Q.π = P.π ≫ (ChainComplex.single₀ C).map f) :
+    (w : g.f 0 ≫ Q.π.f 0 = P.π.f 0 ≫ f) :
     (F.leftDerived n).map f =
       (P.isoLeftDerivedObj F n).hom ≫
         (F.mapHomologicalComplex _ ⋙ HomologicalComplex.homologyFunctor _ _ n).map g ≫
           (Q.isoLeftDerivedObj F n).inv := by
   rw [← cancel_mono (Q.isoLeftDerivedObj F n).hom,
-    ProjectiveResolution.isoLeftDerivedObj_hom_naturality f P Q g _ F n,
+    ProjectiveResolution.isoLeftDerivedObj_hom_naturality f P Q g w F n,
     assoc, assoc, Iso.inv_hom_id, comp_id]
-  rw [← HomologicalComplex.comp_f, w, HomologicalComplex.comp_f,
-    ChainComplex.single₀_map_f_zero]
 
 /-- The natural transformation
 `F.leftDerivedToHomotopyCategory ⟶ G.leftDerivedToHomotopyCategory` induced by

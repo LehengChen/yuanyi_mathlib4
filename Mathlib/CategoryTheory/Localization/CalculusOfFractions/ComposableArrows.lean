@@ -24,16 +24,16 @@ namespace CategoryTheory
 namespace Localization
 
 variable {C D : Type*} [Category* C] [Category* D] (L : C ⥤ D) (W : MorphismProperty C)
-  [L.IsLocalization W]
 
 open ComposableArrows
 
 set_option backward.isDefEq.respectTransparency false in
 lemma essSurj_mapComposableArrows_of_hasRightCalculusOfFractions
-    [W.HasRightCalculusOfFractions] (n : ℕ) :
+    (hL : W.IsInvertedBy L) [L.EssSurj]
+    (hL_exists_rightFraction : ∀ ⦃X Y : C⦄ (f : L.obj X ⟶ L.obj Y),
+      ∃ (φ : W.RightFraction X Y), f = φ.map L hL) (n : ℕ) :
     (L.mapComposableArrows n).EssSurj where
   mem_essImage Y := by
-    have := essSurj L W
     induction n with
     | zero =>
       obtain ⟨Y, rfl⟩ := mk₀_surjective Y
@@ -41,16 +41,20 @@ lemma essSurj_mapComposableArrows_of_hasRightCalculusOfFractions
     | succ n hn =>
       obtain ⟨Y, Z, f, rfl⟩ := ComposableArrows.precomp_surjective Y
       obtain ⟨Y', ⟨e⟩⟩ := hn Y
-      obtain ⟨f', hf'⟩ := exists_rightFraction L W
+      obtain ⟨f', hf'⟩ := hL_exists_rightFraction
         ((L.objObjPreimageIso Z).hom ≫ f ≫ (e.app 0).inv)
+      haveI : IsIso (L.map f'.s) := hL f'.s f'.hs
       refine ⟨Y'.precomp f'.f,
-        ⟨isoMkSucc (isoOfHom L W _ f'.hs ≪≫ L.objObjPreimageIso Z) e ?_⟩⟩
+        ⟨isoMkSucc (asIso (L.map f'.s) ≪≫ L.objObjPreimageIso Z) e ?_⟩⟩
       dsimp at hf' ⊢
-      simp [← cancel_mono (e.inv.app 0), hf']
+      simp [← cancel_mono (e.inv.app 0), hf', MorphismProperty.RightFraction.map]
 
-lemma essSurj_mapComposableArrows [W.HasLeftCalculusOfFractions] (n : ℕ) :
+lemma essSurj_mapComposableArrows [L.IsLocalization W] [W.HasLeftCalculusOfFractions]
+    (n : ℕ) :
     (L.mapComposableArrows n).EssSurj := by
-  have := essSurj_mapComposableArrows_of_hasRightCalculusOfFractions L.op W.op n
+  have := essSurj L W
+  have := essSurj_mapComposableArrows_of_hasRightCalculusOfFractions L.op W.op
+    (inverts L.op W.op) (fun ⦃X Y⦄ f => exists_rightFraction L.op W.op f) n
   have := Functor.essSurj_of_iso (L.mapComposableArrowsOpIso n).symm
   exact Functor.essSurj_of_comp_fully_faithful _ (opEquivalence D n).functor.rightOp
 

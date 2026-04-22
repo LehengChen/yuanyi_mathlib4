@@ -651,7 +651,7 @@ end
 
 section
 
-variable [HasLimitsOfShape K C] [HasLimitsOfShape J C] [HasLimit (curry.obj G ⋙ lim)]
+variable [HasLimitsOfShape K C] [HasLimitsOfShape J C]
 
 open CategoryTheory.prod
 
@@ -689,7 +689,7 @@ end
 
 section
 
-variable [HasColimitsOfShape K C] [HasColimitsOfShape J C] [HasColimit (curry.obj G ⋙ colim)]
+variable [HasColimitsOfShape K C] [HasColimitsOfShape J C]
 
 open CategoryTheory.prod
 

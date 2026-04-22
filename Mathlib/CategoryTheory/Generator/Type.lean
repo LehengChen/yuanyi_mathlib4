@@ -10,7 +10,8 @@ public import Mathlib.CategoryTheory.Generator.Basic
 /-!
 # Generator of Type
 
-In this file, we show that `PUnit` is a separator of the category `Type u`.
+In this file, we show that `PUnit`, and more generally any nonempty type, is a separator
+of the category `Type u`.
 
 -/
 
@@ -20,9 +21,10 @@ universe u
 
 namespace CategoryTheory
 
-lemma Types.isSeparator_punit : IsSeparator (PUnit.{u + 1}) := by
+lemma Types.isSeparator_punit (G : Type u := PUnit.{u + 1}) [Nonempty G] : IsSeparator G := by
   intro X Y f g h
   ext x
-  exact congr_fun (h PUnit (by simp) (fun _ ↦ x)) .unit
+  obtain ⟨a⟩ := (inferInstance : Nonempty G)
+  exact congr_fun (h G (by simp) (fun _ ↦ x)) a
 
 end CategoryTheory

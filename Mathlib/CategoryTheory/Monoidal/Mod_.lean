@@ -83,7 +83,7 @@ instance (X : D) : ModObj (𝟙_ C) X where
   smul := (λₗ _).hom
 
 @[ext]
-theorem ext {X : C} (h₁ h₂ : ModObj M X) (H : h₁.smul = h₂.smul) :
+theorem ext {X : D} (h₁ h₂ : ModObj M X) (H : h₁.smul = h₂.smul) :
     h₁ = h₂ := by
   cases h₁
   cases h₂

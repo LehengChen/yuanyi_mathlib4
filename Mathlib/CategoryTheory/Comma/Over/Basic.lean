@@ -41,12 +41,11 @@ def Over (X : T) :=
 
 instance (X : T) : Category (Over X) := commaCategory
 
--- Satisfying the inhabited linter
-instance Over.inhabited [Inhabited T] : Inhabited (Over (default : T)) where
+instance Over.inhabited (X : T) : Inhabited (Over X) where
   default :=
-    { left := default
+    { left := X
       right := default
-      hom := 𝟙 _ }
+      hom := 𝟙 X }
 
 namespace Over
 
@@ -610,12 +609,11 @@ def Under (X : T) :=
 
 instance (X : T) : Category (Under X) := commaCategory
 
--- Satisfying the inhabited linter
-instance Under.inhabited [Inhabited T] : Inhabited (Under (default : T)) where
+instance Under.inhabited (X : T) : Inhabited (Under X) where
   default :=
     { left := default
-      right := default
-      hom := 𝟙 _ }
+      right := X
+      hom := 𝟙 X }
 
 namespace Under
 

@@ -73,14 +73,14 @@ variable {F G}
 the compatibility is stated in terms of `Adjunction.homEquiv`. -/
 @[simps]
 def mk' (adj : ∀ (X₁ : C₁), F.obj X₁ ⊣ G.obj (op X₁))
-    (h : ∀ {X₁ Y₁ : C₁} (f : X₁ ⟶ Y₁) {X₂ : C₂} {X₃ : C₃} (g : (F.obj Y₁).obj X₂ ⟶ X₃),
-      (adj X₁).homEquiv X₂ X₃ ((F.map f).app X₂ ≫ g) =
-        (adj Y₁).homEquiv X₂ X₃ g ≫ (G.map f.op).app X₃ := by cat_disch) :
+    (h : ∀ {X₁ Y₁ : C₁} (f : X₁ ⟶ Y₁) {X₂ : C₂},
+      (adj X₁).homEquiv X₂ ((F.obj Y₁).obj X₂) ((F.map f).app X₂) =
+        (adj Y₁).unit.app X₂ ≫ (G.map f.op).app ((F.obj Y₁).obj X₂) := by cat_disch) :
     F ⊣₂ G where
   adj := adj
   unit_whiskerRight_map {X₁ Y₁} f := by
     ext X₂
-    simpa [Adjunction.homEquiv_unit] using h f (X₂ := X₂) (𝟙 _)
+    simpa [Adjunction.homEquiv_unit] using h f (X₂ := X₂)
 
 variable (adj₂ : F ⊣₂ G)
   {X₁ Y₁ : C₁} {X₂ Y₂ : C₂} {X₃ Y₃ : C₃}

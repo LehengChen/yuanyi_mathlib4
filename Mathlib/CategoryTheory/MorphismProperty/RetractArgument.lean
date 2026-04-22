@@ -53,18 +53,24 @@ namespace MorphismProperty
 variable {W₁ W₂ : MorphismProperty C}
 
 lemma llp_eq_of_le_llp_of_hasFactorization_of_isStableUnderRetracts
-    [HasFactorization W₁ W₂] [W₁.IsStableUnderRetracts] (h₁ : W₁ ≤ W₂.llp) :
+    [W₁.IsStableUnderRetracts] (h₁ : W₁ ≤ W₂.llp)
+    (hfac : W₂.llp ≤ W₁.comp W₂ := by
+      intro A B i hi
+      exact HasFactorization.nonempty_mapFactorizationData i) :
     W₂.llp = W₁ :=
   le_antisymm (fun A B i hi ↦ by
-    have h := factorizationData W₁ W₂ i
+    obtain ⟨h⟩ := hfac i hi
     have := hi _ h.hp
     simpa using of_retract (RetractArrow.ofLeftLiftingProperty h.fac) h.hi) h₁
 
 lemma rlp_eq_of_le_rlp_of_hasFactorization_of_isStableUnderRetracts
-    [HasFactorization W₁ W₂] [W₂.IsStableUnderRetracts] (h₂ : W₂ ≤ W₁.rlp) :
+    [W₂.IsStableUnderRetracts] (h₂ : W₂ ≤ W₁.rlp)
+    (hfac : W₁.rlp ≤ W₁.comp W₂ := by
+      intro X Y p hp
+      exact HasFactorization.nonempty_mapFactorizationData p) :
     W₁.rlp = W₂ :=
   le_antisymm (fun X Y p hp ↦ by
-    have h := factorizationData W₁ W₂ p
+    obtain ⟨h⟩ := hfac p hp
     have := hp _ h.hi
     simpa using of_retract (RetractArrow.ofRightLiftingProperty h.fac) h.hp) h₂
 

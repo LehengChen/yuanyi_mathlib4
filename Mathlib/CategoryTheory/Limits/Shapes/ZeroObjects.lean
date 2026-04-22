@@ -220,11 +220,19 @@ theorem IsZero.hasZeroObject {X : C} (hX : IsZero X) : HasZeroObject C :=
 def IsZero.isoZero [HasZeroObject C] {X : C} (hX : IsZero X) : X ≅ 0 :=
   hX.iso (isZero_zero C)
 
-theorem IsZero.obj [HasZeroObject D] {F : C ⥤ D} (hF : IsZero F) (X : C) : IsZero (F.obj X) := by
-  let G : C ⥤ D := (CategoryTheory.Functor.const C).obj 0
-  have hG : IsZero G := Functor.isZero _ fun _ => isZero_zero _
-  let e : F ≅ G := hF.iso hG
-  exact (isZero_zero _).of_iso (e.app X)
+theorem IsZero.obj [HasInitial D] [HasTerminal D] {F : C ⥤ D} (hF : IsZero F) (X : C) :
+    IsZero (F.obj X) := by
+  let I : C ⥤ D := (CategoryTheory.Functor.const C).obj (⊥_ D)
+  let T : C ⥤ D := (CategoryTheory.Functor.const C).obj (⊤_ D)
+  let eI : F ≅ I :=
+    hF.isInitial.uniqueUpToIso (CategoryTheory.Functor.isInitialConst C initialIsInitial)
+  let eT : F ≅ T :=
+    hF.isTerminal.uniqueUpToIso (CategoryTheory.Functor.isTerminalConst C terminalIsTerminal)
+  have hInit : IsInitial (F.obj X) := initialIsInitial.ofIso (eI.app X).symm
+  have hTerm : IsTerminal (F.obj X) := terminalIsTerminal.ofIso (eT.app X).symm
+  exact
+    { unique_to := fun Y => ⟨{ default := hInit.to Y, uniq := fun f => hInit.hom_ext f _ }⟩
+      unique_from := fun Y => ⟨{ default := hTerm.from Y, uniq := fun f => hTerm.hom_ext f _ }⟩ }
 
 lemma IsZero.of_full_of_faithful_of_isZero
     (F : C ⥤ D) [F.Full] [F.Faithful] (X : C) (hX : IsZero (F.obj X)) :
@@ -313,7 +321,8 @@ open CategoryTheory.Limits
 
 open ZeroObject
 
-theorem Functor.isZero_iff [HasZeroObject D] (F : C ⥤ D) : IsZero F ↔ ∀ X, IsZero (F.obj X) :=
+theorem Functor.isZero_iff [HasInitial D] [HasTerminal D] (F : C ⥤ D) :
+    IsZero F ↔ ∀ X, IsZero (F.obj X) :=
   ⟨fun hF X => hF.obj X, Functor.isZero _⟩
 
 end CategoryTheory

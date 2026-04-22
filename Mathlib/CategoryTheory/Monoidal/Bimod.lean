@@ -28,13 +28,9 @@ section
 
 open CategoryTheory.Limits
 
-variable [HasCoequalizers C]
-
-section
-
-variable [∀ X : C, PreservesColimitsOfSize.{0, 0} (tensorLeft X)]
-
 theorem id_tensor_π_preserves_coequalizer_inv_desc {W X Y Z : C} (f g : X ⟶ Y) (h : Z ⊗ Y ⟶ W)
+    [HasCoequalizer f g] [HasCoequalizer ((tensorLeft Z).map f) ((tensorLeft Z).map g)]
+    [PreservesColimit (parallelPair f g) (tensorLeft Z)]
     (wh : (Z ◁ f) ≫ h = (Z ◁ g) ≫ h) :
     (Z ◁ coequalizer.π f g) ≫
         (PreservesCoequalizer.iso (tensorLeft Z) f g).inv ≫ coequalizer.desc h wh =
@@ -43,6 +39,9 @@ theorem id_tensor_π_preserves_coequalizer_inv_desc {W X Y Z : C} (f g : X ⟶ Y
 
 theorem id_tensor_π_preserves_coequalizer_inv_colimMap_desc {X Y Z X' Y' Z' : C} (f g : X ⟶ Y)
     (f' g' : X' ⟶ Y') (p : Z ⊗ X ⟶ X') (q : Z ⊗ Y ⟶ Y') (wf : (Z ◁ f) ≫ q = p ≫ f')
+    [HasCoequalizer f g] [HasCoequalizer ((tensorLeft Z).map f) ((tensorLeft Z).map g)]
+    [HasCoequalizer f' g']
+    [PreservesColimit (parallelPair f g) (tensorLeft Z)]
     (wg : (Z ◁ g) ≫ q = p ≫ g') (h : Y' ⟶ Z') (wh : f' ≫ h = g' ≫ h) :
     (Z ◁ coequalizer.π f g) ≫
         (PreservesCoequalizer.iso (tensorLeft Z) f g).inv ≫
@@ -50,13 +49,9 @@ theorem id_tensor_π_preserves_coequalizer_inv_colimMap_desc {X Y Z X' Y' Z' : C
       q ≫ h :=
   map_π_preserves_coequalizer_inv_colimMap_desc (tensorLeft Z) f g f' g' p q wf wg h wh
 
-end
-
-section
-
-variable [∀ X : C, PreservesColimitsOfSize.{0, 0} (tensorRight X)]
-
 theorem π_tensor_id_preserves_coequalizer_inv_desc {W X Y Z : C} (f g : X ⟶ Y) (h : Y ⊗ Z ⟶ W)
+    [HasCoequalizer f g] [HasCoequalizer ((tensorRight Z).map f) ((tensorRight Z).map g)]
+    [PreservesColimit (parallelPair f g) (tensorRight Z)]
     (wh : (f ▷ Z) ≫ h = (g ▷ Z) ≫ h) :
     (coequalizer.π f g ▷ Z) ≫
         (PreservesCoequalizer.iso (tensorRight Z) f g).inv ≫ coequalizer.desc h wh =
@@ -65,14 +60,15 @@ theorem π_tensor_id_preserves_coequalizer_inv_desc {W X Y Z : C} (f g : X ⟶ Y
 
 theorem π_tensor_id_preserves_coequalizer_inv_colimMap_desc {X Y Z X' Y' Z' : C} (f g : X ⟶ Y)
     (f' g' : X' ⟶ Y') (p : X ⊗ Z ⟶ X') (q : Y ⊗ Z ⟶ Y') (wf : (f ▷ Z) ≫ q = p ≫ f')
+    [HasCoequalizer f g] [HasCoequalizer ((tensorRight Z).map f) ((tensorRight Z).map g)]
+    [HasCoequalizer f' g']
+    [PreservesColimit (parallelPair f g) (tensorRight Z)]
     (wg : (g ▷ Z) ≫ q = p ≫ g') (h : Y' ⟶ Z') (wh : f' ≫ h = g' ≫ h) :
     (coequalizer.π f g ▷ Z) ≫
         (PreservesCoequalizer.iso (tensorRight Z) f g).inv ≫
           colimMap (parallelPairHom (f ▷ Z) (g ▷ Z) f' g' p q wf wg) ≫ coequalizer.desc h wh =
       q ≫ h :=
   map_π_preserves_coequalizer_inv_colimMap_desc (tensorRight Z) f g f' g' p q wf wg h wh
-
-end
 
 end
 

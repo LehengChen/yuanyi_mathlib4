@@ -97,17 +97,17 @@ theorem zero_right (X : C) : IsPullback (0 : X ⟶ 0) (𝟙 X) (0 : (0 : C) ⟶ 
 theorem zero_bot (X : C) : IsPullback (𝟙 X) (0 : X ⟶ 0) (0 : X ⟶ 0) (0 : (0 : C) ⟶ 0) :=
   (zero_right X).flip
 
-theorem of_isBilimit {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem of_isBilimit {b : BinaryBicone X Y} (h : IsLimit b.toCone) :
     IsPullback b.fst b.snd (0 : X ⟶ 0) (0 : Y ⟶ 0) := by
-  convert IsPullback.of_is_product' h.isLimit HasZeroObject.zeroIsTerminal
+  convert IsPullback.of_is_product' h HasZeroObject.zeroIsTerminal
     <;> subsingleton
 
 @[simp]
 theorem of_has_biproduct (X Y : C) [HasBinaryBiproduct X Y] :
     IsPullback biprod.fst biprod.snd (0 : X ⟶ 0) (0 : Y ⟶ 0) :=
-  of_isBilimit (BinaryBiproduct.isBilimit X Y)
+  of_isBilimit (BinaryBiproduct.isLimit X Y)
 
-theorem inl_snd' {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem inl_snd' {b : BinaryBicone X Y} (h : IsLimit b.toCone) :
     IsPullback b.inl (0 : X ⟶ 0) b.snd (0 : 0 ⟶ Y) := by
   refine of_right ?_ (by simp) (of_isBilimit h)
   simp
@@ -126,9 +126,9 @@ is a pullback square.
 @[simp]
 theorem inl_snd (X Y : C) [HasBinaryBiproduct X Y] :
     IsPullback biprod.inl (0 : X ⟶ 0) biprod.snd (0 : 0 ⟶ Y) :=
-  inl_snd' (BinaryBiproduct.isBilimit X Y)
+  inl_snd' (BinaryBiproduct.isLimit X Y)
 
-theorem inr_fst' {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem inr_fst' {b : BinaryBicone X Y} (h : IsLimit b.toCone) :
     IsPullback b.inr (0 : Y ⟶ 0) b.fst (0 : 0 ⟶ X) := by
   apply flip
   refine of_bot ?_ (by simp) (of_isBilimit h)
@@ -148,16 +148,32 @@ is a pullback square.
 @[simp]
 theorem inr_fst (X Y : C) [HasBinaryBiproduct X Y] :
     IsPullback biprod.inr (0 : Y ⟶ 0) biprod.fst (0 : 0 ⟶ X) :=
-  inr_fst' (BinaryBiproduct.isBilimit X Y)
+  inr_fst' (BinaryBiproduct.isLimit X Y)
 
-theorem of_is_bilimit' {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem of_is_bilimit' {b : BinaryBicone X Y} :
     IsPullback (0 : 0 ⟶ X) (0 : 0 ⟶ Y) b.inl b.inr := by
-  refine IsPullback.of_right ?_ (by simp) (IsPullback.inl_snd' h).flip
-  simp
+  refine mk' (by simp) (fun _ _ => by subsingleton) (fun {_} a b' w => ?_)
+  have ha : a = 0 := by
+    calc
+      a = a ≫ (b.inl ≫ b.fst) := by simp [b.inl_fst]
+      _ = (a ≫ b.inl) ≫ b.fst := by rw [Category.assoc]
+      _ = (b' ≫ b.inr) ≫ b.fst := by rw [w]
+      _ = b' ≫ (b.inr ≫ b.fst) := by rw [Category.assoc]
+      _ = b' ≫ 0 := by rw [b.inr_fst]
+      _ = 0 := by simp
+  have hb : b' = 0 := by
+    calc
+      b' = b' ≫ (b.inr ≫ b.snd) := by simp [b.inr_snd]
+      _ = (b' ≫ b.inr) ≫ b.snd := by rw [Category.assoc]
+      _ = (a ≫ b.inl) ≫ b.snd := by rw [← w]
+      _ = a ≫ (b.inl ≫ b.snd) := by rw [Category.assoc]
+      _ = a ≫ 0 := by rw [b.inl_snd]
+      _ = 0 := by simp
+  exact ⟨0, by rw [ha]; simp, by rw [hb]; simp⟩
 
 theorem of_hasBinaryBiproduct (X Y : C) [HasBinaryBiproduct X Y] :
     IsPullback (0 : 0 ⟶ X) (0 : 0 ⟶ Y) biprod.inl biprod.inr :=
-  of_is_bilimit' (BinaryBiproduct.isBilimit X Y)
+  of_is_bilimit'
 
 instance hasPullback_biprod_fst_biprod_snd [HasBinaryBiproduct X Y] :
     HasPullback (biprod.inl : X ⟶ _) (biprod.inr : Y ⟶ _) :=
@@ -210,17 +226,17 @@ theorem zero_top (X : C) : IsPushout (0 : (0 : C) ⟶ 0) (0 : 0 ⟶ X) (0 : 0 �
   (zero_left X).flip
 
 
-theorem of_isBilimit {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem of_isBilimit {b : BinaryBicone X Y} (h : IsColimit b.toCocone) :
     IsPushout (0 : 0 ⟶ X) (0 : 0 ⟶ Y) b.inl b.inr := by
-  convert IsPushout.of_is_coproduct' h.isColimit HasZeroObject.zeroIsInitial
+  convert IsPushout.of_is_coproduct' h HasZeroObject.zeroIsInitial
     <;> subsingleton
 
 @[simp]
 theorem of_has_biproduct (X Y : C) [HasBinaryBiproduct X Y] :
     IsPushout (0 : 0 ⟶ X) (0 : 0 ⟶ Y) biprod.inl biprod.inr :=
-  of_isBilimit (BinaryBiproduct.isBilimit X Y)
+  of_isBilimit (BinaryBiproduct.isColimit X Y)
 
-theorem inl_snd' {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem inl_snd' {b : BinaryBicone X Y} (h : IsColimit b.toCocone) :
     IsPushout b.inl (0 : X ⟶ 0) b.snd (0 : 0 ⟶ Y) := by
   apply flip
   refine of_left ?_ (by simp) (of_isBilimit h)
@@ -239,9 +255,9 @@ is a pushout square.
 -/
 theorem inl_snd (X Y : C) [HasBinaryBiproduct X Y] :
     IsPushout biprod.inl (0 : X ⟶ 0) biprod.snd (0 : 0 ⟶ Y) :=
-  inl_snd' (BinaryBiproduct.isBilimit X Y)
+  inl_snd' (BinaryBiproduct.isColimit X Y)
 
-theorem inr_fst' {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem inr_fst' {b : BinaryBicone X Y} (h : IsColimit b.toCocone) :
     IsPushout b.inr (0 : Y ⟶ 0) b.fst (0 : 0 ⟶ X) := by
   refine of_top ?_ (by simp) (of_isBilimit h)
   simp
@@ -259,16 +275,32 @@ is a pushout square.
 -/
 theorem inr_fst (X Y : C) [HasBinaryBiproduct X Y] :
     IsPushout biprod.inr (0 : Y ⟶ 0) biprod.fst (0 : 0 ⟶ X) :=
-  inr_fst' (BinaryBiproduct.isBilimit X Y)
+  inr_fst' (BinaryBiproduct.isColimit X Y)
 
-theorem of_is_bilimit' {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem of_is_bilimit' {b : BinaryBicone X Y} :
     IsPushout b.fst b.snd (0 : X ⟶ 0) (0 : Y ⟶ 0) := by
-  refine IsPushout.of_left ?_ (by simp) (IsPushout.inl_snd' h)
-  simp
+  refine mk' (by simp) (fun _ _ => by subsingleton) (fun {_} a b' w => ?_)
+  have ha : a = 0 := by
+    calc
+      a = (b.inl ≫ b.fst) ≫ a := by simp [b.inl_fst]
+      _ = b.inl ≫ (b.fst ≫ a) := by rw [Category.assoc]
+      _ = b.inl ≫ (b.snd ≫ b') := by rw [w]
+      _ = (b.inl ≫ b.snd) ≫ b' := by rw [← Category.assoc]
+      _ = 0 ≫ b' := by rw [b.inl_snd]
+      _ = 0 := by simp
+  have hb : b' = 0 := by
+    calc
+      b' = (b.inr ≫ b.snd) ≫ b' := by simp [b.inr_snd]
+      _ = b.inr ≫ (b.snd ≫ b') := by rw [Category.assoc]
+      _ = b.inr ≫ (b.fst ≫ a) := by rw [← w]
+      _ = (b.inr ≫ b.fst) ≫ a := by rw [← Category.assoc]
+      _ = 0 ≫ a := by rw [b.inr_fst]
+      _ = 0 := by simp
+  exact ⟨0, by rw [ha]; simp, by rw [hb]; simp⟩
 
 theorem of_hasBinaryBiproduct (X Y : C) [HasBinaryBiproduct X Y] :
     IsPushout biprod.fst biprod.snd (0 : X ⟶ 0) (0 : Y ⟶ 0) :=
-  of_is_bilimit' (BinaryBiproduct.isBilimit X Y)
+  of_is_bilimit'
 
 instance hasPushout_biprod_fst_biprod_snd [HasBinaryBiproduct X Y] :
     HasPushout (biprod.fst : _ ⟶ X) (biprod.snd : _ ⟶ Y) :=
@@ -308,9 +340,9 @@ end
 ```
 is a bi-Cartesian square.
 -/
-theorem of_is_biproduct₁ {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem of_is_biproduct₁ {b : BinaryBicone X Y} (h : IsLimit b.toCone) :
     BicartesianSq b.fst b.snd (0 : X ⟶ 0) (0 : Y ⟶ 0) :=
-  of_isPullback_isPushout (IsPullback.of_isBilimit h) (IsPushout.of_is_bilimit' h)
+  of_isPullback_isPushout (IsPullback.of_isBilimit h) IsPushout.of_is_bilimit'
 
 /-- ```
    0 -----0---> X
@@ -322,9 +354,9 @@ theorem of_is_biproduct₁ {b : BinaryBicone X Y} (h : b.IsBilimit) :
 ```
 is a bi-Cartesian square.
 -/
-theorem of_is_biproduct₂ {b : BinaryBicone X Y} (h : b.IsBilimit) :
+theorem of_is_biproduct₂ {b : BinaryBicone X Y} (h : IsColimit b.toCocone) :
     BicartesianSq (0 : 0 ⟶ X) (0 : 0 ⟶ Y) b.inl b.inr :=
-  of_isPullback_isPushout (IsPullback.of_is_bilimit' h) (IsPushout.of_isBilimit h)
+  of_isPullback_isPushout IsPullback.of_is_bilimit' (IsPushout.of_isBilimit h)
 
 /-- ```
  X ⊞ Y --fst--> X
@@ -339,7 +371,7 @@ is a bi-Cartesian square.
 @[simp]
 theorem of_has_biproduct₁ [HasBinaryBiproduct X Y] :
     BicartesianSq biprod.fst biprod.snd (0 : X ⟶ 0) (0 : Y ⟶ 0) := by
-  convert of_is_biproduct₁ (BinaryBiproduct.isBilimit X Y)
+  convert of_is_biproduct₁ (BinaryBiproduct.isLimit X Y)
 
 /-- ```
    0 -----0---> X
@@ -354,7 +386,7 @@ is a bi-Cartesian square.
 @[simp]
 theorem of_has_biproduct₂ [HasBinaryBiproduct X Y] :
     BicartesianSq (0 : 0 ⟶ X) (0 : 0 ⟶ Y) biprod.inl biprod.inr := by
-  convert of_is_biproduct₂ (BinaryBiproduct.isBilimit X Y)
+  convert of_is_biproduct₂ (BinaryBiproduct.isColimit X Y)
 
 end BicartesianSq
 end CategoryTheory

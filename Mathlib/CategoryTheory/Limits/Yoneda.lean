@@ -25,7 +25,7 @@ assert_not_exists AddCommMonoid
 
 open Opposite CategoryTheory Limits
 
-universe t w w' v u
+universe t w w' v v' u
 
 namespace CategoryTheory
 
@@ -213,11 +213,39 @@ namespace Functor
 
 section Representable
 
-variable (F : Cᵒᵖ ⥤ Type v) [F.IsRepresentable] {J : Type*} [Category* J]
+variable (F : Cᵒᵖ ⥤ Type v') [F.IsRepresentable] {J : Type*} [Category* J]
 
 instance representable_preservesLimit (G : J ⥤ Cᵒᵖ) :
-    PreservesLimit G F :=
-  preservesLimit_of_natIso _ F.reprW
+    PreservesLimit G F where
+  preserves {c} hc := by
+    rw [Types.isLimit_iff]
+    intro s hs
+    let cone : Cone G :=
+      { pt := op F.reprX
+        π :=
+          { app := fun j => (F.representableBy.homEquiv.symm (s j)).op
+            naturality := by
+              intro j j' f
+              apply Quiver.Hom.unop_inj
+              dsimp
+              rw [RepresentableBy.comp_homEquiv_symm]
+              simpa using congr_arg (F.representableBy.homEquiv.symm) (hs f).symm } }
+    refine ⟨F.representableBy.homEquiv (hc.lift cone).unop, ?_, ?_⟩
+    · intro j
+      change F.map ((c.π.app j).unop.op)
+        (F.representableBy.homEquiv (hc.lift cone).unop) = s j
+      rw [← F.representableBy.homEquiv_comp (c.π.app j).unop (hc.lift cone).unop]
+      simpa using congr_arg F.representableBy.homEquiv (Quiver.Hom.op_inj (hc.fac cone j))
+    · intro m hm
+      apply F.representableBy.homEquiv.symm.injective
+      simpa using Quiver.Hom.op_inj (hc.uniq cone
+        (F.representableBy.homEquiv.symm m).op (fun j => by
+          apply Quiver.Hom.unop_inj
+          dsimp
+          change (c.π.app j).unop ≫ F.representableBy.homEquiv.symm m =
+            F.representableBy.homEquiv.symm (s j)
+          rw [RepresentableBy.comp_homEquiv_symm]
+          simpa using congr_arg (F.representableBy.homEquiv.symm) (hm j)))
 
 variable (J) in
 instance representable_preservesLimitsOfShape :
@@ -230,11 +258,36 @@ end Representable
 
 section Corepresentable
 
-variable (F : C ⥤ Type v) [F.IsCorepresentable] {J : Type*} [Category* J]
+variable (F : C ⥤ Type v') [F.IsCorepresentable] {J : Type*} [Category* J]
 
 instance corepresentable_preservesLimit (G : J ⥤ C) :
-    PreservesLimit G F :=
-  preservesLimit_of_natIso _ F.coreprW
+    PreservesLimit G F where
+  preserves {c} hc := by
+    rw [Types.isLimit_iff]
+    intro s hs
+    let cone : Cone G :=
+      { pt := F.coreprX
+        π :=
+          { app := fun j => F.corepresentableBy.homEquiv.symm (s j)
+            naturality := by
+              intro j j' f
+              dsimp
+              rw [Category.id_comp]
+              rw [CorepresentableBy.homEquiv_symm_comp]
+              simpa using congr_arg (F.corepresentableBy.homEquiv.symm) (hs f).symm } }
+    refine ⟨F.corepresentableBy.homEquiv (hc.lift cone), ?_, ?_⟩
+    · intro j
+      change F.map (c.π.app j) (F.corepresentableBy.homEquiv (hc.lift cone)) = s j
+      rw [← F.corepresentableBy.homEquiv_comp (c.π.app j) (hc.lift cone)]
+      exact (congr_arg (F.corepresentableBy.homEquiv) (hc.fac cone j)).trans
+        (by simp [cone])
+    · intro m hm
+      apply F.corepresentableBy.homEquiv.symm.injective
+      simpa using hc.uniq cone (F.corepresentableBy.homEquiv.symm m) (fun j => by
+        change F.corepresentableBy.homEquiv.symm m ≫ c.π.app j =
+          F.corepresentableBy.homEquiv.symm (s j)
+        rw [CorepresentableBy.homEquiv_symm_comp]
+        simpa using congr_arg (F.corepresentableBy.homEquiv.symm) (hm j))
 
 variable (J) in
 instance corepresentable_preservesLimitsOfShape :

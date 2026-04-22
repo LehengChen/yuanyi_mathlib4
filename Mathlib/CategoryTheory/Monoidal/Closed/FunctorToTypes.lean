@@ -22,13 +22,13 @@ It should be shown that `C ⥤ Type max w v u` is Cartesian closed.
 @[expose] public section
 
 
-universe w v' v u u'
+universe w v u
 
 open CategoryTheory Functor MonoidalCategory
 
 namespace CategoryTheory.FunctorToTypes
 
-variable {C : Type u} [Category.{v} C] {D : Type u'} [Category.{v'} D]
+variable {C : Type u} [Category.{v} C]
 
 variable (F : C ⥤ Type max w v u)
 

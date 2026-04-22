@@ -64,12 +64,8 @@ lemma hasRightCalculusOfFractions (adj : F ⊣ G) (W : MorphismProperty C₁)
   have := hasLeftCalculusOfFractions adj.op W.op hW.op (fun _ ↦ hW' _)
   inferInstanceAs W.op.unop.HasRightCalculusOfFractions
 
-section
-
-variable [F.Full] [F.Faithful]
-
 lemma isLocalization_leftAdjoint
-    (adj : G ⊣ F) (W : MorphismProperty C₁)
+    (adj : G ⊣ F) [IsIso adj.counit] (W : MorphismProperty C₁)
     (hW : W.IsInvertedBy G) (hW' : (W.functorCategory C₁) adj.unit) :
     G.IsLocalization W := by
   let Φ : W.Localization ⥤ C₂ := Localization.lift _ hW W.Q
@@ -86,46 +82,58 @@ lemma isLocalization_leftAdjoint
       (Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft _ e ≪≫ asIso adj.counit)) e
 
 lemma isLocalization_rightAdjoint
-    (adj : F ⊣ G) (W : MorphismProperty C₁)
+    (adj : F ⊣ G) [IsIso adj.unit] (W : MorphismProperty C₁)
     (hW : W.IsInvertedBy G) (hW' : (W.functorCategory C₁) adj.counit) :
     G.IsLocalization W := by
+  haveI : ∀ X, IsIso (adj.op.counit.app X) := fun X => by
+    change IsIso (adj.unit.app X.unop).op
+    infer_instance
+  letI : IsIso adj.op.counit := NatIso.isIso_of_isIso_app _
   simpa using isLocalization_leftAdjoint adj.op W.op hW.op (fun X ↦ hW' X.unop)
 
 set_option backward.isDefEq.respectTransparency false in
-lemma functorCategory_inverseImage_isomorphisms_unit (adj : G ⊣ F) :
+lemma functorCategory_inverseImage_isomorphisms_unit (adj : G ⊣ F)
+    [∀ X, IsIso (G.map (adj.unit.app X))] :
     ((isomorphisms C₂).inverseImage G).functorCategory C₁ adj.unit := by
   intro
   simp only [Functor.id_obj, Functor.comp_obj, inverseImage_iff, isomorphisms.iff]
   infer_instance
 
 set_option backward.isDefEq.respectTransparency false in
-lemma functorCategory_inverseImage_isomorphisms_counit (adj : F ⊣ G) :
+lemma functorCategory_inverseImage_isomorphisms_counit (adj : F ⊣ G)
+    [∀ X, IsIso (G.map (adj.counit.app X))] :
     ((isomorphisms C₂).inverseImage G).functorCategory C₁ adj.counit := by
   intro
   simp only [Functor.id_obj, Functor.comp_obj, inverseImage_iff, isomorphisms.iff]
   infer_instance
 
-lemma isLocalization_leftAdjoint' (adj : G ⊣ F) :
-    G.IsLocalization ((isomorphisms C₂).inverseImage G) :=
-  adj.isLocalization_leftAdjoint _ (fun _ _ _ h ↦ h)
+lemma isLocalization_leftAdjoint' (adj : G ⊣ F) [IsIso adj.counit] :
+    G.IsLocalization ((isomorphisms C₂).inverseImage G) := by
+  let hF := adj.fullyFaithfulROfIsIsoCounit
+  letI : F.Full := hF.full
+  letI : F.Faithful := hF.faithful
+  exact adj.isLocalization_leftAdjoint _ (fun _ _ _ h ↦ h)
     adj.functorCategory_inverseImage_isomorphisms_unit
 
-lemma isLocalization_rightAdjoint' (adj : F ⊣ G) :
-    G.IsLocalization ((isomorphisms C₂).inverseImage G) :=
-  adj.isLocalization_rightAdjoint _ (fun _ _ _ h ↦ h)
+lemma isLocalization_rightAdjoint' (adj : F ⊣ G) [IsIso adj.unit] :
+    G.IsLocalization ((isomorphisms C₂).inverseImage G) := by
+  let hF := adj.fullyFaithfulLOfIsIsoUnit
+  letI : F.Full := hF.full
+  letI : F.Faithful := hF.faithful
+  exact adj.isLocalization_rightAdjoint _ (fun _ _ _ h ↦ h)
     adj.functorCategory_inverseImage_isomorphisms_counit
 
-lemma hasLeftCalculusOfFractions' (adj : G ⊣ F) :
+lemma hasLeftCalculusOfFractions' (adj : G ⊣ F)
+    [∀ X, IsIso (G.map (adj.unit.app X))] :
     ((isomorphisms C₂).inverseImage G).HasLeftCalculusOfFractions :=
   hasLeftCalculusOfFractions adj _ (fun _ _ _ h ↦ h)
     adj.functorCategory_inverseImage_isomorphisms_unit
 
-lemma hasRightCalculusOfFractions' (adj : F ⊣ G) :
+lemma hasRightCalculusOfFractions' (adj : F ⊣ G)
+    [∀ X, IsIso (G.map (adj.counit.app X))] :
     ((isomorphisms C₂).inverseImage G).HasRightCalculusOfFractions :=
   hasRightCalculusOfFractions adj _ (fun _ _ _ h ↦ h)
     adj.functorCategory_inverseImage_isomorphisms_counit
-
-end
 
 end Adjunction
 

@@ -19,13 +19,17 @@ are (co)limit (co)cones. We also show that such (co)cones exist, and that `Discr
 @[expose] public section
 
 
-universe v' v
+universe v' v w u
 
 open CategoryTheory
 
 namespace CategoryTheory.Limits
 
-variable {J : Type v} [Category.{v'} J] {F : J ⥤ Discrete PUnit}
+variable {J : Type v} [Category.{v'} J]
+
+section PUnit
+
+variable {F : J ⥤ Discrete PUnit}
 
 /-- A trivial cone for a functor into `PUnit`. `punitConeIsLimit` shows it is a limit. -/
 def punitCone : Cone F :=
@@ -35,15 +39,23 @@ def punitCone : Cone F :=
 def punitCocone : Cocone F :=
   ⟨⟨⟨⟩⟩, (Functor.punitExt _ _).hom⟩
 
-/-- Any cone over a functor into `PUnit` is a limit cone.
+end PUnit
+
+section SubsingletonThin
+
+variable {C : Type u} [Category.{w} C] [Subsingleton C] [Quiver.IsThin C] {F : J ⥤ C}
+
+/-- Any cone over a functor into a subsingleton thin category is a limit cone.
 -/
 def punitConeIsLimit {c : Cone F} : IsLimit c where
-  lift := fun s => eqToHom (by simp [eq_iff_true_of_subsingleton])
+  lift := fun s => eqToHom (Subsingleton.elim _ _)
 
-/-- Any cocone over a functor into `PUnit` is a colimit cocone.
+/-- Any cocone over a functor into a subsingleton thin category is a colimit cocone.
 -/
 def punitCoconeIsColimit {c : Cocone F} : IsColimit c where
-  desc := fun s => eqToHom (by simp [eq_iff_true_of_subsingleton])
+  desc := fun s => eqToHom (Subsingleton.elim _ _)
+
+end SubsingletonThin
 
 instance : HasLimitsOfSize.{v', v} (Discrete PUnit) :=
   ⟨fun _ _ => ⟨fun _ => ⟨punitCone, punitConeIsLimit⟩⟩⟩

@@ -370,25 +370,33 @@ noncomputable def mapBifunctorComp₁₂MapObjIso :
   isoMk _ _ (fun j => (CofanMapObjFun.iso
     (isColimitCofan₃MapBifunctor₁₂BifunctorMapObj F₁₂ G ρ₁₂ X₁ X₂ X₃ j)).symm)
 
+end
+
 @[reassoc (attr := simp)]
 lemma ι_mapBifunctorComp₁₂MapObjIso_hom (i₁ : I₁) (i₂ : I₂) (i₃ : I₃) (j : J)
     (h : r (i₁, i₂, i₃) = j) :
+    letI : HasMap ((((mapTrifunctor (bifunctorComp₁₂ F₁₂ G) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+      HasGoodTrifunctor₁₂Obj.hasMap (ρ₁₂ := ρ₁₂) (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
     ιMapTrifunctorMapObj (bifunctorComp₁₂ F₁₂ G) r X₁ X₂ X₃ i₁ i₂ i₃ j h ≫
       (mapBifunctorComp₁₂MapObjIso F₁₂ G ρ₁₂ X₁ X₂ X₃).hom j =
       ιMapBifunctor₁₂BifunctorMapObj F₁₂ G ρ₁₂ X₁ X₂ X₃ i₁ i₂ i₃ j h := by
+  letI : HasMap ((((mapTrifunctor (bifunctorComp₁₂ F₁₂ G) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+    HasGoodTrifunctor₁₂Obj.hasMap (ρ₁₂ := ρ₁₂) (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
   dsimp [mapBifunctorComp₁₂MapObjIso]
   apply CofanMapObjFun.ιMapObj_iso_inv
 
 @[reassoc (attr := simp)]
 lemma ι_mapBifunctorComp₁₂MapObjIso_inv (i₁ : I₁) (i₂ : I₂) (i₃ : I₃) (j : J)
     (h : r (i₁, i₂, i₃) = j) :
+    letI : HasMap ((((mapTrifunctor (bifunctorComp₁₂ F₁₂ G) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+      HasGoodTrifunctor₁₂Obj.hasMap (ρ₁₂ := ρ₁₂) (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
     ιMapBifunctor₁₂BifunctorMapObj F₁₂ G ρ₁₂ X₁ X₂ X₃ i₁ i₂ i₃ j h ≫
       (mapBifunctorComp₁₂MapObjIso F₁₂ G ρ₁₂ X₁ X₂ X₃).inv j =
       ιMapTrifunctorMapObj (bifunctorComp₁₂ F₁₂ G) r X₁ X₂ X₃ i₁ i₂ i₃ j h :=
+  letI : HasMap ((((mapTrifunctor (bifunctorComp₁₂ F₁₂ G) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+    HasGoodTrifunctor₁₂Obj.hasMap (ρ₁₂ := ρ₁₂) (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
   CofanMapObjFun.inj_iso_hom
     (isColimitCofan₃MapBifunctor₁₂BifunctorMapObj F₁₂ G ρ₁₂ X₁ X₂ X₃ j) _ h
-
-end
 
 variable {X₁ X₂ X₃ F₁₂ G ρ₁₂}
 variable {j : J} {A : C₄}
@@ -548,25 +556,37 @@ noncomputable def mapBifunctorComp₂₃MapObjIso :
   isoMk _ _ (fun j => (CofanMapObjFun.iso
     (isColimitCofan₃MapBifunctorBifunctor₂₃MapObj F G₂₃ ρ₂₃ X₁ X₂ X₃ j)).symm)
 
+end
+
 @[reassoc (attr := simp)]
 lemma ι_mapBifunctorComp₂₃MapObjIso_hom (i₁ : I₁) (i₂ : I₂) (i₃ : I₃) (j : J)
     (h : r (i₁, i₂, i₃) = j) :
+    letI : HasMap ((((mapTrifunctor (bifunctorComp₂₃ F G₂₃) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+      HasGoodTrifunctor₂₃Obj.hasMap (F := F) (G₂₃ := G₂₃) (ρ₂₃ := ρ₂₃)
+        (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
     ιMapTrifunctorMapObj (bifunctorComp₂₃ F G₂₃) r X₁ X₂ X₃ i₁ i₂ i₃ j h ≫
       (mapBifunctorComp₂₃MapObjIso F G₂₃ ρ₂₃ X₁ X₂ X₃).hom j =
       ιMapBifunctorBifunctor₂₃MapObj F G₂₃ ρ₂₃ X₁ X₂ X₃ i₁ i₂ i₃ j h := by
+  letI : HasMap ((((mapTrifunctor (bifunctorComp₂₃ F G₂₃) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+    HasGoodTrifunctor₂₃Obj.hasMap (F := F) (G₂₃ := G₂₃) (ρ₂₃ := ρ₂₃)
+      (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
   dsimp [mapBifunctorComp₂₃MapObjIso]
   apply CofanMapObjFun.ιMapObj_iso_inv
 
 @[reassoc (attr := simp)]
 lemma ι_mapBifunctorComp₂₃MapObjIso_inv (i₁ : I₁) (i₂ : I₂) (i₃ : I₃) (j : J)
     (h : r (i₁, i₂, i₃) = j) :
+    letI : HasMap ((((mapTrifunctor (bifunctorComp₂₃ F G₂₃) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+      HasGoodTrifunctor₂₃Obj.hasMap (F := F) (G₂₃ := G₂₃) (ρ₂₃ := ρ₂₃)
+        (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
     ιMapBifunctorBifunctor₂₃MapObj F G₂₃ ρ₂₃ X₁ X₂ X₃ i₁ i₂ i₃ j h ≫
       (mapBifunctorComp₂₃MapObjIso F G₂₃ ρ₂₃ X₁ X₂ X₃).inv j =
       ιMapTrifunctorMapObj (bifunctorComp₂₃ F G₂₃) r X₁ X₂ X₃ i₁ i₂ i₃ j h :=
+  letI : HasMap ((((mapTrifunctor (bifunctorComp₂₃ F G₂₃) I₁ I₂ I₃).obj X₁).obj X₂).obj X₃) r :=
+    HasGoodTrifunctor₂₃Obj.hasMap (F := F) (G₂₃ := G₂₃) (ρ₂₃ := ρ₂₃)
+      (X₁ := X₁) (X₂ := X₂) (X₃ := X₃)
   CofanMapObjFun.inj_iso_hom
     (isColimitCofan₃MapBifunctorBifunctor₂₃MapObj F G₂₃ ρ₂₃ X₁ X₂ X₃ j) _ h
-
-end
 
 variable {X₁ X₂ X₃ F G₂₃ ρ₂₃}
 variable {j : J} {A : C₄}

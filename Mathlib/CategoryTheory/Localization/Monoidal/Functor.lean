@@ -31,19 +31,22 @@ namespace Localization.Monoidal
 
 variable {C D E : Type*} [Category* C] [Category* D] [Category* E]
   [MonoidalCategory C] [MonoidalCategory D] [MonoidalCategory E]
-  (L : C ⥤ D) (W : MorphismProperty C) [L.IsLocalization W] [L.Monoidal]
-  (F : D ⥤ E) (G : C ⥤ E) [G.Monoidal] [W.ContainsIdentities] [Lifting L W G F]
+  (L : C ⥤ D) (W : MorphismProperty C) (F : D ⥤ E) (G : C ⥤ E) [Lifting L W G F]
 
 @[simps]
 instance lifting₂CurriedTensorPre :
     Lifting₂ L L W W (curriedTensorPre G) (curriedTensorPre F) where
   iso := curriedTensorPreFunctor.mapIso (Lifting.iso L W G F)
 
+variable [L.Monoidal]
+
 @[simps]
 instance lifting₂CurriedTensorPost :
     Lifting₂ L L W W (curriedTensorPost G) (curriedTensorPost F) where
   iso := (postcompose₂.obj F).mapIso (curriedTensorPreIsoPost L) ≪≫
     curriedTensorPostFunctor.mapIso (Lifting.iso L W G F)
+
+variable [L.IsLocalization W] [G.Monoidal] [W.ContainsIdentities]
 
 /--
 The natural isomorphism of bifunctors `F - ⊗ F - ≅ F (- ⊗ -)`, given that `F` lifts along `L`

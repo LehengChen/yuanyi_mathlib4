@@ -49,14 +49,16 @@ universe v₁ v₂ u₁ u₂
 
 namespace AbelianOfAdjunction
 
-variable {C : Type u₁} [Category.{v₁} C] [Preadditive C]
-variable {D : Type u₂} [Category.{v₂} D] [Abelian D]
+variable {C : Type u₁} [Category.{v₁} C] [HasZeroMorphisms C]
+variable {D : Type u₂} [Category.{v₂} D] [HasZeroMorphisms D]
 variable (F : C ⥤ D)
 variable (G : D ⥤ C) [Functor.PreservesZeroMorphisms G]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- No point making this an instance, as it requires `i`. -/
-theorem hasKernels [PreservesFiniteLimits G] (i : F ⋙ G ≅ 𝟭 C) : HasKernels C :=
+theorem hasKernels [HasKernels D]
+    [∀ {X Y : D} (f : X ⟶ Y), PreservesLimit (parallelPair f 0) G]
+    (i : F ⋙ G ≅ 𝟭 C) : HasKernels C :=
   { has_limit {X Y} f := by
       have : i.inv.app X ≫ G.map (F.map f) ≫ i.hom.app Y = f := by
         simpa using NatIso.naturality_1 i f
@@ -65,10 +67,11 @@ theorem hasKernels [PreservesFiniteLimits G] (i : F ⋙ G ≅ 𝟭 C) : HasKerne
       apply Limits.hasKernel_iso_comp }
 
 set_option backward.isDefEq.respectTransparency false in
-/-- No point making this an instance, as it requires `i` and `adj`. -/
-theorem hasCokernels (i : F ⋙ G ≅ 𝟭 C) (adj : G ⊣ F) : HasCokernels C :=
+/-- No point making this an instance, as it requires `i`. -/
+theorem hasCokernels [HasCokernels D]
+    [∀ {X Y : D} (f : X ⟶ Y), PreservesColimit (parallelPair f 0) G]
+    (i : F ⋙ G ≅ 𝟭 C) : HasCokernels C :=
   { has_colimit {X Y} f := by
-      have : PreservesColimits G := adj.leftAdjoint_preservesColimits
       have : i.inv.app X ≫ G.map (F.map f) ≫ i.hom.app Y = f := by
         simpa using NatIso.naturality_1 i f
       rw [← this]
@@ -90,12 +93,12 @@ def abelianOfAdjunction {C : Type u₁} [Category.{v₁} C] [Preadditive C] [Has
     (G : D ⥤ C) [Functor.PreservesZeroMorphisms G] [PreservesFiniteLimits G] (i : F ⋙ G ≅ 𝟭 C)
     (adj : G ⊣ F) : Abelian C := by
   haveI := hasKernels F G i
-  haveI := hasCokernels F G i adj
+  haveI : PreservesColimits G := adj.leftAdjoint_preservesColimits
+  haveI := hasCokernels F G i
   have : ∀ {X Y : C} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f) := by
     intro X Y f
     let arrowIso : Arrow.mk (G.map (F.map f)) ≅ Arrow.mk f :=
       ((Functor.mapArrowFunctor _ _).mapIso i).app (Arrow.mk f)
-    have : PreservesColimits G := adj.leftAdjoint_preservesColimits
     let iso : Arrow.mk (G.map (Abelian.coimageImageComparison (F.map f))) ≅
         Arrow.mk (Abelian.coimageImageComparison f) :=
       Abelian.PreservesCoimageImageComparison.iso G (F.map f) ≪≫

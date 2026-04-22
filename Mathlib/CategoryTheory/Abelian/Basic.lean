@@ -183,12 +183,10 @@ variable [∀ {X Y : C} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f)]
 theorem hasImages : HasImages C :=
   { has_image := fun {_} {_} f => { exists_image := ⟨imageFactorisation f⟩ } }
 
-variable [Limits.HasFiniteProducts C]
-
-attribute [local instance] Limits.HasFiniteBiproducts.of_hasFiniteProducts
+variable [Limits.HasFiniteBiproducts C]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A category with finite products in which coimage-image comparisons are all isomorphisms
+/-- A category with finite biproducts in which coimage-image comparisons are all isomorphisms
 is a normal mono category.
 -/
 lemma isNormalMonoCategory : IsNormalMonoCategory C where
@@ -213,7 +211,7 @@ lemma isNormalMonoCategory : IsNormalMonoCategory C where
           exact (imageMonoFactorisation f).fac }⟩
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A category with finite products in which coimage-image comparisons are all isomorphisms
+/-- A category with finite biproducts in which coimage-image comparisons are all isomorphisms
 is a normal epi category.
 -/
 lemma isNormalEpiCategory : IsNormalEpiCategory C where
@@ -244,6 +242,8 @@ end OfCoimageImageComparisonIsIso
 variable [∀ {X Y : C} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f)]
   [Limits.HasFiniteProducts C]
 
+attribute [local instance] Limits.HasFiniteBiproducts.of_hasFiniteProducts
+
 attribute [local instance] OfCoimageImageComparisonIsIso.isNormalMonoCategory
 
 attribute [local instance] OfCoimageImageComparisonIsIso.isNormalEpiCategory
@@ -268,8 +268,9 @@ variable {C : Type u} [Category.{v} C] [Abelian C]
 -- We set it as a local instance instead.
 -- instance (priority := 100)
 -- Turning it into a global instance breaks `Mathlib/Algebra/Category/ModuleCat/Sheaf/Free.lean`.
-/-- An abelian category has finite biproducts. -/
-theorem hasFiniteBiproducts : HasFiniteBiproducts C :=
+omit [Abelian C] in
+/-- A preadditive category with finite products has finite biproducts. -/
+theorem hasFiniteBiproducts [Preadditive C] [HasFiniteProducts C] : HasFiniteBiproducts C :=
   Limits.HasFiniteBiproducts.of_hasFiniteProducts
 
 attribute [local instance] hasFiniteBiproducts
@@ -312,19 +313,21 @@ end
 
 section Factor
 
-attribute [local instance] nonPreadditiveAbelian
-
 variable {P Q : C} (f : P ⟶ Q)
 
 section
 
-theorem mono_of_kernel_ι_eq_zero (h : kernel.ι f = 0) : Mono f :=
+omit [Abelian C] in
+theorem mono_of_kernel_ι_eq_zero [Preadditive C] [HasKernel f] (h : kernel.ι f = 0) : Mono f :=
   mono_of_kernel_zero h
 
-theorem epi_of_cokernel_π_eq_zero (h : cokernel.π f = 0) : Epi f :=
+omit [Abelian C] in
+theorem epi_of_cokernel_π_eq_zero [Preadditive C] [HasCokernel f] (h : cokernel.π f = 0) : Epi f :=
   epi_of_cokernel_zero h
 
 end
+
+attribute [local instance] nonPreadditiveAbelian
 
 section
 

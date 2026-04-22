@@ -55,12 +55,15 @@ theorem mk_as (b : Pith B) : mk b.as = b := rfl
 
 instance [Inhabited B] : Inhabited (Pith B) := ⟨⟨default⟩⟩
 
-instance categoryStruct [Bicategory.{w₁, v₁} B] : CategoryStruct (Pith B) where
+instance categoryStruct [CategoryStruct.{v₁} B] [∀ a b : B, Category.{w₁} (a ⟶ b)] :
+    CategoryStruct (Pith B) where
   Hom a b := Core (a.as ⟶ b.as)
   id a := ⟨𝟙 a.as⟩
   comp f g := ⟨f.of ≫ g.of⟩
 
-variable [Bicategory.{w₁, v₁} B]
+section CategoryStruct
+
+variable [CategoryStruct.{v₁} B] [∀ a b : B, Category.{w₁} (a ⟶ b)]
 
 -- @[simps!] in categoryStruct puts `Core (a.as ⟶ b.as)` in the hyps for the next two
 -- lemmas, so we record them manually instead.
@@ -90,6 +93,10 @@ lemma id₂_iso_hom {a b : Pith B} {x : a ⟶ b} : (𝟙 x : x ⟶ x).iso.hom = 
 
 @[simp]
 lemma id₂_iso_inv {a b : Pith B} {x : a ⟶ b} : (𝟙 x : x ⟶ x).iso.inv = 𝟙 _ := rfl
+
+end CategoryStruct
+
+variable [Bicategory.{w₁, v₁} B]
 
 @[simps! whiskerLeft_iso_hom whiskerLeft_iso_inv whiskerRight_iso_hom whiskerRight_iso_inv
 associator_hom_iso associator_inv_iso_hom associator_inv_iso_inv leftUnitor_hom_iso

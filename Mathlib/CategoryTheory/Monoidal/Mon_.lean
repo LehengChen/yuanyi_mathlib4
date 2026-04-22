@@ -927,13 +927,14 @@ abbrev FullyFaithful.monObj (hF : F.FullyFaithful) (X : C) [MonObj (F.obj X)] : 
 
 end OplaxMonoidal
 
-section Monoidal
-variable [F.Monoidal]
+section LaxMonoidalEpi
+variable [F.LaxMonoidal]
 
 open scoped Obj
 
 @[to_additive]
-protected instance Full.mapMon [F.Full] [F.Faithful] : F.mapMon.Full where
+protected instance Full.mapMon [Epi (ε F)] [∀ X : Mon C, Epi (LaxMonoidal.μ F X.X X.X)]
+    [F.Full] [F.Faithful] : F.mapMon.Full where
   map_surjective {X Y} f :=
     let ⟨g, hg⟩ := F.map_surjective f.hom
     ⟨{
@@ -944,20 +945,31 @@ protected instance Full.mapMon [F.Full] [F.Faithful] : F.mapMon.Full where
         F.map_injective <| by simpa [← hg, cancel_epi] using IsMonHom.mul_hom f.hom },
       Mon.Hom.ext hg⟩
 
-instance FullyFaithful.isAddMonHom_preimage (hF : F.FullyFaithful) {X Y : C}
-    [AddMonObj X] [AddMonObj Y] (f : F.obj X ⟶ F.obj Y) [IsAddMonHom f] :
+instance FullyFaithful.isAddMonHom_preimage [Epi (ε F)] (hF : F.FullyFaithful) {X Y : C}
+    [AddMonObj X] [AddMonObj Y] [Epi (LaxMonoidal.μ F X X)]
+    (f : F.obj X ⟶ F.obj Y) [IsAddMonHom f] :
     IsAddMonHom (hF.preimage f) where
   zero_hom := hF.map_injective (by simp [← cancel_epi (ε F), ← obj.ζ_def_assoc, ← obj.ζ_def])
   add_hom := hF.map_injective (by
-    simp [← obj.σ_def_assoc, ← obj.σ_def, ← μ_natural_assoc, ← cancel_epi (LaxMonoidal.μ F ..)])
+    simp [← obj.σ_def_assoc, ← obj.σ_def, ← μ_natural_assoc,
+      ← cancel_epi (LaxMonoidal.μ F X X)])
 
 @[to_additive existing]
-instance FullyFaithful.isMonHom_preimage (hF : F.FullyFaithful) {X Y : C}
-    [MonObj X] [MonObj Y] (f : F.obj X ⟶ F.obj Y) [IsMonHom f] :
+instance FullyFaithful.isMonHom_preimage [Epi (ε F)] (hF : F.FullyFaithful) {X Y : C}
+    [MonObj X] [MonObj Y] [Epi (LaxMonoidal.μ F X X)]
+    (f : F.obj X ⟶ F.obj Y) [IsMonHom f] :
     IsMonHom (hF.preimage f) where
   one_hom := hF.map_injective <| by simp [← obj.η_def_assoc, ← obj.η_def, ← cancel_epi (ε F)]
   mul_hom := hF.map_injective <| by
-    simp [← obj.μ_def_assoc, ← obj.μ_def, ← μ_natural_assoc, ← cancel_epi (LaxMonoidal.μ F ..)]
+    simp [← obj.μ_def_assoc, ← obj.μ_def, ← μ_natural_assoc,
+      ← cancel_epi (LaxMonoidal.μ F X X)]
+
+end LaxMonoidalEpi
+
+section Monoidal
+variable [F.Monoidal]
+
+open scoped Obj
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If `F : C ⥤ D` is a fully faithful monoidal functor, then `F.mapMon : Mon C ⥤ Mon D` is fully

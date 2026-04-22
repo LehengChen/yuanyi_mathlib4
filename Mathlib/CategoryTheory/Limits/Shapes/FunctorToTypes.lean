@@ -107,7 +107,7 @@ lemma binaryProductIso_inv_comp_fst :
   simp [binaryProductIso, binaryProductLimitCone]
 
 @[simp]
-lemma binaryProductIso_inv_comp_fst_apply (a : C) (z : (prod F G).obj a) :
+lemma binaryProductIso_inv_comp_fst_apply {F G : C ⥤ Type w} {a : C} (z : (prod F G).obj a) :
     (Limits.prod.fst (X := F)).app a ((binaryProductIso F G).inv.app a z) = z.1 :=
   congr_fun (congr_app (binaryProductIso_inv_comp_fst F G) a) z
 
@@ -118,7 +118,7 @@ lemma binaryProductIso_inv_comp_snd :
   simp [binaryProductIso, binaryProductLimitCone]
 
 @[simp]
-lemma binaryProductIso_inv_comp_snd_apply (a : C) (z : (prod F G).obj a) :
+lemma binaryProductIso_inv_comp_snd_apply {F G : C ⥤ Type w} {a : C} (z : (prod F G).obj a) :
     (Limits.prod.snd (X := F)).app a ((binaryProductIso F G).inv.app a z) = z.2 :=
   congr_fun (congr_app (binaryProductIso_inv_comp_snd F G) a) z
 
@@ -141,7 +141,8 @@ lemma prodMk_snd {a : C} (x : F.obj a) (y : G.obj a) :
   simp only [prodMk, binaryProductIso_inv_comp_snd_apply]
 
 @[ext]
-lemma prod_ext {a : C} (z w : (prod F G).obj a) (h1 : z.1 = w.1) (h2 : z.2 = w.2) :
+lemma prod_ext {D : Type u} {F G : D → Type w} {a : D} (z w : F a × G a)
+    (h1 : z.1 = w.1) (h2 : z.2 = w.2) :
     z = w := Prod.ext h1 h2
 
 variable (F G)
@@ -156,7 +157,7 @@ def binaryProductEquiv (a : C) : (F ⨯ G).obj a ≃ (F.obj a) × (G.obj a) wher
   right_inv _ := by simp [prodMk]
 
 @[ext]
-lemma prod_ext' (a : C) (z w : (F ⨯ G).obj a)
+lemma prod_ext' {F G : C ⥤ Type w} {a : C} (z w : (F ⨯ G).obj a)
     (h1 : (Limits.prod.fst (X := F)).app a z = (Limits.prod.fst (X := F)).app a w)
     (h2 : (Limits.prod.snd (X := F)).app a z = (Limits.prod.snd (X := F)).app a w) :
     z = w := by
@@ -240,7 +241,7 @@ lemma inl_comp_binaryCoproductIso_hom :
   aesop
 
 @[simp]
-lemma inl_comp_binaryCoproductIso_hom_apply (a : C) (x : F.obj a) :
+lemma inl_comp_binaryCoproductIso_hom_apply {F G : C ⥤ Type w} {a : C} (x : F.obj a) :
     (binaryCoproductIso F G).hom.app a ((Limits.coprod.inl (X := F)).app a x) = .inl x :=
   congr_fun (congr_app (inl_comp_binaryCoproductIso_hom F G) a) x
 
@@ -252,7 +253,7 @@ lemma inr_comp_binaryCoproductIso_hom :
   aesop
 
 @[simp]
-lemma inr_comp_binaryCoproductIso_hom_apply (a : C) (x : G.obj a) :
+lemma inr_comp_binaryCoproductIso_hom_apply {F G : C ⥤ Type w} {a : C} (x : G.obj a) :
     (binaryCoproductIso F G).hom.app a ((Limits.coprod.inr (X := F)).app a x) = .inr x :=
   congr_fun (congr_app (inr_comp_binaryCoproductIso_hom F G) a) x
 
@@ -261,7 +262,7 @@ lemma inl_comp_binaryCoproductIso_inv :
     coprod.inl ≫ (binaryCoproductIso F G).inv = (Limits.coprod.inl (X := F)) := rfl
 
 @[simp]
-lemma inl_comp_binaryCoproductIso_inv_apply (a : C) (x : F.obj a) :
+lemma inl_comp_binaryCoproductIso_inv_apply {F G : C ⥤ Type w} {a : C} (x : F.obj a) :
     (binaryCoproductIso F G).inv.app a (.inl x) = (Limits.coprod.inl (X := F)).app a x := rfl
 
 @[simp]
@@ -269,7 +270,7 @@ lemma inr_comp_binaryCoproductIso_inv :
     coprod.inr ≫ (binaryCoproductIso F G).inv = (Limits.coprod.inr (X := F)) := rfl
 
 @[simp]
-lemma inr_comp_binaryCoproductIso_inv_apply (a : C) (x : G.obj a) :
+lemma inr_comp_binaryCoproductIso_inv_apply {F G : C ⥤ Type w} {a : C} (x : G.obj a) :
     (binaryCoproductIso F G).inv.app a (.inr x) = (Limits.coprod.inr (X := F)).app a x := rfl
 
 variable {F G}

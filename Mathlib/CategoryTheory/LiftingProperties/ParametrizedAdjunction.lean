@@ -12,7 +12,7 @@ public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.PullbackObjObj
 /-!
 # Lifting properties and parametrized adjunctions
 
-If we have a parametrized adjunction `adj₂ : F ⊣₂ G`,
+If we have a parametrized adjunction between `F` and `G`,
 `sq₁₂ : F.PushoutObjObj f₁ f₂` and `sq₁₃ : G.PullbackObjObj f₁ f₃`,
 we show that `sq₁₂.ι` has the left lifting property with respect to
 `f₃` if and only if `f₂` has the left lifting property with respect
@@ -158,9 +158,9 @@ noncomputable def liftStructEquiv (α : Arrow.mk sq₁₂.ι ⟶ Arrow.mk f₃) 
   left_inv _ := by aesop
   right_inv _ := by aesop
 
-include adj₂ in
-lemma hasLiftingProperty_iff :
+lemma hasLiftingProperty_iff (hadj₂ : Nonempty (F ⊣₂ G)) :
     HasLiftingProperty sq₁₂.ι f₃ ↔ HasLiftingProperty f₂ sq₁₃.π := by
+  obtain ⟨adj₂⟩ := hadj₂
   simp only [Arrow.hasLiftingProperty_iff]
   constructor
   · intro h β

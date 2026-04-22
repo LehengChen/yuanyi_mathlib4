@@ -93,25 +93,28 @@ namespace MakesOverArrow
 
 /-- "Functoriality" of `MakesOverArrow η s` in `η`. -/
 lemma map₁ {F G : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {μ : G ⟶ A} {ε : F ⟶ G}
-    (hε : ε ≫ μ = η) {X : C} {s : yoneda.obj X ⟶ A} {u : F.obj (op X)}
+    {X : C} {s : yoneda.obj X ⟶ A} {u : F.obj (op X)}
+    (hε : μ.app (op X) (ε.app (op X) u) = η.app (op X) u)
     (h : MakesOverArrow η s u) : MakesOverArrow μ s (ε.app _ u) := by
-  have := elementwise_of% NatTrans.comp_app ε μ
-  dsimp only [Types.hom_eq_coe] at this
-  exact ⟨by rw [← this, hε, h.app]⟩
+  exact ⟨by rw [hε, h.app]⟩
 
 /-- Functoriality of `MakesOverArrow η s` in `s`. -/
 lemma map₂ {F : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {X Y : C} (f : X ⟶ Y)
-    {s : yoneda.obj X ⟶ A} {t : yoneda.obj Y ⟶ A} (hst : yoneda.map f ≫ t = s)
+    {s : yoneda.obj X ⟶ A} {t : yoneda.obj Y ⟶ A}
+    (hst : A.map f.op (yonedaEquiv t) = yonedaEquiv s)
     {u : F.obj (op Y)} (h : MakesOverArrow η t u) : MakesOverArrow η s (F.map f.op u) :=
-  ⟨by simp [h.app, yonedaEquiv_naturality, hst]⟩
+  ⟨by simpa [h.app] using hst⟩
 
 lemma of_arrow {F : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {X : C} {s : yoneda.obj X ⟶ A}
-    {f : yoneda.obj X ⟶ F} (hf : f ≫ η = s) : MakesOverArrow η s (yonedaEquiv f) :=
-  ⟨hf ▸ rfl⟩
+    {f : yoneda.obj X ⟶ F} (hf : η.app (op X) (yonedaEquiv f) = yonedaEquiv s) :
+    MakesOverArrow η s (yonedaEquiv f) :=
+  ⟨hf⟩
 
 lemma of_yoneda_arrow {Y : C} {η : yoneda.obj Y ⟶ A} {X : C} {s : yoneda.obj X ⟶ A} {f : X ⟶ Y}
-    (hf : yoneda.map f ≫ η = s) : MakesOverArrow η s f := by
-  simpa only [yonedaEquiv_yoneda_map f] using of_arrow hf
+    (hf : η.app (op X) f = yonedaEquiv s) : MakesOverArrow η s f := by
+  have hf' : η.app (op X) (yonedaEquiv (yoneda.map f)) = yonedaEquiv s := by
+    simpa only [yonedaEquiv_yoneda_map f] using hf
+  simpa only [yonedaEquiv_yoneda_map f] using of_arrow (f := yoneda.map f) hf'
 
 end MakesOverArrow
 
@@ -154,7 +157,10 @@ lemma map_val {Y : C} {η : yoneda.obj Y ⟶ A} {X : C} {s : yoneda.obj X ⟶ A}
 /-- Functoriality of `OverArrows η s` in `η`. -/
 def map₁ {F G : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {μ : G ⟶ A} {X : C} {s : yoneda.obj X ⟶ A}
     (u : OverArrows η s) (ε : F ⟶ G) (hε : ε ≫ μ = η) : OverArrows μ s :=
-  ⟨ε.app _ u.val, MakesOverArrow.map₁ hε u.2⟩
+  ⟨ε.app _ u.val, MakesOverArrow.map₁ (by
+    have := elementwise_of% NatTrans.comp_app ε μ
+    dsimp only [Types.hom_eq_coe] at this
+    rw [← this, hε]) u.2⟩
 
 @[simp]
 lemma map₁_val {F G : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {μ : G ⟶ A} {X : C}
@@ -166,7 +172,7 @@ lemma map₁_val {F G : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {μ : G ⟶ A} {X : C
 def map₂ {F : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {X Y : C} {s : yoneda.obj X ⟶ A}
     {t : yoneda.obj Y ⟶ A} (u : OverArrows η t) (f : X ⟶ Y) (hst : yoneda.map f ≫ t = s) :
     OverArrows η s :=
-  ⟨F.map f.op u.val, MakesOverArrow.map₂ f hst u.2⟩
+  ⟨F.map f.op u.val, MakesOverArrow.map₂ f (by simp [yonedaEquiv_naturality, hst]) u.2⟩
 
 @[simp]
 lemma map₂_val {F : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {X Y : C} (f : X ⟶ Y)
@@ -185,7 +191,8 @@ lemma map₁_map₂ {F G : Cᵒᵖ ⥤ Type v} {η : F ⟶ A} {μ : G ⟶ A} (ε
 `f : X ⟶ Y`. -/
 def yonedaArrow {Y : C} {η : yoneda.obj Y ⟶ A} {X : C} {s : yoneda.obj X ⟶ A} (f : X ⟶ Y)
     (hf : yoneda.map f ≫ η = s) : OverArrows η s :=
-  ⟨f, .of_yoneda_arrow hf⟩
+  ⟨f, .of_yoneda_arrow (by
+    rw [← yonedaEquiv_yoneda_map f, ← yonedaEquiv_comp, hf])⟩
 
 @[simp]
 lemma yonedaArrow_val {Y : C} {η : yoneda.obj Y ⟶ A} {X : C} {s : yoneda.obj X ⟶ A} {f : X ⟶ Y}

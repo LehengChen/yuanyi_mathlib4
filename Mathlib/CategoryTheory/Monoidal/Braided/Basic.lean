@@ -371,8 +371,9 @@ class SymmetricCategory (C : Type u) [Category.{v} C] [MonoidalCategory.{v} C] e
 attribute [reassoc (attr := simp)] SymmetricCategory.symmetry
 
 lemma SymmetricCategory.braiding_swap_eq_inv_braiding {C : Type u₁}
-    [Category.{v₁} C] [MonoidalCategory C] [SymmetricCategory C] (X Y : C) :
-    (β_ Y X).hom = (β_ X Y).inv := Iso.inv_ext' (symmetry X Y)
+    [Category.{v₁} C] [MonoidalCategory C] [BraidedCategory C] (X Y : C)
+    (h : (β_ X Y).hom ≫ (β_ Y X).hom = 𝟙 (X ⊗ Y) := by simp) :
+    (β_ Y X).hom = (β_ X Y).inv := Iso.inv_ext' h
 
 variable {C : Type u₁} [Category.{v₁} C] [MonoidalCategory C] [BraidedCategory C]
 variable {D : Type u₂} [Category.{v₂} D] [MonoidalCategory D] [BraidedCategory D]
@@ -880,6 +881,7 @@ reversed braiding, upgraded to a braided functor. -/
 def SymmetricCategory.equivReverseBraiding (C : Type u₁) [Category.{v₁} C]
     [MonoidalCategory C] [SymmetricCategory C] :=
   @Functor.Braided.mk C _ _ _ C _ _ (reverseBraiding C) (𝟭 C) _ <| by
-    simp +instances [reverseBraiding, braiding_swap_eq_inv_braiding]
+    intro X Y
+    simpa [reverseBraiding] using (braiding_swap_eq_inv_braiding Y X)
 
 end CategoryTheory

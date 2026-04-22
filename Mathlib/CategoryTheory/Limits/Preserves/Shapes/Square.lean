@@ -6,6 +6,7 @@ Authors: Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Square
+public import Mathlib.CategoryTheory.Limits.Types.Pullbacks
 public import Mathlib.CategoryTheory.Limits.Yoneda
 public import Mathlib.CategoryTheory.Limits.Preserves.Ulift
 
@@ -107,8 +108,40 @@ lemma IsPullback.iff_of_equiv : sq₁.IsPullback ↔ sq₂.IsPullback := by
   · simpa [types_comp, uliftFunctor_map] using congrFun comm₂₄ _
   · simpa [types_comp, uliftFunctor_map] using congrFun comm₃₄ _
 
-lemma IsPullback.of_equiv (h₁ : sq₁.IsPullback) : sq₂.IsPullback :=
-  (iff_of_equiv sq₁ sq₂ e₁ e₂ e₃ e₄ comm₁₂ comm₁₃ comm₂₄ comm₃₄).1 h₁
+end
+
+section
+
+variable {sq₁ : Square (Type v)} {sq₂ : Square (Type u)}
+  (e₁ : sq₁.X₁ → sq₂.X₁) (e₂ : sq₁.X₂ ≃ sq₂.X₂)
+  (e₃ : sq₁.X₃ ≃ sq₂.X₃) (e₄ : sq₁.X₄ → sq₂.X₄)
+  (comm₁₂ : e₂ ∘ sq₁.f₁₂ = sq₂.f₁₂ ∘ e₁)
+  (comm₁₃ : e₃ ∘ sq₁.f₁₃ = sq₂.f₁₃ ∘ e₁)
+  (comm₂₄ : e₄ ∘ sq₁.f₂₄ = sq₂.f₂₄ ∘ e₂)
+  (comm₃₄ : e₄ ∘ sq₁.f₃₄ = sq₂.f₃₄ ∘ e₃)
+include comm₁₂ comm₁₃ comm₂₄ comm₃₄
+
+lemma IsPullback.of_equiv (h₁ : sq₁.IsPullback) (he₁ : Function.Surjective e₁)
+    (he₄ : Function.Injective e₄) : sq₂.IsPullback := by
+  rw [Square.IsPullback, Limits.Types.isPullback_iff] at h₁ ⊢
+  refine ⟨sq₂.fac, ?_, ?_⟩
+  · intro x₁ y₁ hxy
+    obtain ⟨x₁', rfl⟩ := he₁ x₁
+    obtain ⟨y₁', rfl⟩ := he₁ y₁
+    congr 1
+    exact h₁.2.1 x₁' y₁' ⟨
+      e₂.injective ((congrFun comm₁₂ x₁').trans
+        (hxy.1.trans (congrFun comm₁₂ y₁').symm)),
+      e₃.injective ((congrFun comm₁₃ x₁').trans
+        (hxy.2.trans (congrFun comm₁₃ y₁').symm))⟩
+  · intro x₂ x₃ hx
+    obtain ⟨x₂', rfl⟩ := e₂.surjective x₂
+    obtain ⟨x₃', rfl⟩ := e₃.surjective x₃
+    obtain ⟨x₁', hx₁₂, hx₁₃⟩ := h₁.2.2 x₂' x₃' <|
+      he₄ <| (congrFun comm₂₄ x₂').trans (hx.trans (congrFun comm₃₄ x₃').symm)
+    exact ⟨e₁ x₁', ⟨
+      (congrFun comm₁₂ x₁').symm.trans (congrArg e₂ hx₁₂),
+      (congrFun comm₁₃ x₁').symm.trans (congrArg e₃ hx₁₃)⟩⟩
 
 end
 

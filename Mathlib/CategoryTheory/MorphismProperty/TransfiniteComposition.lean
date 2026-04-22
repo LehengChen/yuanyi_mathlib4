@@ -241,12 +241,13 @@ namespace IsStableUnderTransfiniteCompositionOfShape.of_isStableUnderColimitsOfS
 
 variable {W J} {X Y : C} {f : X ⟶ Y} (hf : W.TransfiniteCompositionOfShape J f)
   [W.IsMultiplicative]
-  (hJ : ∀ (J : Type w) [LinearOrder J] [SuccOrder J] [OrderBot J] [WellFoundedLT J],
-    W.IsStableUnderColimitsOfShape J)
+  (hJ : W.IsStableUnderColimitsOfShape J)
+  (hJ' : ∀ ⦃j : J⦄, Order.IsSuccLimit j →
+    W.IsStableUnderColimitsOfShape (Set.Iio j))
 
 attribute [local instance] IsCofiltered.isConnected
 
-include hJ in
+include hJ' in
 lemma mem_map_bot_le {j : J} (g : ⊥ ⟶ j) : W (hf.F.map g) := by
   obtain rfl : g = homOfLE bot_le := rfl
   induction j using SuccOrder.limitRecOn with
@@ -260,15 +261,17 @@ lemma mem_map_bot_le {j : J} (g : ⊥ ⟶ j) : W (hf.F.map g) := by
     letI : OrderBot (Set.Iio j) :=
       { bot := ⟨⊥, Order.IsSuccLimit.bot_lt hj⟩
         bot_le j := bot_le }
+    letI : W.IsStableUnderColimitsOfShape (Set.Iio j) := hJ' hj
     exact MorphismProperty.colimitsOfShape_le _
       (.of_isColimit (hf.F.isColimitOfIsWellOrderContinuous j hj) (fun k ↦ hj' _ k.2))
 
 set_option backward.isDefEq.respectTransparency false in
-include hf hJ in
+include hf hJ hJ' in
 lemma mem [W.RespectsIso] : W f :=
+  letI : W.IsStableUnderColimitsOfShape J := hJ
   (MorphismProperty.arrow_mk_iso_iff _ (Arrow.isoMk hf.isoBot.symm (Iso.refl _))).2
     (MorphismProperty.colimitsOfShape_le _
-      (.of_isColimit hf.isColimit (fun j ↦ mem_map_bot_le _ hJ _)))
+      (.of_isColimit hf.isColimit (fun j ↦ mem_map_bot_le _ hJ' _)))
 
 end IsStableUnderTransfiniteCompositionOfShape.of_isStableUnderColimitsOfShape
 
@@ -276,15 +279,20 @@ variable {W J} in
 open IsStableUnderTransfiniteCompositionOfShape.of_isStableUnderColimitsOfShape in
 lemma IsStableUnderTransfiniteCompositionOfShape.of_isStableUnderColimitsOfShape
     [W.IsMultiplicative] [W.RespectsIso]
-    (hJ : ∀ (J : Type w) [LinearOrder J] [SuccOrder J] [OrderBot J] [WellFoundedLT J],
-      W.IsStableUnderColimitsOfShape J) :
+    (hJ : W.IsStableUnderColimitsOfShape J)
+    (hJ' : ∀ ⦃j : J⦄, Order.IsSuccLimit j →
+      W.IsStableUnderColimitsOfShape (Set.Iio j)) :
     W.IsStableUnderTransfiniteCompositionOfShape J where
-  le _ _ _ | ⟨hf⟩ => mem hf hJ
+  le _ _ _ | ⟨hf⟩ => mem hf hJ hJ'
 
 instance [W.IsMultiplicative] [W.RespectsIso]
     [MorphismProperty.IsStableUnderFilteredColimits.{w, w} W] :
     W.IsStableUnderTransfiniteCompositionOfShape J :=
-  .of_isStableUnderColimitsOfShape (fun _ _ _ _ _ ↦ by infer_instance)
+  .of_isStableUnderColimitsOfShape (by infer_instance) (fun j hj ↦ by
+    letI : OrderBot (Set.Iio j) :=
+      { bot := ⟨⊥, Order.IsSuccLimit.bot_lt hj⟩
+        bot_le j := bot_le }
+    infer_instance)
 
 end
 

@@ -121,23 +121,22 @@ instance (priority := 100) isIdempotentComplete_of_abelian (D : Type*) [Category
 
 variable {C}
 
-theorem split_imp_of_iso {X X' : C} (φ : X ≅ X') (p : X ⟶ X) (p' : X' ⟶ X')
-    (hpp' : p ≫ φ.hom = φ.hom ≫ p')
+theorem split_imp_of_iso {X X' : C} (φ : X ≅ X') (p : X ⟶ X)
     (h : ∃ (Y : C) (i : Y ⟶ X) (e : X ⟶ Y), i ≫ e = 𝟙 Y ∧ e ≫ i = p) :
-    ∃ (Y' : C) (i' : Y' ⟶ X') (e' : X' ⟶ Y'), i' ≫ e' = 𝟙 Y' ∧ e' ≫ i' = p' := by
+    ∃ (Y' : C) (i' : Y' ⟶ X') (e' : X' ⟶ Y'),
+      i' ≫ e' = 𝟙 Y' ∧ e' ≫ i' = φ.inv ≫ p ≫ φ.hom := by
   rcases h with ⟨Y, i, e, ⟨h₁, h₂⟩⟩
   use Y, i ≫ φ.hom, φ.inv ≫ e
   grind
 
-theorem split_iff_of_iso {X X' : C} (φ : X ≅ X') (p : X ⟶ X) (p' : X' ⟶ X')
-    (hpp' : p ≫ φ.hom = φ.hom ≫ p') :
+theorem split_iff_of_iso {X X' : C} (φ : X ≅ X') (p : X ⟶ X) :
     (∃ (Y : C) (i : Y ⟶ X) (e : X ⟶ Y), i ≫ e = 𝟙 Y ∧ e ≫ i = p) ↔
-      ∃ (Y' : C) (i' : Y' ⟶ X') (e' : X' ⟶ Y'), i' ≫ e' = 𝟙 Y' ∧ e' ≫ i' = p' := by
+      ∃ (Y' : C) (i' : Y' ⟶ X') (e' : X' ⟶ Y'),
+        i' ≫ e' = 𝟙 Y' ∧ e' ≫ i' = φ.inv ≫ p ≫ φ.hom := by
   constructor
-  · exact split_imp_of_iso φ p p' hpp'
-  · apply split_imp_of_iso φ.symm p' p
-    rw [← comp_id p, ← φ.hom_inv_id]
-    slice_rhs 2 3 => rw [hpp']
+  · exact split_imp_of_iso φ p
+  · intro h
+    convert split_imp_of_iso φ.symm (φ.inv ≫ p ≫ φ.hom) h using 1
     simp
 
 set_option backward.isDefEq.respectTransparency false in
@@ -146,10 +145,7 @@ theorem Equivalence.isIdempotentComplete {D : Type*} [Category* D] (ε : C ≌ D
   refine ⟨?_⟩
   intro X' p hp
   let φ := ε.counitIso.symm.app X'
-  erw [split_iff_of_iso φ p (φ.inv ≫ p ≫ φ.hom)
-      (by
-        slice_rhs 1 2 => rw [φ.hom_inv_id]
-        rw [id_comp])]
+  erw [split_iff_of_iso φ p]
   rcases IsIdempotentComplete.idempotents_split (ε.inverse.obj X') (ε.inverse.map p)
       (by rw [← ε.inverse.map_comp, hp]) with
     ⟨Y, i, e, ⟨h₁, h₂⟩⟩

@@ -52,21 +52,26 @@ noncomputable def shrinkYonedaMonObjObjEquiv {M : Mon C} {Y : Cᵒᵖ} :
 
 set_option backward.isDefEq.respectTransparency false in
 lemma shrinkYonedaMon_obj_map_shrinkYonedaMonObjObjEquiv_symm
-    {M : Mon C} {Y Y' : Cᵒᵖ} (g : Y ⟶ Y') (f : Y.unop ⟶ M.X) :
-    (shrinkYonedaMon.{w}.obj _).map g (shrinkYonedaMonObjObjEquiv.symm f) =
-      shrinkYonedaMonObjObjEquiv.symm (g.unop ≫ f) := by
+    {M : C} [MonObj M] {Y Y' : Cᵒᵖ} (g : Y ⟶ Y') (f : Y.unop ⟶ M) :
+    (shrinkYonedaMon.{w}.obj (Mon.mk M)).map g
+        ((shrinkYonedaMonObjObjEquiv (M := Mon.mk M)).symm f) =
+      (shrinkYonedaMonObjObjEquiv (M := Mon.mk M)).symm (g.unop ≫ f) := by
   simp [shrinkYonedaMon, shrinkYonedaMonObjObjEquiv]
 
-lemma shrinkYonedaMonObjObjEquiv_symm_comp {M : Mon C} {Y Y' : C} (g : Y' ⟶ Y) (f : Y ⟶ M.X) :
-    shrinkYonedaMonObjObjEquiv.symm (g ≫ f) =
-    (shrinkYonedaMon.obj _).map g.op (shrinkYonedaMonObjObjEquiv.symm f) :=
+lemma shrinkYonedaMonObjObjEquiv_symm_comp {M : C} [MonObj M] {Y Y' : C} (g : Y' ⟶ Y)
+    (f : Y ⟶ M) :
+    (shrinkYonedaMonObjObjEquiv (M := Mon.mk M)).symm (g ≫ f) =
+    (shrinkYonedaMon.obj (Mon.mk M)).map g.op
+      ((shrinkYonedaMonObjObjEquiv (M := Mon.mk M)).symm f) :=
   (shrinkYonedaMon_obj_map_shrinkYonedaMonObjObjEquiv_symm g.op f).symm
 
 set_option backward.isDefEq.respectTransparency false in
 lemma shrinkYonedaMon_map_app_shrinkYonedaObjObjEquiv_symm
-    {M M' : Mon C} {Y : Cᵒᵖ} (f : Y.unop ⟶ M.X) (g : M ⟶ M') :
-    (shrinkYonedaMon.map g).app _ (shrinkYonedaMonObjObjEquiv.symm f) =
-      shrinkYonedaMonObjObjEquiv.symm (f ≫ g.hom) := by
+    {M M' : C} [MonObj M] [MonObj M'] {Y : Cᵒᵖ} (f : Y.unop ⟶ M) (g : M ⟶ M')
+    [IsMonHom g] :
+    (shrinkYonedaMon.map (Mon.Hom.mk g)).app _
+        ((shrinkYonedaMonObjObjEquiv (M := Mon.mk M)).symm f) =
+      (shrinkYonedaMonObjObjEquiv (M := Mon.mk M')).symm (f ≫ g) := by
   simp [shrinkYonedaMon, shrinkYonedaMonObjObjEquiv]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -84,21 +89,26 @@ noncomputable def shrinkYonedaGrpObjObjEquiv {M : Grp C} {Y : Cᵒᵖ} :
 
 set_option backward.isDefEq.respectTransparency false in
 lemma shrinkYonedaGrp_obj_map_shrinkYonedaGrpObjObjEquiv_symm
-    {M : Grp C} {Y Y' : Cᵒᵖ} (g : Y ⟶ Y') (f : Y.unop ⟶ M.X) :
-    (shrinkYonedaGrp.{w}.obj _).map g (shrinkYonedaGrpObjObjEquiv.symm f) =
-      shrinkYonedaGrpObjObjEquiv.symm (g.unop ≫ f) := by
+    {M : C} [GrpObj M] {Y Y' : Cᵒᵖ} (g : Y ⟶ Y') (f : Y.unop ⟶ M) :
+    (shrinkYonedaGrp.{w}.obj (Grp.mk M)).map g
+        ((shrinkYonedaGrpObjObjEquiv (M := Grp.mk M)).symm f) =
+      (shrinkYonedaGrpObjObjEquiv (M := Grp.mk M)).symm (g.unop ≫ f) := by
   simp [shrinkYonedaGrp, shrinkYonedaGrpObjObjEquiv]
 
-lemma shrinkYonedaGrpObjObjEquiv_symm_comp {M : Grp C} {Y Y' : C} (g : Y' ⟶ Y) (f : Y ⟶ M.X) :
-    shrinkYonedaGrpObjObjEquiv.symm (g ≫ f) =
-    (shrinkYonedaGrp.obj _).map g.op (shrinkYonedaGrpObjObjEquiv.symm f) :=
+lemma shrinkYonedaGrpObjObjEquiv_symm_comp {M : C} [GrpObj M] {Y Y' : C} (g : Y' ⟶ Y)
+    (f : Y ⟶ M) :
+    (shrinkYonedaGrpObjObjEquiv (M := Grp.mk M)).symm (g ≫ f) =
+    (shrinkYonedaGrp.obj (Grp.mk M)).map g.op
+      ((shrinkYonedaGrpObjObjEquiv (M := Grp.mk M)).symm f) :=
   (shrinkYonedaGrp_obj_map_shrinkYonedaGrpObjObjEquiv_symm g.op f).symm
 
 set_option backward.isDefEq.respectTransparency false in
 lemma shrinkYonedaGrp_map_app_shrinkYonedaObjObjEquiv_symm
-    {M M' : Grp C} {Y : Cᵒᵖ} (f : Y.unop ⟶ M.X) (g : M ⟶ M') :
-    (shrinkYonedaGrp.map g).app _ (shrinkYonedaGrpObjObjEquiv.symm f) =
-      shrinkYonedaGrpObjObjEquiv.symm (f ≫ g.hom.hom) := by
+    {M M' : C} [GrpObj M] [GrpObj M'] {Y : Cᵒᵖ} (f : Y.unop ⟶ M) (g : M ⟶ M')
+    [IsMonHom g] :
+    (shrinkYonedaGrp.map (Grp.homMk g)).app _
+        ((shrinkYonedaGrpObjObjEquiv (M := Grp.mk M)).symm f) =
+      (shrinkYonedaGrpObjObjEquiv (M := Grp.mk M')).symm (f ≫ g) := by
   simp [shrinkYonedaGrp, shrinkYonedaGrpObjObjEquiv]
 
 end CategoryTheory

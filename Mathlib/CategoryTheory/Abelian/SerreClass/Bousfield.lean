@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Abelian.SerreClass.MorphismProperty
 public import Mathlib.CategoryTheory.Localization.Bousfield
+public import Mathlib.CategoryTheory.Preadditive.LeftExact
 
 /-!
 # Bousfield localizations with respect to Serre classes
@@ -28,9 +29,14 @@ namespace CategoryTheory
 
 open Localization Limits MorphismProperty
 
+attribute [local instance] Functor.PreservesHomology.preservesKernel
+attribute [local instance] Functor.PreservesHomology.preservesCokernel
+attribute [local instance] Functor.preservesFiniteLimits_of_preservesKernels
+attribute [local instance] Functor.preservesFiniteColimits_of_preservesCokernels
+
 variable {C D : Type*} [Category* C] [Category* D]
   [Abelian C] [Abelian D] (G : D ⥤ C)
-  [PreservesFiniteLimits G] [PreservesFiniteColimits G]
+  [G.PreservesZeroMorphisms] [G.PreservesHomology]
 
 namespace Abelian
 

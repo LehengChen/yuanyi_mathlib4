@@ -488,25 +488,31 @@ theorem inv_tensor {W X Y Z : C} (f : W ⟶ X) [IsIso f] (g : Y ⟶ Z) [IsIso g]
     inv (f ⊗ₘ g) = inv f ⊗ₘ inv g := by
   simp [tensorHom_def, whisker_exchange]
 
-variable {W X Y Z : C}
+section StructOnly
+
+variable {D : Type u} [Category.{v} D] [MonoidalCategoryStruct D]
 
 theorem whiskerLeft_dite {P : Prop} [Decidable P]
-    (X : C) {Y Z : C} (f : P → (Y ⟶ Z)) (f' : ¬P → (Y ⟶ Z)) :
+    (X : D) {Y Z : D} (f : P → (Y ⟶ Z)) (f' : ¬P → (Y ⟶ Z)) :
       X ◁ (if h : P then f h else f' h) = if h : P then X ◁ f h else X ◁ f' h := by
   split_ifs <;> rfl
 
 theorem dite_whiskerRight {P : Prop} [Decidable P]
-    {X Y : C} (f : P → (X ⟶ Y)) (f' : ¬P → (X ⟶ Y)) (Z : C) :
+    {X Y : D} (f : P → (X ⟶ Y)) (f' : ¬P → (X ⟶ Y)) (Z : D) :
       (if h : P then f h else f' h) ▷ Z = if h : P then f h ▷ Z else f' h ▷ Z := by
   split_ifs <;> rfl
 
-theorem tensor_dite {P : Prop} [Decidable P] {W X Y Z : C} (f : W ⟶ X) (g : P → (Y ⟶ Z))
+theorem tensor_dite {P : Prop} [Decidable P] {W X Y Z : D} (f : W ⟶ X) (g : P → (Y ⟶ Z))
     (g' : ¬P → (Y ⟶ Z)) : (f ⊗ₘ if h : P then g h else g' h) =
     if h : P then f ⊗ₘ g h else f ⊗ₘ g' h := by split_ifs <;> rfl
 
-theorem dite_tensor {P : Prop} [Decidable P] {W X Y Z : C} (f : W ⟶ X) (g : P → (Y ⟶ Z))
+theorem dite_tensor {P : Prop} [Decidable P] {W X Y Z : D} (f : W ⟶ X) (g : P → (Y ⟶ Z))
     (g' : ¬P → (Y ⟶ Z)) : (if h : P then g h else g' h) ⊗ₘ f =
     if h : P then g h ⊗ₘ f else g' h ⊗ₘ f := by split_ifs <;> rfl
+
+end StructOnly
+
+variable {W X Y Z : C}
 
 @[simp]
 theorem whiskerLeft_eqToHom (X : C) {Y Z : C} (f : Y = Z) :

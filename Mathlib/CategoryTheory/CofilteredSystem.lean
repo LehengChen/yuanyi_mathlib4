@@ -281,35 +281,40 @@ theorem toEventualRanges_nonempty (h : F.IsMittagLeffler) [∀ j : J, Nonempty (
   rw [toEventualRanges_obj, h]
   infer_instance
 
-/-- If `F` has all arrows surjective, then it "factors through a poset". -/
-theorem thin_diagram_of_surjective (Fsur : ∀ ⦃i j : J⦄ (f : i ⟶ j), (F.map f).Surjective) {i j}
-    (f g : i ⟶ j) : F.map f = F.map g :=
+/-- If `F` has all arrows into `i` surjective, then parallel arrows out of `i` have the same
+image under `F`. -/
+theorem thin_diagram_of_surjective {i j}
+    (Fsur : ∀ ⦃k : J⦄ (f : k ⟶ i), (F.map f).Surjective) (f g : i ⟶ j) :
+    F.map f = F.map g :=
   let ⟨k, φ, hφ⟩ := IsCofilteredOrEmpty.cone_maps f g
   (Fsur φ).injective_comp_right <| by simp_rw [← types_comp, ← F.map_comp, hφ]
 
-theorem toPreimages_nonempty_of_surjective [hFn : ∀ j : J, Nonempty (F.obj j)]
+theorem toPreimages_nonempty_of_surjective
     (Fsur : ∀ ⦃i j : J⦄ (f : i ⟶ j), (F.map f).Surjective) (hs : s.Nonempty) (j) :
     Nonempty ((F.toPreimages s).obj j) := by
   simp only [toPreimages_obj, nonempty_coe_sort, nonempty_iInter, mem_preimage]
-  obtain h | ⟨⟨ji⟩⟩ := isEmpty_or_nonempty (j ⟶ i)
-  · exact ⟨(hFn j).some, fun ji => h.elim ji⟩
-  · obtain ⟨y, ys⟩ := hs
-    obtain ⟨x, rfl⟩ := Fsur ji y
-    exact ⟨x, fun ji' => (F.thin_diagram_of_surjective Fsur ji' ji).symm ▸ ys⟩
+  obtain ⟨x, hx⟩ := hs
+  obtain ⟨k, ki, kj, -⟩ := IsCofilteredOrEmpty.cone_objs i j
+  obtain ⟨y, hy⟩ := Fsur ki x
+  refine ⟨F.map kj y, fun ji => ?_⟩
+  rw [← map_comp_apply,
+    F.thin_diagram_of_surjective (i := k) (j := i) (fun ⦃l⦄ (f : l ⟶ k) => Fsur f)
+      (kj ≫ ji) ki, hy]
+  exact hx
 
-theorem eval_section_injective_of_eventually_injective {j}
-    (Finj : ∀ (i) (f : i ⟶ j), (F.map f).Injective) (i) (f : i ⟶ j) :
+theorem eval_section_injective_of_eventually_injective {i j} (f : i ⟶ j)
+    (Finj : ∀ ⦃k : J⦄ (g : k ⟶ i), (F.map (g ≫ f)).Injective) :
     (fun s : F.sections => s.val j).Injective := by
   refine fun s₀ s₁ h => Subtype.ext <| funext fun k => ?_
   obtain ⟨m, mi, mk, _⟩ := IsCofilteredOrEmpty.cone_objs i k
   dsimp at h
   rw [← s₀.prop (mi ≫ f), ← s₁.prop (mi ≫ f)] at h
   rw [← s₀.prop mk, ← s₁.prop mk]
-  exact congr_arg _ (Finj m (mi ≫ f) h)
+  exact congr_arg _ (Finj mi h)
 
 section FiniteCofilteredSystem
 
-variable [∀ j : J, Nonempty (F.obj j)] [∀ j : J, Finite (F.obj j)]
+variable [∀ j : J, Finite (F.obj j)]
   (Fsur : ∀ ⦃i j : J⦄ (f : i ⟶ j), (F.map f).Surjective)
 include Fsur
 

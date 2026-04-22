@@ -217,8 +217,11 @@ lemma card_fiber_eq_of_iso {X Y : C} (i : X ≅ Y) : Nat.card (F.obj X) = Nat.ca
 
 variable [PreGaloisCategory C] [FiberFunctor F]
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- An object is initial if and only if its fiber is empty. -/
-lemma initial_iff_fiber_empty (X : C) : Nonempty (IsInitial X) ↔ IsEmpty (F.obj X) := by
+lemma initial_iff_fiber_empty [PreservesColimitsOfShape (Discrete PEmpty.{1}) F]
+    [ReflectsColimitsOfShape (Discrete PEmpty.{1}) F] (X : C) :
+    Nonempty (IsInitial X) ↔ IsEmpty (F.obj X) := by
   rw [(IsInitial.isInitialIffObj F X).nonempty_congr]
   haveI : PreservesFiniteColimits (forget FintypeCat) := by
     change PreservesFiniteColimits FintypeCat.incl
@@ -228,14 +231,20 @@ lemma initial_iff_fiber_empty (X : C) : Nonempty (IsInitial X) ↔ IsEmpty (F.ob
     infer_instance
   exact Concrete.initial_iff_empty_of_preserves_of_reflects (F.obj X)
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- An object is not initial if and only if its fiber is nonempty. -/
-lemma not_initial_iff_fiber_nonempty (X : C) : (IsInitial X → False) ↔ Nonempty (F.obj X) := by
+lemma not_initial_iff_fiber_nonempty [PreservesColimitsOfShape (Discrete PEmpty.{1}) F]
+    [ReflectsColimitsOfShape (Discrete PEmpty.{1}) F] (X : C) :
+    (IsInitial X → False) ↔ Nonempty (F.obj X) := by
   rw [← not_isEmpty_iff]
   refine ⟨fun h he ↦ ?_, fun h hin ↦ h <| (initial_iff_fiber_empty F X).mp ⟨hin⟩⟩
   exact Nonempty.elim ((initial_iff_fiber_empty F X).mpr he) h
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- An object whose fiber is inhabited is not initial. -/
-lemma not_initial_of_inhabited {X : C} (x : F.obj X) (h : IsInitial X) : False :=
+lemma not_initial_of_inhabited [PreservesColimitsOfShape (Discrete PEmpty.{1}) F]
+    [ReflectsColimitsOfShape (Discrete PEmpty.{1}) F] {X : C} (x : F.obj X)
+    (h : IsInitial X) : False :=
   ((initial_iff_fiber_empty F X).mp ⟨h⟩).false x
 
 /-- The fiber of a connected object is nonempty. -/
@@ -331,8 +340,10 @@ lemma epi_of_nonempty_of_isConnected {X A : C} [IsConnected A] [h : Nonempty (F.
   apply evaluation_injective_of_isConnected F A Z (F.map f (Classical.arbitrary _))
   simpa using ConcreteCategory.congr_hom (F.congr_map huv) _
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- An epimorphism induces a surjective map on fibers. -/
-lemma surjective_on_fiber_of_epi {X Y : C} (f : X ⟶ Y) [Epi f] : Function.Surjective (F.map f) :=
+lemma surjective_on_fiber_of_epi [F.PreservesEpimorphisms] {X Y : C} (f : X ⟶ Y) [Epi f] :
+    Function.Surjective (F.map f) :=
   surjective_of_epi (FintypeCat.incl.map (F.map f))
 
 /- A morphism from an object with non-empty fiber to a connected object is surjective on fibers. -/
@@ -356,8 +367,10 @@ section CardFiber
 open ConcreteCategory
 
 attribute [local instance] FintypeCat.fintype in
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- A mono between objects with equally sized fibers is an iso. -/
-lemma isIso_of_mono_of_eq_card_fiber {X Y : C} (f : X ⟶ Y) [Mono f]
+lemma isIso_of_mono_of_eq_card_fiber [PreservesLimitsOfShape WalkingCospan F]
+    [F.ReflectsIsomorphisms] {X Y : C} (f : X ⟶ Y) [Mono f]
     (h : Nat.card (F.obj X) = Nat.card (F.obj Y)) : IsIso f := by
   have : IsIso (F.map f) := by
     apply (ConcreteCategory.isIso_iff_bijective (F.map f)).mpr
@@ -366,8 +379,10 @@ lemma isIso_of_mono_of_eq_card_fiber {X Y : C} (f : X ⟶ Y) [Mono f]
     simp only [← Nat.card_eq_fintype_card, h]
   exact isIso_of_reflects_iso f F
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- Along a mono that is not an iso, the cardinality of the fiber strictly increases. -/
-lemma lt_card_fiber_of_mono_of_notIso {X Y : C} (f : X ⟶ Y) [Mono f]
+lemma lt_card_fiber_of_mono_of_notIso [PreservesLimitsOfShape WalkingCospan F]
+    [F.ReflectsIsomorphisms] {X Y : C} (f : X ⟶ Y) [Mono f]
     (h : ¬ IsIso f) : Nat.card (F.obj X) < Nat.card (F.obj Y) := by
   by_contra hlt
   apply h
@@ -376,16 +391,20 @@ lemma lt_card_fiber_of_mono_of_notIso {X Y : C} (f : X ⟶ Y) [Mono f]
   exact Nat.le_antisymm
     (Nat.card_le_card_of_injective (F.map f) (injective_of_mono_of_preservesPullback (F.map f))) hlt
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- The cardinality of the fiber of a not-initial object is non-zero. -/
-lemma non_zero_card_fiber_of_not_initial (X : C) (h : IsInitial X → False) :
+lemma non_zero_card_fiber_of_not_initial [PreservesColimitsOfShape (Discrete PEmpty.{1}) F]
+    [ReflectsColimitsOfShape (Discrete PEmpty.{1}) F] (X : C) (h : IsInitial X → False) :
     Nat.card (F.obj X) ≠ 0 := by
   intro hzero
   refine Nonempty.elim ?_ h
   rw [initial_iff_fiber_empty F]
   exact Finite.card_eq_zero_iff.mp hzero
 
+omit [PreGaloisCategory C] [FiberFunctor F] in
 /-- The cardinality of the fiber of a coproduct is the sum of the cardinalities of the fibers. -/
-lemma card_fiber_coprod_eq_sum (X Y : C) :
+lemma card_fiber_coprod_eq_sum (X Y : C) [HasBinaryCoproduct X Y]
+    [PreservesColimit (pair X Y) F] :
     Nat.card (F.obj (X ⨿ Y)) = Nat.card (F.obj X) + Nat.card (F.obj Y) := by
   let e : F.obj (X ⨿ Y) ≃ F.obj X ⊕ F.obj Y := Iso.toEquiv
     <| (PreservesColimitPair.iso (F ⋙ FintypeCat.incl) X Y).symm.trans

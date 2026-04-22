@@ -160,10 +160,12 @@ lemma factorization_prodComparison_colim :
     externalProductBifunctorCurried, externalProduct]
   cat_disch
 
-variable [IsSifted C]
+section
+
+variable [IsSiftedOrEmpty C]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- If `C` is sifted, the canonical product comparison map for the `colim` functor
+/-- If `C` is sifted or empty, the canonical product comparison map for the `colim` functor
 `(C ⥤ Type) ⥤ Type` is an isomorphism. -/
 instance : IsIso (CartesianMonoidalCategory.prodComparison colim X Y) := by
   rw [← factorization_prodComparison_colim]
@@ -173,14 +175,20 @@ instance colim_preservesLimits_pair_of_sSifted {X Y : C ⥤ Type u} :
     PreservesLimit (pair X Y) colim :=
   preservesLimit_pair_of_isIso_prodComparison _ _ _
 
-/-- Sifted colimits commute with binary products -/
+/-- Sifted-or-empty colimits commute with binary products -/
 instance colim_preservesBinaryProducts_of_isSifted :
     PreservesLimitsOfShape (Discrete WalkingPair) (colim : (C ⥤ _) ⥤ Type u) := by
   constructor
   intro F
   apply preservesLimit_of_iso_diagram colim (diagramIsoPair F).symm
 
-/-- If `C` is sifted, the `colimit` functor `(C ⥤ Type) ⥤ Type` preserves terminal objects -/
+end
+
+section
+
+variable [IsConnected C]
+
+/-- If `C` is connected, the `colimit` functor `(C ⥤ Type) ⥤ Type` preserves terminal objects -/
 instance colim_preservesTerminal_of_isSifted :
     PreservesLimit (Functor.empty.{0} (C ⥤ Type u)) colim := by
   apply preservesTerminal_of_iso
@@ -195,10 +203,18 @@ instance colim_preservesLimitsOfShape_pempty_of_isSifted :
     PreservesLimitsOfShape (Discrete PEmpty.{1}) (colim : (C ⥤ _) ⥤ Type u) :=
   preservesLimitsOfShape_pempty_of_preservesTerminal _
 
+end
+
+section
+
+variable [IsSifted C]
+
 /-- If `C` is sifted, the `colim` functor `(C ⥤ Type) ⥤ Type` preserves finite products. -/
 instance colim_preservesFiniteProducts_of_isSifted :
     PreservesFiniteProducts (colim : (C ⥤ _) ⥤ Type u) :=
   PreservesFiniteProducts.of_preserves_binary_and_terminal colim
+
+end
 
 end
 
@@ -243,11 +259,13 @@ lemma nonempty_of_colim_preservesLimitsOfShapeFinZero
     intro _
     exact isLimitChangeEmptyCone _ Types.isTerminalPUnit _ <| Iso.refl _
 
-/-- If the `colim` functor `(C ⥤ Type) ⥤ Type` preserves finite products, then `C` is sifted. -/
+/-- If the `colim` functor `(C ⥤ Type) ⥤ Type` preserves binary products and the empty product,
+then `C` is sifted. -/
 theorem of_colim_preservesFiniteProducts
-    [h : PreservesFiniteProducts (colim : (C ⥤ Type u) ⥤ Type u)] :
+    [PreservesLimitsOfShape (Discrete WalkingPair) (colim : (C ⥤ Type u) ⥤ Type u)]
+    [PreservesLimitsOfShape (Discrete (Fin 0)) (colim : (C ⥤ Type u) ⥤ Type u)] :
     IsSifted C := by
-  have := isSiftedOrEmpty_of_colim_preservesFiniteProducts C
+  have := isSiftedOrEmpty_of_colim_preservesBinaryProducts C
   have := nonempty_of_colim_preservesLimitsOfShapeFinZero C
   constructor
 

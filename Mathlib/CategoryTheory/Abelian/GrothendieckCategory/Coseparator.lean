@@ -18,7 +18,9 @@ universe w v u
 
 namespace CategoryTheory.IsGrothendieckAbelian
 
-variable {C : Type u} [Category.{v} C] [Abelian C] [IsGrothendieckAbelian.{w} C]
+variable {C : Type u} [Category.{v} C] [LocallySmall.{w} C]
+  [Abelian (ShrinkHoms C)] [Limits.HasLimits (ShrinkHoms C)]
+  [EnoughInjectives (ShrinkHoms C)] [HasSeparator (ShrinkHoms C)]
 
 instance : HasCoseparator C := by
   suffices HasCoseparator (ShrinkHoms C) from

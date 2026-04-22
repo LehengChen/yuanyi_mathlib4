@@ -47,7 +47,9 @@ def cartesianComon : C ⥤ Comon C where
 
 variable {C}
 
-@[simp] theorem counit_eq_toUnit (A : C) [ComonObj A] : ε[A] = toUnit _ := by ext
+omit [CartesianMonoidalCategory C] in
+@[simp] theorem counit_eq_toUnit (A : C) [SemiCartesianMonoidalCategory C] [ComonObj A] :
+    ε[A] = toUnit _ := by ext
 
 @[simp] theorem comul_eq_lift (A : C) [ComonObj A] : Δ[A] = lift (𝟙 _) (𝟙 _) := by
   ext

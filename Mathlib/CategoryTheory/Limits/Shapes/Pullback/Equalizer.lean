@@ -53,18 +53,31 @@ lemma isPushout_coequalizer_coprod [HasCoequalizer f g] [HasBinaryCoproduct X X]
 
 section
 
-variable [HasEqualizers C] [HasPullbacks C] {X Y S T : C}
+variable {X Y S T : C}
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The natural isomorphism `eq(f ×[S] T, g ×[S] T) ≅ eq(f, g) ×[S] T`. -/
 noncomputable def equalizerPullbackMapIso {f g : X ⟶ Y} {s : X ⟶ S} {t : Y ⟶ S}
-    (hf : f ≫ t = s) (hg : g ≫ t = s) (v : T ⟶ S) :
+    (hf : f ≫ t = s) (hg : g ≫ t = s) (v : T ⟶ S)
+    [HasPullback s v] [HasPullback t v] [HasEqualizer f g]
+    [HasPullback (equalizer.ι f g) (pullback.fst s v)]
+    [HasEqualizer
+      (pullback.map s v t v f (𝟙 T) (𝟙 S) (show s ≫ 𝟙 S = f ≫ t from by simp [hf])
+        (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp))
+      (pullback.map s v t v g (𝟙 T) (𝟙 S) (show s ≫ 𝟙 S = g ≫ t from by simp [hg])
+        (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp))] :
     equalizer
-      (pullback.map s v t v f (𝟙 T) (𝟙 S) (by simp [hf]) (by simp))
-      (pullback.map s v t v g (𝟙 T) (𝟙 S) (by simp [hg]) (by simp)) ≅
+      (pullback.map s v t v f (𝟙 T) (𝟙 S) (show s ≫ 𝟙 S = f ≫ t from by simp [hf])
+        (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp))
+      (pullback.map s v t v g (𝟙 T) (𝟙 S) (show s ≫ 𝟙 S = g ≫ t from by simp [hg])
+        (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp)) ≅
     pullback (equalizer.ι f g) (pullback.fst s v) :=
-  letI lhs := pullback.map s v t v f (𝟙 T) (𝟙 S) (by simp [hf]) (by simp)
-  letI rhs := pullback.map s v t v g (𝟙 T) (𝟙 S) (by simp [hg]) (by simp)
+  letI lhs := pullback.map s v t v f (𝟙 T) (𝟙 S)
+    (show s ≫ 𝟙 S = f ≫ t from by simp [hf])
+    (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp)
+  letI rhs := pullback.map s v t v g (𝟙 T) (𝟙 S)
+    (show s ≫ 𝟙 S = g ≫ t from by simp [hg])
+    (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp)
   haveI hl : pullback.fst s v ≫ f = lhs ≫ pullback.fst _ _ := by simp [lhs]
   haveI hr : pullback.fst s v ≫ g = rhs ≫ pullback.fst _ _ := by simp [rhs]
   letI e : equalizer lhs rhs ≅ pullback (equalizer.ι f g) (pullback.fst s v) :=
@@ -83,6 +96,13 @@ noncomputable def equalizerPullbackMapIso {f g : X ⟶ Y} {s : X ⟶ S} {t : Y �
   e
 
 variable {f g : X ⟶ Y} {s : X ⟶ S} {t : Y ⟶ S} (hf : f ≫ t = s) (hg : g ≫ t = s) (v : T ⟶ S)
+variable [HasPullback s v] [HasPullback t v] [HasEqualizer f g]
+variable [HasPullback (equalizer.ι f g) (pullback.fst s v)]
+variable [HasEqualizer
+  (pullback.map s v t v f (𝟙 T) (𝟙 S) (show s ≫ 𝟙 S = f ≫ t from by simp [hf])
+    (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp))
+  (pullback.map s v t v g (𝟙 T) (𝟙 S) (show s ≫ 𝟙 S = g ≫ t from by simp [hg])
+    (show v ≫ 𝟙 S = 𝟙 T ≫ v from by simp))]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]

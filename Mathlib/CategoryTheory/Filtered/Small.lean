@@ -40,6 +40,9 @@ inductive filteredClosure : ObjectProperty C
   | coeq : {j j' : C} → filteredClosure j → filteredClosure j' → (f f' : j ⟶ j') →
       filteredClosure (coeq f f')
 
+instance [Nonempty α] : (filteredClosure f).Nonempty :=
+  ObjectProperty.nonempty_of_prop (filteredClosure.base (Classical.arbitrary α))
+
 /-- The full subcategory induced by the filtered closure of a family of objects is filtered. -/
 instance : IsFilteredOrEmpty (filteredClosure f).FullSubcategory where
   cocone_objs j j' :=
@@ -183,9 +186,12 @@ noncomputable def factoringCompInclusion : factoring F ⋙ inclusion F ≅ F :=
 instance : IsFilteredOrEmpty (SmallFilteredIntermediate F) :=
   IsFilteredOrEmpty.of_equivalence (equivSmallModel _)
 
-instance [Nonempty D] : IsFiltered (SmallFilteredIntermediate F) :=
+instance instOfNonempty [(filteredClosure F.obj).Nonempty] :
+    IsFiltered (SmallFilteredIntermediate F) :=
   { (inferInstance : IsFilteredOrEmpty _) with
-    nonempty := Nonempty.map (factoring F).obj inferInstance }
+    nonempty :=
+      Nonempty.map (equivSmallModel (filteredClosure F.obj).FullSubcategory).functor.obj
+        (inferInstance : Nonempty (filteredClosure F.obj).FullSubcategory) }
 
 end SmallFilteredIntermediate
 
@@ -206,6 +212,9 @@ inductive cofilteredClosure : ObjectProperty C
   | min : {j j' : C} → cofilteredClosure j → cofilteredClosure j' → cofilteredClosure (min j j')
   | eq : {j j' : C} → cofilteredClosure j → cofilteredClosure j' → (f f' : j ⟶ j') →
       cofilteredClosure (eq f f')
+
+instance [Nonempty α] : (cofilteredClosure f).Nonempty :=
+  ObjectProperty.nonempty_of_prop (cofilteredClosure.base (Classical.arbitrary α))
 
 /-- The full subcategory induced by the cofiltered closure of a family is cofiltered. -/
 instance : IsCofilteredOrEmpty (cofilteredClosure f).FullSubcategory where
@@ -336,9 +345,12 @@ noncomputable def factoringCompInclusion : factoring F ⋙ inclusion F ≅ F :=
 instance : IsCofilteredOrEmpty (SmallCofilteredIntermediate F) :=
   IsCofilteredOrEmpty.of_equivalence (equivSmallModel _)
 
-instance [Nonempty D] : IsCofiltered (SmallCofilteredIntermediate F) :=
+instance instOfNonempty [(cofilteredClosure F.obj).Nonempty] :
+    IsCofiltered (SmallCofilteredIntermediate F) :=
   { (inferInstance : IsCofilteredOrEmpty _) with
-    nonempty := Nonempty.map (factoring F).obj inferInstance }
+    nonempty :=
+      Nonempty.map (equivSmallModel (cofilteredClosure F.obj).FullSubcategory).functor.obj
+        (inferInstance : Nonempty (cofilteredClosure F.obj).FullSubcategory) }
 
 end SmallCofilteredIntermediate
 
