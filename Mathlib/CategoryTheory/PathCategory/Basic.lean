@@ -176,15 +176,28 @@ theorem ext_functor {C} [Category* C] {F G : Paths V ⥤ C} (h_obj : F.obj = G.o
     (h : ∀ (a b : V) (e : a ⟶ b), F.map e.toPath =
         eqToHom (congr_fun h_obj a) ≫ G.map e.toPath ≫ eqToHom (congr_fun h_obj.symm b)) :
     F = G := by
-  fapply Functor.ext
-  · intro X
-    rw [h_obj]
-  · intro X Y f
-    induction f with
-    | nil => erw [F.map_id, G.map_id, Category.id_comp, eqToHom_trans, eqToHom_refl]
-    | cons g e ih =>
-      erw [F.map_comp g (Quiver.Hom.toPath e), G.map_comp g (Quiver.Hom.toPath e), ih, h]
-      simp only [Category.id_comp, eqToHom_refl, eqToHom_trans_assoc, Category.assoc]
+  apply Functor.hext (fun X ↦ congr_fun h_obj X)
+  intro X Y f
+  induction f with
+  | nil =>
+      have hF : F.map Quiver.Path.nil = 𝟙 (F.obj X) := by
+        convert F.map_id X
+      have hG : G.map Quiver.Path.nil = 𝟙 (G.obj X) := by
+        convert G.map_id X
+      exact (heq_of_eq hF).trans <|
+        (eqToHom_heq_id_dom (F.obj X) (G.obj X) (congr_fun h_obj X)).symm.trans <|
+        (eqToHom_heq_id_cod (F.obj X) (G.obj X) (congr_fun h_obj X)).trans <|
+        (heq_of_eq hG).symm
+  | cons g e ih =>
+      have hF : F.map (Quiver.Path.cons g e) = F.map g ≫ F.map (Quiver.Hom.toPath e) := by
+        convert F.map_comp g (Quiver.Hom.toPath e)
+      have hG : G.map (Quiver.Path.cons g e) = G.map g ≫ G.map (Quiver.Hom.toPath e) := by
+        convert G.map_comp g (Quiver.Hom.toPath e)
+      have h' : F.map (Quiver.Hom.toPath e) ≍ G.map (Quiver.Hom.toPath e) := by
+        exact (conj_eqToHom_iff_heq' _ _ _ _).1 (h _ _ e)
+      exact (heq_of_eq hF).trans <|
+        (heq_comp (congr_fun h_obj _) (congr_fun h_obj _) (congr_fun h_obj _) ih h').trans <|
+        (heq_of_eq hG).symm
 
 end Paths
 
