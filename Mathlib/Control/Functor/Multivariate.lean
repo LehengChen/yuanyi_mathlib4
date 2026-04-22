@@ -159,7 +159,9 @@ private def g :
       (fun i : Fin2 (n + 1) => { p_1 : (α ::: β) i // PredLast α pp p_1 }) ⟹ fun i : Fin2 (n + 1) =>
         { p_1 // ofRepeat (PredLast' α pp i p_1) }
   | _, α, Fin2.fs i, x =>
-    ⟨x.val, cast (by simp only [PredLast]; erw [const_iff_true]) x.property⟩
+    ⟨x.val, by
+      rw [PredLast']
+      exact (const_iff_true (α := α) (i := i) (x := x.val) (p := True)).2 trivial⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
 theorem LiftP_PredLast_iff {β} (P : β → Prop) (x : F (α ::: β)) :
@@ -184,7 +186,9 @@ private def f' :
           { p_1 : _ × _ // ofRepeat (RelLast' α rr i (TypeVec.prod.mk _ p_1.fst p_1.snd)) }) ⟹
         fun i : Fin2 (n + 1) => { p_1 : (α ::: β) i × _ // RelLast α rr p_1.fst p_1.snd }
   | _, α, Fin2.fs i, x =>
-    ⟨x.val, cast (by simp only [RelLast]; erw [repeatEq_iff_eq]) x.property⟩
+    ⟨x.val, by
+      rw [RelLast]
+      exact (repeatEq_iff_eq (α := α) (i := i) (x := x.val.fst) (y := x.val.snd)).mp x.property⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
 set_option backward.isDefEq.respectTransparency false in
@@ -194,7 +198,9 @@ private def g' :
         fun i : Fin2 (n + 1) =>
         { p_1 : _ × _ // ofRepeat (RelLast' α rr i (TypeVec.prod.mk _ p_1.1 p_1.2)) }
   | _, α, Fin2.fs i, x =>
-    ⟨x.val, cast (by simp only [RelLast]; erw [repeatEq_iff_eq]) x.property⟩
+    ⟨x.val, by
+      rw [RelLast']
+      exact (repeatEq_iff_eq (α := α) (i := i) (x := x.val.1) (y := x.val.2)).2 x.property⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
 theorem LiftR_RelLast_iff (x y : F (α ::: β)) :
