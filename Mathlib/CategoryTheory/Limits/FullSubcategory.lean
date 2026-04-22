@@ -9,11 +9,11 @@ public import Mathlib.CategoryTheory.ObjectProperty.LimitsOfShape
 public import Mathlib.CategoryTheory.ObjectProperty.ColimitsOfShape
 
 /-!
-# Limits in full subcategories
+# Limits and colimits in full subcategories
 
-If a property of objects `P` is closed under taking limits,
-then limits in `FullSubcategory P` can be constructed from limits in `C`.
-More precisely, the inclusion creates such limits.
+If a property of objects `P` is closed under taking limits or colimits,
+then limits or colimits in `FullSubcategory P` can be constructed from those in `C`.
+More precisely, the inclusion creates such limits and colimits.
 
 -/
 
@@ -148,7 +148,7 @@ variable (F : C ⥤ D)
 
 namespace Limits
 
-/-- The essential image of a functor is closed under the limits it preserves. -/
+/-- The essential image of a full and faithful functor is closed under the limits it preserves. -/
 instance [HasLimitsOfShape J C] [PreservesLimitsOfShape J F] [F.Full] [F.Faithful] :
     F.essImage.IsClosedUnderLimitsOfShape J :=
   .mk' (by
@@ -158,7 +158,7 @@ instance [HasLimitsOfShape J C] [PreservesLimitsOfShape J F] [F.Full] [F.Faithfu
         (isLimitOfPreserves F (limit.isLimit _)) (limit.isLimit _)
         (Functor.essImage.liftFunctorCompIso _ _ _)⟩⟩)
 
-/-- The essential image of a functor is closed under the colimits it preserves. -/
+/-- The essential image of a full and faithful functor is closed under the colimits it preserves. -/
 instance [HasColimitsOfShape J C] [PreservesColimitsOfShape J F] [F.Full] [F.Faithful] :
     F.essImage.IsClosedUnderColimitsOfShape J :=
   .mk' (by
