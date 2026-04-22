@@ -17,7 +17,7 @@ reporting discrepancies at "instances and reducible" transparency.
 Reports from this tactic do not necessarily indicate a problem,
 although typically `simp` should reduce rather than increase the reported discrepancies.
 
-`check_compositions` may be useful in diagnosing uses of `erw` in the category theory library.
+`check_compositions` may be useful in diagnosing fragile rewrites in the category theory library.
 -/
 
 public meta section
@@ -85,8 +85,7 @@ example (j : J) :
   fail_if_success rw [ι_preservesColimitIso_inv (G ⋙ H)]
   fail_if_success simp only [ι_preservesColimitIso_inv]
 
-  -- This would work:
-  -- erw [ι_preservesColimitIso_inv (G ⋙ H)]
+  -- A more permissive rewrite tactic would work here.
 
   -- `check_compositions` checks if the two morphisms we're composing are
   -- composed by abusing defeq, and indeed it tells us that we are abusing
