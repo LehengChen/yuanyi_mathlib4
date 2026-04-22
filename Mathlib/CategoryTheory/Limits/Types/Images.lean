@@ -90,7 +90,7 @@ private noncomputable def limitOfSurjectionsSurjective.preimage
 
 include hF in
 open limitOfSurjectionsSurjective in
-/-- Auxiliary lemma. Use `limit_of_surjections_surjective` instead. -/
+/-- Auxiliary lemma. Use `surjective_π_app_zero_of_surjective_map` instead. -/
 lemma surjective_π_app_zero_of_surjective_map_aux :
     Function.Surjective ((limitCone F).π.app ⟨0⟩) := by
   intro a
