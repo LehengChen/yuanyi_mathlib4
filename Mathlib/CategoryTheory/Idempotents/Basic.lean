@@ -146,10 +146,10 @@ theorem Equivalence.isIdempotentComplete {D : Type*} [Category* D] (ε : C ≌ D
   refine ⟨?_⟩
   intro X' p hp
   let φ := ε.counitIso.symm.app X'
-  erw [split_iff_of_iso φ p (φ.inv ≫ p ≫ φ.hom)
+  refine (split_iff_of_iso φ p (φ.inv ≫ p ≫ φ.hom)
       (by
         slice_rhs 1 2 => rw [φ.hom_inv_id]
-        rw [id_comp])]
+        rw [id_comp])).2 ?_
   rcases IsIdempotentComplete.idempotents_split (ε.inverse.obj X') (ε.inverse.map p)
       (by rw [← ε.inverse.map_comp, hp]) with
     ⟨Y, i, e, ⟨h₁, h₂⟩⟩
