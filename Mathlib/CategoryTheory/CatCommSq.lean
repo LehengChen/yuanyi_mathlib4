@@ -116,15 +116,22 @@ lemma hInv_hInv (h : CatCommSq T.functor L R B.functor) :
   ext X
   rw [← cancel_mono (B.functor.map (L.map (T.unitIso.hom.app X)))]
   rw [← Functor.comp_map]
-  erw [← h.iso.hom.naturality (T.unitIso.hom.app X)]
-  rw [hInv_iso_hom_app]
-  simp only [Equivalence.symm_functor]
-  rw [hInv_iso_inv_app]
-  dsimp
-  simp only [Functor.comp_obj, assoc, ← Functor.map_comp, Iso.inv_hom_id_app,
-    Equivalence.counitInv_app_functor, Functor.map_id]
-  simp only [Functor.map_comp, Equivalence.fun_inv_map, assoc,
-    Equivalence.counitInv_functor_comp, comp_id, Iso.inv_hom_id_app_assoc]
+  calc
+    _ = (T.functor ⋙ R).map (T.unitIso.hom.app X) ≫
+          h.iso.hom.app ((T.functor ⋙ T.inverse).obj X) := by
+      rw [hInv_iso_hom_app]
+      simp only [Equivalence.symm_functor]
+      rw [hInv_iso_inv_app]
+      dsimp
+      simp only [Functor.comp_obj, assoc, ← Functor.map_comp, Iso.inv_hom_id_app,
+        Equivalence.counitInv_app_functor, Functor.map_id]
+      simp only [Functor.map_comp, Equivalence.fun_inv_map, assoc,
+        Equivalence.counitInv_functor_comp, comp_id, Iso.inv_hom_id_app_assoc]
+    _ = h.iso.hom.app ((𝟭 C₁).obj X) ≫ (L ⋙ B.functor).map (T.unitIso.hom.app X) := by
+      exact h.iso.hom.naturality (T.unitIso.hom.app X)
+    _ = _ := by
+      letI := h
+      rfl
 
 /-- In a square of categories, when the top and bottom functors are part
 of equivalence of categories, it is equivalent to show 2-commutativity for
