@@ -175,11 +175,14 @@ set_option backward.isDefEq.respectTransparency false in
 theorem desc_op_comp_opCoproductIsoProduct'_hom {c : Cofan Z} {f : Fan (op <| Z ·)}
     (hc : IsColimit c) (hf : IsLimit f) (c' : Cofan Z) :
     (hc.desc c').op ≫ (opCoproductIsoProduct' hc hf).hom = hf.lift c'.op := by
-  refine (Iso.eq_comp_inv _).mp (Quiver.Hom.unop_inj (hc.hom_ext (fun ⟨j⟩ ↦ Quiver.Hom.op_inj ?_)))
-  simp only [unop_op, Discrete.functor_obj, const_obj_obj, Quiver.Hom.unop_op, IsColimit.fac,
-    Cofan.op, unop_comp, op_comp, op_unop, Quiver.Hom.op_unop, Category.assoc]
-  erw [opCoproductIsoProduct'_inv_comp_inj, IsLimit.fac]
-  rfl
+  apply hf.hom_ext
+  intro ⟨j⟩
+  rw [opCoproductIsoProduct']
+  simp only [Discrete.functor_obj_eq_as, Cofan.op, Category.assoc,
+    IsLimit.conePointUniqueUpToIso_hom_comp, Fan.mk_pt, Fan.mk_π_app, IsLimit.fac]
+  rw [← op_comp]
+  have h := hc.fac c' ⟨j⟩
+  exact congrArg Quiver.Hom.op h
 
 theorem desc_op_comp_opCoproductIsoProduct_hom [HasCoproduct Z] {X : C} (π : (a : α) → Z a ⟶ X) :
     (Sigma.desc π).op ≫ (opCoproductIsoProduct Z).hom = Pi.lift (fun a ↦ (π a).op) := by
@@ -271,11 +274,15 @@ set_option backward.isDefEq.respectTransparency false in
 theorem opProductIsoCoproduct'_inv_comp_lift {f : Fan Z} {c : Cofan (op <| Z ·)}
     (hf : IsLimit f) (hc : IsColimit c) (f' : Fan Z) :
     (opProductIsoCoproduct' hf hc).inv ≫ (hf.lift f').op = hc.desc f'.op := by
-  refine (Iso.inv_comp_eq _).mpr (Quiver.Hom.unop_inj (hf.hom_ext (fun ⟨j⟩ ↦ Quiver.Hom.op_inj ?_)))
-  simp only [Discrete.functor_obj, unop_op, Quiver.Hom.unop_op, IsLimit.fac, Fan.op, unop_comp,
-    Category.assoc, op_comp, op_unop, Quiver.Hom.op_unop]
-  erw [← Category.assoc, proj_comp_opProductIsoCoproduct'_hom, IsColimit.fac]
-  rfl
+  apply hc.hom_ext
+  intro ⟨j⟩
+  rw [opProductIsoCoproduct']
+  simp only [Discrete.functor_obj_eq_as, const_obj_obj, Fan.op,
+    IsColimit.comp_coconePointUniqueUpToIso_inv_assoc, Cofan.mk_pt, Cofan.mk_ι_app,
+    IsColimit.fac]
+  rw [← op_comp]
+  have h := hf.fac f' ⟨j⟩
+  exact congrArg Quiver.Hom.op h
 
 theorem opProductIsoCoproduct_inv_comp_lift [HasProduct Z] {X : C} (π : (a : α) → X ⟶ Z a) :
     (opProductIsoCoproduct Z).inv ≫ (Pi.lift π).op = Sigma.desc (fun a ↦ (π a).op) := by
