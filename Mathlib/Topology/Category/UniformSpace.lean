@@ -250,8 +250,7 @@ noncomputable def adj : completionFunctor ⊣ forget₂ CpltSepUniformSpace Unif
       homEquiv_naturality_left_symm := fun {X' X Y} f g => by
         ext x
         dsimp [-Function.comp_apply]
-        erw [Completion.extension_map (γ := Y) g.hom.2 f.hom.2]
-        rfl }
+        exact (congr_fun (Completion.extension_map (γ := Y) g.hom.2 f.hom.2) x).symm }
 
 noncomputable instance : Reflective (forget₂ CpltSepUniformSpace UniformSpaceCat) where
   L := completionFunctor
