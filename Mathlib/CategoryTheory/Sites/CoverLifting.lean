@@ -307,9 +307,17 @@ lemma sheafAdjunctionCocontinuous_unit_app_hom (F : Sheaf K A) :
     (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).symm
     (G.sheafPushforwardCocontinuousCompSheafToPresheafIso A J K).symm F).trans
   dsimp
-  erw [Functor.map_id]
-  change _ ≫ 𝟙 _ ≫ 𝟙 _ = _
-  simp only [Category.comp_id]
+  ext X
+  simp only [NatTrans.comp_app, NatTrans.id_app]
+  suffices hX :
+      ((G.op.ranAdjunction A).unit.app F.obj).app X ≫
+          (G.op.ran.map (𝟙 ((G.sheafPushforwardContinuous A J K).obj F).obj)).app X ≫
+            𝟙 ((G.op.ran.obj ((G.sheafPushforwardContinuous A J K).obj F).obj).obj X) =
+        ((G.op.ranAdjunction A).unit.app F.obj).app X by
+    exact hX
+  rw [NatTrans.congr_app (G.op.ran.map_id ((G.sheafPushforwardContinuous A J K).obj F).obj) X]
+  rw [Category.comp_id]
+  exact Category.comp_id (((G.op.ranAdjunction A).unit.app F.obj).app X)
 
 @[deprecated (since := "2026-03-05")]
 alias sheafAdjunctionCocontinuous_unit_app_val :=
@@ -333,15 +341,9 @@ set_option backward.isDefEq.respectTransparency false in
 lemma sheafAdjunctionCocontinuous_homEquiv_apply_hom {F : Sheaf K A} {H : Sheaf J A}
     (f : (G.sheafPushforwardContinuous A J K).obj F ⟶ H) :
     ((G.sheafAdjunctionCocontinuous A J K).homEquiv F H f).hom =
-      (G.op.ranAdjunction A).homEquiv F.obj H.obj f.hom :=
-  ((sheafToPresheaf K A).congr_map
-    (((G.op.ranAdjunction A).restrictFullyFaithful_homEquiv_apply
-      (fullyFaithfulSheafToPresheaf K A) (fullyFaithfulSheafToPresheaf J A)
-      (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).symm
-      (G.sheafPushforwardCocontinuousCompSheafToPresheafIso A J K).symm f))).trans (by
-        dsimp
-        erw [Functor.map_id, Category.comp_id, Category.id_comp,
-          Adjunction.homEquiv_unit])
+      (G.op.ranAdjunction A).homEquiv F.obj H.obj f.hom := by
+  rw [Adjunction.homEquiv_unit, Adjunction.homEquiv_unit]
+  simp [sheafAdjunctionCocontinuous_unit_app_hom, Functor.sheafPushforwardCocontinuous]
 
 @[deprecated (since := "2026-03-05")]
 alias sheafAdjunctionCocontinuous_homEquiv_apply_val :=
