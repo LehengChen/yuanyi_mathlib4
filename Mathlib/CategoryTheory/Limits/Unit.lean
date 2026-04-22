@@ -27,20 +27,20 @@ namespace CategoryTheory.Limits
 
 variable {J : Type v} [Category.{v'} J] {F : J ⥤ Discrete PUnit}
 
-/-- A trivial cone for a functor into `PUnit`. `punitConeIsLimit` shows it is a limit. -/
+/-- A trivial cone for a functor into `Discrete PUnit`. `punitConeIsLimit` shows it is a limit. -/
 def punitCone : Cone F :=
   ⟨⟨⟨⟩⟩, (Functor.punitExt _ _).hom⟩
 
-/-- A trivial cocone for a functor into `PUnit`. `punitCoconeIsLimit` shows it is a colimit. -/
+/-- A trivial cocone for a functor into `Discrete PUnit`. `punitCoconeIsColimit` shows it is a colimit. -/
 def punitCocone : Cocone F :=
   ⟨⟨⟨⟩⟩, (Functor.punitExt _ _).hom⟩
 
-/-- Any cone over a functor into `PUnit` is a limit cone.
+/-- Any cone over a functor into `Discrete PUnit` is a limit cone.
 -/
 def punitConeIsLimit {c : Cone F} : IsLimit c where
   lift := fun s => eqToHom (by simp [eq_iff_true_of_subsingleton])
 
-/-- Any cocone over a functor into `PUnit` is a colimit cocone.
+/-- Any cocone over a functor into `Discrete PUnit` is a colimit cocone.
 -/
 def punitCoconeIsColimit {c : Cocone F} : IsColimit c where
   desc := fun s => eqToHom (by simp [eq_iff_true_of_subsingleton])
