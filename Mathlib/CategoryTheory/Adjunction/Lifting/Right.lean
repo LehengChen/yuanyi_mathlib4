@@ -162,10 +162,8 @@ noncomputable def constructRightAdjoint (h : ∀ X : B, RegularMono (adj₁.unit
     Equiv.symm_apply_eq, Subtype.ext_iff]
   dsimp
   simp only [Adjunction.homEquiv_counit]
-  erw [Fork.IsLimit.homIso_natural, Fork.IsLimit.homIso_natural]
-  simp only [Fork.ofι_pt, Functor.map_comp, assoc, limit.cone_x]
-  erw [adj₂.homEquiv_naturality_left, Equiv.rightInverse_symm]
-  simp
+  simpa [Fork.IsLimit.homIso, Functor.map_comp, assoc, Fork.IsLimit.lift, Fork.IsLimit.lift']
+    using (adj₂.homEquiv_naturality_left g (F.map h))
 
 end LiftRightAdjoint
 
