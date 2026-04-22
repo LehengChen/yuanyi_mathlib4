@@ -90,7 +90,16 @@ lemma iso_hom_app (a : A) (X : C) :
   dsimp only [iso, natIsoLift]
   rw [natTransLift_app]
   dsimp
-  erw [comp_id, id_comp, id_comp, id_comp, Functor.map_id, comp_id]
+  have hmap :
+      (shiftFunctor D a).map (𝟙 (F.obj X)) = 𝟙 ((shiftFunctor D a).obj (F.obj X)) := by
+    exact Functor.map_id (shiftFunctor D a) (F.obj X)
+  rw [hmap]
+  simp only [id_comp, comp_id]
+  have hid :
+      𝟙 (F.obj ((shiftFunctor C a).obj X)) ≫ (Functor.commShiftIso F a).hom.app X =
+        (Functor.commShiftIso F a).hom.app X := by
+    exact id_comp _
+  rw [hid]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -101,7 +110,12 @@ lemma iso_inv_app (a : A) (X : C) :
   dsimp only [iso, natIsoLift]
   rw [natTransLift_app]
   dsimp
-  erw [id_comp, comp_id, comp_id, comp_id, Functor.map_id, id_comp]
+  have hmap :
+      (shiftFunctor D a).map (𝟙 (F.obj X)) = 𝟙 ((shiftFunctor D a).obj (F.obj X)) := by
+    exact Functor.map_id (shiftFunctor D a) (F.obj X)
+  rw [hmap]
+  simp only [id_comp, comp_id, assoc]
+  exact id_comp _
 
 attribute [irreducible] iso
 
@@ -138,12 +152,55 @@ noncomputable instance liftCommShift :
     congr 1
     rw [← cancel_epi ((shiftFunctor (Quotient r) b ⋙ lift r F hF).map
       (NatTrans.app (Functor.commShiftIso (functor r) a).hom X))]
-    erw [(LiftCommShift.iso F r hF b).hom.naturality_assoc
-      (((functor r).commShiftIso a).hom.app X), LiftCommShift.iso_hom_app,
-      ← Functor.map_comp_assoc, Iso.hom_inv_id_app]
-    dsimp
-    simp only [Functor.comp_obj, assoc, ← Functor.map_comp_assoc, Iso.inv_hom_id_app,
-      Functor.map_id, id_comp, Iso.hom_inv_id_app, lift_obj_functor_obj]
+    have hnat :
+        (shiftFunctor (Quotient r) b ⋙ lift r F hF).map
+            (((functor r).commShiftIso a).hom.app X) ≫
+          (LiftCommShift.iso F r hF b).hom.app
+            ((shiftFunctor (Quotient r) a).obj ((functor r).obj X)) ≫
+            ((shiftFunctor D b).map
+                ((lift r F hF).map (((functor r).commShiftIso a).inv.app X) ≫
+                  (F.commShiftIso a).hom.app X) ≫
+              (shiftFunctorAdd D a b).inv.app
+                ((lift r F hF).obj ((functor r).obj X))) =
+      (LiftCommShift.iso F r hF b).hom.app
+          ((functor r).obj ((shiftFunctor C a).obj X)) ≫
+        (lift r F hF ⋙ shiftFunctor D b).map
+            (((functor r).commShiftIso a).hom.app X) ≫
+          ((shiftFunctor D b).map
+              ((lift r F hF).map (((functor r).commShiftIso a).inv.app X) ≫
+                (F.commShiftIso a).hom.app X) ≫
+            (shiftFunctorAdd D a b).inv.app
+              ((lift r F hF).obj ((functor r).obj X))) := by
+      simpa only [Functor.comp_obj] using
+        (LiftCommShift.iso F r hF b).hom.naturality_assoc
+          (((functor r).commShiftIso a).hom.app X)
+          ((shiftFunctor D b).map
+              ((lift r F hF).map (((functor r).commShiftIso a).inv.app X) ≫
+                (F.commShiftIso a).hom.app X) ≫
+            (shiftFunctorAdd D a b).inv.app
+              ((lift r F hF).obj ((functor r).obj X)))
+    rw [hnat]
+    simp only [Functor.comp_obj, Functor.comp_map, LiftCommShift.iso_hom_app,
+      Functor.map_comp, assoc]
+    repeat rw [← Functor.map_comp_assoc]
+    have hshift :
+        (shiftFunctor (Quotient r) b).map
+            ((Functor.commShiftIso (functor r) a).hom.app X) ≫
+          (shiftFunctor (Quotient r) b).map
+            ((Functor.commShiftIso (functor r) a).inv.app X) =
+      𝟙 ((shiftFunctor (Quotient r) b).obj ((shiftFunctor C a ⋙ functor r).obj X)) := by
+      rw [← Functor.map_comp, Iso.hom_inv_id_app, Functor.map_id]
+    have hlift :
+        (lift r F hF).map ((Functor.commShiftIso (functor r) a).hom.app X) ≫
+          (lift r F hF).map ((Functor.commShiftIso (functor r) a).inv.app X) =
+      𝟙 ((lift r F hF).obj ((shiftFunctor C a ⋙ functor r).obj X)) := by
+      rw [← Functor.map_comp, Iso.hom_inv_id_app, Functor.map_id]
+    have hadd :
+        F.map ((shiftFunctorAdd C a b).inv.app X ≫ (shiftFunctorAdd C a b).hom.app X) =
+          𝟙 (F.obj ((shiftFunctor C a ⋙ shiftFunctor C b).obj X)) := by
+      rw [Iso.inv_hom_id_app, Functor.map_id]
+    rw [hshift, hlift, hadd]
+    simp [lift_obj_functor_obj]
 
 set_option backward.isDefEq.respectTransparency false in
 instance liftCommShift_compatibility :
