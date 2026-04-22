@@ -230,8 +230,9 @@ instance mono_r {A : C} : Mono (r A) := by
   obtain ⟨y, hy⟩ := KernelFork.IsLimit.lift' hl _ hxx
   rw [KernelFork.ι_ofι] at hy
   have hyy : y = 0 := by
-    erw [← Category.comp_id y, ← Limits.prod.lift_snd (𝟙 A) (𝟙 A), ← Category.assoc, hy,
-      Category.assoc, prod.lift_snd, HasZeroMorphisms.comp_zero]
+    exact by
+      have hy' := congrArg (fun t => t ≫ Limits.prod.snd) hy
+      simpa [Limits.diag, Limits.prod.lift_snd] using hy'
   haveI : Mono (prod.lift (𝟙 A) (0 : A ⟶ A)) := mono_of_mono_fac (prod.lift_fst _ _)
   apply (cancel_mono (prod.lift (𝟙 A) (0 : A ⟶ A))).1
   rw [← hy, hyy, zero_comp, zero_comp]
