@@ -81,8 +81,8 @@ abbrev liftToDiagramLimitObj {X : C} {K : Type s} [SmallCategory K] [HasLimitsOf
       ext k
       dsimp
       simp only [Category.assoc, NatTrans.naturality, liftToDiagramLimitObjAux_fac_assoc]
-      erw [Multiequalizer.condition]
-      rfl)
+      exact congrArg (fun f => E.π.app k ≫ f)
+        (Multiequalizer.condition ((unop W).index (F.obj k)) i))
 
 set_option backward.isDefEq.respectTransparency false in
 instance preservesLimit_diagramFunctor
@@ -148,11 +148,33 @@ def liftToPlusObjLimitObj {K : Type s} [SmallCategory K] [FinCategory K]
         rw [← Iso.eq_comp_inv, Category.assoc, ← Iso.inv_comp_eq]
         refine colimit.hom_ext (fun w => ?_)
         dsimp [plusMap]
-        erw [colimit.ι_map_assoc,
-          colimitObjIsoColimitCompEvaluation_ι_inv (F ⋙ J.diagramFunctor D X).flip w j,
-          colimitObjIsoColimitCompEvaluation_ι_inv_assoc (F ⋙ J.diagramFunctor D X).flip w i]
-        rw [← (colimit.ι (F ⋙ J.diagramFunctor D X).flip w).naturality]
-        rfl)
+        calc
+          colimit.ι (J.diagram (F.obj i) X) w ≫
+              (colimitObjIsoColimitCompEvaluation (F ⋙ J.diagramFunctor D X).flip i).inv ≫
+                (colimit (F ⋙ J.diagramFunctor D X).flip).map f =
+            (colimit.ι (F ⋙ J.diagramFunctor D X).flip w).app i ≫
+              (colimit (F ⋙ J.diagramFunctor D X).flip).map f := by
+                exact colimitObjIsoColimitCompEvaluation_ι_inv_assoc
+                  (F ⋙ J.diagramFunctor D X).flip w i
+                  ((colimit (F ⋙ J.diagramFunctor D X).flip).map f)
+          _ = ((F ⋙ J.diagramFunctor D X).flip.obj w).map f ≫
+              (colimit.ι (F ⋙ J.diagramFunctor D X).flip w).app j := by
+                rw [← (colimit.ι (F ⋙ J.diagramFunctor D X).flip w).naturality]
+          _ = (J.diagramNatTrans (F.map f) X).app w ≫
+              (colimit.ι (F ⋙ J.diagramFunctor D X).flip w).app j := by
+                rfl
+          _ = (J.diagramNatTrans (F.map f) X).app w ≫
+              colimit.ι (J.diagram (F.obj j) X) w ≫
+                (colimitObjIsoColimitCompEvaluation (F ⋙ J.diagramFunctor D X).flip j).inv := by
+                exact congrArg (fun g => (J.diagramNatTrans (F.map f) X).app w ≫ g)
+                  (colimitObjIsoColimitCompEvaluation_ι_inv
+                    (F ⋙ J.diagramFunctor D X).flip w j).symm
+          _ = colimit.ι (J.diagram (F.obj i) X) w ≫
+              colimMap (J.diagramNatTrans (F.map f) X) ≫
+                (colimitObjIsoColimitCompEvaluation (F ⋙ J.diagramFunctor D X).flip j).inv := by
+                exact (colimit.ι_map_assoc (J.diagramNatTrans (F.map f) X) w
+                  ((colimitObjIsoColimitCompEvaluation
+                    (F ⋙ J.diagramFunctor D X).flip j).inv)).symm)
   limit.lift _ S ≫ (HasLimit.isoOfNatIso s.symm).hom ≫ e.inv ≫ p.inv
 
 set_option backward.isDefEq.respectTransparency false in
@@ -181,8 +203,7 @@ theorem liftToPlusObjLimitObj_fac {K : Type s} [SmallCategory K] [FinCategory K]
   rw [limit.lift_π, Category.assoc]
   congr 1
   rw [← Iso.comp_inv_eq]
-  erw [colimit.ι_desc]
-  rfl
+  exact colimitObjIsoColimitCompEvaluation_ι_inv (F ⋙ J.diagramFunctor D X).flip j k
 
 set_option backward.isDefEq.respectTransparency false in
 instance preservesLimitsOfShape_plusFunctor
@@ -202,14 +223,14 @@ instance preservesLimitsOfShape_plusFunctor
     congr 1
     refine colimit.hom_ext (fun k => ?_)
     dsimp [plusMap, plusObj]
-    erw [colimit.ι_map, colimit.ι_desc_assoc, limit.lift_π]
-    conv_lhs => dsimp
-    simp only [Category.assoc]
-    rw [ι_colimitLimitIso_limit_π_assoc]
-    simp only [colimitObjIsoColimitCompEvaluation_ι_app_hom]
+    simp only [HasLimit.isoOfNatIso_inv_π, Functor.comp_obj, plusFunctor_obj, evaluation_obj_obj,
+      Iso.symm_inv, NatIso.ofComponents_hom_app, HasColimit.isoOfNatIso_ι_hom_assoc,
+      diagram_obj, ι_colimitLimitIso_limit_π_assoc, diagramFunctor_obj,
+      colimitObjIsoColimitCompEvaluation_ι_app_hom, ι_colimMap, diagramNatTrans_app,
+      Cover.shape_L, Cover.index_left]
     conv_lhs =>
       dsimp [IsLimit.conePointUniqueUpToIso]
-    rw [← Category.assoc, ← NatTrans.comp_app, limit.lift_π]
+    simp only [← Category.assoc, ← NatTrans.comp_app, limit.lift_π]
     rfl
 
 instance preserveFiniteLimits_plusFunctor
