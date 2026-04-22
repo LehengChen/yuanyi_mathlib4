@@ -267,10 +267,22 @@ instance full_map [F.Faithful] [F₁.Full] [F₂.Full] [IsIso α] [IsIso β] : (
       right := F₂.preimage φ.right
       w := F.map_injective (by
         rw [← cancel_mono (β.app _), ← cancel_epi (α.app _), F.map_comp, F.map_comp, assoc, assoc]
-        erw [← α.naturality_assoc, β.naturality]
         dsimp
-        rw [F₁.map_preimage, F₂.map_preimage]
-        simpa using φ.w) }, by cat_disch⟩
+        have hα := congrArg (fun k => k ≫ F.map Y.hom ≫ β.app Y.right)
+          (α.naturality (F₁.preimage φ.left)).symm
+        simp [Functor.comp_map, F₁.map_preimage, Category.assoc] at hα
+        have hβ := congrArg (fun k => α.app X.left ≫ F.map X.hom ≫ k)
+          (β.naturality (F₂.preimage φ.right))
+        simp [Functor.comp_map, F₂.map_preimage, Category.assoc] at hβ
+        calc
+          α.app X.left ≫ F.map (L.map (F₁.preimage φ.left)) ≫ F.map Y.hom ≫ β.app Y.right
+              = L'.map φ.left ≫ α.app Y.left ≫ F.map Y.hom ≫ β.app Y.right := by
+                  exact hα
+          _ = α.app X.left ≫ F.map X.hom ≫ β.app X.right ≫ R'.map φ.right := by
+                  simpa [Category.assoc] using φ.w
+          _ = α.app X.left ≫ F.map X.hom ≫ F.map (R.map (F₂.preimage φ.right)) ≫
+                β.app Y.right := by
+                  exact hβ.symm) }, by cat_disch⟩
 
 instance essSurj_map [F₁.EssSurj] [F₂.EssSurj] [F.Full] [IsIso α] [IsIso β] :
     (map α β).EssSurj where
