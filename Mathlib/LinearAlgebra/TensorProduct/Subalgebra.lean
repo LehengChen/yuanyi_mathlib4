@@ -65,7 +65,7 @@ def lTensorBot : (⊥ : Subalgebra R S) ⊗[R] A ≃ₐ[R] A := by
     obtain ⟨y', hy⟩ := Algebra.mem_bot.1 y.2
     replace hy : algebraMap R _ y' = y := Subtype.val_injective hy
     rw [← hx, ← hy, ← map_mul]
-    erw [(toSubmodule A).lTensorOne_tmul x' a,
+    rw [(toSubmodule A).lTensorOne_tmul x' a,
       (toSubmodule A).lTensorOne_tmul y' b,
       (toSubmodule A).lTensorOne_tmul (x' * y') (a * b)]
     rw [Algebra.mul_smul_comm, Algebra.smul_mul_assoc, smul_smul, mul_comm x' y']
@@ -98,7 +98,7 @@ def rTensorBot : A ⊗[R] (⊥ : Subalgebra R S) ≃ₐ[R] A := by
     obtain ⟨y', hy⟩ := Algebra.mem_bot.1 y.2
     replace hy : algebraMap R _ y' = y := Subtype.val_injective hy
     rw [← hx, ← hy, ← map_mul]
-    erw [(toSubmodule A).rTensorOne_tmul x' a,
+    rw [(toSubmodule A).rTensorOne_tmul x' a,
       (toSubmodule A).rTensorOne_tmul y' b,
       (toSubmodule A).rTensorOne_tmul (x' * y') (a * b)]
     rw [Algebra.mul_smul_comm, Algebra.smul_mul_assoc, smul_smul, mul_comm x' y']
@@ -145,14 +145,52 @@ def linearEquivIncludeRange :
   (_root_.TensorProduct.ext' <| by
     rintro ⟨x', x, rfl : x ⊗ₜ 1 = x'⟩ ⟨y', y, rfl : 1 ⊗ₜ y = y'⟩
     rw [LinearMap.comp_apply, LinearMap.id_apply]
-    erw [Submodule.mulMap_tmul]
-    rw [tmul_mul_tmul, mul_one, one_mul, _root_.TensorProduct.map_tmul]
-    rfl)
+    have hmul :
+        (includeLeft.toLinearMap.range.mulMap includeRight.toLinearMap.range)
+            (includeLeft.toLinearMap.rangeRestrict x ⊗ₜ[R]
+              includeRight.toLinearMap.rangeRestrict y) =
+          (x ⊗ₜ[R] (1 : T)) * ((1 : S) ⊗ₜ[R] y) :=
+      @Submodule.mulMap_tmul R (S ⊗[R] T) _ _ _
+        includeLeft.toLinearMap.range
+        includeRight.toLinearMap.range
+        (includeLeft.toLinearMap.rangeRestrict x)
+        (includeRight.toLinearMap.rangeRestrict y)
+    calc
+      (_root_.TensorProduct.map includeLeft.toLinearMap.rangeRestrict
+          includeRight.toLinearMap.rangeRestrict)
+          ((includeLeft.toLinearMap.range.mulMap includeRight.toLinearMap.range)
+            (⟨x ⊗ₜ[R] (1 : T), by simp⟩ ⊗ₜ[R] ⟨(1 : S) ⊗ₜ[R] y, by simp⟩)) =
+        (_root_.TensorProduct.map includeLeft.toLinearMap.rangeRestrict
+          includeRight.toLinearMap.rangeRestrict)
+          ((includeLeft.toLinearMap.range.mulMap includeRight.toLinearMap.range)
+            (includeLeft.toLinearMap.rangeRestrict x ⊗ₜ[R]
+              includeRight.toLinearMap.rangeRestrict y)) := rfl
+      _ = (_root_.TensorProduct.map includeLeft.toLinearMap.rangeRestrict
+          includeRight.toLinearMap.rangeRestrict)
+          ((x ⊗ₜ[R] (1 : T)) * ((1 : S) ⊗ₜ[R] y)) :=
+        congrArg _ hmul
+      _ = includeLeft.toLinearMap.rangeRestrict x ⊗ₜ[R]
+          includeRight.toLinearMap.rangeRestrict y := by
+        rw [tmul_mul_tmul, mul_one, one_mul, _root_.TensorProduct.map_tmul]
+    )
   (_root_.TensorProduct.ext' fun x y ↦ by
     rw [LinearMap.comp_apply, LinearMap.id_apply, _root_.TensorProduct.map_tmul]
-    erw [Submodule.mulMap_tmul]
-    change (x ⊗ₜ 1) * (1 ⊗ₜ y) = _
-    rw [tmul_mul_tmul, mul_one, one_mul])
+    have hmul :
+        (includeLeft.toLinearMap.range.mulMap includeRight.toLinearMap.range)
+            (includeLeft.toLinearMap.rangeRestrict x ⊗ₜ[R]
+              includeRight.toLinearMap.rangeRestrict y) =
+          (x ⊗ₜ[R] (1 : T)) * ((1 : S) ⊗ₜ[R] y) :=
+      @Submodule.mulMap_tmul R (S ⊗[R] T) _ _ _
+        includeLeft.toLinearMap.range
+        includeRight.toLinearMap.range
+        (includeLeft.toLinearMap.rangeRestrict x)
+        (includeRight.toLinearMap.rangeRestrict y)
+    calc
+      (includeLeft.toLinearMap.range.mulMap includeRight.toLinearMap.range)
+          (includeLeft.toLinearMap.rangeRestrict x ⊗ₜ[R]
+            includeRight.toLinearMap.rangeRestrict y) =
+        (x ⊗ₜ[R] (1 : T)) * ((1 : S) ⊗ₜ[R] y) := hmul
+      _ = x ⊗ₜ[R] y := by rw [tmul_mul_tmul, mul_one, one_mul])
 
 theorem linearEquivIncludeRange_toLinearMap :
     (linearEquivIncludeRange R S T).toLinearMap =
