@@ -11,8 +11,8 @@ public import Mathlib.CategoryTheory.HomCongr
 
 # Restricting adjunctions
 
-`Adjunction.restrictFullyFaithful` shows that an adjunction can be restricted along fully faithful
-inclusions.
+`CategoryTheory.Adjunction.restrictFullyFaithful` shows that an adjunction can be restricted
+along fully faithful inclusions.
 -/
 
 @[expose] public section

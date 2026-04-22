@@ -112,7 +112,7 @@ theorem rel_iso_iff {X Y : RelCat} (r : X ⟶ Y) :
 section Opposite
 open Opposite
 
-/-- The argument-swap isomorphism from `RelCat` to its opposite. -/
+/-- The argument-swap functor from `RelCat` to its opposite. -/
 def opFunctor : RelCat ⥤ RelCatᵒᵖ where
   obj X := op X
   map {_ _} r := .op <| .ofRel r.rel.inv

@@ -148,7 +148,7 @@ theorem isIso_of_epi_of_isIso_of_isIso_of_mono (h₀ : Epi (app' φ 0)) (h₁ : 
 
 end Five
 
-/-! The following "three lemmas" for morphisms in `ComposableArrows C 2` are
+/-! The following lemmas for morphisms in `ComposableArrows C 2` are
 special cases of "four lemmas" applied to diagrams where some of the
 leftmost or rightmost maps (or objects) are zero. -/
 

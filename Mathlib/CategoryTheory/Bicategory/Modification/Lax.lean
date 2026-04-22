@@ -92,7 +92,7 @@ end Modification
 
 variable (η θ) in
 /-- Type-alias for modifications between lax transformations of lax functors. This is the type
-used for the 2-homomorphisms in the bicategory of lax functors equipped with lax
+used for the 2-morphisms in the bicategory of lax functors equipped with lax
 transformations. -/
 @[ext]
 structure Hom where
@@ -179,7 +179,7 @@ end Modification
 
 variable (η θ) in
 /-- Type-alias for modifications between oplax transformations of lax functors. This is the type
-used for the 2-homomorphisms in the bicategory of lax functors equipped with oplax
+used for the 2-morphisms in the bicategory of lax functors equipped with oplax
 transformations. -/
 @[ext]
 structure Hom where

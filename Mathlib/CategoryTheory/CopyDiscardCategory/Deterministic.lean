@@ -12,8 +12,8 @@ public import Mathlib.CategoryTheory.CopyDiscardCategory.Basic
 
 Morphisms that preserve the copy operation perfectly.
 
-A morphism `f : X → Y` is deterministic if copying then applying `f` to both copies equals applying
-`f` then copying: `f ≫ Δ[Y] = Δ[X] ≫ (f ⊗ f)`.
+A morphism `f : X → Y` is deterministic if applying `f` then copying equals copying then applying
+`f` to both copies: `f ≫ Δ[Y] = Δ[X] ≫ (f ⊗ₘ f)`.
 
 In probabilistic settings, these are morphisms without randomness. In cartesian categories, all
 morphisms are deterministic.

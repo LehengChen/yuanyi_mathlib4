@@ -19,9 +19,7 @@ we show that comonads in `B` form a bicategory.
 
 ## TODO
 
-We can also define monads in a bicategory. This is not yet done as we don't have the bicategory
-structure on the set of lax functors at this point, which is needed to show that monads form a
-bicategory.
+Add the corresponding development for monads in a bicategory.
 -/
 
 @[expose] public section

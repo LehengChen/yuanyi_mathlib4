@@ -29,8 +29,9 @@ variable {C D : Type*} [Category* C] [Category* D] {L : C ⥤ D} {W : MorphismPr
 
 namespace Localization
 
-/-- If `L : C ⥤ D` satisfies the universal property of the localisation
-for `W : MorphismProperty C`, then `L.op` also does. -/
+/-- If `L : C ⥤ D` satisfies `StrictUniversalPropertyFixedTarget` for
+`W : MorphismProperty C` with target `Eᵒᵖ`, then `L.op` satisfies
+`StrictUniversalPropertyFixedTarget` for `W.op` with target `E`. -/
 def StrictUniversalPropertyFixedTarget.op {E : Type*} [Category* E]
     (h : StrictUniversalPropertyFixedTarget L W Eᵒᵖ) :
     StrictUniversalPropertyFixedTarget L.op W.op E where

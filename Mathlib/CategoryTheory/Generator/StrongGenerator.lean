@@ -17,14 +17,15 @@ generator (in the sense that `IsSeparating P` holds) such that for any
 proper subobject `A ⊂ X`, there exists a morphism `G ⟶ X` which does not factor
 through `A` from an object satisfying `P`.
 
-The main result is the lemma `isStrongGenerator_iff_exists_extremalEpi` which
+The main result is the lemma
+`CategoryTheory.ObjectProperty.isStrongGenerator_iff_exists_extremalEpi` which
 says that if `P` is `w`-small, `C` is locally `w`-small and
 has coproducts of size `w`, then `P` is a strong generator iff any
 object of `C` is the target of an extremal epimorphism from a coproduct of
 objects satisfying `P`.
 
-We also show that if any object in `C` is a colimit of objects in `S`,
-then `S` is a strong generator.
+We also show that if any object in `C` is a colimit of objects satisfying `P`,
+then `P` is a strong generator.
 
 ## References
 * [Adámek, J. and Rosický, J., *Locally presentable and accessible categories*][Adamek_Rosicky_1994]

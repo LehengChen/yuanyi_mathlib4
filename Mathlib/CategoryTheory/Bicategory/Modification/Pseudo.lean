@@ -126,7 +126,7 @@ end Modification
 
 variable (η θ) in
 /-- Type-alias for modifications between strong transformations of pseudofunctors. This is the type
-used for the 2-homomorphisms in the bicategory of pseudofunctors. -/
+used for the 2-morphisms in the bicategory of pseudofunctors. -/
 @[ext]
 structure Hom where
   of ::

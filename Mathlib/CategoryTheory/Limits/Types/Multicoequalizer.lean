@@ -21,7 +21,8 @@ which gives a criteria for `c` to be a colimit (i.e. a multicoequalizer):
 it restates in a more explicit manner the injectivity and surjectivity
 conditions for the map `d.multispan.descColimitType c : d.multispan.ColimitType → c.pt`.
 
-We deduce a definition `Set.isColimitOfMulticoequalizerDiagram` which shows
+We deduce a definition `CategoryTheory.Limits.Types.isColimitOfMulticoequalizerDiagram`
+which shows
 that given `X : Type u`, a `MulticoequalizerDiagram` in `Set X` gives
 a multicoequalizer in the category of types.
 

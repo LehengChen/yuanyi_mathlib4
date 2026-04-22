@@ -36,7 +36,7 @@ structure MulticospanIndex.sections where
   val (i : J.L) : I.left i
   property (r : J.R) : I.fst r (val _) = I.snd r (val _)
 
-/-- The bijection `I.sections ≃ I.multicospan.sections` when `I : MulticospanIndex (Type u)`
+/-- The bijection `I.sections ≃ I.multicospan.sections` when `I : MulticospanIndex J (Type u)`
 is a multiequalizer diagram in the category of types. -/
 @[simps]
 def MulticospanIndex.sectionsEquiv :
@@ -63,7 +63,7 @@ namespace Multifork
 variable {I}
 variable (c : Multifork I)
 
-/-- Given a multiequalizer diagram `I : MulticospanIndex (Type u)` in the category of
+/-- Given a multiequalizer diagram `I : MulticospanIndex J (Type u)` in the category of
 types and `c` a multifork for `I`, this is the canonical map `c.pt → I.sections`. -/
 @[simps]
 def toSections (x : c.pt) : I.sections where

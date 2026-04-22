@@ -230,47 +230,47 @@ namespace Functor
 
 variable {W : Type*} [Category* W] (F : V ⥤ W) (G : Type*) [Monoid G] {J : Type*} [Category* J]
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves the limit of some `K : J ⥤ Action V G` if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves the limit of some `K : J ⥤ Action V G` if
 `K ⋙ forget V G` has a limit and `F` preserves the limit of `K ⋙ forget V G`. -/
 instance mapActionPreservesLimit_of_preserves (K : J ⥤ Action V G) [HasLimit (K ⋙ forget V G)]
     [PreservesLimit (K ⋙ Action.forget V G) F] : PreservesLimit K (F.mapAction G) :=
   Action.preservesLimit_of_preserves (F.mapAction G) K <|
     inferInstanceAs (PreservesLimit K (forget V G ⋙ F))
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves limits of some shape `J` if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves limits of some shape `J` if
 `V` has limits of shape `J` and `F` preserves limits of shape `J`. -/
 instance mapActionPreservesLimitsOfShapeOfPreserves [PreservesLimitsOfShape J F]
     [HasLimitsOfShape J V] : PreservesLimitsOfShape J (F.mapAction G) where
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves limits of some size if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves limits of some size if
 `V` has limits of that size and `F` preserves limits of that size. -/
 instance preservesLimitsOfSize_of_preserves [PreservesLimitsOfSize.{w₂, w₁} F]
     [HasLimitsOfSize.{w₂, w₁} V] : PreservesLimitsOfSize.{w₂, w₁} (F.mapAction G) where
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves finite limits if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves finite limits if
 `V` has finite limits and `F` preserves finite limits. -/
 instance [PreservesFiniteLimits F] [HasFiniteLimits V] :
     PreservesFiniteLimits (F.mapAction G) where
   preservesFiniteLimits _ _ _ := inferInstance
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves the colimit of some `K : J ⥤ Action V G` if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves the colimit of some `K : J ⥤ Action V G` if
 `K ⋙ forget V G` has a colimit and `F` preserves the colimit of `K ⋙ forget V G`. -/
 instance mapActionPreservesColimit_of_preserves (K : J ⥤ Action V G) [HasColimit (K ⋙ forget V G)]
     [PreservesColimit (K ⋙ Action.forget V G) F] : PreservesColimit K (F.mapAction G) :=
   Action.preservesColimit_of_preserves (F.mapAction G) K <|
     inferInstanceAs (PreservesColimit K (forget V G ⋙ F))
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves colimits of some shape `J` if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves colimits of some shape `J` if
 `V` has colimits of shape `J` and `F` preserves colimits of shape `J`. -/
 instance mapActionPreservesColimitsOfShapeOfPreserves [PreservesColimitsOfShape J F]
     [HasColimitsOfShape J V] : PreservesColimitsOfShape J (F.mapAction G) where
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves colimits of some size if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves colimits of some size if
 `V` has colimits of that size and `F` preserves colimits of that size. -/
 instance preservesColimitsOfSize_of_preserves [PreservesColimitsOfSize.{w₂, w₁} F]
     [HasColimitsOfSize.{w₂, w₁} V] : PreservesColimitsOfSize.{w₂, w₁} (F.mapAction G) where
 
-/-- `F.mapAction : Action V G ⥤ Action W G` preserves finite colimits if
+/-- `F.mapAction G : Action V G ⥤ Action W G` preserves finite colimits if
 `V` has finite colimits and `F` preserves finite colimits. -/
 instance [PreservesFiniteColimits F] [HasFiniteColimits V] :
     PreservesFiniteColimits (F.mapAction G) where

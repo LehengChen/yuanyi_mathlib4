@@ -58,7 +58,7 @@ filtered indexing category `I`, a diagram `F : I ⥤ C` and the data for a colim
 structure IndObjectPresentation (A : Cᵒᵖ ⥤ Type v) where
   /-- The indexing category of the filtered colimit presentation -/
   I : Type v
-  /-- The indexing category of the filtered colimit presentation -/
+  /-- The small category structure on the indexing category. -/
   [ℐ : SmallCategory I]
   [hI : IsFiltered I]
   /-- The diagram of the filtered colimit presentation -/

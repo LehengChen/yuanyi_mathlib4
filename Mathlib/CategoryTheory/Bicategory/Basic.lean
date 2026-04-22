@@ -33,7 +33,7 @@ The composition of 1-morphisms is in fact an object part of a functor
 require this functor directly. Instead, it requires the whiskering functions. For a 1-morphism
 `f : a ⟶ b` and a 2-morphism `η : g ⟶ h` between 1-morphisms `g h : b ⟶ c`, there is a
 2-morphism `whiskerLeft f η : f ≫ g ⟶ f ≫ h`. Similarly, for a 2-morphism `η : f ⟶ g`
-between 1-morphisms `f g : a ⟶ b` and a 1-morphism `f : b ⟶ c`, there is a 2-morphism
+between 1-morphisms `f g : a ⟶ b` and a 1-morphism `h : b ⟶ c`, there is a 2-morphism
 `whiskerRight η h : f ≫ h ⟶ g ≫ h`. These satisfy the exchange law
 `whiskerLeft f θ ≫ whiskerRight η i = whiskerRight η h ≫ whiskerLeft g θ`,
 which is required as an axiom in the definition here.

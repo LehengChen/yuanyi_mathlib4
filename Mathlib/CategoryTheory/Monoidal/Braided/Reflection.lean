@@ -87,7 +87,7 @@ adjunction `L ⊣ R`. Denote the internal hom by `[-,-]`. The following are equi
 3. `L(u ▷ d') : L(d ⊗ d') ⟶ L(RLd ⊗ d')` is an isomorphism,
 4. `L(u ⊗ u) : L(d ⊗ d') ⟶ L(RLd ⊗ RLd')` is an isomorphism,
 
-where `c, d, d'` are arbitrary objects of `C`/`D`, quantified over separately in each condition.
+where `c : C` and `d, d' : D` are quantified separately in each condition.
 -/
 theorem isIso_tfae : List.TFAE
     [ ∀ (c : C) (d : D), IsIso (adj.unit.app ((ihom d).obj (R.obj c)))

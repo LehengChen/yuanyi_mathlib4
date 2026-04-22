@@ -25,7 +25,7 @@ variable {C : Type*} [Category* C]
 /--
 An effective epi family precomposed by a family of split epis is effective epimorphic.
 This version takes an explicit section to the split epis, and is mainly used to define
-`effectiveEpiStructCompOfEffectiveEpiSplitEpi`,
+`effectiveEpiFamilyStructCompOfEffectiveEpiSplitEpi`,
 which takes a `IsSplitEpi` instance instead.
 -/
 noncomputable

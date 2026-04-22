@@ -22,7 +22,7 @@ preadditive categories).
   `isIdempotentComplete_iff_idempotents_have_kernels`.
 - `isIdempotentComplete_of_abelian` expresses that abelian categories are
   idempotent complete.
-- `isIdempotentComplete_iff_ofEquivalence` expresses that if two categories `C` and `D`
+- `isIdempotentComplete_iff_of_equivalence` expresses that if two categories `C` and `D`
   are equivalent, then `C` is idempotent complete iff `D` is.
 - `isIdempotentComplete_iff_opposite` expresses that `Cᵒᵖ` is idempotent complete
   iff `C` is.

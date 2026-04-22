@@ -21,7 +21,7 @@ implemented as the `eqToHom` morphism in the `CategoryStruct` underlying the
 bicategory.
 
 Unlike the situation in ordinary category theory, these 1-morphisms do not
-compose strictly: `eqToHom h.trans h'` is merely isomorphic to
+compose strictly: `eqToHom (h.trans h')` is merely isomorphic to
 `eqToHom h ≫ eqToHom h'`. We define this isomorphism as
 `CategoryTheory.Bicategory.eqToHomTransIso`.
 

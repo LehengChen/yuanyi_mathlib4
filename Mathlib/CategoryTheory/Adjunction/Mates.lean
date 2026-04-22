@@ -262,7 +262,7 @@ variable (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂)
 /-- Given two adjunctions `L₁ ⊣ R₁` and `L₂ ⊣ R₂` both between categories `C`, `D`, there is a
 bijection between natural transformations `L₂ ⟶ L₁` and natural transformations `R₁ ⟶ R₂`. This is
 defined as a special case of `mateEquiv`, where the two "vertical" functors are identity, modulo
-composition with the unitors. Corresponding natural transformations are called `conjugateEquiv`.
+composition with the unitors. This bijection is `conjugateEquiv`.
 TODO: Generalise to when the two vertical functors are equivalences rather than being exactly `𝟭`.
 
 Furthermore, this bijection preserves (and reflects) isomorphisms, i.e. a transformation is an iso

@@ -45,7 +45,7 @@ namespace Limits
 
 variable (C : Type*) [Category* C]
 
-/-- This condition expresses that inclusion morphisms into coproducts are monomorphisms. -/
+/-- This condition expresses that inclusion morphisms into binary coproducts are monomorphisms. -/
 class MonoCoprod : Prop where
   /-- the left inclusion of a colimit binary cofan is mono -/
   binaryCofan_inl : ∀ ⦃A B : C⦄ (c : BinaryCofan A B) (_ : IsColimit c), Mono c.inl

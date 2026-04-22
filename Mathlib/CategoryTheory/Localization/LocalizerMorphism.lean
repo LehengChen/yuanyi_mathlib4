@@ -169,8 +169,9 @@ instance localizedFunctor_isEquivalence [Φ.IsLocalizedEquivalence] :
     (Φ.localizedFunctor L₁ L₂).IsEquivalence :=
   Φ.isEquivalence L₁ L₂ _
 
-/-- When `Φ : LocalizerMorphism W₁ W₂`, if the composition `Φ.functor ⋙ L₂` is a
-localization functor for `W₁`, then `Φ` is a localized equivalence. -/
+/-- When `Φ : LocalizerMorphism W₁ W₂`, if `L₂` is a localization functor for `W₂`
+and the composition `Φ.functor ⋙ L₂` is a localization functor for `W₁`, then `Φ`
+is a localized equivalence. -/
 lemma IsLocalizedEquivalence.of_isLocalization_of_isLocalization
     [(Φ.functor ⋙ L₂).IsLocalization W₁] :
     IsLocalizedEquivalence Φ := by

@@ -268,7 +268,7 @@ theorem mk_right_unitor_hom : Quot.mk _ (Hom₂.right_unitor f) = (ρ_ f).hom :=
 theorem mk_right_unitor_inv : Quot.mk _ (Hom₂.right_unitor_inv f) = (ρ_ f).inv :=
   rfl
 
-/-- Canonical prefunctor from `B` to `free_bicategory B`. -/
+/-- Canonical prefunctor from `B` to `FreeBicategory B`. -/
 @[simps]
 def of : Prefunctor B (FreeBicategory B) where
   obj := id
@@ -322,7 +322,7 @@ theorem liftHom₂_congr {a b : FreeBicategory B} {f g : a ⟶ b} {η θ : Hom�
     liftHom₂ F η = liftHom₂ F θ := by induction H <;> (dsimp [liftHom₂]; cat_disch)
 
 /-- A prefunctor from a quiver `B` to a bicategory `C` can be lifted to a pseudofunctor from
-`free_bicategory B` to `C`.
+`FreeBicategory B` to `C`.
 -/
 @[simps]
 def lift : FreeBicategory B ⥤ᵖ C where

@@ -11,8 +11,8 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Kernels
 /-!
 # Preservation of coimage-image comparisons
 
-If a functor preserves kernels and cokernels, then it preserves abelian images, abelian coimages
-and coimage-image comparisons.
+If a functor preserves the specific kernels and cokernels used to construct abelian images and
+coimages, then it preserves abelian images, abelian coimages and coimage-image comparisons.
 -/
 
 @[expose] public section
@@ -36,7 +36,8 @@ variable [HasCokernel f] [HasKernel (cokernel.π f)] [PreservesColimit (parallel
   [PreservesLimit (parallelPair (cokernel.π f) 0) F] [HasCokernel (F.map f)]
   [HasKernel (cokernel.π (F.map f))]
 
-/-- If a functor preserves kernels and cokernels, it preserves abelian images. -/
+/-- If `F` preserves the cokernel of `f` and the kernel of `cokernel.π f`, then it preserves the
+abelian image of `f`. -/
 def PreservesImage.iso : F.obj (Abelian.image f) ≅ Abelian.image (F.map f) :=
   PreservesKernel.iso F _ ≪≫ kernel.mapIso _ _ (Iso.refl _) (PreservesCokernel.iso F _) (by simp)
 
@@ -70,7 +71,8 @@ variable [HasKernel f] [HasCokernel (kernel.ι f)] [PreservesLimit (parallelPair
   [PreservesColimit (parallelPair (kernel.ι f) 0) F] [HasKernel (F.map f)]
   [HasCokernel (kernel.ι (F.map f))]
 
-/-- If a functor preserves kernels and cokernels, it preserves abelian coimages. -/
+/-- If `F` preserves the kernel of `f` and the cokernel of `kernel.ι f`, then it preserves the
+abelian coimage of `f`. -/
 def PreservesCoimage.iso : F.obj (Abelian.coimage f) ≅ Abelian.coimage (F.map f) :=
   PreservesCokernel.iso F _ ≪≫ cokernel.mapIso _ _ (PreservesKernel.iso F _) (Iso.refl _) (by simp)
 
@@ -110,7 +112,8 @@ theorem PreservesCoimage.hom_coimageImageComparison :
   simp [← Functor.map_comp, ← Iso.eq_inv_comp, ← cancel_epi (Abelian.coimage.π (F.map f)),
     ← cancel_mono (Abelian.image.ι (F.map f))]
 
-/-- If a functor preserves kernels and cokernels, it preserves coimage-image comparisons. -/
+/-- If `F` preserves the kernel and cokernel of `f`, the kernel of `cokernel.π f`, and the
+cokernel of `kernel.ι f`, then it preserves the coimage-image comparison of `f`. -/
 @[simps!]
 def PreservesCoimageImageComparison.iso :
     Arrow.mk (F.map (coimageImageComparison f)) ≅ Arrow.mk (coimageImageComparison (F.map f)) :=

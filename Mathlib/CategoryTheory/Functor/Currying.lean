@@ -201,7 +201,7 @@ def compFlipUncurryIso (F : B ⥤ D) (G : D ⥤ C ⥤ E) :
 lemma comp_flip_uncurry_eq (F : B ⥤ D) (G : D ⥤ C ⥤ E) :
     uncurry.obj (F ⋙ G).flip = (𝟭 C).prod F ⋙ uncurry.obj G.flip := rfl
 
-/-- Natural isomorphism witnessing `comp_flip_curry_eq`. -/
+/-- Natural isomorphism witnessing `curry_obj_comp_flip`. -/
 @[simps!]
 def curryObjCompIso (F : C × B ⥤ D) (G : D ⥤ E) :
     (curry.obj (F ⋙ G)).flip ≅ (curry.obj F).flip ⋙ (whiskeringRight _ _ _).obj G := .refl _

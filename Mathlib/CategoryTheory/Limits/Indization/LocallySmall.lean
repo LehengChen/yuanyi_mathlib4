@@ -12,7 +12,8 @@ public import Mathlib.CategoryTheory.Limits.Indization.IndObject
 /-!
 # There are only `v`-many natural transformations between Ind-objects
 
-We provide the instance `LocallySmall.{v} (FullSubcategory (IsIndObject (C := C)))`, which will
+We provide the instance
+`LocallySmall.{v} (ObjectProperty.FullSubcategory (IsIndObject (C := C)))`, which will
 serve as the basis for our definition of the category of Ind-objects.
 
 ## Future work

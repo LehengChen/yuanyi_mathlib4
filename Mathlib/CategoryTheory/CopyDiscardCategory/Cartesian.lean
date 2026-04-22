@@ -19,7 +19,7 @@ Every cartesian monoidal category is a copy-discard category where:
 
 ## Main results
 
-* `CopyDiscardCategory` instance for cartesian monoidal categories
+* `CopyDiscardCategory` structure for cartesian monoidal categories
 * All morphisms in cartesian categories are deterministic
 
 ## Tags

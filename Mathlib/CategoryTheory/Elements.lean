@@ -253,8 +253,8 @@ def costructuredArrowYonedaEquivalence (F : Cᵒᵖ ⥤ Type v) :
         exact Quiver.Hom.unop_inj (by ext; simp))
   counitIso := NatIso.ofComponents (fun X ↦ CostructuredArrow.isoMk (Iso.refl _))
 
-/-- The equivalence `(-.Elements)ᵒᵖ ≅ (yoneda, -)` of is actually a natural isomorphism of functors.
--/
+/-- The forward direction of the equivalence `(-.Elements)ᵒᵖ ≅ (yoneda, -)` is natural in the
+functor argument. -/
 theorem costructuredArrow_yoneda_equivalence_naturality {F₁ F₂ : Cᵒᵖ ⥤ Type v} (α : F₁ ⟶ F₂) :
     (map α).op ⋙ toCostructuredArrow F₂ = toCostructuredArrow F₁ ⋙ CostructuredArrow.map α := by
   fapply Functor.ext
@@ -266,13 +266,13 @@ theorem costructuredArrow_yoneda_equivalence_naturality {F₁ F₂ : Cᵒᵖ ⥤
     simpa using congr_fun (α.naturality f.op).symm (unop X).snd
   · simp
 
-/-- The equivalence `F.elementsᵒᵖ ≌ (yoneda, F)` is compatible with the forgetful functors. -/
+/-- The equivalence `F.Elementsᵒᵖ ≌ (yoneda, F)` is compatible with the forgetful functors. -/
 @[simps!]
 def costructuredArrowYonedaEquivalenceFunctorProj (F : Cᵒᵖ ⥤ Type v) :
     (costructuredArrowYonedaEquivalence F).functor ⋙ CostructuredArrow.proj _ _ ≅ (π F).leftOp :=
   Iso.refl _
 
-/-- The equivalence `F.elementsᵒᵖ ≌ (yoneda, F)` is compatible with the forgetful functors. -/
+/-- The equivalence `F.Elementsᵒᵖ ≌ (yoneda, F)` is compatible with the forgetful functors. -/
 @[simps!]
 def costructuredArrowYonedaEquivalenceInverseπ (F : Cᵒᵖ ⥤ Type v) :
     (costructuredArrowYonedaEquivalence F).inverse ⋙ (π F).leftOp ≅ CostructuredArrow.proj _ _ :=
@@ -316,7 +316,7 @@ def Elements.initialOfRepresentableBy {F : Cᵒᵖ ⥤ Type*} {X : C} (h : F.Rep
   ⟨.op X, h.homEquiv (𝟙 X)⟩
 
 /-- If `F` is represented by `X`, `X` with its universal element is the initial object of
-`F.Elements.` -/
+`F.Elements`. -/
 def Elements.isInitialOfRepresentableBy {F : Cᵒᵖ ⥤ Type*} {X : C} (h : F.RepresentableBy X) :
     Limits.IsInitial (initialOfRepresentableBy h) :=
   .ofUniqueHom (fun Y ↦ ⟨h.homEquiv.symm Y.snd |>.op, by simp [← h.homEquiv_comp]⟩) fun Y m ↦ by
@@ -329,15 +329,15 @@ def Elements.initialOfCorepresentableBy {F : C ⥤ Type*} {X : C} (h : F.Corepre
   ⟨X, h.homEquiv (𝟙 X)⟩
 
 /-- If `F` is corepresented by `X`, `X` with its universal element is the initial object of
-`F.Elements.` -/
+`F.Elements`. -/
 def Elements.isInitialOfCorepresentableBy {F : C ⥤ Type*} {X : C} (h : F.CorepresentableBy X) :
     Limits.IsInitial (initialOfCorepresentableBy h) :=
   .ofUniqueHom (fun Y ↦ ⟨h.homEquiv.symm Y.snd, by simp [← h.homEquiv_comp]⟩) fun Y m ↦ by
     simp [← m.2, ← h.homEquiv_comp]
 
 /--
-The initial object in the category of elements for a representable functor. In `isInitial` it is
-shown that this is initial.
+The initial object in the category of elements for a representable functor. In
+`Elements.isInitial` it is shown that this is initial.
 -/
 def Elements.initial (A : C) : (yoneda.obj A).Elements :=
   ⟨Opposite.op A, 𝟙 _⟩

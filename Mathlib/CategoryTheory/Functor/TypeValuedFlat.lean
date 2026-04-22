@@ -84,7 +84,7 @@ set_option backward.isDefEq.respectTransparency false in
 open CategoryOfElements in
 /-- Given a functor `F : C ⥤ Type w`, an object `X : C` and `x : F.obj X`,
 this is the equivalence between the category of elements of `fromOverFunctor F x`
-with the `Over` category of `x` considered as an object of `F.Elements`. -/
+with the `Over` category of the object `F.elementsMk X x` of `F.Elements`. -/
 def fromOverFunctorElementsEquivalence :
     (fromOverFunctor F x).Elements ≌ Over (F.elementsMk X x) where
   functor.obj u :=

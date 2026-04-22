@@ -16,7 +16,7 @@ we introduce the class `W.HasLeftCalculusOfFractions`. The main
 result `Localization.exists_leftFraction` is that if `L : C ⥤ D`
 is a localization functor for `W`, then for any morphism `L.obj X ⟶ L.obj Y` in `D`,
 there exists an auxiliary object `Y' : C` and morphisms `g : X ⟶ Y'` and `s : Y ⟶ Y'`,
-with `W s`, such that the given morphism is a sort of fraction `g / s`,
+with `hs : W s`, such that the given morphism is a sort of fraction `g / s`,
 or more precisely of the form `L.map g ≫ (Localization.isoOfHom L W s hs).inv`.
 We also show that the functor `L.mapArrow : Arrow C ⥤ Arrow D` is essentially surjective.
 
@@ -287,8 +287,9 @@ def comp₀ [W.HasLeftCalculusOfFractions] {X Y Z : C}
     W.LeftFraction X Z :=
   mk (z₁.f ≫ z₃.f) (z₂.s ≫ z₃.s) (W.comp_mem _ _ z₂.hs z₃.hs)
 
-/-- The equivalence class of `z₁.comp₀ z₂ z₃` does not depend on the choice of `z₃` provided
-they satisfy the compatibility `z₂.f ≫ z₃.s = z₁.s ≫ z₃.f`. -/
+/-- The equivalence class of `z₁.comp₀ z₂ z₃` does not depend on the choice of `z₃`
+provided both `z₃` and `z₃'` satisfy the compatibilities
+`z₂.f ≫ z₃.s = z₁.s ≫ z₃.f` and `z₂.f ≫ z₃'.s = z₁.s ≫ z₃'.f`. -/
 lemma comp₀_rel [W.HasLeftCalculusOfFractions]
     {X Y Z : C} (z₁ : W.LeftFraction X Y) (z₂ : W.LeftFraction Y Z)
     (z₃ z₃' : W.LeftFraction z₁.Y' z₂.Y') (h₃ : z₂.f ≫ z₃.s = z₁.s ≫ z₃.f)

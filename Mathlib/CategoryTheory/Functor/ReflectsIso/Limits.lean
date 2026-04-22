@@ -8,12 +8,13 @@ module
 public import Mathlib.CategoryTheory.Functor.ReflectsIso.Jointly
 
 /-!
-# Exactness of families of functors which jointly reflect isomorphisms
+# Reflection of limits and colimits by families of functors which jointly reflect isomorphisms
 
 Let `Fᵢ : C ⥤ Dᵢ` be a conservative family of functors (i.e. they jointly
-reflect isomorphisms). Let `G : J ⥤ C` be a functor that has a limit that
-is preserved by the functors `Fᵢ`. In this file, we show that a cone for `G`
-is a limit if it is so after applying the functors `Fᵢ`.
+reflect isomorphisms). Let `G : J ⥤ C` be a functor that has a limit or
+colimit that is preserved by the functors `Fᵢ`. In this file, we show that
+a cone or cocone for `G` is limiting or colimiting if it is so after applying
+the functors `Fᵢ`.
 
 -/
 

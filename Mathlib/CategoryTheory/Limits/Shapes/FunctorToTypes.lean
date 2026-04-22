@@ -75,7 +75,7 @@ variable (F G)
 def binaryProductCone : BinaryFan F G :=
   BinaryFan.mk prod.fst prod.snd
 
-/-- `prod F G` is a limit cone. -/
+/-- The binary fan with point `prod F G` is a limit cone. -/
 @[simps]
 def binaryProductLimit : IsLimit (binaryProductCone F G) where
   lift (s : BinaryFan F G) := prod.lift s.fst s.snd
@@ -215,7 +215,7 @@ variable (F G)
 def binaryCoproductCocone : BinaryCofan F G :=
   BinaryCofan.mk coprod.inl coprod.inr
 
-/-- `coprod F G` is a colimit cocone. -/
+/-- The binary cofan with point `coprod F G` is a colimit cocone. -/
 @[simps]
 def binaryCoproductColimit : IsColimit (binaryCoproductCocone F G) where
   desc (s : BinaryCofan F G) := coprod.desc s.inl s.inr

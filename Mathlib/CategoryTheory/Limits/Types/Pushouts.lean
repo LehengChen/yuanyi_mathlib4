@@ -47,7 +47,7 @@ inductive Pushout.Rel' : X₁ ⊕ X₂ → X₁ ⊕ X₂ → Prop
   | inl_inr (s : S) : Rel' (Sum.inl (f s)) (Sum.inr (g s))
   | inr_inl (s : S) : Rel' (Sum.inr (g s)) (Sum.inl (f s))
 
-/-- The quotient of `X₁ ⊕ X₂` by the relation `PushoutRel' f g`. -/
+/-- The quotient of `X₁ ⊕ X₂` by the relation `Pushout.Rel' f g`. -/
 def Pushout' : Type u := _root_.Quot (Pushout.Rel' f g)
 
 namespace Pushout
