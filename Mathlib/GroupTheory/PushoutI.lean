@@ -360,7 +360,7 @@ theorem eq_one_of_smul_normalized (w : CoprodI.Word G) {i : ι} (h : H)
         Prod.ext_iff] at h
       rcases h with ⟨h₁, h₂⟩
       rw [h₂, equiv_one (d.compl i) (one_mem _) (d.one_mem _)] at h₁
-      erw [mul_one] at h₁
+      rw [coe_mul, Subtype.coe_mk, mul_one] at h₁
       simp only [((injective_iff_map_eq_one' _).1 (d.injective i))] at h₁
       contradiction
     · rw [Word.equivPair_head]
