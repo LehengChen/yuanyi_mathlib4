@@ -217,7 +217,7 @@ end
 
 section ChangeOfUniverse
 
-/-- Up to an equivalence, the type `SmallHom.{w} W X Y n` does not depend on the universe `w`. -/
+/-- Up to an equivalence, the type `SmallHom.{w} W X Y` does not depend on the universe `w`. -/
 noncomputable def chgUniv {X Y : C}
     [HasSmallLocalizedHom.{w} W X Y] [HasSmallLocalizedHom.{w''} W X Y] :
     SmallHom.{w} W X Y ≃ SmallHom.{w''} W X Y :=
