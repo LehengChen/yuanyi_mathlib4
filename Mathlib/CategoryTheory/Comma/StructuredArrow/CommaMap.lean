@@ -74,7 +74,8 @@ def commaMapEquivalenceUnitIso [IsIso β] (X : Comma L' R') :
       commaMapEquivalenceFunctor α β X ⋙ commaMapEquivalenceInverse α β X :=
   NatIso.ofComponents (fun _ => isoMk (Iso.refl _))
 
-/-- The counit functor establishing the equivalence `StructuredArrow.commaMapEquivalence`. -/
+/-- The counit isomorphism establishing the equivalence
+`StructuredArrow.commaMapEquivalence`. -/
 @[simps!]
 def commaMapEquivalenceCounitIso [IsIso β] (X : Comma L' R') :
     commaMapEquivalenceInverse α β X ⋙ commaMapEquivalenceFunctor α β X ≅
