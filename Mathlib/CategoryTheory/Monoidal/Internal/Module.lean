@@ -94,6 +94,64 @@ scoped instance Algebra_of_Mon_ (A : ModuleCat.{u} R) [MonObj A] : Algebra R A w
 theorem algebraMap (A : ModuleCat.{u} R) [MonObj A] (r : R) : algebraMap R A r = η[A] r :=
   rfl
 
+private theorem tensorUnit_mk_apply (A : AlgCat.{u} R) (x : ModuleCat.of R A) :
+    ((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R)) ↑(ModuleCat.of R A))
+        1) x =
+      ((1 : R) ⊗ₜ[R] x) :=
+  rfl
+
+private theorem mk_tensorUnit_apply (A : AlgCat.{u} R) (x : ModuleCat.of R A) :
+    ((TensorProduct.mk R ↑(ModuleCat.of R A) ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R)))
+        x) 1 =
+      (x ⊗ₜ[R] (1 : R)) :=
+  rfl
+
+private theorem mk_tensorObj_apply (A : AlgCat.{u} R) (x y z : ModuleCat.of R A) :
+    ((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorObj (of R ↑A) (of R ↑A))
+        ↑(ModuleCat.of R A)) (x ⊗ₜ[R] y)) z =
+      ((x ⊗ₜ[R] y) ⊗ₜ[R] z) :=
+  rfl
+
+private theorem inverseObj_one_mul_apply (A : AlgCat.{u} R) (x : ModuleCat.of R A) :
+    (Hom.hom (↟(LinearMap.mul' R ↑A)))
+        ((Hom.hom (MonoidalCategoryStruct.whiskerRight (↟(Algebra.linearMap R ↑A))
+            (of R ↑A))) (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R))
+            ↑(ModuleCat.of R A)) 1) x)) =
+      (Hom.hom (MonoidalCategoryStruct.leftUnitor (of R ↑A)).hom)
+        (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R))
+          ↑(ModuleCat.of R A)) 1) x) := by
+  rw [tensorUnit_mk_apply]
+  rw [MonoidalCategory.whiskerRight_apply, MonoidalCategory.leftUnitor_hom_apply]
+  simp [LinearMap.mul'_apply, Algebra.smul_def]
+
+private theorem inverseObj_mul_one_apply (A : AlgCat.{u} R) (x : ModuleCat.of R A) :
+    (LinearMap.mul' R ↑A)
+        ((Hom.hom (MonoidalCategoryStruct.whiskerLeft (of R ↑A) (↟(Algebra.linearMap R ↑A))))
+          (((TensorProduct.mk R ↑(ModuleCat.of R A)
+            ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R))) x) 1)) =
+      (Hom.hom (MonoidalCategoryStruct.rightUnitor (of R ↑A)).hom)
+        (((TensorProduct.mk R ↑(ModuleCat.of R A)
+          ↑(MonoidalCategoryStruct.tensorUnit (ModuleCat R))) x) 1) := by
+  rw [mk_tensorUnit_apply]
+  rw [MonoidalCategory.whiskerLeft_apply, ModuleCat.MonoidalCategory.rightUnitor_hom_apply]
+  simp [LinearMap.mul'_apply, Algebra.smul_def]
+
+private theorem inverseObj_mul_assoc_apply (A : AlgCat.{u} R) (x y z : ModuleCat.of R A) :
+    (Hom.hom (↟(LinearMap.mul' R ↑A)))
+        ((Hom.hom (MonoidalCategoryStruct.whiskerRight (↟(LinearMap.mul' R ↑A))
+            (of R ↑A))) (((TensorProduct.mk R
+            ↑(MonoidalCategoryStruct.tensorObj (of R ↑A) (of R ↑A)) ↑(ModuleCat.of R A))
+            (x ⊗ₜ[R] y)) z)) =
+      (Hom.hom (↟(LinearMap.mul' R ↑A)))
+        ((Hom.hom (MonoidalCategoryStruct.whiskerLeft (of R ↑A) (↟(LinearMap.mul' R ↑A))))
+          ((Hom.hom (MonoidalCategoryStruct.associator (of R ↑A) (of R ↑A) (of R ↑A)).hom)
+            (((TensorProduct.mk R ↑(MonoidalCategoryStruct.tensorObj (of R ↑A) (of R ↑A))
+              ↑(ModuleCat.of R A)) (x ⊗ₜ[R] y)) z))) := by
+  rw [mk_tensorObj_apply]
+  rw [MonoidalCategory.whiskerRight_apply, MonoidalCategory.associator_hom_apply,
+    MonoidalCategory.whiskerLeft_apply]
+  simp [LinearMap.mul'_apply, _root_.mul_assoc]
+
 /-- Converting a monoid object in `ModuleCat R` to a bundled algebra.
 -/
 @[simps!]
@@ -119,29 +177,14 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
     refine TensorProduct.ext <| LinearMap.ext_ring <| LinearMap.ext fun x => ?_
     rw [compr₂ₛₗ_apply, compr₂ₛₗ_apply, hom_comp, LinearMap.comp_apply]
-    -- Porting note: this `dsimp` does nothing
-    -- dsimp [AlgCat.id_apply, TensorProduct.mk_apply, Algebra.linearMap_apply,
-    --    LinearMap.compr₂_apply, Function.comp_apply, RingHom.map_one,
-    --    ModuleCat.MonoidalCategory.tensorHom_tmul, AlgCat.hom_comp,
-    --    ModuleCat.MonoidalCategory.leftUnitor_hom_apply]
-    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
-    dsimp
-    erw [LinearMap.mul'_apply, MonoidalCategory.leftUnitor_hom_apply, ← Algebra.smul_def]
-    dsimp
+    exact inverseObj_one_mul_apply A x
   mul_one := by
     ext : 1
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
     refine TensorProduct.ext <| LinearMap.ext fun x => LinearMap.ext_ring ?_
-    -- Porting note: this `dsimp` does nothing
-    -- dsimp only [AlgCat.id_apply, TensorProduct.mk_apply, Algebra.linearMap_apply,
-    --   LinearMap.compr₂_apply, Function.comp_apply, ModuleCat.MonoidalCategory.hom_apply,
-    --   AlgCat.coe_comp]
-    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
-    erw [compr₂_apply, compr₂ₛₗ_apply]
-    simp only [hom_comp, hom_ofHom, id_coe, id_eq, LinearMap.comp_apply]
-    erw [LinearMap.mul'_apply, ModuleCat.MonoidalCategory.rightUnitor_hom_apply, ← Algebra.commutes,
-      ← Algebra.smul_def]
-    dsimp
+    rw [compr₂ₛₗ_apply]
+    simp only [hom_comp, hom_ofHom, LinearMap.comp_apply]
+    exact inverseObj_mul_one_apply A x
   mul_assoc := by
     ext : 1
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
@@ -150,10 +193,7 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     dsimp only [compr₂ₛₗ_apply, TensorProduct.mk_apply]
     rw [hom_comp, LinearMap.comp_apply, hom_comp, LinearMap.comp_apply, hom_comp,
         LinearMap.comp_apply]
-    erw [LinearMap.mul'_apply, LinearMap.mul'_apply]
-    dsimp only [id_coe, id_eq]
-    erw [TensorProduct.mk_apply, TensorProduct.mk_apply, mul'_apply, LinearMap.id_apply, mul'_apply]
-    simp only [_root_.mul_assoc]
+    exact inverseObj_mul_assoc_apply A x y z
 
 attribute [local instance] inverseObj
 
