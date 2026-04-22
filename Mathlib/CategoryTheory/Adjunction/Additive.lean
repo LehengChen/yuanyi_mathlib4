@@ -64,26 +64,38 @@ lemma homAddEquiv_apply (X : C) (Y : D) (f : F.obj X ⟶ Y) :
 lemma homAddEquiv_symm_apply (X : C) (Y : D) (f : X ⟶ G.obj Y) :
     (adj.homAddEquiv X Y).symm f = (adj.homEquiv X Y).symm f := rfl
 
+omit [Preadditive C] [Preadditive D] [F.Additive] in
 @[simp]
-lemma homAddEquiv_zero (X : C) (Y : D) : adj.homEquiv X Y 0 = 0 := map_zero (adj.homAddEquiv X Y)
+lemma homAddEquiv_zero [Limits.HasZeroMorphisms C] [Limits.HasZeroMorphisms D]
+    (X : C) (Y : D) : adj.homEquiv X Y 0 = 0 := by
+  letI := adj.isRightAdjoint
+  simp [homEquiv_apply]
 
+omit [F.Additive] in
 @[simp]
-lemma homAddEquiv_add (X : C) (Y : D) (f f' : F.obj X ⟶ Y) :
+lemma homAddEquiv_add [G.Additive] (X : C) (Y : D) (f f' : F.obj X ⟶ Y) :
     adj.homEquiv X Y (f + f') = adj.homEquiv X Y f + adj.homEquiv X Y f' :=
-  map_add (adj.homAddEquiv X Y) _ _
+  by simp [homEquiv_apply]
 
+omit [F.Additive] in
 @[simp]
-lemma homAddEquiv_sub (X : C) (Y : D) (f f' : F.obj X ⟶ Y) :
+lemma homAddEquiv_sub [G.Additive] (X : C) (Y : D) (f f' : F.obj X ⟶ Y) :
     adj.homEquiv X Y (f - f') = adj.homEquiv X Y f - adj.homEquiv X Y f' :=
-  map_sub (adj.homAddEquiv X Y) _ _
+  by simp [homEquiv_apply]
 
+omit [F.Additive] in
 @[simp]
-lemma homAddEquiv_neg (X : C) (Y : D) (f : F.obj X ⟶ Y) :
-    adj.homEquiv X Y (-f) = - adj.homEquiv X Y f := map_neg (adj.homAddEquiv X Y) _
+lemma homAddEquiv_neg [G.Additive] (X : C) (Y : D) (f : F.obj X ⟶ Y) :
+    adj.homEquiv X Y (-f) = - adj.homEquiv X Y f :=
+  by simp [homEquiv_apply]
 
+omit [Preadditive C] [Preadditive D] [F.Additive] in
 @[simp]
-lemma homAddEquiv_symm_zero (X : C) (Y : D) :
-    (adj.homEquiv X Y).symm 0 = 0 := map_zero (adj.homAddEquiv X Y).symm
+lemma homAddEquiv_symm_zero [Limits.HasZeroMorphisms C] [Limits.HasZeroMorphisms D]
+    (X : C) (Y : D) :
+    (adj.homEquiv X Y).symm 0 = 0 := by
+  letI := adj.isLeftAdjoint
+  simp [homEquiv_symm_apply]
 
 @[simp]
 lemma homAddEquiv_symm_add (X : C) (Y : D) (f f' : X ⟶ G.obj Y) :

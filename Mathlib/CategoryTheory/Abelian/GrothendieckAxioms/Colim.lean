@@ -35,13 +35,12 @@ variable {C : Type u} [Category.{v} C] {J : Type u'} [Category.{v'} J]
 namespace Limits
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Assume that `colim : (J ⥤ C) ⥤ C` preserves monomorphisms, and
-`φ : X₁ ⟶ X₂` is a monomorphism in `J ⥤ C`, then if `f : c₁.pt ⟶ c₂.pt` is a morphism
-between the points of colimit cocones for `X₁` and `X₂` in such a way that `f`
-identifies to `colim.map φ`, then `f` is a monomorphism. -/
+/-- Assume that the morphism induced by `φ : X₁ ⟶ X₂` between colimits is a
+monomorphism. If `f : c₁.pt ⟶ c₂.pt` is a morphism between the points of colimit
+cocones for `X₁` and `X₂` in such a way that `f` identifies to `colim.map φ`,
+then `f` is a monomorphism. -/
 lemma colim.map_mono' [HasColimitsOfShape J C]
-    [(colim : (J ⥤ C) ⥤ C).PreservesMonomorphisms]
-    {X₁ X₂ : J ⥤ C} (φ : X₁ ⟶ X₂) [Mono φ]
+    {X₁ X₂ : J ⥤ C} (φ : X₁ ⟶ X₂) [Mono (colim.map φ)]
     {c₁ : Cocone X₁} (hc₁ : IsColimit c₁) {c₂ : Cocone X₂} (hc₂ : IsColimit c₂)
     (f : c₁.pt ⟶ c₂.pt) (hf : ∀ j, c₁.ι.app j ≫ f = φ.app j ≫ c₂.ι.app j) : Mono f := by
   refine ((MorphismProperty.monomorphisms C).arrow_mk_iso_iff ?_).2
@@ -70,13 +69,13 @@ lemma colim.map_epi'
 attribute [local instance] IsFiltered.isConnected
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Assume that a functor `X : J ⥤ C` maps any morphism to a monomorphism,
-that `J` is filtered. Then the "inclusion" map `c.ι.app j₀` of a colimit cocone for `X`
-is a monomorphism if `colim : (Under j₀ ⥤ C) ⥤ C` preserves monomorphisms
+/-- Assume that a functor `X : J ⥤ C` maps the morphisms out of `j₀` to monomorphisms
+and that `J` is filtered. Then the "inclusion" map `c.ι.app j₀` of a colimit cocone
+for `X` is a monomorphism if `colim : (Under j₀ ⥤ C) ⥤ C` preserves monomorphisms
 (e.g. when `C` satisfies AB5). -/
 lemma IsColimit.mono_ι_app_of_isFiltered
-    {X : J ⥤ C} [∀ (j j' : J) (φ : j ⟶ j'), Mono (X.map φ)]
-    {c : Cocone X} (hc : IsColimit c) [IsFiltered J] (j₀ : J)
+    {X : J ⥤ C} {c : Cocone X} (hc : IsColimit c) [IsFiltered J] (j₀ : J)
+    [∀ j : Under j₀, Mono (X.map j.hom)]
     [HasColimitsOfShape (Under j₀) C]
     [(colim : (Under j₀ ⥤ C) ⥤ C).PreservesMonomorphisms] :
     Mono (c.ι.app j₀) := by
@@ -91,7 +90,7 @@ lemma IsColimit.mono_ι_app_of_isFiltered
 
 section
 
-variable [HasColimitsOfShape J C] [HasExactColimitsOfShape J C] [HasZeroMorphisms C]
+variable [HasColimitsOfShape J C] [HasZeroMorphisms C]
   (S : ShortComplex (J ⥤ C)) (hS : S.Exact)
   {c₁ : Cocone S.X₁} (hc₁ : IsColimit c₁) (c₂ : Cocone S.X₂) (hc₂ : IsColimit c₂)
   (c₃ : Cocone S.X₃) (hc₃ : IsColimit c₃)
@@ -112,9 +111,11 @@ def colim.mapShortComplex : ShortComplex C :=
 
 variable {S c₂ c₃}
 
+variable [PreservesFiniteLimits (colim (J := J) (C := C))]
+
 set_option backward.isDefEq.respectTransparency false in
 include hc₂ hc₃ hS in
-/-- Assuming `HasExactColimitsOfShape J C`, this lemma rephrases the exactness
+/-- Assuming `colim : (J ⥤ C) ⥤ C` preserves finite limits, this lemma rephrases the exactness
 of the functor `colim : (J ⥤ C) ⥤ C` by saying that if `S : ShortComplex (J ⥤ C)`
 is exact, then the short complex obtained by taking the colimits is exact,
 where we allow the replacement of the chosen colimit cocones of the

@@ -53,11 +53,12 @@ abbrev Derives : Prop := W₁.IsInvertedBy (Φ.functor ⋙ F)
 
 namespace Derives
 
-variable {Φ F} (h : Φ.Derives F) [Φ.IsRightDerivabilityStructure]
+variable {Φ F} (h : Φ.Derives F)
 
 include h
 
-lemma hasPointwiseRightDerivedFunctor : F.HasPointwiseRightDerivedFunctor W₂ := by
+lemma hasPointwiseRightDerivedFunctor [Φ.IsRightDerivabilityStructure] :
+    F.HasPointwiseRightDerivedFunctor W₂ := by
   rw [hasPointwiseRightDerivedFunctor_iff_of_isRightDerivabilityStructure Φ F]
   exact Functor.hasPointwiseRightDerivedFunctor_of_inverts _ h
 
@@ -65,7 +66,7 @@ section
 
 variable {L₂ : C₂ ⥤ D₂} [L₂.IsLocalization W₂] {RF : D₂ ⥤ H} (α : F ⟶ L₂ ⋙ RF)
 
-lemma isIso (X₁ : C₁) [RF.IsRightDerivedFunctor α W₂] :
+lemma isIso (X₁ : C₁) [Φ.IsRightDerivabilityStructure] [RF.IsRightDerivedFunctor α W₂] :
     IsIso (α.app (Φ.functor.obj X₁)) := by
   let G : W₁.Localization ⥤ H := Localization.lift (Φ.functor ⋙ F) h W₁.Q
   let eG := Localization.Lifting.iso W₁.Q W₁ (Φ.functor ⋙ F) G
@@ -74,29 +75,36 @@ lemma isIso (X₁ : C₁) [RF.IsRightDerivedFunctor α W₂] :
   rw [← Φ.isIso_iff_of_isRightDerivabilityStructure W₁.Q L₂ F G eG.inv RF α]
   infer_instance
 
+omit h in
 set_option backward.isDefEq.respectTransparency false in
-lemma isRightDerivedFunctor_of_isIso (hα : ∀ (X₁ : C₁), IsIso (α.app (Φ.functor.obj X₁))) :
+lemma isRightDerivedFunctor_of_isIso [F.HasRightDerivedFunctor W₂] [Φ.HasRightResolutions]
+    (hF : ∀ (X₁ : C₁), IsIso ((F.totalRightDerivedUnit L₂ W₂).app (Φ.functor.obj X₁)))
+    (hα : ∀ (X₁ : C₁), IsIso (α.app (Φ.functor.obj X₁))) :
     RF.IsRightDerivedFunctor α W₂ := by
-  have := h.hasPointwiseRightDerivedFunctor
-  have := h.isIso (F.totalRightDerivedUnit L₂ W₂)
   have := Φ.essSurj_of_hasRightResolutions L₂
   let φ := (F.totalRightDerived L₂ W₂).rightDerivedDesc (F.totalRightDerivedUnit L₂ W₂) W₂ RF α
   have hφ : F.totalRightDerivedUnit L₂ W₂ ≫ Functor.whiskerLeft L₂ φ = α :=
     (F.totalRightDerived L₂ W₂).rightDerived_fac (F.totalRightDerivedUnit L₂ W₂) W₂ RF α
+  have hφ_app (X₁ : C₁) : IsIso (φ.app (L₂.obj (Φ.functor.obj X₁))) := by
+    haveI := hF X₁
+    rw [← isIso_comp_left_iff ((F.totalRightDerivedUnit L₂ W₂).app (Φ.functor.obj X₁))]
+    simpa only [← hφ, NatTrans.comp_app, Functor.whiskerLeft_app] using hα X₁
   have : IsIso φ := by
     rw [NatTrans.isIso_iff_isIso_app]
     intro Y₂
     rw [NatTrans.isIso_app_iff_of_iso φ ((Φ.functor ⋙ L₂).objObjPreimageIso Y₂).symm]
     dsimp
-    simp only [← hφ, NatTrans.comp_app, Functor.whiskerLeft_app, isIso_comp_left_iff] at hα
-    infer_instance
+    exact hφ_app ((Φ.functor ⋙ L₂).objPreimage Y₂)
   rw [← Functor.isRightDerivedFunctor_iff_of_iso (F.totalRightDerivedUnit L₂ W₂) α W₂
     (asIso φ) (by cat_disch)]
   infer_instance
 
-lemma isRightDerivedFunctor_iff_isIso :
+lemma isRightDerivedFunctor_iff_isIso [Φ.IsRightDerivabilityStructure] :
     RF.IsRightDerivedFunctor α W₂ ↔ ∀ (X₁ : C₁), IsIso (α.app (Φ.functor.obj X₁)) :=
-  ⟨fun _ _ ↦ h.isIso α _, h.isRightDerivedFunctor_of_isIso α⟩
+  have := h.hasPointwiseRightDerivedFunctor
+  let hF : ∀ (X₁ : C₁), IsIso ((F.totalRightDerivedUnit L₂ W₂).app (Φ.functor.obj X₁)) :=
+    fun X₁ ↦ h.isIso (F.totalRightDerivedUnit L₂ W₂) X₁
+  ⟨fun _ _ ↦ h.isIso α _, isRightDerivedFunctor_of_isIso α hF⟩
 
 end
 

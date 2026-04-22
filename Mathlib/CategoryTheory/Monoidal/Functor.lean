@@ -1083,14 +1083,15 @@ def laxMonoidalEquivOplaxMonoidal : G.LaxMonoidal ≃ F.OplaxMonoidal where
     · simp [homEquiv_counit, homEquiv_unit, ← δ_natural_assoc]
 
 section Monoidal
-variable [F.Monoidal] [G.Monoidal] [adj.IsMonoidal]
 
 @[reassoc]
-lemma ε_comp_map_ε : ε G ≫ G.map (ε F) = adj.unit.app (𝟙_ C) := by
+lemma ε_comp_map_ε [F.Monoidal] [G.LaxMonoidal] [adj.IsMonoidal] :
+    ε G ≫ G.map (ε F) = adj.unit.app (𝟙_ C) := by
   simp [← adj.unit_app_unit_comp_map_η]
 
 @[reassoc]
-lemma map_η_comp_η : F.map (η G) ≫ η F = adj.counit.app (𝟙_ D) := by
+lemma map_η_comp_η [F.OplaxMonoidal] [G.Monoidal] [adj.IsMonoidal] :
+    F.map (η G) ≫ η F = adj.counit.app (𝟙_ D) := by
   simp [← adj.map_ε_comp_counit_app_unit]
 
 end Monoidal
@@ -1123,31 +1124,35 @@ abbrev IsMonoidal [e.functor.Monoidal] [e.inverse.Monoidal] : Prop := e.toAdjunc
 set_option backward.isDefEq.respectTransparency false in
 example [e.functor.Monoidal] : letI := e.inverseMonoidal; e.IsMonoidal := inferInstance
 
-variable [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal]
-
 open Functor.LaxMonoidal Functor.OplaxMonoidal
 
 @[reassoc]
-lemma unitIso_hom_app_comp_inverse_map_η_functor :
+lemma unitIso_hom_app_comp_inverse_map_η_functor [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] :
     e.unitIso.hom.app (𝟙_ C) ≫ e.inverse.map (η e.functor) = ε e.inverse :=
   e.toAdjunction.unit_app_unit_comp_map_η
 
 @[reassoc]
-lemma unitIso_hom_app_tensor_comp_inverse_map_δ_functor (X Y : C) :
+lemma unitIso_hom_app_tensor_comp_inverse_map_δ_functor [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] (X Y : C) :
     e.unitIso.hom.app (X ⊗ Y) ≫ e.inverse.map (δ e.functor X Y) =
       (e.unitIso.hom.app X ⊗ₘ e.unitIso.hom.app Y) ≫ μ e.inverse _ _ :=
   e.toAdjunction.unit_app_tensor_comp_map_δ X Y
 
 @[reassoc]
-lemma functor_map_ε_inverse_comp_counitIso_hom_app :
+lemma functor_map_ε_inverse_comp_counitIso_hom_app [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] :
     e.functor.map (ε e.inverse) ≫ e.counitIso.hom.app (𝟙_ D) = η e.functor :=
   e.toAdjunction.map_ε_comp_counit_app_unit
 
 @[reassoc]
-lemma functor_map_μ_inverse_comp_counitIso_hom_app_tensor (X Y : D) :
+lemma functor_map_μ_inverse_comp_counitIso_hom_app_tensor [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] (X Y : D) :
     e.functor.map (μ e.inverse X Y) ≫ e.counitIso.hom.app (X ⊗ Y) =
       δ e.functor _ _ ≫ (e.counitIso.hom.app X ⊗ₘ e.counitIso.hom.app Y) :=
   e.toAdjunction.map_μ_comp_counit_app_tensor X Y
+
+variable [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -1167,24 +1172,32 @@ lemma counitIso_inv_app_tensor_comp_functor_map_δ_inverse (X Y : C) :
   simp [← cancel_epi (e.unitIso.hom.app (X ⊗ Y)), Functor.map_comp,
     unitIso_hom_app_tensor_comp_inverse_map_δ_functor_assoc]
 
+omit [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal] in
 @[reassoc]
-lemma unit_app_comp_inverse_map_η_functor :
+lemma unit_app_comp_inverse_map_η_functor [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] :
     e.unit.app (𝟙_ C) ≫ e.inverse.map (η e.functor) = ε e.inverse :=
   e.toAdjunction.unit_app_unit_comp_map_η
 
+omit [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal] in
 @[reassoc]
-lemma unit_app_tensor_comp_inverse_map_δ_functor (X Y : C) :
+lemma unit_app_tensor_comp_inverse_map_δ_functor [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] (X Y : C) :
     e.unit.app (X ⊗ Y) ≫ e.inverse.map (δ e.functor X Y) =
       (e.unit.app X ⊗ₘ e.unitIso.hom.app Y) ≫ μ e.inverse _ _ :=
   e.toAdjunction.unit_app_tensor_comp_map_δ X Y
 
+omit [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal] in
 @[reassoc (attr := simp)]
-lemma functor_map_ε_inverse_comp_counit_app :
+lemma functor_map_ε_inverse_comp_counit_app [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] :
     e.functor.map (ε e.inverse) ≫ e.counit.app (𝟙_ D) = η e.functor :=
   e.toAdjunction.map_ε_comp_counit_app_unit
 
+omit [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal] in
 @[reassoc]
-lemma functor_map_μ_inverse_comp_counit_app_tensor (X Y : D) :
+lemma functor_map_μ_inverse_comp_counit_app_tensor [e.functor.OplaxMonoidal]
+    [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal] (X Y : D) :
     e.functor.map (μ e.inverse X Y) ≫ e.counit.app (X ⊗ Y) =
       δ e.functor _ _ ≫ (e.counit.app X ⊗ₘ e.counit.app Y) :=
   e.toAdjunction.map_μ_comp_counit_app_tensor X Y
@@ -1203,12 +1216,18 @@ lemma counitInv_app_tensor_comp_functor_map_δ_inverse (X Y : C) :
       μ e.functor X Y ≫ e.functor.map (e.unitIso.hom.app X ⊗ₘ e.unitIso.hom.app Y) :=
   counitIso_inv_app_tensor_comp_functor_map_δ_inverse e X Y
 
+omit [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal] in
 @[reassoc (attr := simp)]
-lemma ε_comp_map_ε : ε e.inverse ≫ e.inverse.map (ε e.functor) = e.unit.app (𝟙_ C) :=
+lemma ε_comp_map_ε [e.functor.Monoidal] [e.inverse.LaxMonoidal]
+    [e.toAdjunction.IsMonoidal] :
+    ε e.inverse ≫ e.inverse.map (ε e.functor) = e.unit.app (𝟙_ C) :=
   e.toAdjunction.ε_comp_map_ε
 
+omit [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal] in
 @[reassoc (attr := simp)]
-lemma map_η_comp_η : e.functor.map (η e.inverse) ≫ η e.functor = e.counit.app (𝟙_ D) :=
+lemma map_η_comp_η [e.functor.OplaxMonoidal] [e.inverse.Monoidal]
+    [e.toAdjunction.IsMonoidal] :
+    e.functor.map (η e.inverse) ≫ η e.functor = e.counit.app (𝟙_ D) :=
   e.toAdjunction.map_η_comp_η
 
 instance : (refl (C := C)).functor.Monoidal := inferInstanceAs (𝟭 C).Monoidal

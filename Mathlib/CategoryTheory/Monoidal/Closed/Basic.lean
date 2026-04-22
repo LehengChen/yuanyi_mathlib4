@@ -300,24 +300,28 @@ section OfEquiv
 variable {D : Type u₂} [Category.{v₂} D] [MonoidalCategory.{v₂} D]
 
 variable (F : C ⥤ D) {G : D ⥤ C} (adj : F ⊣ G)
-  [F.Monoidal] [F.IsEquivalence] [MonoidalClosed D]
+  [F.Monoidal] [F.IsEquivalence]
 
 /-- Transport the property of being monoidal closed across a monoidal equivalence of categories -/
 @[implicit_reducible]
-noncomputable def ofEquiv : MonoidalClosed C where
+noncomputable def ofEquiv [MonoidalClosed D] : MonoidalClosed C where
   closed X :=
     { rightAdj := F ⋙ ihom (F.obj X) ⋙ G
       adj := (adj.comp ((ihom.adjunction (F.obj X)).comp
           adj.toEquivalence.symm.toAdjunction)).ofNatIsoLeft
             (Iso.compInverseIso (H := adj.toEquivalence) (Functor.Monoidal.commTensorLeft F X)) }
 
-/-- Suppose we have a monoidal equivalence `F : C ≌ D`, with `D` monoidal closed. We can pull the
-monoidal closed instance back along the equivalence. For `X, Y, Z : C`, this lemma describes the
-resulting currying map `Hom(X ⊗ Y, Z) → Hom(Y, (X ⟶[C] Z))`. (`X ⟶[C] Z` is defined to be
+/-- Suppose we have a monoidal equivalence `F : C ≌ D`, with `F.obj X` closed. We can pull the
+closed instance back along the equivalence. For `X, Y, Z : C`, this lemma describes the resulting
+currying map `Hom(X ⊗ Y, Z) → Hom(Y, (X ⟶[C] Z))`. (`X ⟶[C] Z` is defined to be
 `F⁻¹(F(X) ⟶[D] F(Z))`, so currying in `C` is given by essentially conjugating currying in
 `D` by `F.`) -/
-theorem ofEquiv_curry_def {X Y Z : C} (f : X ⊗ Y ⟶ Z) :
-    letI := ofEquiv F adj
+theorem ofEquiv_curry_def {X Y Z : C} [Closed (F.obj X)] (f : X ⊗ Y ⟶ Z) :
+    letI : Closed X :=
+      { rightAdj := F ⋙ ihom (F.obj X) ⋙ G
+        adj := (adj.comp ((ihom.adjunction (F.obj X)).comp
+            adj.toEquivalence.symm.toAdjunction)).ofNatIsoLeft
+              (Iso.compInverseIso (H := adj.toEquivalence) (Functor.Monoidal.commTensorLeft F X)) }
     MonoidalClosed.curry f =
       adj.homEquiv Y ((ihom (F.obj X)).obj (F.obj Z))
         (MonoidalClosed.curry (adj.toEquivalence.symm.toAdjunction.homEquiv (F.obj X ⊗ F.obj Y) Z
@@ -331,13 +335,17 @@ theorem ofEquiv_curry_def {X Y Z : C} (f : X ⊗ Y ⟶ Z) :
   rw [Adjunction.comp_homEquiv, Adjunction.comp_homEquiv]
   rfl
 
-/-- Suppose we have a monoidal equivalence `F : C ≌ D`, with `D` monoidal closed. We can pull the
-monoidal closed instance back along the equivalence. For `X, Y, Z : C`, this lemma describes the
-resulting uncurrying map `Hom(Y, (X ⟶[C] Z)) → Hom(X ⊗ Y ⟶ Z)`. (`X ⟶[C] Z` is
-defined to be `F⁻¹(F(X) ⟶[D] F(Z))`, so uncurrying in `C` is given by essentially conjugating
-uncurrying in `D` by `F.`) -/
-theorem ofEquiv_uncurry_def {X Y Z : C} :
-    letI := ofEquiv F adj
+/-- Suppose we have a monoidal equivalence `F : C ≌ D`, with `F.obj X` closed. We can pull the
+closed instance back along the equivalence. For `X, Y, Z : C`, this lemma describes the resulting
+uncurrying map `Hom(Y, (X ⟶[C] Z)) → Hom(X ⊗ Y ⟶ Z)`. (`X ⟶[C] Z` is defined to be
+`F⁻¹(F(X) ⟶[D] F(Z))`, so uncurrying in `C` is given by essentially conjugating uncurrying in
+`D` by `F.`) -/
+theorem ofEquiv_uncurry_def {X Y Z : C} [Closed (F.obj X)] :
+    letI : Closed X :=
+      { rightAdj := F ⋙ ihom (F.obj X) ⋙ G
+        adj := (adj.comp ((ihom.adjunction (F.obj X)).comp
+            adj.toEquivalence.symm.toAdjunction)).ofNatIsoLeft
+              (Iso.compInverseIso (H := adj.toEquivalence) (Functor.Monoidal.commTensorLeft F X)) }
     ∀ (f : Y ⟶ (ihom X).obj Z), MonoidalClosed.uncurry f =
       ((Iso.compInverseIso (H := adj.toEquivalence)
           (Functor.Monoidal.commTensorLeft F X)).inv.app Y) ≫

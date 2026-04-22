@@ -128,17 +128,17 @@ class Lan.CommuteWith
 
 namespace Lan.CommuteWith
 
-theorem of_isKan_whisker [HasLeftKanExtension f g] (t : LeftExtension f g) {x : B} (h : c ⟶ x)
-    (H : IsKan (t.whisker h)) (i : t.whisker h ≅ (lanLeftExtension f g).whisker h) :
+theorem of_isKan_whisker [HasLeftKanExtension f g] {x : B} (h : c ⟶ x)
+    {s : LeftExtension f (g ≫ h)} (H : IsKan s)
+    (i : s ≅ (lanLeftExtension f g).whisker h) :
     Lan.CommuteWith f g h :=
   ⟨⟨IsKan.ofIsoKan H i⟩⟩
 
-theorem of_lan_comp_iso [HasLeftKanExtension f g]
-    {x : B} {h : c ⟶ x} [HasLeftKanExtension f (g ≫ h)]
-    (i : f⁺ (g ≫ h) ≅ f⁺ g ≫ h)
-    (w : lanUnit f (g ≫ h) ≫ f ◁ i.hom = lanUnit f g ▷ h ≫ (α_ _ _ _).hom) :
+theorem of_lan_comp_iso [HasLeftKanExtension f g] {x : B} {h : c ⟶ x}
+    {s : LeftExtension f (g ≫ h)} (H : IsKan s) (i : s.extension ≅ f⁺ g ≫ h)
+    (w : s.unit ≫ f ◁ i.hom = lanUnit f g ▷ h ≫ (α_ _ _ _).hom) :
     Lan.CommuteWith f g h :=
-  ⟨⟨(lanIsKan f (g ≫ h)).ofIsoKan <| StructuredArrow.isoMk i⟩⟩
+  ⟨⟨H.ofIsoKan <| StructuredArrow.isoMk i w⟩⟩
 
 variable (f : a ⟶ b) (g : a ⟶ c) [HasLeftKanExtension f g]
 variable {x : B} (h : c ⟶ x) [Lan.CommuteWith f g h]
@@ -272,17 +272,16 @@ class LanLift.CommuteWith
 
 namespace LanLift.CommuteWith
 
-theorem of_isKan_whisker [HasLeftKanLift f g] (t : LeftLift f g) {x : B} (h : x ⟶ c)
-    (H : IsKan (t.whisker h)) (i : t.whisker h ≅ (lanLiftLeftLift f g).whisker h) :
+theorem of_isKan_whisker [HasLeftKanLift f g] {x : B} (h : x ⟶ c)
+    {s : LeftLift f (h ≫ g)} (H : IsKan s) (i : s ≅ (lanLiftLeftLift f g).whisker h) :
     LanLift.CommuteWith f g h :=
   ⟨⟨IsKan.ofIsoKan H i⟩⟩
 
-theorem of_lanLift_comp_iso [HasLeftKanLift f g]
-    {x : B} {h : x ⟶ c} [HasLeftKanLift f (h ≫ g)]
-    (i : f₊ (h ≫ g) ≅ h ≫ f₊ g)
-    (w : lanLiftUnit f (h ≫ g) ≫ i.hom ▷ f = h ◁ lanLiftUnit f g ≫ (α_ _ _ _).inv) :
+theorem of_lanLift_comp_iso [HasLeftKanLift f g] {x : B} {h : x ⟶ c}
+    {s : LeftLift f (h ≫ g)} (H : IsKan s) (i : s.lift ≅ h ≫ f₊ g)
+    (w : s.unit ≫ i.hom ▷ f = h ◁ lanLiftUnit f g ≫ (α_ _ _ _).inv) :
     LanLift.CommuteWith f g h :=
-  ⟨⟨(lanLiftIsKan f (h ≫ g)).ofIsoKan <| StructuredArrow.isoMk i⟩⟩
+  ⟨⟨H.ofIsoKan <| StructuredArrow.isoMk i w⟩⟩
 
 variable (f : b ⟶ a) (g : c ⟶ a) [HasLeftKanLift f g]
 variable {x : B} (h : x ⟶ c) [LanLift.CommuteWith f g h]

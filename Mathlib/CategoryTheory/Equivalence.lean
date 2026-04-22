@@ -689,18 +689,49 @@ lemma isEquivalence_iff_of_iso {F G : C ⥤ D} (e : F ≅ G) :
     F.IsEquivalence ↔ G.IsEquivalence :=
   ⟨fun _ => isEquivalence_of_iso e, fun _ => isEquivalence_of_iso e.symm⟩
 
-/-- If `G` and `F ⋙ G` are equivalence of categories, then `F` is also an equivalence. -/
+/-- If `G` is fully faithful and `F ⋙ G` is an equivalence of categories, then `F` is also an
+equivalence. -/
 lemma isEquivalence_of_comp_right {E : Type*} [Category* E] (F : C ⥤ D) (G : D ⥤ E)
-    [IsEquivalence G] [IsEquivalence (F ⋙ G)] : IsEquivalence F := by
-  rw [isEquivalence_iff_of_iso (F.rightUnitor.symm ≪≫ isoWhiskerLeft F (G.asEquivalence.unitIso))]
-  exact ((F ⋙ G).asEquivalence.trans G.asEquivalence.symm).isEquivalence_functor
+    [G.Faithful] [G.Full] [IsEquivalence (F ⋙ G)] : IsEquivalence F where
+  faithful := Faithful.of_comp F G
+  full := Full.of_comp_faithful F G
+  essSurj := essSurj_of_comp_fully_faithful F G
 
-/-- If `F` and `F ⋙ G` are equivalence of categories, then `G` is also an equivalence. -/
+/-- If `F` is full and essentially surjective and `F ⋙ G` is an equivalence of categories, then
+`G` is also an equivalence. -/
 lemma isEquivalence_of_comp_left {E : Type*} [Category* E] (F : C ⥤ D) (G : D ⥤ E)
-    [IsEquivalence F] [IsEquivalence (F ⋙ G)] : IsEquivalence G := by
-  rw [isEquivalence_iff_of_iso (G.leftUnitor.symm ≪≫
-    isoWhiskerRight F.asEquivalence.counitIso.symm G)]
-  exact (F.asEquivalence.symm.trans (F ⋙ G).asEquivalence).isEquivalence_functor
+    [F.Full] [F.EssSurj] [IsEquivalence (F ⋙ G)] : IsEquivalence G where
+  full := by
+    constructor
+    intro X Y f
+    refine ⟨(F.objObjPreimageIso X).inv ≫
+        F.map ((F ⋙ G).preimage (G.map (F.objObjPreimageIso X).hom ≫ f ≫
+          G.map (F.objObjPreimageIso Y).inv)) ≫
+        (F.objObjPreimageIso Y).hom, ?_⟩
+    simp only [Functor.map_comp]
+    rw [← Functor.comp_map F G, (F ⋙ G).map_preimage]
+    simp
+  faithful := by
+    constructor
+    intro X Y f g h
+    let eX := F.objObjPreimageIso X
+    let eY := F.objObjPreimageIso Y
+    let f' := F.preimage (eX.hom ≫ f ≫ eY.inv)
+    let g' := F.preimage (eX.hom ≫ g ≫ eY.inv)
+    have hfg' : f' = g' := (F ⋙ G).map_injective (by
+      dsimp [f', g']
+      simp [h])
+    have hconj : eX.hom ≫ f ≫ eY.inv = eX.hom ≫ g ≫ eY.inv := by
+      calc
+        eX.hom ≫ f ≫ eY.inv = F.map f' := by simp [f']
+        _ = F.map g' := by rw [hfg']
+        _ = eX.hom ≫ g ≫ eY.inv := by simp [g']
+    rw [← cancel_epi eX.hom, ← cancel_mono eY.inv]
+    simpa [Category.assoc] using hconj
+  essSurj := by
+    constructor
+    intro Z
+    exact ⟨F.obj ((F ⋙ G).objPreimage Z), ⟨(F ⋙ G).objObjPreimageIso Z⟩⟩
 
 end Functor
 

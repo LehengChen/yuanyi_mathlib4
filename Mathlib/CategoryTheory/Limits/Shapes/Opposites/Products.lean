@@ -40,9 +40,8 @@ instance hasCoproductsOfShape_opposite [HasProductsOfShape X C] : HasCoproductsO
     hasLimitsOfShape_of_equivalence (Discrete.opposite X).symm
   infer_instance
 
-theorem hasCoproductsOfShape_of_opposite [HasProductsOfShape X Cᵒᵖ] : HasCoproductsOfShape X C :=
-  haveI : HasLimitsOfShape (Discrete X)ᵒᵖ Cᵒᵖ :=
-    hasLimitsOfShape_of_equivalence (Discrete.opposite X).symm
+theorem hasCoproductsOfShape_of_opposite [HasLimitsOfShape (Discrete X)ᵒᵖ Cᵒᵖ] :
+    HasCoproductsOfShape X C :=
   hasColimitsOfShape_of_hasLimitsOfShape_op
 
 /-- If `C` has coproducts indexed by `X`, then `Cᵒᵖ` has products indexed by `X`.
@@ -52,34 +51,43 @@ instance hasProductsOfShape_opposite [HasCoproductsOfShape X C] : HasProductsOfS
     hasColimitsOfShape_of_equivalence (Discrete.opposite X).symm
   hasLimitsOfShape_op_of_hasColimitsOfShape
 
-theorem hasProductsOfShape_of_opposite [HasCoproductsOfShape X Cᵒᵖ] : HasProductsOfShape X C :=
-  haveI : HasColimitsOfShape (Discrete X)ᵒᵖ Cᵒᵖ :=
-    hasColimitsOfShape_of_equivalence (Discrete.opposite X).symm
+theorem hasProductsOfShape_of_opposite [HasColimitsOfShape (Discrete X)ᵒᵖ Cᵒᵖ] :
+    HasProductsOfShape X C :=
   hasLimitsOfShape_of_hasColimitsOfShape_op
 
 instance hasProducts_opposite [HasCoproducts.{v₂} C] : HasProducts.{v₂} Cᵒᵖ := fun _ =>
   inferInstance
 
 theorem hasProducts_of_opposite [HasCoproducts.{v₂} Cᵒᵖ] : HasProducts.{v₂} C := fun X =>
+  haveI : HasColimitsOfShape (Discrete X)ᵒᵖ Cᵒᵖ :=
+    hasColimitsOfShape_of_equivalence (Discrete.opposite X).symm
   hasProductsOfShape_of_opposite X
 
 instance hasCoproducts_opposite [HasProducts.{v₂} C] : HasCoproducts.{v₂} Cᵒᵖ := fun _ =>
   inferInstance
 
 theorem hasCoproducts_of_opposite [HasProducts.{v₂} Cᵒᵖ] : HasCoproducts.{v₂} C := fun X =>
+  haveI : HasLimitsOfShape (Discrete X)ᵒᵖ Cᵒᵖ :=
+    hasLimitsOfShape_of_equivalence (Discrete.opposite X).symm
   hasCoproductsOfShape_of_opposite X
 
 instance hasFiniteCoproducts_opposite [HasFiniteProducts C] : HasFiniteCoproducts Cᵒᵖ where
   out _ := Limits.hasCoproductsOfShape_opposite _
 
 theorem hasFiniteCoproducts_of_opposite [HasFiniteProducts Cᵒᵖ] : HasFiniteCoproducts C :=
-  { out := fun _ => hasCoproductsOfShape_of_opposite _ }
+  { out := fun n =>
+      haveI : HasLimitsOfShape (Discrete (Fin n))ᵒᵖ Cᵒᵖ :=
+        hasLimitsOfShape_of_equivalence (Discrete.opposite (Fin n)).symm
+      hasCoproductsOfShape_of_opposite _ }
 
 instance hasFiniteProducts_opposite [HasFiniteCoproducts C] : HasFiniteProducts Cᵒᵖ where
   out _ := inferInstance
 
 theorem hasFiniteProducts_of_opposite [HasFiniteCoproducts Cᵒᵖ] : HasFiniteProducts C :=
-  { out := fun _ => hasProductsOfShape_of_opposite _ }
+  { out := fun n =>
+      haveI : HasColimitsOfShape (Discrete (Fin n))ᵒᵖ Cᵒᵖ :=
+        hasColimitsOfShape_of_equivalence (Discrete.opposite (Fin n)).symm
+      hasProductsOfShape_of_opposite _ }
 
 section OppositeCoproducts
 

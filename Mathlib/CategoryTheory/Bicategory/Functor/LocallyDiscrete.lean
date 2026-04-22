@@ -16,8 +16,9 @@ bicategories.
 
 Firstly, we define the constructors `pseudofunctorOfIsLocallyDiscrete` and
 `oplaxFunctorOfIsLocallyDiscrete` for defining pseudofunctors and oplax functors
-from a locally discrete bicategory. In this situation, we do not need to care about
-the field `map₂`, because all the `2`-morphisms in `B` are identities.
+from a locally discrete bicategory. More generally, it suffices that every `2`-morphism
+in `B` identifies its source and target `1`-morphisms. In this situation, we do not need
+to care about the field `map₂`.
 
 We also define a specialized constructor `LocallyDiscrete.mkPseudofunctor` when
 the source bicategory is of the form `B := LocallyDiscrete B₀` for a category `B₀`.
@@ -34,72 +35,88 @@ namespace CategoryTheory
 
 open Bicategory
 
-/-- Constructor for pseudofunctors from a locally discrete bicategory. In that
-case, we do not need to provide the `map₂` field of pseudofunctors. -/
+/-- Constructor for pseudofunctors from a bicategory where any `2`-morphism identifies
+the corresponding `1`-morphisms. In particular, this applies to locally discrete bicategories.
+In that case, we do not need to provide the `map₂` field of pseudofunctors. -/
 @[simps obj map mapId mapComp]
 def pseudofunctorOfIsLocallyDiscrete
-    {B C : Type*} [Bicategory B] [IsLocallyDiscrete B] [Bicategory C]
+    {B C : Type*} [Bicategory B] [Bicategory C]
     (obj : B → C)
     (map : ∀ {b b' : B}, (b ⟶ b') → (obj b ⟶ obj b'))
     (mapId : ∀ (b : B), map (𝟙 b) ≅ 𝟙 _)
     (mapComp : ∀ {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂), map (f ≫ g) ≅ map f ≫ map g)
+    (eq_of_hom : ∀ {b b' : B} {f g : b ⟶ b'}, (f ⟶ g) → f = g := by
+      intro b b' f g φ
+      exact obj_ext_of_isDiscrete φ)
     (map₂_associator : ∀ {b₀ b₁ b₂ b₃ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) (h : b₂ ⟶ b₃),
       (mapComp (f ≫ g) h).hom ≫
         (mapComp f g).hom ▷ map h ≫ (α_ (map f) (map g) (map h)).hom ≫
-          map f ◁ (mapComp g h).inv ≫ (mapComp f (g ≫ h)).inv = eqToHom (by simp) := by cat_disch)
+          map f ◁ (mapComp g h).inv ≫ (mapComp f (g ≫ h)).inv =
+            eqToHom (congr_arg map (eq_of_hom (α_ f g h).hom)) := by cat_disch)
     (map₂_left_unitor : ∀ {b₀ b₁ : B} (f : b₀ ⟶ b₁),
-      (mapComp (𝟙 b₀) f).hom ≫ (mapId b₀).hom ▷ map f ≫ (λ_ (map f)).hom = eqToHom (by simp) := by
+      (mapComp (𝟙 b₀) f).hom ≫ (mapId b₀).hom ▷ map f ≫ (λ_ (map f)).hom =
+        eqToHom (congr_arg map (eq_of_hom (λ_ f).hom)) := by
         cat_disch)
     (map₂_right_unitor : ∀ {b₀ b₁ : B} (f : b₀ ⟶ b₁),
-      (mapComp f (𝟙 b₁)).hom ≫ map f ◁ (mapId b₁).hom ≫ (ρ_ (map f)).hom = eqToHom (by simp) := by
+      (mapComp f (𝟙 b₁)).hom ≫ map f ◁ (mapId b₁).hom ≫ (ρ_ (map f)).hom =
+        eqToHom (congr_arg map (eq_of_hom (ρ_ f).hom)) := by
         cat_disch) :
     B ⥤ᵖ C where
   obj := obj
   map := map
-  map₂ φ := eqToHom (by
-    obtain rfl := obj_ext_of_isDiscrete φ
-    dsimp)
+  map₂ φ := eqToHom (congr_arg map (eq_of_hom φ))
   mapId := mapId
   mapComp := mapComp
+  map₂_associator := fun f g h => (map₂_associator f g h).symm
+  map₂_left_unitor := fun f => (map₂_left_unitor f).symm
+  map₂_right_unitor := fun f => (map₂_right_unitor f).symm
   map₂_whisker_left _ _ _ η := by
-    obtain rfl := obj_ext_of_isDiscrete η
+    obtain rfl := eq_of_hom η
     simp
   map₂_whisker_right η _ := by
-    obtain rfl := obj_ext_of_isDiscrete η
+    obtain rfl := eq_of_hom η
     simp
 
-/-- Constructor for oplax functors from a locally discrete bicategory. In that
-case, we do not need to provide the `map₂` field of oplax functors. -/
+/-- Constructor for oplax functors from a bicategory where any `2`-morphism identifies
+the corresponding `1`-morphisms. In particular, this applies to locally discrete bicategories.
+In that case, we do not need to provide the `map₂` field of oplax functors. -/
 @[simps obj map mapId mapComp]
 def oplaxFunctorOfIsLocallyDiscrete
-    {B C : Type*} [Bicategory B] [IsLocallyDiscrete B] [Bicategory C]
+    {B C : Type*} [Bicategory B] [Bicategory C]
     (obj : B → C)
     (map : ∀ {b b' : B}, (b ⟶ b') → (obj b ⟶ obj b'))
     (mapId : ∀ (b : B), map (𝟙 b) ⟶ 𝟙 _)
     (mapComp : ∀ {b₀ b₁ b₂ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂), map (f ≫ g) ⟶ map f ≫ map g)
+    (eq_of_hom : ∀ {b b' : B} {f g : b ⟶ b'}, (f ⟶ g) → f = g := by
+      intro b b' f g φ
+      exact obj_ext_of_isDiscrete φ)
     (map₂_associator : ∀ {b₀ b₁ b₂ b₃ : B} (f : b₀ ⟶ b₁) (g : b₁ ⟶ b₂) (h : b₂ ⟶ b₃),
-      eqToHom (by simp) ≫ mapComp f (g ≫ h) ≫ map f ◁ mapComp g h =
+      eqToHom (congr_arg map (eq_of_hom (α_ f g h).hom)) ≫
+          mapComp f (g ≫ h) ≫ map f ◁ mapComp g h =
         mapComp (f ≫ g) h ≫ mapComp f g ▷ map h ≫ (α_ (map f) (map g) (map h)).hom := by
           cat_disch)
     (map₂_left_unitor : ∀ {b₀ b₁ : B} (f : b₀ ⟶ b₁),
-      mapComp (𝟙 b₀) f ≫ mapId b₀ ▷ map f ≫ (λ_ (map f)).hom = eqToHom (by simp) := by
+      mapComp (𝟙 b₀) f ≫ mapId b₀ ▷ map f ≫ (λ_ (map f)).hom =
+        eqToHom (congr_arg map (eq_of_hom (λ_ f).hom)) := by
         cat_disch)
     (map₂_right_unitor : ∀ {b₀ b₁ : B} (f : b₀ ⟶ b₁),
-      mapComp f (𝟙 b₁) ≫ map f ◁ mapId b₁ ≫ (ρ_ (map f)).hom = eqToHom (by simp) := by
+      mapComp f (𝟙 b₁) ≫ map f ◁ mapId b₁ ≫ (ρ_ (map f)).hom =
+        eqToHom (congr_arg map (eq_of_hom (ρ_ f).hom)) := by
         cat_disch) :
     B ⥤ᵒᵖᴸ C where
   obj := obj
   map := map
-  map₂ φ := eqToHom (by
-    obtain rfl := obj_ext_of_isDiscrete φ
-    dsimp)
+  map₂ φ := eqToHom (congr_arg map (eq_of_hom φ))
   mapId := mapId
   mapComp := mapComp
+  map₂_associator := fun f g h => map₂_associator f g h
+  map₂_leftUnitor := fun f => (map₂_left_unitor f).symm
+  map₂_rightUnitor := fun f => (map₂_right_unitor f).symm
   mapComp_naturality_left η := by
-    obtain rfl := obj_ext_of_isDiscrete η
+    obtain rfl := eq_of_hom η
     simp
   mapComp_naturality_right _ _ _ η := by
-    obtain rfl := obj_ext_of_isDiscrete η
+    obtain rfl := eq_of_hom η
     simp
 
 section
@@ -181,8 +198,10 @@ def mkPseudofunctor {B₀ C : Type*} [Category* B₀] [Bicategory C]
         cat_disch) :
     LocallyDiscrete B₀ ⥤ᵖ C :=
   pseudofunctorOfIsLocallyDiscrete (fun b ↦ obj b.as) (fun f ↦ map f.as)
-    (fun _ ↦ mapId _) (fun _ _ ↦ mapComp _ _) (fun _ _ _ ↦ map₂_associator _ _ _)
-    (fun _ ↦ map₂_left_unitor _) (fun _ ↦ map₂_right_unitor _)
+    (fun _ ↦ mapId _) (fun _ _ ↦ mapComp _ _)
+    (map₂_associator := fun _ _ _ ↦ map₂_associator _ _ _)
+    (map₂_left_unitor := fun _ ↦ map₂_left_unitor _)
+    (map₂_right_unitor := fun _ ↦ map₂_right_unitor _)
 
 end LocallyDiscrete
 

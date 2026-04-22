@@ -39,8 +39,11 @@ open CategoryTheory.Limits Opposite Functor
 
 variable {C : Type u₁} [Category.{v₁} C]
 
-variable {J : Type u₂} [Category.{v₂} J] [HasColimitsOfShape J (Type v₁)]
-  [HasColimitsOfShape J (Type (max u₁ v₁))] (F : J ⥤ Cᵒᵖ ⥤ Type v₁)
+variable {J : Type u₂} [Category.{v₂} J] (F : J ⥤ Cᵒᵖ ⥤ Type v₁)
+
+section HasColimitsOfShape
+
+variable [HasColimitsOfShape J (Type v₁)] [HasColimitsOfShape J (Type (max u₁ v₁))]
 
 /-- Naturally in `X`, we have `Hom(YX, colim_i Fi) ≅ colim_i Hom(YX, Fi)`. -/
 noncomputable def yonedaYonedaColimit :
@@ -73,13 +76,18 @@ theorem yonedaYonedaColimit_app_inv {X : C} : ((yonedaYonedaColimit F).app (op X
   simp [largeCurriedYonedaLemma, yonedaOpCompYonedaObj, FunctorToTypes.colimit.map_ι_apply,
     map_yonedaEquiv]
 
+end HasColimitsOfShape
+
 set_option backward.isDefEq.respectTransparency false in
-noncomputable instance {X : C} : PreservesColimit F (coyoneda.obj (op (yoneda.obj X))) := by
-  suffices IsIso (colimit.post F (coyoneda.obj (op (yoneda.obj X)))) from
-    preservesColimit_of_isIso_post _ _
-  suffices colimit.post F (coyoneda.obj (op (yoneda.obj X))) =
-      (colimitObjIsoColimitCompEvaluation _ _).inv ≫ ((yonedaYonedaColimit F).app (op X)).inv from
-    this ▸ inferInstance
-  rw [yonedaYonedaColimit_app_inv, Iso.inv_hom_id_assoc]
+noncomputable instance {X : C} [∀ Y : Cᵒᵖ, HasColimit (F.flip.obj Y)] :
+    PreservesColimit F (coyoneda.obj (op (yoneda.obj X))) := by
+  haveI : PreservesColimit F
+      ((evaluation Cᵒᵖ (Type v₁) ⋙
+          (whiskeringRight (Cᵒᵖ ⥤ Type v₁) (Type v₁) (Type (max u₁ v₁))).obj
+            uliftFunctor.{u₁}).obj (op X)) := by
+    change PreservesColimit F (((evaluation Cᵒᵖ (Type v₁)).obj (op X)) ⋙
+      uliftFunctor.{u₁})
+    infer_instance
+  exact preservesColimit_of_natIso F (largeCurriedYonedaLemma.app (op X)).symm
 
 end CategoryTheory

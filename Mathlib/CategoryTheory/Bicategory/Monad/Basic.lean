@@ -56,19 +56,30 @@ variable {a : B}
 /- Comonad laws -/
 section
 
-variable (t : a ⟶ a) [Comonad t]
+open scoped MonoidalCategory
+
+variable {C : Type v} [Category.{w} C] [MonoidalCategory.{w} C]
+variable (t : C) [ComonObj t]
 
 @[reassoc (attr := simp)]
-theorem counit_comul : Δ ≫ ε ▷ t = (λ_ t).inv := ComonObj.counit_comul t
+theorem counit_comul : ComonObj.comul ≫ ComonObj.counit ▷ t = (λ_ t).inv :=
+  ComonObj.counit_comul t
 
 @[reassoc (attr := simp)]
-theorem comul_counit : Δ ≫ t ◁ ε = (ρ_ t).inv := ComonObj.comul_counit t
+theorem comul_counit : ComonObj.comul ≫ t ◁ ComonObj.counit = (ρ_ t).inv :=
+  ComonObj.comul_counit t
 
 @[reassoc (attr := simp)]
-theorem comul_assoc : Δ ≫ t ◁ Δ = Δ ≫ Δ ▷ t ≫ (α_ t t t).hom := ComonObj.comul_assoc t
+theorem comul_assoc :
+    ComonObj.comul ≫ t ◁ ComonObj.comul =
+      ComonObj.comul ≫ ComonObj.comul ▷ t ≫ (α_ t t t).hom :=
+  ComonObj.comul_assoc t
 
 @[reassoc]
-theorem comul_assoc_flip : Δ ≫ Δ ▷ t = Δ ≫ t ◁ Δ ≫ (α_ t t t).inv := ComonObj.comul_assoc_flip t
+theorem comul_assoc_flip :
+    ComonObj.comul ≫ ComonObj.comul ▷ t =
+      ComonObj.comul ≫ t ◁ ComonObj.comul ≫ (α_ t t t).inv :=
+  ComonObj.comul_assoc_flip t
 
 end
 
@@ -105,6 +116,16 @@ def toOplax {a : B} (t : a ⟶ a) [Comonad t] : LocallyDiscrete (Discrete Unit) 
   map₂_associator _ _ _ := by
     rw [Category.id_comp]
     apply Comonad.comul_assoc
+  map₂_leftUnitor _ := by
+    have h : Δ ≫ ε ▷ t = (λ_ t).inv := by
+      simpa only [whiskerRight_def, leftUnitor_def] using (ComonObj.counit_comul t)
+    rw [← Category.assoc, h]
+    simp
+  map₂_rightUnitor _ := by
+    have h : Δ ≫ t ◁ ε = (ρ_ t).inv := by
+      simpa only [whiskerLeft_def, rightUnitor_def] using (ComonObj.comul_counit t)
+    rw [← Category.assoc, h]
+    simp
 
 end Comonad
 

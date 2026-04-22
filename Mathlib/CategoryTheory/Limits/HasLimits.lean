@@ -246,9 +246,10 @@ theorem limit.hom_ext {F : J ⥤ C} [HasLimit F] {X : C} {f f' : X ⟶ limit F}
     (w : ∀ j, f ≫ limit.π F j = f' ≫ limit.π F j) : f = f' :=
   (limit.isLimit F).hom_ext w
 
-instance isIso_limMap {F G : J ⥤ C} [HasLimit F] [HasLimit G] (α : F ⟶ G) [IsIso α] :
-    IsIso (limMap α) :=
-  ⟨limMap (inv α), by cat_disch , by cat_disch⟩
+instance isIso_limMap {F G : J ⥤ C} [HasLimit F] [HasLimit G] (α : F ⟶ G)
+    [∀ j, IsIso (α.app j)] : IsIso (limMap α) := by
+  haveI : IsIso α := NatIso.isIso_of_isIso_app α
+  exact ⟨limMap (inv α), by cat_disch , by cat_disch⟩
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
@@ -542,8 +543,18 @@ instance : IsRightAdjoint (lim : (J ⥤ C) ⥤ C) :=
 
 end LimFunctor
 
-instance limMap_mono' {F G : J ⥤ C} [HasLimitsOfShape J C] (α : F ⟶ G) [Mono α] : Mono (limMap α) :=
-  (lim : (J ⥤ C) ⥤ C).map_mono α
+instance limMap_mono' {F G : J ⥤ C} [HasLimit F] [HasLimit G] (α : F ⟶ G) [Mono α] :
+    Mono (limMap α) :=
+  ⟨fun {Z} u v h => by
+    apply limit.hom_ext
+    intro j
+    have hcone :
+        (const J).map u ≫ (limit.cone F).π =
+          (const J).map v ≫ (limit.cone F).π := by
+      apply (cancel_mono α).1
+      ext j
+      simpa [Category.assoc] using congrArg (fun f => f ≫ limit.π G j) h
+    simpa using NatTrans.congr_app hcone j⟩
 
 instance limMap_mono {F G : J ⥤ C} [HasLimit F] [HasLimit G] (α : F ⟶ G) [∀ j, Mono (α.app j)] :
     Mono (limMap α) :=
@@ -813,9 +824,10 @@ theorem colimit.hom_ext {F : J ⥤ C} [HasColimit F] {X : C} {f f' : colimit F �
     (w : ∀ j, colimit.ι F j ≫ f = colimit.ι F j ≫ f') : f = f' :=
   (colimit.isColimit F).hom_ext w
 
-instance isIso_colimMap {F G : J ⥤ C} [HasColimit F] [HasColimit G] (α : F ⟶ G) [IsIso α] :
-    IsIso (colimMap α) :=
-  ⟨colimMap (inv α), by cat_disch , by cat_disch⟩
+instance isIso_colimMap {F G : J ⥤ C} [HasColimit F] [HasColimit G] (α : F ⟶ G)
+    [∀ j, IsIso (α.app j)] : IsIso (colimMap α) := by
+  haveI : IsIso α := NatIso.isIso_of_isIso_app α
+  exact ⟨colimMap (inv α), by cat_disch , by cat_disch⟩
 
 @[simp]
 theorem colimit.desc_cocone {F : J ⥤ C} [HasColimit F] :
@@ -1134,9 +1146,18 @@ instance : IsLeftAdjoint (colim : (J ⥤ C) ⥤ C) :=
 
 end ColimFunctor
 
-instance colimMap_epi' {F G : J ⥤ C} [HasColimitsOfShape J C] (α : F ⟶ G) [Epi α] :
+instance colimMap_epi' {F G : J ⥤ C} [HasColimit F] [HasColimit G] (α : F ⟶ G) [Epi α] :
     Epi (colimMap α) :=
-  (colim : (J ⥤ C) ⥤ C).map_epi α
+  ⟨fun {Z} u v h => by
+    apply colimit.hom_ext
+    intro j
+    have hcocone :
+        (colimit.cocone G).ι ≫ (const J).map u =
+          (colimit.cocone G).ι ≫ (const J).map v := by
+      apply (cancel_epi α).1
+      ext j
+      simpa [Category.assoc] using congrArg (fun f => colimit.ι F j ≫ f) h
+    simpa using NatTrans.congr_app hcocone j⟩
 
 instance colimMap_epi {F G : J ⥤ C} [HasColimit F] [HasColimit G] (α : F ⟶ G) [∀ j, Epi (α.app j)] :
     Epi (colimMap α) :=

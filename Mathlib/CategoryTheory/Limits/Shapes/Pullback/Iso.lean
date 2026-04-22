@@ -30,7 +30,7 @@ section PullbackLeftIso
 
 open WalkingCospan
 
-variable (f : X ⟶ Z) (g : Y ⟶ Z) [IsIso f]
+variable (f : X ⟶ Z) (g : Y ⟶ Z) [hf : IsIso f]
 
 /-- If `f : X ⟶ Z` is iso, then `X ×[Z] Y ≅ Y`. This is the explicit limit cone. -/
 def pullbackConeOfLeftIso : PullbackCone f g :=
@@ -58,13 +58,18 @@ theorem pullbackConeOfLeftIso_π_app_right : (pullbackConeOfLeftIso f g).π.app 
 def pullbackConeOfLeftIsoIsLimit : IsLimit (pullbackConeOfLeftIso f g) :=
   PullbackCone.isLimitAux' _ fun s => ⟨s.snd, by simp [← s.condition_assoc]⟩
 
-theorem hasPullback_of_left_iso : HasPullback f g :=
-  ⟨⟨⟨_, pullbackConeOfLeftIsoIsLimit f g⟩⟩⟩
+omit hf in
+theorem hasPullback_of_left_iso [Mono f] [IsSplitEpi f] : HasPullback f g := by
+  haveI : IsIso f := isIso_of_mono_of_isSplitEpi f
+  exact ⟨⟨⟨_, pullbackConeOfLeftIsoIsLimit f g⟩⟩⟩
 
 attribute [local instance] hasPullback_of_left_iso
 
+omit hf in
 set_option backward.isDefEq.respectTransparency false in
-instance pullback_snd_iso_of_left_iso : IsIso (pullback.snd f g) := by
+instance pullback_snd_iso_of_left_iso [Mono f] [IsSplitEpi f] :
+    IsIso (pullback.snd f g) := by
+  haveI : IsIso f := isIso_of_mono_of_isSplitEpi f
   refine ⟨⟨pullback.lift (g ≫ inv f) (𝟙 _) (by simp), ?_, by simp⟩⟩
   ext
   · simp [← pullback.condition_assoc]
@@ -81,7 +86,7 @@ section PullbackRightIso
 
 open WalkingCospan
 
-variable (f : X ⟶ Z) (g : Y ⟶ Z) [IsIso g]
+variable (f : X ⟶ Z) (g : Y ⟶ Z) [hg : IsIso g]
 
 /-- If `g : Y ⟶ Z` is iso, then `X ×[Z] Y ≅ X`. This is the explicit limit cone. -/
 def pullbackConeOfRightIso : PullbackCone f g :=
@@ -110,13 +115,18 @@ theorem pullbackConeOfRightIso_π_app_right : (pullbackConeOfRightIso f g).π.ap
 def pullbackConeOfRightIsoIsLimit : IsLimit (pullbackConeOfRightIso f g) :=
   PullbackCone.isLimitAux' _ fun s => ⟨s.fst, by simp [s.condition_assoc]⟩
 
-theorem hasPullback_of_right_iso : HasPullback f g :=
-  ⟨⟨⟨_, pullbackConeOfRightIsoIsLimit f g⟩⟩⟩
+omit hg in
+theorem hasPullback_of_right_iso [Mono g] [IsSplitEpi g] : HasPullback f g := by
+  haveI : IsIso g := isIso_of_mono_of_isSplitEpi g
+  exact ⟨⟨⟨_, pullbackConeOfRightIsoIsLimit f g⟩⟩⟩
 
 attribute [local instance] hasPullback_of_right_iso
 
+omit hg in
 set_option backward.isDefEq.respectTransparency false in
-instance pullback_fst_iso_of_right_iso : IsIso (pullback.fst f g) := by
+instance pullback_fst_iso_of_right_iso [Mono g] [IsSplitEpi g] :
+    IsIso (pullback.fst f g) := by
+  haveI : IsIso g := isIso_of_mono_of_isSplitEpi g
   refine ⟨⟨pullback.lift (𝟙 _) (f ≫ inv g) (by simp), ?_, by simp⟩⟩
   ext
   · simp
@@ -133,7 +143,7 @@ section PushoutLeftIso
 
 open WalkingSpan
 
-variable (f : X ⟶ Y) (g : X ⟶ Z) [IsIso f]
+variable (f : X ⟶ Y) (g : X ⟶ Z) [hf : IsIso f]
 
 /-- If `f : X ⟶ Y` is iso, then `Y ⨿[X] Z ≅ Z`. This is the explicit colimit cocone. -/
 def pushoutCoconeOfLeftIso : PushoutCocone f g :=
@@ -162,13 +172,18 @@ theorem pushoutCoconeOfLeftIso_ι_app_right : (pushoutCoconeOfLeftIso f g).ι.ap
 def pushoutCoconeOfLeftIsoIsLimit : IsColimit (pushoutCoconeOfLeftIso f g) :=
   PushoutCocone.isColimitAux' _ fun s => ⟨s.inr, by simp [← s.condition]⟩
 
-theorem hasPushout_of_left_iso : HasPushout f g :=
-  ⟨⟨⟨_, pushoutCoconeOfLeftIsoIsLimit f g⟩⟩⟩
+omit hf in
+theorem hasPushout_of_left_iso [IsSplitMono f] [Epi f] : HasPushout f g := by
+  haveI : IsIso f := isIso_of_epi_of_isSplitMono f
+  exact ⟨⟨⟨_, pushoutCoconeOfLeftIsoIsLimit f g⟩⟩⟩
 
 attribute [local instance] hasPushout_of_left_iso
 
+omit hf in
 set_option backward.isDefEq.respectTransparency false in
-instance pushout_inr_iso_of_left_iso : IsIso (pushout.inr f g) := by
+instance pushout_inr_iso_of_left_iso [IsSplitMono f] [Epi f] :
+    IsIso (pushout.inr f g) := by
+  haveI : IsIso f := isIso_of_epi_of_isSplitMono f
   refine ⟨⟨pushout.desc (inv f ≫ g) (𝟙 _) (by simp), by simp, ?_⟩⟩
   ext
   · simp [← pushout.condition]
@@ -185,7 +200,7 @@ section PushoutRightIso
 
 open WalkingSpan
 
-variable (f : X ⟶ Y) (g : X ⟶ Z) [IsIso g]
+variable (f : X ⟶ Y) (g : X ⟶ Z) [hg : IsIso g]
 
 /-- If `f : X ⟶ Z` is iso, then `Y ⨿[X] Z ≅ Y`. This is the explicit colimit cocone. -/
 def pushoutCoconeOfRightIso : PushoutCocone f g :=
@@ -214,13 +229,18 @@ theorem pushoutCoconeOfRightIso_ι_app_right :
 def pushoutCoconeOfRightIsoIsLimit : IsColimit (pushoutCoconeOfRightIso f g) :=
   PushoutCocone.isColimitAux' _ fun s => ⟨s.inl, by simp [← s.condition]⟩
 
-theorem hasPushout_of_right_iso : HasPushout f g :=
-  ⟨⟨⟨_, pushoutCoconeOfRightIsoIsLimit f g⟩⟩⟩
+omit hg in
+theorem hasPushout_of_right_iso [IsSplitMono g] [Epi g] : HasPushout f g := by
+  haveI : IsIso g := isIso_of_epi_of_isSplitMono g
+  exact ⟨⟨⟨_, pushoutCoconeOfRightIsoIsLimit f g⟩⟩⟩
 
 attribute [local instance] hasPushout_of_right_iso
 
+omit hg in
 set_option backward.isDefEq.respectTransparency false in
-instance pushout_inl_iso_of_right_iso : IsIso (pushout.inl _ _ : _ ⟶ pushout f g) := by
+instance pushout_inl_iso_of_right_iso [IsSplitMono g] [Epi g] :
+    IsIso (pushout.inl _ _ : _ ⟶ pushout f g) := by
+  haveI : IsIso g := isIso_of_epi_of_isSplitMono g
   refine ⟨⟨pushout.desc (𝟙 _) (inv g ≫ f) (by simp), by simp, ?_⟩⟩
   ext
   · simp

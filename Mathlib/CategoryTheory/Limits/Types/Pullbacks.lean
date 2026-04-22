@@ -177,30 +177,37 @@ namespace CategoryTheory.Limits.Types
 
 variable {P X Y Z : Type u} {fst : P ⟶ X} {snd : P ⟶ Y} {f : X ⟶ Z} {g : Y ⟶ Z}
 
-lemma range_fst_of_isPullback (h : IsPullback fst snd f g) :
+lemma range_fst_of_isPullback (w : fst ≫ f = snd ≫ g)
+    (h : ∀ x y, f x = g y → ∃ p, fst p = x) :
     Set.range fst = f ⁻¹' Set.range g := by
-  let e := h.isoPullback ≪≫ Types.pullbackIsoPullback f g
-  have : fst = _root_.Prod.fst ∘ Subtype.val ∘ e.hom := by
-    ext p
-    suffices fst p = pullback.fst f g (h.isoPullback.hom p) by simpa
-    rw [← types_comp_apply h.isoPullback.hom (pullback.fst f g), IsPullback.isoPullback_hom_fst]
-  rw [this, Set.range_comp, Set.range_comp, Set.range_eq_univ.mpr (surjective_of_epi e.hom)]
   ext
-  simp [eq_comm]
+  constructor
+  · rintro ⟨p, rfl⟩
+    exact ⟨snd p, (congr_fun w p).symm⟩
+  · rintro ⟨y, hy⟩
+    exact h _ _ hy.symm
 
-lemma range_snd_of_isPullback (h : IsPullback fst snd f g) :
+lemma range_snd_of_isPullback (w : fst ≫ f = snd ≫ g)
+    (h : ∀ x y, f x = g y → ∃ p, snd p = y) :
     Set.range snd = g ⁻¹' Set.range f := by
-  rw [range_fst_of_isPullback (IsPullback.flip h)]
+  ext
+  constructor
+  · rintro ⟨p, rfl⟩
+    exact ⟨fst p, congr_fun w p⟩
+  · rintro ⟨x, hx⟩
+    exact h _ _ hx
 
 variable (f g)
 
 @[simp]
 lemma range_pullbackFst : Set.range (pullback.fst f g) = f ⁻¹' Set.range g :=
-  range_fst_of_isPullback (.of_hasPullback f g)
+  range_fst_of_isPullback pullback.condition
+    (fun x y h ↦ ⟨(pullbackIsoPullback f g).inv ⟨⟨x, y⟩, h⟩, by simp⟩)
 
 @[simp]
 lemma range_pullbackSnd : Set.range (pullback.snd f g) = g ⁻¹' Set.range f :=
-  range_snd_of_isPullback (.of_hasPullback f g)
+  range_snd_of_isPullback pullback.condition
+    (fun x y h ↦ ⟨(pullbackIsoPullback f g).inv ⟨⟨x, y⟩, h⟩, by simp⟩)
 
 section
 

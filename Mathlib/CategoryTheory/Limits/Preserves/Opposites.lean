@@ -468,7 +468,8 @@ lemma preservesFiniteColimits_of_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFinite
 
 /-- If `F : C ⥤ D` preserves finite coproducts, then `F.op : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite
 products. -/
-lemma preservesFiniteProducts_op (F : C ⥤ D) [PreservesFiniteCoproducts F] :
+lemma preservesFiniteProducts_op (F : C ⥤ D)
+    [∀ n, PreservesColimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteProducts F.op where
   preserves n := by
     apply +allowSynthFailures preservesLimitsOfShape_op
@@ -476,7 +477,8 @@ lemma preservesFiniteProducts_op (F : C ⥤ D) [PreservesFiniteCoproducts F] :
 
 /-- If `F : C ⥤ Dᵒᵖ` preserves finite coproducts, then `F.leftOp : Cᵒᵖ ⥤ D` preserves finite
 products. -/
-lemma preservesFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ) [PreservesFiniteCoproducts F] :
+lemma preservesFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ)
+    [∀ n, PreservesColimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteProducts F.leftOp where
   preserves _ := by
     apply +allowSynthFailures preservesLimitsOfShape_leftOp
@@ -484,7 +486,8 @@ lemma preservesFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ) [PreservesFiniteCoprodu
 
 /-- If `F : Cᵒᵖ ⥤ D` preserves finite coproducts, then `F.rightOp : C ⥤ Dᵒᵖ` preserves finite
 products. -/
-lemma preservesFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D) [PreservesFiniteCoproducts F] :
+lemma preservesFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D)
+    [∀ n, PreservesColimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteProducts F.rightOp where
   preserves _ := by
     apply +allowSynthFailures preservesLimitsOfShape_rightOp
@@ -492,7 +495,8 @@ lemma preservesFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D) [PreservesFiniteCoprod
 
 /-- If `F : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite coproducts, then `F.unop : C ⥤ D` preserves finite
 products. -/
-lemma preservesFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFiniteCoproducts F] :
+lemma preservesFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ)
+    [∀ n, PreservesColimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteProducts F.unop where
   preserves _ := by
     apply +allowSynthFailures preservesLimitsOfShape_unop
@@ -500,7 +504,8 @@ lemma preservesFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFiniteCop
 
 /-- If `F : C ⥤ D` preserves finite products, then `F.op : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite
 coproducts. -/
-lemma preservesFiniteCoproducts_op (F : C ⥤ D) [PreservesFiniteProducts F] :
+lemma preservesFiniteCoproducts_op (F : C ⥤ D)
+    [∀ n, PreservesLimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteCoproducts F.op where
   preserves _ := by
     apply +allowSynthFailures preservesColimitsOfShape_op
@@ -508,7 +513,8 @@ lemma preservesFiniteCoproducts_op (F : C ⥤ D) [PreservesFiniteProducts F] :
 
 /-- If `F : C ⥤ Dᵒᵖ` preserves finite products, then `F.leftOp : Cᵒᵖ ⥤ D` preserves finite
 coproducts. -/
-lemma preservesFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ) [PreservesFiniteProducts F] :
+lemma preservesFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ)
+    [∀ n, PreservesLimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteCoproducts F.leftOp where
   preserves _ := by
     apply +allowSynthFailures preservesColimitsOfShape_leftOp
@@ -516,7 +522,8 @@ lemma preservesFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ) [PreservesFiniteProdu
 
 /-- If `F : Cᵒᵖ ⥤ D` preserves finite products, then `F.rightOp : C ⥤ Dᵒᵖ` preserves finite
 coproducts. -/
-lemma preservesFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D) [PreservesFiniteProducts F] :
+lemma preservesFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D)
+    [∀ n, PreservesLimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteCoproducts F.rightOp where
   preserves _ := by
     apply +allowSynthFailures preservesColimitsOfShape_rightOp
@@ -524,7 +531,8 @@ lemma preservesFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D) [PreservesFiniteProd
 
 /-- If `F : Cᵒᵖ ⥤ Dᵒᵖ` preserves finite products, then `F.unop : C ⥤ D` preserves finite
 coproducts. -/
-lemma preservesFiniteCoproducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [PreservesFiniteProducts F] :
+lemma preservesFiniteCoproducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ)
+    [∀ n, PreservesLimitsOfShape (Discrete (Fin n)) F] :
     PreservesFiniteCoproducts F.unop where
   preserves _ := by
     apply +allowSynthFailures preservesColimitsOfShape_unop
@@ -967,7 +975,8 @@ lemma reflectsFiniteColimits_of_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [ReflectsFiniteLi
 
 /-- If `F : C ⥤ D` reflects finite coproducts, then `F.op : Cᵒᵖ ⥤ Dᵒᵖ` reflects finite
 products. -/
-lemma reflectsFiniteProducts_op (F : C ⥤ D) [ReflectsFiniteCoproducts F] :
+lemma reflectsFiniteProducts_op (F : C ⥤ D)
+    [∀ n, ReflectsColimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteProducts F.op where
   reflects n := by
     apply +allowSynthFailures reflectsLimitsOfShape_op
@@ -975,7 +984,8 @@ lemma reflectsFiniteProducts_op (F : C ⥤ D) [ReflectsFiniteCoproducts F] :
 
 /-- If `F : C ⥤ Dᵒᵖ` reflects finite coproducts, then `F.leftOp : Cᵒᵖ ⥤ D` reflects finite
 products. -/
-lemma reflectsFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ) [ReflectsFiniteCoproducts F] :
+lemma reflectsFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ)
+    [∀ n, ReflectsColimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteProducts F.leftOp where
   reflects _ := by
     apply +allowSynthFailures reflectsLimitsOfShape_leftOp
@@ -983,7 +993,8 @@ lemma reflectsFiniteProducts_leftOp (F : C ⥤ Dᵒᵖ) [ReflectsFiniteCoproduct
 
 /-- If `F : Cᵒᵖ ⥤ D` reflects finite coproducts, then `F.rightOp : C ⥤ Dᵒᵖ` reflects finite
 products. -/
-lemma reflectsFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D) [ReflectsFiniteCoproducts F] :
+lemma reflectsFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D)
+    [∀ n, ReflectsColimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteProducts F.rightOp where
   reflects _ := by
     apply +allowSynthFailures reflectsLimitsOfShape_rightOp
@@ -991,7 +1002,8 @@ lemma reflectsFiniteProducts_rightOp (F : Cᵒᵖ ⥤ D) [ReflectsFiniteCoproduc
 
 /-- If `F : Cᵒᵖ ⥤ Dᵒᵖ` reflects finite coproducts, then `F.unop : C ⥤ D` reflects finite
 products. -/
-lemma reflectsFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [ReflectsFiniteCoproducts F] :
+lemma reflectsFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ)
+    [∀ n, ReflectsColimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteProducts F.unop where
   reflects _ := by
     apply +allowSynthFailures reflectsLimitsOfShape_unop
@@ -999,7 +1011,8 @@ lemma reflectsFiniteProducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [ReflectsFiniteCopro
 
 /-- If `F : C ⥤ D` reflects finite products, then `F.op : Cᵒᵖ ⥤ Dᵒᵖ` reflects finite
 coproducts. -/
-lemma reflectsFiniteCoproducts_op (F : C ⥤ D) [ReflectsFiniteProducts F] :
+lemma reflectsFiniteCoproducts_op (F : C ⥤ D)
+    [∀ n, ReflectsLimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteCoproducts F.op where
   reflects _ := by
     apply +allowSynthFailures reflectsColimitsOfShape_op
@@ -1007,7 +1020,8 @@ lemma reflectsFiniteCoproducts_op (F : C ⥤ D) [ReflectsFiniteProducts F] :
 
 /-- If `F : C ⥤ Dᵒᵖ` reflects finite products, then `F.leftOp : Cᵒᵖ ⥤ D` reflects finite
 coproducts. -/
-lemma reflectsFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ) [ReflectsFiniteProducts F] :
+lemma reflectsFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ)
+    [∀ n, ReflectsLimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteCoproducts F.leftOp where
   reflects _ := by
     apply +allowSynthFailures reflectsColimitsOfShape_leftOp
@@ -1015,7 +1029,8 @@ lemma reflectsFiniteCoproducts_leftOp (F : C ⥤ Dᵒᵖ) [ReflectsFiniteProduct
 
 /-- If `F : Cᵒᵖ ⥤ D` reflects finite products, then `F.rightOp : C ⥤ Dᵒᵖ` reflects finite
 coproducts. -/
-lemma reflectsFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D) [ReflectsFiniteProducts F] :
+lemma reflectsFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D)
+    [∀ n, ReflectsLimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteCoproducts F.rightOp where
   reflects _ := by
     apply +allowSynthFailures reflectsColimitsOfShape_rightOp
@@ -1023,7 +1038,8 @@ lemma reflectsFiniteCoproducts_rightOp (F : Cᵒᵖ ⥤ D) [ReflectsFiniteProduc
 
 /-- If `F : Cᵒᵖ ⥤ Dᵒᵖ` reflects finite products, then `F.unop : C ⥤ D` reflects finite
 coproducts. -/
-lemma reflectsFiniteCoproducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ) [ReflectsFiniteProducts F] :
+lemma reflectsFiniteCoproducts_unop (F : Cᵒᵖ ⥤ Dᵒᵖ)
+    [∀ n, ReflectsLimitsOfShape (Discrete (Fin n)) F] :
     ReflectsFiniteCoproducts F.unop where
   reflects _ := by
     apply +allowSynthFailures reflectsColimitsOfShape_unop

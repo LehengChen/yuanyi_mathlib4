@@ -43,7 +43,8 @@ variable {W}
 
 instance IsStableUnderLimitsOfShape.functorCategory
     {K : Type u'} [Category.{v'} K] [W.IsStableUnderLimitsOfShape K]
-    (J : Type u'') [Category.{v''} J] [HasLimitsOfShape K C] :
+    (J : Type u'') [Category.{v''} J]
+    [∀ j : J, PreservesLimitsOfShape K ((evaluation J C).obj j)] :
     (W.functorCategory J).IsStableUnderLimitsOfShape K where
   condition X₁ X₂ _ _ hc₁ hc₂ f hf φ hφ j :=
     MorphismProperty.limitsOfShape_le _
@@ -53,7 +54,8 @@ instance IsStableUnderLimitsOfShape.functorCategory
 
 instance IsStableUnderColimitsOfShape.functorCategory
     {K : Type u'} [Category.{v'} K] [W.IsStableUnderColimitsOfShape K]
-    (J : Type u'') [Category.{v''} J] [HasColimitsOfShape K C] :
+    (J : Type u'') [Category.{v''} J]
+    [∀ j : J, PreservesColimitsOfShape K ((evaluation J C).obj j)] :
     (W.functorCategory J).IsStableUnderColimitsOfShape K where
   condition X₁ X₂ _ _ hc₁ hc₂ f hf φ hφ j :=
     MorphismProperty.colimitsOfShape_le _
@@ -61,19 +63,22 @@ instance IsStableUnderColimitsOfShape.functorCategory
       _ _ (isColimitOfPreserves _ hc₁) (isColimitOfPreserves _ hc₂) (Functor.whiskerRight f _)
       (fun k ↦ hf k j) (φ.app j) (fun k ↦ congr_app (hφ k) j))
 
-instance [W.IsStableUnderBaseChange] (J : Type u'') [Category.{v''} J] [HasPullbacks C] :
+instance [W.IsStableUnderBaseChange] (J : Type u'') [Category.{v''} J]
+    [∀ j : J, PreservesLimitsOfShape WalkingCospan ((evaluation J C).obj j)] :
     (W.functorCategory J).IsStableUnderBaseChange where
   of_isPullback sq hr j :=
     W.of_isPullback (sq.map ((evaluation _ _).obj j)) (hr j)
 
-instance [W.IsStableUnderCobaseChange] (J : Type u'') [Category.{v''} J] [HasPushouts C] :
+instance [W.IsStableUnderCobaseChange] (J : Type u'') [Category.{v''} J]
+    [∀ j : J, PreservesColimitsOfShape WalkingSpan ((evaluation J C).obj j)] :
     (W.functorCategory J).IsStableUnderCobaseChange where
   of_isPushout sq hr j :=
     W.of_isPushout (sq.map ((evaluation _ _).obj j)) (hr j)
 
 instance (K : Type u') [LinearOrder K] [SuccOrder K] [OrderBot K] [WellFoundedLT K]
     [W.IsStableUnderTransfiniteCompositionOfShape K] (J : Type u'') [Category.{v''} J]
-    [HasIterationOfShape K C] :
+    [∀ j : J, PreservesWellOrderContinuousOfShape K ((evaluation J C).obj j)]
+    [∀ j : J, PreservesColimitsOfShape K ((evaluation J C).obj j)] :
     (W.functorCategory J).IsStableUnderTransfiniteCompositionOfShape K where
   le := by
     rintro X Y f ⟨hf⟩ j
@@ -87,31 +92,45 @@ lemma functorCategory_isomorphisms :
   ext _ _ f
   simp only [functorCategory, isomorphisms.iff, NatTrans.isIso_iff_isIso_app]
 
-lemma functorCategory_monomorphisms [HasPullbacks C] :
+lemma functorCategory_monomorphisms
+    [∀ j : J, ((evaluation J C).obj j).PreservesMonomorphisms] :
     (monomorphisms C).functorCategory J = monomorphisms (J ⥤ C) := by
   ext _ _ f
-  simp only [functorCategory, monomorphisms.iff, NatTrans.mono_iff_mono_app]
+  simp only [functorCategory, monomorphisms.iff]
+  constructor
+  · exact fun _ ↦ NatTrans.mono_of_mono_app f
+  · intro _ j
+    exact inferInstanceAs (Mono (((evaluation J C).obj j).map f))
 
-lemma functorCategory_epimorphisms [HasPushouts C] :
+lemma functorCategory_epimorphisms
+    [∀ j : J, ((evaluation J C).obj j).PreservesEpimorphisms] :
     (epimorphisms C).functorCategory J = epimorphisms (J ⥤ C) := by
   ext _ _ f
-  simp only [functorCategory, epimorphisms.iff, NatTrans.epi_iff_epi_app]
+  simp only [functorCategory, epimorphisms.iff]
+  constructor
+  · exact fun _ ↦ NatTrans.epi_of_epi_app f
+  · intro _ j
+    exact inferInstanceAs (Epi (((evaluation J C).obj j).map f))
 
 instance (K : Type u') [LinearOrder K] [SuccOrder K] [OrderBot K] [WellFoundedLT K]
     [(monomorphisms C).IsStableUnderTransfiniteCompositionOfShape K]
-    [HasPullbacks C] [HasIterationOfShape K C] :
+    [∀ j : J, ((evaluation J C).obj j).PreservesMonomorphisms]
+    [∀ j : J, PreservesWellOrderContinuousOfShape K ((evaluation J C).obj j)]
+    [∀ j : J, PreservesColimitsOfShape K ((evaluation J C).obj j)] :
     (monomorphisms (J ⥤ C)).IsStableUnderTransfiniteCompositionOfShape K := by
   rw [← functorCategory_monomorphisms]
   infer_instance
 
 instance (K' : Type u') [(monomorphisms C).IsStableUnderCoproductsOfShape K']
-    [HasCoproductsOfShape K' C] [HasPullbacks C] :
+    [∀ j : J, ((evaluation J C).obj j).PreservesMonomorphisms]
+    [∀ j : J, PreservesColimitsOfShape (Discrete K') ((evaluation J C).obj j)] :
     (monomorphisms (J ⥤ C)).IsStableUnderCoproductsOfShape K' := by
   rw [← functorCategory_monomorphisms]
   infer_instance
 
 instance [IsStableUnderCoproducts.{u'} (monomorphisms C)]
-    [HasCoproducts.{u'} C] [HasPullbacks C] :
+    [∀ j : J, ((evaluation J C).obj j).PreservesMonomorphisms]
+    [∀ (K' : Type u') (j : J), PreservesColimitsOfShape (Discrete K') ((evaluation J C).obj j)] :
     IsStableUnderCoproducts.{u'} (monomorphisms (J ⥤ C)) where
 
 end MorphismProperty

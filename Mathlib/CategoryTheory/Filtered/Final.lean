@@ -175,20 +175,39 @@ theorem IsCofiltered.of_exists_of_isCofiltered_of_fullyFaithful [IsCofiltered D]
       obtain ⟨c, -⟩ := h (Classical.arbitrary D)
       exact ⟨c⟩ }
 
-/-- In this situation, `C` is also filtered, see
+/-- A full functor into a filtered or empty category is final if every target object maps to an
+object in its essential image. In the fully faithful case, `C` is also filtered; see
 `IsFilteredOrEmpty.of_exists_of_isFiltered_of_fullyFaithful`. -/
 theorem Functor.final_of_exists_of_isFiltered_of_fullyFaithful [IsFilteredOrEmpty D] [F.Full]
-    [F.Faithful] (h : ∀ d, ∃ c, Nonempty (d ⟶ F.obj c)) : Final F := by
-  have := IsFilteredOrEmpty.of_exists_of_isFiltered_of_fullyFaithful F h
-  refine Functor.final_of_exists_of_isFiltered F h (fun {d c} s s' => ?_)
-  obtain ⟨c₀, ⟨f⟩⟩ := h (IsFiltered.coeq s s')
-  refine ⟨c₀, F.preimage (IsFiltered.coeqHom s s' ≫ f), ?_⟩
-  simp [reassoc_of% (IsFiltered.coeq_condition s s')]
+    (h : ∀ d, ∃ c, Nonempty (d ⟶ F.obj c)) : Final F := by
+  refine ⟨fun d => ?_⟩
+  have : Nonempty (StructuredArrow d F) := by
+    obtain ⟨c, ⟨f⟩⟩ := h d
+    exact ⟨.mk f⟩
+  refine zigzag_isConnected (fun f g => ?_)
+  let w := IsFiltered.max (F.obj f.right) (F.obj g.right)
+  let p₁ : F.obj f.right ⟶ w := IsFiltered.leftToMax _ _
+  let p₂ : F.obj g.right ⟶ w := IsFiltered.rightToMax _ _
+  let q := IsFiltered.coeq (f.hom ≫ p₁) (g.hom ≫ p₂)
+  let e : w ⟶ q := IsFiltered.coeqHom (f.hom ≫ p₁) (g.hom ≫ p₂)
+  obtain ⟨c₀, ⟨k⟩⟩ := h q
+  let z : StructuredArrow d F := .mk (Y := c₀) (f.hom ≫ p₁ ≫ e ≫ k)
+  refine Zigzag.of_hom_inv
+    (StructuredArrow.homMk (f := f) (f' := z)
+      (show f.right ⟶ c₀ from F.preimage (p₁ ≫ e ≫ k)) ?_)
+    (StructuredArrow.homMk (f := g) (f' := z)
+      (show g.right ⟶ c₀ from F.preimage (p₂ ≫ e ≫ k)) ?_)
+  · simp [z, p₁, e]
+  · simp [z, p₁, p₂, e, q]
+    simpa using (reassoc_of% (IsFiltered.coeq_condition
+      (f.hom ≫ IsFiltered.leftToMax (F.obj f.right) (F.obj g.right))
+      (g.hom ≫ IsFiltered.rightToMax (F.obj f.right) (F.obj g.right))).symm) k
 
-/-- In this situation, `C` is also cofiltered, see
+/-- A full functor into a cofiltered or empty category is initial if every target object receives a
+morphism from its essential image. In the fully faithful case, `C` is also cofiltered; see
 `IsCofilteredOrEmpty.of_exists_of_isCofiltered_of_fullyFaithful`. -/
 theorem Functor.initial_of_exists_of_isCofiltered_of_fullyFaithful [IsCofilteredOrEmpty D] [F.Full]
-    [Faithful F] (h : ∀ d, ∃ c, Nonempty (F.obj c ⟶ d)) : Initial F := by
+    (h : ∀ d, ∃ c, Nonempty (F.obj c ⟶ d)) : Initial F := by
   suffices Final F.op from initial_of_final_op _
   refine Functor.final_of_exists_of_isFiltered_of_fullyFaithful F.op (fun d => ?_)
   obtain ⟨c, ⟨f⟩⟩ := h d.unop
@@ -371,8 +390,8 @@ instance CostructuredArrow.initial_proj_of_isCofiltered [IsCofilteredOrEmpty C]
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor `StructuredArrow d T ⥤ StructuredArrow e (T ⋙ S)` that `u : e ⟶ S.obj d`
 induces via `StructuredArrow.map₂` is final, if `T` and `S` are final and the domain of `T` is
-filtered. -/
-instance StructuredArrow.final_map₂_id [IsFiltered C] {E : Type u₃} [Category.{v₃} E]
+filtered or empty. -/
+instance StructuredArrow.final_map₂_id [IsFilteredOrEmpty C] {E : Type u₃} [Category.{v₃} E]
     {T : C ⥤ D} [T.Final] {S : D ⥤ E} [S.Final] {T' : C ⥤ E}
     {d : D} {e : E} (u : e ⟶ S.obj d) (α : T ⋙ S ⟶ T') [IsIso α] :
     Final (map₂ (F := 𝟭 _) u α) := by
@@ -381,8 +400,10 @@ instance StructuredArrow.final_map₂_id [IsFiltered C] {E : Type u₃} [Categor
   apply final_of_natIso (map₂IsoPreEquivalenceInverseCompProj d e u α).symm
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `StructuredArrow.map` is final if the functor `T` is final and its domain is filtered. -/
-instance StructuredArrow.final_map [IsFiltered C] {S S' : D} (f : S ⟶ S') (T : C ⥤ D) [T.Final] :
+/-- `StructuredArrow.map` is final if the functor `T` is final and its domain is filtered or
+empty. -/
+instance StructuredArrow.final_map [IsFilteredOrEmpty C] {S S' : D} (f : S ⟶ S') (T : C ⥤ D)
+    [T.Final] :
     Final (map (T := T) f) := by
   haveI := NatIso.isIso_of_isIso_app (𝟙 T)
   have : (map₂ (F := 𝟭 C) (G := 𝟭 D) f (𝟙 T)).Final := by
@@ -390,24 +411,25 @@ instance StructuredArrow.final_map [IsFiltered C] {S S' : D} (f : S ⟶ S') (T :
   apply final_of_natIso (mapIsoMap₂ f).symm
 
 /-- `StructuredArrow.post X T S` is final if `T` and `S` are final and the domain of `T` is
-filtered. -/
-instance StructuredArrow.final_post [IsFiltered C] {E : Type u₃} [Category.{v₃} E] (X : D)
+filtered or empty. -/
+instance StructuredArrow.final_post [IsFilteredOrEmpty C] {E : Type u₃} [Category.{v₃} E] (X : D)
     (T : C ⥤ D) [T.Final] (S : D ⥤ E) [S.Final] : Final (post X T S) := by
   apply final_of_natIso (postIsoMap₂ X T S).symm
 
 /-- The functor `CostructuredArrow T d ⥤ CostructuredArrow (T ⋙ S) e` that `u : S.obj d ⟶ e`
 induces via `CostructuredArrow.map₂` is initial, if `T` and `S` are initial and the domain of `T` is
-filtered. -/
-instance CostructuredArrow.initial_map₂_id [IsCofiltered C] {E : Type u₃} [Category.{v₃} E]
+cofiltered or empty. -/
+instance CostructuredArrow.initial_map₂_id [IsCofilteredOrEmpty C] {E : Type u₃} [Category.{v₃} E]
     (T : C ⥤ D) [T.Initial] (S : D ⥤ E) [S.Initial] (d : D) (e : E)
     (u : S.obj d ⟶ e) : Initial (map₂ (F := 𝟭 _) (U := T ⋙ S) (𝟙 (T ⋙ S)) u) := by
   have := (T ⋙ S).initial_iff_isCofiltered_costructuredArrow.mp inferInstance e
   apply initial_of_natIso (map₂IsoPreEquivalenceInverseCompProj T S d e u).symm
 
 /-- `CostructuredArrow.post T S X` is initial if `T` and `S` are initial and the domain of `T` is
-cofiltered. -/
-instance CostructuredArrow.initial_post [IsCofiltered C] {E : Type u₃} [Category.{v₃} E] (X : D)
-    (T : C ⥤ D) [T.Initial] (S : D ⥤ E) [S.Initial] : Initial (post T S X) := by
+cofiltered or empty. -/
+instance CostructuredArrow.initial_post [IsCofilteredOrEmpty C] {E : Type u₃} [Category.{v₃} E]
+    (X : D) (T : C ⥤ D) [T.Initial] (S : D ⥤ E) [S.Initial] :
+    Initial (post T S X) := by
   apply initial_of_natIso (postIsoMap₂ X T S).symm
 
 section Pi

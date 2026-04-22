@@ -302,13 +302,12 @@ noncomputable instance (G : Comonad C) : ComonadicLeftAdjoint G.forget where
   eqv := { }
 
 set_option backward.isDefEq.respectTransparency false in
--- TODO: This holds more generally for idempotent adjunctions, not just reflective adjunctions.
-instance μ_iso_of_reflective [Reflective R] : IsIso (reflectorAdjunction R).toMonad.μ := by
+instance μ_iso_of_reflective {adj : L ⊣ R} [IsIso adj.counit] : IsIso adj.toMonad.μ := by
   dsimp
   infer_instance
 
 set_option backward.isDefEq.respectTransparency false in
-instance δ_iso_of_coreflective [Coreflective R] : IsIso (coreflectorAdjunction R).toComonad.δ := by
+instance δ_iso_of_coreflective {adj : L ⊣ R} [IsIso adj.unit] : IsIso adj.toComonad.δ := by
   dsimp
   infer_instance
 
@@ -318,31 +317,28 @@ attribute [instance] ComonadicLeftAdjoint.eqv
 namespace Reflective
 
 set_option backward.isDefEq.respectTransparency false in
-instance [Reflective R] (X : (reflectorAdjunction R).toMonad.Algebra) :
-    IsIso ((reflectorAdjunction R).unit.app X.A) :=
-  ⟨⟨X.a,
-      ⟨X.unit, by
-        dsimp only [Functor.id_obj]
-        rw [← (reflectorAdjunction R).unit_naturality]
-        dsimp only [Functor.comp_obj, Adjunction.toMonad_coe]
-        rw [unit_obj_eq_map_unit, ← Functor.map_comp, ← Functor.map_comp]
-        dsimp [X.unit]
-        simpa using congrArg (fun t ↦ R.map ((reflector R).map t)) X.unit ⟩⟩⟩
+instance {adj : L ⊣ R} [IsIso adj.toMonad.μ] (X : adj.toMonad.Algebra) :
+    IsIso (adj.unit.app X.A) := by
+  change IsIso (adj.toMonad.η.app X.A)
+  rw [← adj.toMonad.isSplitMono_iff_isIso_unit X.A]
+  exact IsSplitMono.mk' { retraction := X.a, id := X.unit }
 
 set_option backward.isDefEq.respectTransparency false in
-instance comparison_essSurj [Reflective R] :
-    (Monad.comparison (reflectorAdjunction R)).EssSurj := by
-  refine ⟨fun X => ⟨(reflector R).obj X.A, ⟨?_⟩⟩⟩
+instance comparison_essSurj {adj : L ⊣ R} [IsIso adj.toMonad.μ] :
+    (Monad.comparison adj).EssSurj := by
+  refine ⟨fun X => ⟨L.obj X.A, ⟨?_⟩⟩⟩
   symm
   refine Monad.Algebra.isoMk ?_ ?_
-  · exact asIso ((reflectorAdjunction R).unit.app X.A)
+  · exact asIso (adj.unit.app X.A)
   dsimp only [Functor.comp_map, Monad.comparison_obj_a, asIso_hom, Functor.comp_obj,
     Monad.comparison_obj_A, Adjunction.toMonad_coe]
-  rw [← cancel_epi ((reflectorAdjunction R).unit.app X.A)]
+  rw [← cancel_epi (adj.unit.app X.A)]
   dsimp only [Functor.id_obj, Functor.comp_obj]
-  rw [Adjunction.unit_naturality_assoc,
-    Adjunction.right_triangle_components, comp_id]
-  apply (X.unit_assoc _).symm
+  rw [show R.map (L.map (adj.unit.app X.A)) = adj.unit.app (R.obj (L.obj X.A)) by
+    simpa [Adjunction.toMonad] using (adj.toMonad.map_unit_app X.A)]
+  rw [adj.right_triangle_components, comp_id, ← assoc,
+    show adj.unit.app X.A ≫ X.a = 𝟙 X.A by simpa [Adjunction.toMonad] using X.unit,
+    id_comp]
 
 lemma comparison_full [R.Full] {L : C ⥤ D} (adj : L ⊣ R) :
     (Monad.comparison adj).Full where
@@ -353,26 +349,27 @@ end Reflective
 namespace Coreflective
 
 set_option backward.isDefEq.respectTransparency false in
-instance [Coreflective R] (X : (coreflectorAdjunction R).toComonad.Coalgebra) :
-    IsIso ((coreflectorAdjunction R).counit.app X.A) :=
-  ⟨⟨X.a,
-      ⟨by
-        dsimp only [Functor.id_obj]
-        rw [← (coreflectorAdjunction R).counit_naturality]
-        dsimp only [Functor.comp_obj, Adjunction.toMonad_coe]
-        rw [counit_obj_eq_map_counit, ← Functor.map_comp, ← Functor.map_comp]
-        simpa using congrArg (fun t ↦ R.map ((coreflector R).map t)) X.counit, X.counit⟩⟩⟩
+instance {adj : L ⊣ R} [IsIso adj.toComonad.δ] (X : adj.toComonad.Coalgebra) :
+    IsIso (adj.counit.app X.A) := by
+  change IsIso (adj.toComonad.ε.app X.A)
+  rw [← adj.toComonad.isSplitEpi_iff_isIso_counit X.A]
+  exact IsSplitEpi.mk' { section_ := X.a, id := X.counit }
 
 set_option backward.isDefEq.respectTransparency false in
-instance comparison_essSurj [Coreflective R] :
-    (Comonad.comparison (coreflectorAdjunction R)).EssSurj := by
-  refine ⟨fun X => ⟨(coreflector R).obj X.A, ⟨?_⟩⟩⟩
+instance comparison_essSurj {adj : L ⊣ R} [IsIso adj.toComonad.δ] :
+    (Comonad.comparison adj).EssSurj := by
+  refine ⟨fun X => ⟨R.obj X.A, ⟨?_⟩⟩⟩
   refine Comonad.Coalgebra.isoMk ?_ ?_
-  · exact (asIso ((coreflectorAdjunction R).counit.app X.A))
-  rw [← cancel_mono ((coreflectorAdjunction R).counit.app X.A)]
-  simp only [Functor.comp_obj, Functor.id_obj,
-    assoc]
-  simpa using (coreflectorAdjunction R).counit.app X.A ≫= X.counit.symm
+  · exact asIso (adj.counit.app X.A)
+  rw [← cancel_mono (adj.counit.app X.A)]
+  dsimp only [Functor.comp_map, Comonad.comparison_obj_a, asIso_hom, Functor.comp_obj,
+    Comonad.comparison_obj_A, Adjunction.toComonad_coe]
+  rw [show L.map (R.map (adj.counit.app X.A)) = adj.counit.app (L.obj (R.obj X.A)) by
+    simpa [Adjunction.toComonad] using (adj.toComonad.map_counit_app X.A)]
+  rw [adj.left_triangle_components, id_comp]
+  rw [assoc,
+    show X.a ≫ adj.counit.app X.A = 𝟙 X.A by simpa [Adjunction.toComonad] using X.counit,
+    comp_id]
 
 lemma comparison_full [R.Full] {L : C ⥤ D} (adj : R ⊣ L) :
     (Comonad.comparison adj).Full where

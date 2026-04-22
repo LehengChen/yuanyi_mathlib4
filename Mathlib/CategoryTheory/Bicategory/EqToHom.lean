@@ -88,49 +88,51 @@ lemma associator_eqToHom_inv {x y z t : B}
   simp
 
 lemma associator_hom_congr {x y z t : B} {f f' : x ⟶ y} {g g' : y ⟶ z}
-    {h h' : z ⟶ t} (ef : f = f') (eg : g = g') (eh : h = h') :
+    {h h' : z ⟶ t} (ef : f ≅ f') (eg : g ≅ g') (eh : h ≅ h') :
     (α_ f g h).hom =
-    eqToHom (by grind) ≫ (α_ f' g' h').hom ≫ eqToHom (by grind) := by
-  subst_vars
-  simp
+    ((ef.hom ▷ g) ▷ h ≫ (f' ◁ eg.hom) ▷ h ≫ (f' ≫ g') ◁ eh.hom) ≫
+      (α_ f' g' h').hom ≫
+      (f' ◁ (g' ◁ eh.inv) ≫ f' ◁ (eg.inv ▷ h) ≫ ef.inv ▷ (g ≫ h)) := by
+  simp [Category.assoc]
 
 lemma associator_inv_congr {x y z t : B} {f f' : x ⟶ y} {g g' : y ⟶ z}
-    {h h' : z ⟶ t} (ef : f = f') (eg : g = g') (eh : h = h') :
+    {h h' : z ⟶ t} (ef : f ≅ f') (eg : g ≅ g') (eh : h ≅ h') :
     (α_ f g h).inv =
-    eqToHom (by grind) ≫ (α_ f' g' h').inv ≫ eqToHom (by grind) := by
-  subst_vars
-  simp
+    (ef.hom ▷ (g ≫ h) ≫ f' ◁ (eg.hom ▷ h) ≫ f' ◁ (g' ◁ eh.hom)) ≫
+      (α_ f' g' h').inv ≫
+      ((f' ≫ g') ◁ eh.inv ≫ (f' ◁ eg.inv) ▷ h ≫ (ef.inv ▷ g) ▷ h) := by
+  simp [Category.assoc]
 
-lemma congr_whiskerLeft {x y : B} {f f' : x ⟶ y} (h : f = f') {z : B}
+lemma congr_whiskerLeft {x y : B} {f f' : x ⟶ y} (e : f ≅ f') {z : B}
     {g g' : y ⟶ z} (η : g ⟶ g') :
-      f ◁ η = eqToHom (by rw [h]) ≫ f' ◁ η ≫ eqToHom (by rw [h]) := by
-  subst h
+      f ◁ η = e.hom ▷ g ≫ f' ◁ η ≫ e.inv ▷ g' := by
+  rw [← whisker_exchange_assoc]
   simp
 
-lemma whiskerRight_congr {y z : B} {g g' : y ⟶ z} (h : g = g') {x : B}
+lemma whiskerRight_congr {y z : B} {g g' : y ⟶ z} (e : g ≅ g') {x : B}
     {f f' : x ⟶ y} (η : f ⟶ f') :
-      η ▷ g = eqToHom (by rw [h]) ≫ η ▷ g' ≫ eqToHom (by rw [h]) := by
-  subst h
+      η ▷ g = f ◁ e.hom ≫ η ▷ g' ≫ f' ◁ e.inv := by
+  rw [whisker_exchange_assoc]
   simp
 
-lemma leftUnitor_hom_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (λ_ f).hom = 𝟙 _ ◁ (eqToHom h) ≫ (λ_ f').hom ≫ eqToHom h.symm := by
-  subst h
+lemma leftUnitor_hom_congr {x y : B} {f f' : x ⟶ y} (e : f ≅ f') :
+    (λ_ f).hom = 𝟙 _ ◁ e.hom ≫ (λ_ f').hom ≫ e.inv := by
+  rw [leftUnitor_naturality_assoc]
   simp
 
-lemma leftUnitor_inv_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (λ_ f).inv = (eqToHom h) ≫ (λ_ f').inv ≫ 𝟙 _ ◁ eqToHom h.symm := by
-  subst h
+lemma leftUnitor_inv_congr {x y : B} {f f' : x ⟶ y} (e : f ≅ f') :
+    (λ_ f).inv = e.hom ≫ (λ_ f').inv ≫ 𝟙 _ ◁ e.inv := by
+  rw [leftUnitor_inv_naturality_assoc]
   simp
 
-lemma rightUnitor_hom_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (ρ_ f).hom = (eqToHom h) ▷ 𝟙 _ ≫ (ρ_ f').hom ≫ eqToHom h.symm := by
-  subst h
+lemma rightUnitor_hom_congr {x y : B} {f f' : x ⟶ y} (e : f ≅ f') :
+    (ρ_ f).hom = e.hom ▷ 𝟙 _ ≫ (ρ_ f').hom ≫ e.inv := by
+  rw [rightUnitor_naturality_assoc]
   simp
 
-lemma rightUnitor_inv_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (ρ_ f).inv = (eqToHom h) ≫ (ρ_ f').inv ≫ eqToHom h.symm ▷ 𝟙 _ := by
-  subst h
+lemma rightUnitor_inv_congr {x y : B} {f f' : x ⟶ y} (e : f ≅ f') :
+    (ρ_ f).inv = e.hom ≫ (ρ_ f').inv ≫ e.inv ▷ 𝟙 _ := by
+  rw [rightUnitor_inv_naturality_assoc]
   simp
 
 end CategoryTheory.Bicategory

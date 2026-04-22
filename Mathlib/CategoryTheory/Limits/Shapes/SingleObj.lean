@@ -75,16 +75,17 @@ end Limits
 
 section Colimits
 
-variable {G : Type v} [Group G] (J : SingleObj G ⥤ Type u)
+variable {M : Type v} [Monoid M] (J : SingleObj M ⥤ Type u)
 
-/-- The relation used to construct colimits in types for `J : SingleObj G ⥤ Type u` is
-equivalent to the `MulAction.orbitRel` equivalence relation on `J.obj (SingleObj.star G)`. -/
-lemma colimitTypeRel_iff_orbitRel (x y : J.obj (SingleObj.star G)) :
-    J.ColimitTypeRel ⟨SingleObj.star G, x⟩ ⟨SingleObj.star G, y⟩ ↔
-      MulAction.orbitRel G (J.obj (SingleObj.star G)) x y := by
-  conv => rhs; rw [Setoid.comm']
-  change (∃ g : G, y = g • x) ↔ (∃ g : G, g • x = y)
-  grind
+/-- The relation used to construct colimits in types for `J : SingleObj M ⥤ Type u` is
+equivalent to membership in the induced orbit on `J.obj (SingleObj.star M)`. -/
+lemma colimitTypeRel_iff_orbitRel (x y : J.obj (SingleObj.star M)) :
+    J.ColimitTypeRel ⟨SingleObj.star M, x⟩ ⟨SingleObj.star M, y⟩ ↔
+      y ∈ MulAction.orbit M x := by
+  change (∃ g : M, y = g • x) ↔ y ∈ MulAction.orbit M x
+  simp [MulAction.mem_orbit_iff, eq_comm]
+
+variable {G : Type v} [Group G] (J : SingleObj G ⥤ Type u)
 
 /-- The explicit quotient construction of the colimit of `J : SingleObj G ⥤ Type u` is
 equivalent to the quotient of `J.obj (SingleObj.star G)` by the induced action. -/
@@ -92,9 +93,11 @@ equivalent to the quotient of `J.obj (SingleObj.star G)` by the induced action. 
 def colimitTypeRelEquivOrbitRelQuotient :
     J.ColimitType ≃ MulAction.orbitRel.Quotient G (J.obj (SingleObj.star G)) where
   toFun := Quot.lift (fun p => ⟦p.2⟧) <| fun a b h => Quotient.sound <|
-    (colimitTypeRel_iff_orbitRel J a.2 b.2).mp h
+    (MulAction.orbitRel_apply).mpr <| MulAction.mem_orbit_symm.mp <|
+      (colimitTypeRel_iff_orbitRel J a.2 b.2).mp h
   invFun := Quot.lift (fun x => Quot.mk _ ⟨SingleObj.star G, x⟩) <| fun a b h =>
-    Quot.sound <| (colimitTypeRel_iff_orbitRel J a b).mpr h
+    Quot.sound <| (colimitTypeRel_iff_orbitRel J a b).mpr <|
+      MulAction.mem_orbit_symm.mp <| (MulAction.orbitRel_apply).mp h
   left_inv := fun x => Quot.inductionOn x (fun _ ↦ rfl)
   right_inv := fun x => Quot.inductionOn x (fun _ ↦ rfl)
 

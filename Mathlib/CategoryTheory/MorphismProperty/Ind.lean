@@ -113,13 +113,17 @@ instance [P.RespectsIso] : P.ind.RespectsIso where
     · exact (IsColimit.equivIsoColimit (Cocone.ext (asIso i))) hs
     · simp [reassoc_of% (hst j).2]
 
-lemma ind_underObj_pushout {X Y : C} (g : X ⟶ Y) [HasPushouts C] [P.IsStableUnderCobaseChange]
+lemma ind_underObj_pushout {X Y : C} (g : X ⟶ Y) [HasPushoutsAlong g]
+    [P.IsStableUnderCobaseChangeAlong g]
     {f : Under X} (hf : ObjectProperty.ind.{w} P.underObj f) :
     ObjectProperty.ind.{w} P.underObj ((Under.pushout g).obj f) := by
   obtain ⟨J, _, _, pres, hpres⟩ := hf
   use J, inferInstance, inferInstance, pres.map (Under.pushout g)
   intro i
-  exact P.pushout_inr _ _ (hpres i)
+  haveI : HasPushout (pres.diag.obj i).hom g := ‹HasPushoutsAlong g› _
+  haveI : P.IsStableUnderCobaseChangeAlong g := ‹P.IsStableUnderCobaseChangeAlong g›
+  exact IsStableUnderCobaseChangeAlong.of_isPushout (P := P) (f := g)
+    (IsPushout.of_hasPushout (pres.diag.obj i).hom g).flip (hpres i)
 
 instance [P.IsStableUnderCobaseChange] [HasPushouts C] : P.ind.IsStableUnderCobaseChange := by
   refine .mk' fun A B A' f g _ hf ↦ ?_
@@ -138,7 +142,9 @@ lemma ind_ind (hp : P ≤ isFinitelyPresentable.{w} C) [LocallySmall.{w} C] :
     ObjectProperty.ind_ind.{w} this] using hf
 
 set_option backward.isDefEq.respectTransparency false in
-lemma ind_iff_exists (H : P ≤ isFinitelyPresentable.{w} C) {X Y : C} (f : X ⟶ Y)
+lemma ind_iff_exists {X : C}
+    (H : ∀ {Y : C} (f : X ⟶ Y), P f → isFinitelyPresentable.{w} C f) {Y : C}
+    (f : X ⟶ Y)
     [IsFinitelyAccessibleCategory.{w} (Under X)] :
     ind.{w} P f ↔ ∀ {Z : C} (p : X ⟶ Z) (g : Z ⟶ Y),
       isFinitelyPresentable.{w} _ p → p ≫ g = f →
@@ -154,7 +160,7 @@ lemma ind_iff_exists (H : P ≤ isFinitelyPresentable.{w} C) {X Y : C} (f : X �
       exact ⟨CategoryTheory.Under.mk (Z.hom ≫ u), CategoryTheory.Under.homMk u,
           CategoryTheory.Under.homMk v, by ext; simpa, hW⟩
   · intro Y hY
-    exact H _ hY
+    exact H Y.hom hY
 
 /--
 A property of morphisms `P` is said to pre-ind-spread if `P`-morphisms out of filtered colimits
@@ -185,12 +191,12 @@ set_option backward.isDefEq.respectTransparency false in
 is stable under composition if `P` is. -/
 @[stacks 0BSI "The stacks project lemma is for the special case of ind-étale ring homomorphisms."]
 lemma IsStableUnderComposition.ind_of_preIndSpreads
-    [∀ X : C, (IsFinitelyAccessibleCategory.{w} (Under X))] [HasPushouts C]
+    [∀ X : C, (IsFinitelyAccessibleCategory.{w} (Under X))] [P.HasPushouts]
     [P.IsStableUnderComposition] [P.IsStableUnderCobaseChange]
     [PreIndSpreads.{w} P] (H : P ≤ isFinitelyPresentable.{w} C) :
     (ind.{w} P).IsStableUnderComposition where
   comp_mem {X Y Z} f g hf hg := by
-    rw [ind_iff_exists H]
+    rw [ind_iff_exists (fun p hp ↦ H p hp)]
     intro T p u hp hpu
     obtain ⟨J₁, _, _, D₁, s₁, t₁, ht₁, h₁⟩ := hf
     obtain ⟨J₂, _, _, D₂, s₂, t₂, ht₂, h₂⟩ := hg
@@ -199,6 +205,9 @@ lemma IsStableUnderComposition.ind_of_preIndSpreads
         ht₂ p ((Functor.const _).map f ≫ s₂) u <| by simp [h₂, hpu]
     obtain ⟨j₁, W, f', g', h, hf'⟩ :=
       P.exists_isPushout_of_isFiltered ht₁ (s₂.app j₂) (h₂ j₂).left
+    haveI : HasPushoutsAlong f' := fun h ↦ by
+      haveI : HasPushout f' h := P.hasPushout h hf'
+      exact hasPushout_symmetry f' h
     let D' : Under j₁ ⥤ C :=
       (Under.post D₁ ⋙ Under.pushout f') ⋙ CategoryTheory.Under.forget _
     let c' : Cocone D' :=
@@ -223,8 +232,8 @@ lemma IsStableUnderComposition.ind_of_preIndSpreads
 /-- If `P` ind-spreads and all under categories are finitely accessible, `ind P`
 is multiplicative if `P` is. -/
 lemma IsMultiplicative.ind_of_preIndSpreads
-    [∀ X : C, (IsFinitelyAccessibleCategory.{w} (Under X))] [HasPushouts C]
-    [P.IsMultiplicative] [P.IsStableUnderCobaseChange]
+    [∀ X : C, (IsFinitelyAccessibleCategory.{w} (Under X))] [P.HasPushouts]
+    [P.ContainsIdentities] [P.IsStableUnderComposition] [P.IsStableUnderCobaseChange]
     [PreIndSpreads.{w} P] (H : P ≤ isFinitelyPresentable.{w} C) :
     (ind.{w} P).IsMultiplicative where
   __ := IsStableUnderComposition.ind_of_preIndSpreads H

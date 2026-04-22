@@ -88,17 +88,44 @@ noncomputable def limitConeOfTerminalAndPullbacks [HasTerminal C] [HasPullbacks 
 
 variable (C) in
 -- This is not an instance, as it is not always how one wants to construct binary products!
-/-- Any category with pullbacks and terminal object has binary products. -/
-theorem hasBinaryProducts_of_hasTerminal_and_pullbacks [HasTerminal C] [HasPullbacks C] :
+/-- Any category with pullbacks over the terminal object has binary products. -/
+theorem hasBinaryProducts_of_hasTerminal_and_pullbacks [HasTerminal C]
+    [∀ X Y : C, HasPullback (terminal.from X) (terminal.from Y)] :
     HasBinaryProducts C :=
-  { has_limit := fun F => HasLimit.mk (limitConeOfTerminalAndPullbacks F) }
+  { has_limit := fun F =>
+      HasLimit.mk
+        { cone :=
+            { pt :=
+                pullback (terminal.from (F.obj ⟨WalkingPair.left⟩))
+                  (terminal.from (F.obj ⟨WalkingPair.right⟩))
+              π :=
+                Discrete.natTrans fun x =>
+                  Discrete.casesOn x fun x =>
+                    WalkingPair.casesOn x (pullback.fst _ _) (pullback.snd _ _) }
+          isLimit :=
+            isBinaryProductOfIsTerminalIsPullback F _ terminalIsTerminal _ _
+              (pullbackIsPullback _ _) } }
 
-/-- A functor that preserves terminal objects and pullbacks preserves binary products. -/
+/-- A functor that preserves terminal objects and pullbacks over them preserves binary products. -/
 lemma preservesBinaryProducts_of_preservesTerminal_and_pullbacks [HasTerminal C]
-    [HasPullbacks C] [PreservesLimitsOfShape (Discrete.{0} PEmpty) F]
-    [PreservesLimitsOfShape WalkingCospan F] : PreservesLimitsOfShape (Discrete WalkingPair) F :=
+    [∀ X Y : C, HasPullback (terminal.from X) (terminal.from Y)]
+    [PreservesLimit (Functor.empty.{0} C) F]
+    [∀ X Y : C, PreservesLimit (cospan (terminal.from X) (terminal.from Y)) F] :
+    PreservesLimitsOfShape (Discrete WalkingPair) F :=
   ⟨fun {K} =>
-    preservesLimit_of_preserves_limit_cone (limitConeOfTerminalAndPullbacks K).2
+    let t : LimitCone K :=
+      { cone :=
+          { pt :=
+              pullback (terminal.from (K.obj ⟨WalkingPair.left⟩))
+                (terminal.from (K.obj ⟨WalkingPair.right⟩))
+            π :=
+              Discrete.natTrans fun x =>
+                Discrete.casesOn x fun x =>
+                  WalkingPair.casesOn x (pullback.fst _ _) (pullback.snd _ _) }
+        isLimit :=
+          isBinaryProductOfIsTerminalIsPullback K _ terminalIsTerminal _ _
+            (pullbackIsPullback _ _) }
+    preservesLimit_of_preserves_limit_cone t.2
       (by
         apply
           isBinaryProductOfIsTerminalIsPullback _ _ (isLimitOfHasTerminalOfPreservesLimit F)
@@ -192,17 +219,42 @@ noncomputable def colimitCoconeOfInitialAndPushouts [HasInitial C] [HasPushouts 
 
 variable (C) in
 -- This is not an instance, as it is not always how one wants to construct binary coproducts!
-/-- Any category with pushouts and initial object has binary coproducts. -/
-theorem hasBinaryCoproducts_of_hasInitial_and_pushouts [HasInitial C] [HasPushouts C] :
+/-- Any category with pushouts under the initial object has binary coproducts. -/
+theorem hasBinaryCoproducts_of_hasInitial_and_pushouts [HasInitial C]
+    [∀ X Y : C, HasPushout (initial.to X) (initial.to Y)] :
     HasBinaryCoproducts C :=
-  { has_colimit := fun F => HasColimit.mk (colimitCoconeOfInitialAndPushouts F) }
+  { has_colimit := fun F =>
+      HasColimit.mk
+        { cocone :=
+            { pt := pushout (initial.to (F.obj ⟨WalkingPair.left⟩))
+                (initial.to (F.obj ⟨WalkingPair.right⟩))
+              ι :=
+                Discrete.natTrans fun x =>
+                  Discrete.casesOn x fun x =>
+                    WalkingPair.casesOn x (pushout.inl _ _) (pushout.inr _ _) }
+          isColimit :=
+            isBinaryCoproductOfIsInitialIsPushout F _ initialIsInitial _ _
+              (pushoutIsPushout _ _) } }
 
-/-- A functor that preserves initial objects and pushouts preserves binary coproducts. -/
+/-- A functor that preserves initial objects and pushouts under them preserves binary coproducts. -/
 lemma preservesBinaryCoproducts_of_preservesInitial_and_pushouts [HasInitial C]
-    [HasPushouts C] [PreservesColimitsOfShape (Discrete.{0} PEmpty) F]
-    [PreservesColimitsOfShape WalkingSpan F] : PreservesColimitsOfShape (Discrete WalkingPair) F :=
+    [∀ X Y : C, HasPushout (initial.to X) (initial.to Y)]
+    [PreservesColimit (Functor.empty.{0} C) F]
+    [∀ X Y : C, PreservesColimit (span (initial.to X) (initial.to Y)) F] :
+    PreservesColimitsOfShape (Discrete WalkingPair) F :=
   ⟨fun {K} =>
-    preservesColimit_of_preserves_colimit_cocone (colimitCoconeOfInitialAndPushouts K).2 (by
+    let t : ColimitCocone K :=
+      { cocone :=
+          { pt := pushout (initial.to (K.obj ⟨WalkingPair.left⟩))
+              (initial.to (K.obj ⟨WalkingPair.right⟩))
+            ι :=
+              Discrete.natTrans fun x =>
+                Discrete.casesOn x fun x =>
+                  WalkingPair.casesOn x (pushout.inl _ _) (pushout.inr _ _) }
+        isColimit :=
+          isBinaryCoproductOfIsInitialIsPushout K _ initialIsInitial _ _
+            (pushoutIsPushout _ _) }
+    preservesColimit_of_preserves_colimit_cocone t.2 (by
       apply
         isBinaryCoproductOfIsInitialIsPushout _ _
           (isColimitOfHasInitialOfPreservesColimit F)

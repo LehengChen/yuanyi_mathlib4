@@ -75,8 +75,9 @@ end
 
 section
 
-variable [Abelian C] [∀ i, Abelian (D i)] [CategoryWithHomology C]
-  [∀ i, PreservesFiniteLimits (F i)] [∀ i, PreservesFiniteColimits (F i)]
+variable [Preadditive C] [∀ i, Preadditive (D i)] [HasZeroObject C]
+  [∀ i, HasZeroObject (D i)] [CategoryWithHomology C]
+  [∀ i, (F i).PreservesZeroMorphisms] [∀ i, (F i).PreservesHomology]
 
 lemma shortExact_iff (S : ShortComplex C) :
     S.ShortExact ↔ ∀ (i : I), (S.map (F i)).ShortExact := by
@@ -85,12 +86,34 @@ lemma shortExact_iff (S : ShortComplex C) :
     have := hS.epi_g
     exact hS.map (F i)
   · have : Mono S.f := by
-      rw [hP.jointlyReflectMonomorphisms.mono_iff]
-      exact fun i ↦ (hS i).mono_f
+      let T := ShortComplex.mk (0 : S.X₁ ⟶ S.X₁) S.f zero_comp
+      rw [← T.exact_iff_mono rfl]
+      rw [hP.exact_iff T]
+      intro i
+      rw [(T.map (F i)).exact_iff_mono (by
+        dsimp [T, ShortComplex.map]
+        rw [(F i).map_zero]
+        rfl)]
+      simpa [T] using (hS i).mono_f
     have : Epi S.g := by
-      rw [hP.jointlyReflectEpimorphisms.epi_iff]
-      exact fun i ↦ (hS i).epi_g
+      let T := ShortComplex.mk S.g (0 : S.X₃ ⟶ S.X₃) comp_zero
+      rw [← T.exact_iff_epi rfl]
+      rw [hP.exact_iff T]
+      intro i
+      rw [(T.map (F i)).exact_iff_epi (by
+        dsimp [T, ShortComplex.map]
+        rw [(F i).map_zero]
+        rfl)]
+      simpa [T] using (hS i).epi_g
     exact { exact := (hP.exact_iff S).2 (fun i ↦ (hS i).exact) }
+
+end
+
+section
+
+variable [HasZeroMorphisms C] [∀ i, HasZeroMorphisms (D i)]
+  [∀ i, (F i).PreservesZeroMorphisms] [CategoryWithHomology C]
+  [∀ i, CategoryWithHomology (D i)] [∀ i, (F i).PreservesHomology]
 
 lemma shortComplexQuasiIso_iff {S₁ S₂ : ShortComplex C} (f : S₁ ⟶ S₂) :
     ShortComplex.QuasiIso f ↔

@@ -153,49 +153,51 @@ def tensorObj (X Y : Center C) : Center C :=
           _ = _ := by rw [HalfBraiding.naturality]; monoidal }⟩
 
 @[reassoc]
-theorem whiskerLeft_comm (X : Center C) {Y₁ Y₂ : Center C} (f : Y₁ ⟶ Y₂) (U : C) :
-    (X.1 ◁ f.f) ▷ U ≫ ((tensorObj X Y₂).2.β U).hom =
-      ((tensorObj X Y₁).2.β U).hom ≫ U ◁ X.1 ◁ f.f := by
+theorem whiskerLeft_comm (X : Center C) {Y₁ Y₂ : Center C} (f : Y₁.1 ⟶ Y₂.1) (U : C)
+    (hf : (f ▷ U) ≫ (Y₂.2.β U).hom = (Y₁.2.β U).hom ≫ (U ◁ f)) :
+    (X.1 ◁ f) ▷ U ≫ ((tensorObj X Y₂).2.β U).hom =
+      ((tensorObj X Y₁).2.β U).hom ≫ U ◁ X.1 ◁ f := by
   dsimp only [tensorObj_fst, tensorObj_snd_β, Iso.trans_hom, whiskerLeftIso_hom,
     Iso.symm_hom, whiskerRightIso_hom]
   calc
     _ = 𝟙 _ ⊗≫
-      X.fst ◁ (f.f ▷ U ≫ (HalfBraiding.β Y₂.snd U).hom) ⊗≫
+      X.fst ◁ (f ▷ U ≫ (HalfBraiding.β Y₂.snd U).hom) ⊗≫
         (HalfBraiding.β X.snd U).hom ▷ Y₂.fst ⊗≫ 𝟙 _ := by monoidal
     _ = 𝟙 _ ⊗≫
       X.fst ◁ (HalfBraiding.β Y₁.snd U).hom ⊗≫
-        ((X.fst ⊗ U) ◁ f.f ≫ (HalfBraiding.β X.snd U).hom ▷ Y₂.fst) ⊗≫ 𝟙 _ := by
-      rw [f.comm]; monoidal
+        ((X.fst ⊗ U) ◁ f ≫ (HalfBraiding.β X.snd U).hom ▷ Y₂.fst) ⊗≫ 𝟙 _ := by
+      rw [hf]; monoidal
     _ = _ := by rw [whisker_exchange]; monoidal
 
 /-- Auxiliary definition for the `MonoidalCategory` instance on `Center C`. -/
 def whiskerLeft (X : Center C) {Y₁ Y₂ : Center C} (f : Y₁ ⟶ Y₂) :
     tensorObj X Y₁ ⟶ tensorObj X Y₂ where
   f := X.1 ◁ f.f
-  comm U := whiskerLeft_comm X f U
+  comm U := whiskerLeft_comm X f.f U (f.comm U)
 
 set_option backward.isDefEq.respectTransparency false in -- Needed below.
 @[reassoc]
-theorem whiskerRight_comm {X₁ X₂ : Center C} (f : X₁ ⟶ X₂) (Y : Center C) (U : C) :
-    f.f ▷ Y.1 ▷ U ≫ ((tensorObj X₂ Y).2.β U).hom =
-      ((tensorObj X₁ Y).2.β U).hom ≫ U ◁ f.f ▷ Y.1 := by
+theorem whiskerRight_comm {X₁ X₂ : Center C} (f : X₁.1 ⟶ X₂.1) (Y : Center C) (U : C)
+    (hf : (f ▷ U) ≫ (X₂.2.β U).hom = (X₁.2.β U).hom ≫ (U ◁ f)) :
+    f ▷ Y.1 ▷ U ≫ ((tensorObj X₂ Y).2.β U).hom =
+      ((tensorObj X₁ Y).2.β U).hom ≫ U ◁ f ▷ Y.1 := by
   dsimp only [tensorObj_fst, tensorObj_snd_β, Iso.trans_hom, whiskerLeftIso_hom,
     Iso.symm_hom, whiskerRightIso_hom]
   calc
     _ = 𝟙 _ ⊗≫
-      (f.f ▷ (Y.fst ⊗ U) ≫ X₂.fst ◁ (HalfBraiding.β Y.snd U).hom) ⊗≫
+      (f ▷ (Y.fst ⊗ U) ≫ X₂.fst ◁ (HalfBraiding.β Y.snd U).hom) ⊗≫
         (HalfBraiding.β X₂.snd U).hom ▷ Y.fst ⊗≫ 𝟙 _ := by monoidal
     _ = 𝟙 _ ⊗≫
       X₁.fst ◁ (HalfBraiding.β Y.snd U).hom ⊗≫
-        (f.f ▷ U ≫ (HalfBraiding.β X₂.snd U).hom) ▷ Y.fst ⊗≫ 𝟙 _ := by
+        (f ▷ U ≫ (HalfBraiding.β X₂.snd U).hom) ▷ Y.fst ⊗≫ 𝟙 _ := by
       rw [← whisker_exchange]; monoidal
-    _ = _ := by rw [f.comm]; monoidal
+    _ = _ := by rw [hf]; monoidal
 
 /-- Auxiliary definition for the `MonoidalCategory` instance on `Center C`. -/
 def whiskerRight {X₁ X₂ : Center C} (f : X₁ ⟶ X₂) (Y : Center C) :
     tensorObj X₁ Y ⟶ tensorObj X₂ Y where
   f := f.f ▷ Y.1
-  comm U := whiskerRight_comm f Y U
+  comm U := whiskerRight_comm f.f Y U (f.comm U)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Auxiliary definition for the `MonoidalCategory` instance on `Center C`. -/
@@ -206,6 +208,8 @@ def tensorHom {X₁ Y₁ X₂ Y₂ : Center C} (f : X₁ ⟶ Y₁) (g : X₂ ⟶
   comm U := by
     rw [tensorHom_def, comp_whiskerRight_assoc, whiskerLeft_comm, whiskerRight_comm_assoc,
       MonoidalCategory.whiskerLeft_comp]
+    · exact f.comm U
+    · exact g.comm U
 
 section
 

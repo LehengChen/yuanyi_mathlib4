@@ -26,7 +26,8 @@ namespace CategoryTheory
 
 open Category Limits
 
-variable {I : Type*} [AddCommMonoid I] {C : Type*} [Category* C] [MonoidalCategory C]
+variable {I : Type*} [AddMonoid I] [IsAddCommutative I] {C : Type*} [Category* C]
+  [MonoidalCategory C]
 
 namespace GradedObject
 
@@ -42,9 +43,9 @@ variable [BraidedCategory C]
 indexed by a commutative additive monoid. -/
 noncomputable def braiding [HasTensor X Y] [HasTensor Y X] : tensorObj X Y ≅ tensorObj Y X where
   hom k := tensorObjDesc (fun i j hij => (β_ _ _).hom ≫
-    ιTensorObj Y X j i k (by simpa only [add_comm j i] using hij))
+    ιTensorObj Y X j i k (by simpa only [add_comm' j i] using hij))
   inv k := tensorObjDesc (fun i j hij => (β_ _ _).inv ≫
-    ιTensorObj X Y j i k (by simpa only [add_comm j i] using hij))
+    ιTensorObj X Y j i k (by simpa only [add_comm' j i] using hij))
 
 variable {Y Z} in
 lemma braiding_naturality_right [HasTensor X Y] [HasTensor Y X] [HasTensor X Z] [HasTensor Z X]
@@ -78,7 +79,8 @@ lemma hexagon_forward [HasTensor X Y] [HasTensor Y X] [HasTensor Y Z]
     BraidedCategory.braiding_naturality_assoc,
     BraidedCategory.braiding_tensor_right_hom, assoc, assoc, assoc, assoc, Iso.hom_inv_id_assoc,
     MonoidalCategory.tensorHom_id,
-    ← ιTensorObj₃'_eq_assoc Y Z X i₂ i₃ i₁ k (by rw [add_comm _ i₁, ← add_assoc, h]) _ rfl,
+    ← ιTensorObj₃'_eq_assoc Y Z X i₂ i₃ i₁ k
+      (by rw [add_comm' (i₂ + i₃) i₁, ← add_assoc, h]) _ rfl,
     ιTensorObj₃'_associator_hom, Iso.inv_hom_id_assoc]
   conv_rhs => rw [ιTensorObj₃'_eq X Y Z i₁ i₂ i₃ k h _ rfl, assoc, ι_tensorHom_assoc,
     ← MonoidalCategory.tensorHom_id,
@@ -86,17 +88,18 @@ lemma hexagon_forward [HasTensor X Y] [HasTensor Y X] [HasTensor Y Z]
     categoryOfGradedObjects_id, MonoidalCategory.comp_tensor_id, assoc,
     MonoidalCategory.tensorHom_id, MonoidalCategory.tensorHom_id,
     ← ιTensorObj₃'_eq_assoc Y X Z i₂ i₁ i₃ k
-      (by rw [add_comm i₂ i₁, h]) (i₁ + i₂) (add_comm i₂ i₁),
+      (by rw [add_comm' i₂ i₁, h]) (i₁ + i₂) (add_comm' i₂ i₁),
     ιTensorObj₃'_associator_hom_assoc,
-    ιTensorObj₃_eq Y X Z i₂ i₁ i₃ k (by rw [add_comm i₂ i₁, h]) _ rfl, assoc,
+    ιTensorObj₃_eq Y X Z i₂ i₁ i₃ k (by rw [add_comm' i₂ i₁, h]) _ rfl, assoc,
     ι_tensorHom, categoryOfGradedObjects_id, ← MonoidalCategory.tensorHom_id,
     ← MonoidalCategory.id_tensorHom,
     ← MonoidalCategory.id_tensor_comp_assoc,
     ι_tensorObjDesc, MonoidalCategory.id_tensor_comp, assoc,
     ← MonoidalCategory.id_tensor_comp_assoc, MonoidalCategory.tensorHom_id,
     MonoidalCategory.id_tensorHom, MonoidalCategory.whiskerLeft_comp, assoc,
-    ← ιTensorObj₃_eq Y Z X i₂ i₃ i₁ k (by rw [add_comm _ i₁, ← add_assoc, h])
-      (i₁ + i₃) (add_comm _ _)]
+    ← ιTensorObj₃_eq Y Z X i₂ i₃ i₁ k
+      (by rw [add_comm' (i₂ + i₃) i₁, ← add_assoc, h])
+      (i₁ + i₃) (add_comm' i₃ i₁)]
 
 lemma hexagon_reverse [HasTensor X Y] [HasTensor Y Z] [HasTensor Z X]
     [HasTensor Z Y] [HasTensor X Z]
@@ -116,7 +119,8 @@ lemma hexagon_reverse [HasTensor X Y] [HasTensor Y Z] [HasTensor Z X]
     BraidedCategory.braiding_naturality_assoc,
     BraidedCategory.braiding_tensor_left_hom, assoc, assoc, assoc, assoc, Iso.inv_hom_id_assoc,
     MonoidalCategory.id_tensorHom,
-    ← ιTensorObj₃_eq_assoc Z X Y i₃ i₁ i₂ k (by rw [add_assoc, add_comm i₃, h]) _ rfl,
+    ← ιTensorObj₃_eq_assoc Z X Y i₃ i₁ i₂ k
+      (by rw [add_assoc, add_comm' i₃ (i₁ + i₂), h]) _ rfl,
     ιTensorObj₃_associator_inv, Iso.hom_inv_id_assoc]
   conv_rhs => rw [ιTensorObj₃_eq X Y Z i₁ i₂ i₃ k h _ rfl, assoc, ι_tensorHom_assoc,
     ← MonoidalCategory.id_tensorHom,
@@ -124,15 +128,18 @@ lemma hexagon_reverse [HasTensor X Y] [HasTensor Y Z] [HasTensor Z X]
     categoryOfGradedObjects_id, MonoidalCategory.id_tensor_comp, assoc,
     MonoidalCategory.id_tensorHom, MonoidalCategory.id_tensorHom,
     ← ιTensorObj₃_eq_assoc X Z Y i₁ i₃ i₂ k
-      (by rw [add_assoc, add_comm i₃, ← add_assoc, h]) (i₂ + i₃) (add_comm _ _),
+      (by rw [add_assoc, add_comm' i₃ i₂, ← add_assoc, h])
+      (i₂ + i₃) (add_comm' i₃ i₂),
     ιTensorObj₃_associator_inv_assoc,
-    ιTensorObj₃'_eq X Z Y i₁ i₃ i₂ k (by rw [add_assoc, add_comm i₃, ← add_assoc, h]) _ rfl,
+    ιTensorObj₃'_eq X Z Y i₁ i₃ i₂ k
+      (by rw [add_assoc, add_comm' i₃ i₂, ← add_assoc, h]) _ rfl,
     assoc, ι_tensorHom, categoryOfGradedObjects_id, ← MonoidalCategory.tensorHom_id,
     ← MonoidalCategory.comp_tensor_id_assoc,
     ι_tensorObjDesc, MonoidalCategory.comp_tensor_id, assoc,
     MonoidalCategory.tensorHom_id, MonoidalCategory.tensorHom_id,
-    ← ιTensorObj₃'_eq Z X Y i₃ i₁ i₂ k (by rw [add_assoc, add_comm i₃, h])
-      (i₁ + i₃) (add_comm _ _)]
+    ← ιTensorObj₃'_eq Z X Y i₃ i₁ i₂ k
+      (by rw [add_assoc, add_comm' i₃ (i₁ + i₂), h])
+      (i₁ + i₃) (add_comm' i₃ i₁)]
 
 end Braided
 

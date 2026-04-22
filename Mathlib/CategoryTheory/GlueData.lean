@@ -284,6 +284,22 @@ theorem hasColimit_multispan_comp : HasColimit (D.diagram.multispan ⋙ F) :=
 
 attribute [local instance] hasColimit_multispan_comp
 
+/-- If there is a forgetful functor into `Type` that preserves the gluing colimit, then `D.ι` will
+be jointly surjective. -/
+theorem ι_jointly_surjective (F : C ⥤ Type v) [PreservesColimit D.diagram.multispan F]
+    (x : F.obj D.glued) :
+    ∃ (i : _) (y : F.obj (D.U i)), F.map (D.ι i) y = x := by
+  obtain ⟨p, y, hy⟩ := Types.jointly_surjective _
+    (isColimitOfPreserves F (colimit.isColimit D.diagram.multispan)) x
+  cases p with
+  | left a =>
+      refine ⟨a.1, F.map (D.f a.1 a.2) y, ?_⟩
+      rw [← hy]
+      simpa [GlueData.ι] using
+        congr_fun (congr_arg F.map (colimit.w D.diagram.multispan (WalkingMultispan.Hom.fst a))) y
+  | right i =>
+      exact ⟨i, y, by simpa [GlueData.ι] using hy⟩
+
 variable [∀ i j k, PreservesLimit (cospan (D.f i j) (D.f i k)) F]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -328,18 +344,6 @@ def vPullbackConeIsLimitOfMap (i j : D.J) [ReflectsLimit (cospan (D.ι i) (D.ι 
   refine Cone.ext (Iso.refl _) ?_
   rintro (_ | _ | _)
   all_goals simp [e]; rfl
-
-/-- If there is a forgetful functor into `Type` that preserves enough (co)limits, then `D.ι` will
-be jointly surjective. -/
-theorem ι_jointly_surjective (F : C ⥤ Type v) [PreservesColimit D.diagram.multispan F]
-    [∀ i j k : D.J, PreservesLimit (cospan (D.f i j) (D.f i k)) F] (x : F.obj D.glued) :
-    ∃ (i : _) (y : F.obj (D.U i)), F.map (D.ι i) y = x := by
-  let e := D.gluedIso F
-  obtain ⟨i, y, eq⟩ := (D.mapGlueData F).types_ι_jointly_surjective (e.hom x)
-  replace eq := congr_arg e.inv eq
-  change ((D.mapGlueData F).ι i ≫ e.inv) y = (e.hom ≫ e.inv) x at eq
-  rw [e.hom_inv_id, D.ι_gluedIso_inv] at eq
-  exact ⟨i, y, eq⟩
 
 end GlueData
 

@@ -178,10 +178,25 @@ theorem lift_comp_inv_right [GrpObj B] (f : A ⟶ B) :
   rwa [comp_lift_assoc, comp_id, reassoc_of% toUnit_unique (f ≫ toUnit B) (toUnit A)] at this
 
 @[to_additive (attr := reassoc)]
-theorem lift_inv_comp_right [GrpObj A] [GrpObj B] (f : A ⟶ B) [IsMonHom f] :
+theorem lift_inv_comp_right [GrpObj A] [GrpObj B] (f : A ⟶ B)
+    (mul_f : μ[A] ≫ f = (f ⊗ₘ f) ≫ μ[B] := by cat_disch) :
     lift f (ι ≫ f) ≫ μ = toUnit _ ≫ η := by
+  have one_f : η[A] ≫ f = η[B] := by
+    let e : 𝟙_ C ⟶ B := η[A] ≫ f
+    have h_idem : lift e e ≫ μ[B] = e := by
+      dsimp [e]
+      rw [← lift_map_assoc, ← mul_f]
+      slice_lhs 1 2 => rw [show lift η[A] η[A] ≫ μ[A] = η[A] by
+        simpa using lift_comp_one_left (𝟙 (𝟙_ C)) η[A]]
+    symm
+    calc
+      η[B] = lift e (e ≫ ι) ≫ μ[B] := by simp
+      _ = lift (lift e e ≫ μ[B]) (e ≫ ι) ≫ μ[B] := by rw [h_idem]
+      _ = lift e (lift e (e ≫ ι) ≫ μ[B]) ≫ μ[B] := by rw [lift_lift_assoc]
+      _ = lift e (toUnit _ ≫ η[B]) ≫ μ[B] := by rw [lift_comp_inv_right]
+      _ = e := by simpa using lift_comp_one_right e (toUnit (𝟙_ C))
   have := right_inv A =≫ f
-  rwa [assoc, IsMonHom.mul_hom, assoc, IsMonHom.one_hom, lift_map_assoc, id_comp] at this
+  rwa [assoc, mul_f, assoc, one_f, lift_map_assoc, id_comp] at this
 
 @[to_additive (attr := reassoc (attr := simp))]
 theorem lift_comp_inv_left [GrpObj B] (f : A ⟶ B) :
@@ -190,10 +205,25 @@ theorem lift_comp_inv_left [GrpObj B] (f : A ⟶ B) :
   rwa [comp_lift_assoc, comp_id, reassoc_of% toUnit_unique (f ≫ toUnit B) (toUnit A)] at this
 
 @[to_additive (attr := reassoc)]
-theorem lift_inv_comp_left [GrpObj A] [GrpObj B] (f : A ⟶ B) [IsMonHom f] :
+theorem lift_inv_comp_left [GrpObj A] [GrpObj B] (f : A ⟶ B)
+    (mul_f : μ[A] ≫ f = (f ⊗ₘ f) ≫ μ[B] := by cat_disch) :
     lift (ι ≫ f) f ≫ μ = toUnit _ ≫ η := by
+  have one_f : η[A] ≫ f = η[B] := by
+    let e : 𝟙_ C ⟶ B := η[A] ≫ f
+    have h_idem : lift e e ≫ μ[B] = e := by
+      dsimp [e]
+      rw [← lift_map_assoc, ← mul_f]
+      slice_lhs 1 2 => rw [show lift η[A] η[A] ≫ μ[A] = η[A] by
+        simpa using lift_comp_one_left (𝟙 (𝟙_ C)) η[A]]
+    symm
+    calc
+      η[B] = lift e (e ≫ ι) ≫ μ[B] := by simp
+      _ = lift (lift e e ≫ μ[B]) (e ≫ ι) ≫ μ[B] := by rw [h_idem]
+      _ = lift e (lift e (e ≫ ι) ≫ μ[B]) ≫ μ[B] := by rw [lift_lift_assoc]
+      _ = lift e (toUnit _ ≫ η[B]) ≫ μ[B] := by rw [lift_comp_inv_right]
+      _ = e := by simpa using lift_comp_one_right e (toUnit (𝟙_ C))
   have := left_inv A =≫ f
-  rwa [assoc, IsMonHom.mul_hom, assoc, IsMonHom.one_hom, lift_map_assoc, id_comp] at this
+  rwa [assoc, mul_f, assoc, one_f, lift_map_assoc, id_comp] at this
 
 @[to_additive]
 theorem eq_lift_inv_left [GrpObj B] (f g h : A ⟶ B) :
@@ -324,14 +354,15 @@ theorem isPullback (A : C) [GrpObj A] :
         rwa [← assoc s.snd, eq_lift_inv_left]
       · simpa using hm₁ =≫ snd _ _)
 
-/-- Morphisms of group objects preserve inverses. -/
+/-- Multiplication-preserving maps of group objects preserve inverses. -/
 @[to_additive (attr := reassoc (attr := simp))
-/-- Morphisms of group objects preserve negations. -/]
-theorem inv_hom [GrpObj A] [GrpObj B] (f : A ⟶ B) [IsMonHom f] : ι ≫ f = f ≫ ι := by
+/-- Addition-preserving maps of group objects preserve negations. -/]
+theorem inv_hom [GrpObj A] [GrpObj B] (f : A ⟶ B)
+    (mul_f : μ[A] ≫ f = (f ⊗ₘ f) ≫ μ[B] := by cat_disch) : ι ≫ f = f ≫ ι := by
   suffices lift (lift f (ι ≫ f)) f =
       lift (lift f (f ≫ ι)) f by simpa using (this =≫ fst _ _) =≫ snd _ _
   apply (isPullback B).hom_ext <;> apply CartesianMonoidalCategory.hom_ext <;>
-    simp [lift_inv_comp_right, lift_inv_comp_left]
+    simp [lift_inv_comp_right f mul_f, lift_inv_comp_left f mul_f]
 
 @[to_additive]
 lemma toMonObj_injective {X : C} :
@@ -745,7 +776,8 @@ noncomputable instance mapGrp.instMonoidal : F.mapGrp.Monoidal :=
 @[to_additive]
 noncomputable instance mapGrp.instBraided : F.mapGrp.Braided where
   braided X Y :=
-    (Grp.forget₂Mon _).map_injective (Braided.braided X.toMon Y.toMon)
+    (Grp.forget₂Mon _).map_injective
+      (Braided.braided (F := F.mapMon) X.toMon Y.toMon)
 
 end Braided
 end Functor

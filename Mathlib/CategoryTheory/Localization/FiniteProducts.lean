@@ -42,7 +42,8 @@ lemma inverts :
     (W.functorCategory (Discrete J)).IsInvertedBy (lim ⋙ L) :=
   fun _ _ f hf => Localization.inverts L W _ (MorphismProperty.limMap f hf)
 
-variable [W.ContainsIdentities] [Finite J]
+variable [((whiskeringRight (Discrete J) C D).obj L).IsLocalization
+  (W.functorCategory (Discrete J))]
 
 /-- The (candidate) limit functor for the localized category.
 It is induced by `lim ⋙ L : (Discrete J ⥤ C) ⥤ D`. -/
@@ -88,25 +89,27 @@ noncomputable def isLimitMapCone (F : Discrete J ⥤ C) :
 
 end HasProductsOfShapeAux
 
-variable [W.ContainsIdentities]
-
 include L
-lemma hasProductsOfShape (J : Type) [Finite J] [HasProductsOfShape J C]
-    [W.IsStableUnderProductsOfShape J] :
+lemma hasProductsOfShape (J : Type) [HasProductsOfShape J C]
+    [W.IsStableUnderProductsOfShape J]
+    [((whiskeringRight (Discrete J) C D).obj L).IsLocalization
+      (W.functorCategory (Discrete J))] :
     HasProductsOfShape J D :=
   hasLimitsOfShape_iff_isLeftAdjoint_const.2
     (HasProductsOfShapeAux.adj L W J).isLeftAdjoint
 
-/-- When `C` has finite products indexed by `J`, `W : MorphismProperty C` contains
-identities and is stable under products indexed by `J`,
-then any localization functor for `W` preserves finite products indexed by `J`. -/
-lemma preservesProductsOfShape (J : Type) [Finite J]
-    [HasProductsOfShape J C] [W.IsStableUnderProductsOfShape J] :
+/-- When `C` has products indexed by `J`, `W : MorphismProperty C` is stable under products
+indexed by `J`, and the functor category induced by a localization functor for `W` is again a
+localization, then that localization functor preserves products indexed by `J`. -/
+lemma preservesProductsOfShape (J : Type) [HasProductsOfShape J C]
+    [W.IsStableUnderProductsOfShape J]
+    [((whiskeringRight (Discrete J) C D).obj L).IsLocalization
+      (W.functorCategory (Discrete J))] :
     PreservesLimitsOfShape (Discrete J) L where
   preservesLimit {F} := preservesLimit_of_preserves_limit_cone (limit.isLimit F)
     (HasProductsOfShapeAux.isLimitMapCone L W J F)
 
-variable [HasFiniteProducts C] [W.IsStableUnderFiniteProducts]
+variable [W.ContainsIdentities] [HasFiniteProducts C] [W.IsStableUnderFiniteProducts]
 
 include W in
 lemma hasFiniteProducts : HasFiniteProducts D :=

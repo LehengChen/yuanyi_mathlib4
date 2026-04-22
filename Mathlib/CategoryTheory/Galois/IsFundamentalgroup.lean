@@ -118,16 +118,30 @@ lemma toAut_injective_of_non_trivial (h : ∀ (g : G), (∀ (X : C) (x : F.obj X
 
 variable [GaloisCategory C] [FiberFunctor F]
 
-lemma toAut_continuous [TopologicalSpace G] [IsTopologicalGroup G]
-    [∀ (X : C), ContinuousSMul G (F.obj X)] :
+lemma toAut_continuous [TopologicalSpace G] [ContinuousConstSMul G G]
+    [∀ (X : C) [IsGalois X], ContinuousSMul G (F.obj X)] :
     Continuous (toAut F G) := by
-  apply continuous_of_continuousAt_one
-  rw [continuousAt_def, map_one]
-  intro A hA
-  obtain ⟨X, _, hX⟩ := ((nhds_one_has_basis_stabilizers F).mem_iff' A).mp hA
-  rw [mem_nhds_iff]
-  exact ⟨MulAction.stabilizer G X.pt, Set.preimage_mono (f := toAut F G) hX,
-    stabilizer_isOpen G X.pt, one_mem _⟩
+  have h_one : ContinuousAt (toAut F G) 1 := by
+    rw [continuousAt_def, map_one]
+    intro A hA
+    obtain ⟨X, _, hX⟩ := ((nhds_one_has_basis_stabilizers F).mem_iff' A).mp hA
+    rw [mem_nhds_iff]
+    exact ⟨MulAction.stabilizer G X.pt, Set.preimage_mono (f := toAut F G) hX,
+      stabilizer_isOpen G X.pt, one_mem _⟩
+  rw [continuous_iff_continuousAt]
+  intro g
+  rw [ContinuousAt]
+  have hgcont : ContinuousAt (fun h : G ↦ g⁻¹ * h) g := by
+    simpa [smul_eq_mul] using (continuous_const_smul g⁻¹).continuousAt (x := g)
+  change Filter.Tendsto (fun h : G ↦ g⁻¹ * h) (nhds g) (nhds (g⁻¹ * g)) at hgcont
+  have hg : Filter.Tendsto (fun h : G ↦ g⁻¹ * h) (nhds g) (nhds 1) := by
+    simpa using hgcont
+  have hmap : Filter.Tendsto (fun h : G ↦ toAut F G (g⁻¹ * h)) (nhds g) (nhds 1) := by
+    simpa [Function.comp_def] using h_one.tendsto.comp hg
+  have hmain : Filter.Tendsto (fun h : G ↦ toAut F G g * toAut F G (g⁻¹ * h))
+      (nhds g) (nhds (toAut F G g * 1)) :=
+    tendsto_const_nhds.mul hmap
+  simpa [← map_mul, mul_assoc] using hmain
 
 variable {G}
 
@@ -169,14 +183,27 @@ lemma toAut_surjective_isGalois_finite_family (t : Aut F) {ι : Type*} [Finite �
 
 open Pointwise
 
-/-- If `G` is a compact, topological group that acts continuously and naturally on the
-fibers of `F`, `toAut F G` is surjective if and only if it acts transitively on the fibers
-of all Galois objects. This is the `if` direction. For the `only if` see
+/-- If `G` is compact with continuous left translations and acts naturally on the
+fibers of `F`, `toAut F G` is surjective if and only if it acts continuously and transitively on
+the fibers of all Galois objects. This is the `if` direction. For the `only if` see
 `isPretransitive_of_surjective`. -/
-lemma toAut_surjective_of_isPretransitive [TopologicalSpace G] [IsTopologicalGroup G]
-    [CompactSpace G] [∀ (X : C), ContinuousSMul G (F.obj X)]
+lemma toAut_surjective_of_isPretransitive [TopologicalSpace G] [ContinuousConstSMul G G]
+    [CompactSpace G] [∀ (X : C) [IsGalois X], ContinuousSMul G (F.obj X)]
     (h : ∀ (X : C) [IsGalois X], MulAction.IsPretransitive G (F.obj X)) :
     Function.Surjective (toAut F G) := by
+  have isClosed_of_isOpen_subgroup (U : Subgroup G) (hU : IsOpen (U : Set G)) :
+      IsClosed (U : Set G) := by
+    rw [← isOpen_compl_iff]
+    refine isOpen_iff_forall_mem_open.mpr ?_
+    intro g hg
+    refine ⟨g • (U : Set G), ?_, hU.smul g, ?_⟩
+    · intro y hy hyU
+      rcases hy with ⟨u, hu, rfl⟩
+      apply hg
+      have hgu : g * u ∈ U := by simpa [smul_eq_mul] using hyU
+      have hguu : g * u * u⁻¹ ∈ U := U.mul_mem hgu (U.inv_mem hu)
+      simpa [mul_assoc] using hguu
+    · exact ⟨1, U.one_mem, by simp [smul_eq_mul]⟩
   intro t
   choose gi hgi using (fun X : PointedGaloisObject F ↦ toAut_surjective_isGalois F G t X)
   let cl (X : PointedGaloisObject F) : Set G := gi X • MulAction.stabilizer G X.pt
@@ -185,8 +212,8 @@ lemma toAut_surjective_of_isPretransitive [TopologicalSpace G] [IsTopologicalGro
     rw [← Set.univ_inter c]
     apply CompactSpace.isCompact_univ.inter_iInter_nonempty
     · intro X
-      apply IsClosed.leftCoset
-      exact Subgroup.isClosed_of_isOpen _ (stabilizer_isOpen G X.pt)
+      exact (isClosed_of_isOpen_subgroup (MulAction.stabilizer G X.pt)
+        (stabilizer_isOpen G X.pt)).smul (gi X)
     · intro s
       rw [Set.univ_inter]
       obtain ⟨gs, hgs⟩ :=

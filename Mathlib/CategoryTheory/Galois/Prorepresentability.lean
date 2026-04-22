@@ -412,31 +412,34 @@ lemma autMulEquivAutGalois_symm_app (x : AutGalois F) (A : C) [IsGalois A] (a : 
 
 end EndAutGaloisIsomorphism
 
-/-- The `Aut F` action on the fiber of a Galois object is transitive. See
-`pretransitive_of_isConnected` for the same result for connected objects. -/
-theorem FiberFunctor.isPretransitive_of_isGalois (X : C) [IsGalois X] :
+/-- The `Aut F` action on the fiber of a connected object is transitive. See
+`FiberFunctor.isPretransitive_of_isConnected` for the version with less restrictive universe
+assumptions. -/
+theorem FiberFunctor.isPretransitive_of_isGalois (X : C) [IsConnected X] :
     MulAction.IsPretransitive (Aut F) (F.obj X) := by
-  refine ⟨fun x y ↦ ?_⟩
-  obtain ⟨(φ : Aut X), h⟩ := MulAction.IsPretransitive.exists_smul_eq (M := Aut X) x y
-  obtain ⟨a, ha⟩ := AutGalois.π_surjective F ⟨X, x, inferInstance⟩ φ
-  use (autMulEquivAutGalois F).symm ⟨a⟩
-  simpa [mulAction_def, ha]
-
-/-- The `Aut F` action on the fiber of a connected object is transitive. For a version
-with less restrictive universe assumptions, see `FiberFunctor.isPretransitive_of_isConnected`. -/
-private instance FiberFunctor.isPretransitive_of_isConnected' (X : C) [IsConnected X] :
-    MulAction.IsPretransitive (Aut F) (F.obj X) := by
+  have h_galois (A : C) [IsGalois A] : MulAction.IsPretransitive (Aut F) (F.obj A) := by
+    refine ⟨fun x y ↦ ?_⟩
+    obtain ⟨(φ : Aut A), h⟩ := MulAction.IsPretransitive.exists_smul_eq (M := Aut A) x y
+    obtain ⟨a, ha⟩ := AutGalois.π_surjective F ⟨A, x, inferInstance⟩ φ
+    use (autMulEquivAutGalois F).symm ⟨a⟩
+    simpa [mulAction_def, ha]
   obtain ⟨A, f, hgal⟩ := exists_hom_from_galois_of_connected F X
   have hs : Function.Surjective (F.map f) := surjective_of_nonempty_fiber_of_isConnected F f
   refine ⟨fun x y ↦ ?_⟩
   obtain ⟨a, ha⟩ := hs x
   obtain ⟨b, hb⟩ := hs y
-  have : MulAction.IsPretransitive (Aut F) (F.obj A) := isPretransitive_of_isGalois F A
+  have : MulAction.IsPretransitive (Aut F) (F.obj A) := h_galois A
   obtain ⟨σ, (hσ : σ.hom.app A a = b)⟩ := MulAction.exists_smul_eq (Aut F) a b
   use σ
   rw [← ha, ← hb]
   change (F.map f ≫ σ.hom.app X) a = F.map f b
   rw [σ.hom.naturality, FintypeCat.comp_apply, hσ]
+
+/-- The `Aut F` action on the fiber of a connected object is transitive. For a version
+with less restrictive universe assumptions, see `FiberFunctor.isPretransitive_of_isConnected`. -/
+private instance FiberFunctor.isPretransitive_of_isConnected' (X : C) [IsConnected X] :
+    MulAction.IsPretransitive (Aut F) (F.obj X) :=
+  isPretransitive_of_isGalois F X
 
 end Specialized
 

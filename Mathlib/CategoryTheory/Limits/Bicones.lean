@@ -49,9 +49,12 @@ instance : Inhabited (Bicone J) :=
   ⟨Bicone.left⟩
 
 open scoped Classical in
-instance finBicone [Fintype J] : Fintype (Bicone J) where
-  elems := [Bicone.left, Bicone.right].toFinset ∪ Finset.image Bicone.diagram Fintype.elems
+instance finBicone [Finite J] : Fintype (Bicone J) where
+  elems :=
+    letI := Fintype.ofFinite J
+    [Bicone.left, Bicone.right].toFinset ∪ Finset.image Bicone.diagram Fintype.elems
   complete j := by
+    letI := Fintype.ofFinite J
     cases j <;> simp [Fintype.complete]
 
 variable [Category.{v₁} J]
@@ -90,6 +93,42 @@ instance biconeCategory : Category (Bicone J) where
   comp_id f := by cases f <;> simp
   assoc f g h := by cases f <;> cases g <;> cases h <;> simp
 
+open scoped Classical in
+instance finBiconeHom [∀ j k : J, Finite (j ⟶ k)] (j k : Bicone J) : Fintype (j ⟶ k) := by
+  rcases j with (_ | _ | j) <;> rcases k with (_ | _ | k)
+  · exact
+      { elems := {BiconeHom.left_id}
+        complete := fun f => by cases f; simp }
+  · exact
+    { elems := ∅
+      complete := fun f => by cases f }
+  · exact
+    { elems := {BiconeHom.left _}
+      complete := fun f => by cases f; simp }
+  · exact
+    { elems := ∅
+      complete := fun f => by cases f }
+  · exact
+      { elems := {BiconeHom.right_id}
+        complete := fun f => by cases f; simp }
+  · exact
+    { elems := {BiconeHom.right _}
+      complete := fun f => by cases f; simp }
+  · exact
+    { elems := ∅
+      complete := fun f => by cases f }
+  · exact
+    { elems := ∅
+      complete := fun f => by cases f }
+  · letI := Fintype.ofFinite (j ⟶ k)
+    exact
+      { elems := Finset.image BiconeHom.diagram Fintype.elems
+        complete := fun f => by
+          rcases f with (_ | _ | _ | _ | f)
+          simp only [Finset.mem_image]
+          use f
+          simpa using Fintype.complete _ }
+
 end Bicone
 
 section SmallCategory
@@ -120,45 +159,11 @@ def biconeMk {C : Type u₁} [Category.{v₁} C] {F : J ⥤ C} (c₁ c₂ : Cone
     · cases g
       apply F.map_comp
 
-open scoped Classical in
-instance finBiconeHom [FinCategory J] (j k : Bicone J) : Fintype (j ⟶ k) := by
-  cases j <;> cases k
-  · exact
-      { elems := {BiconeHom.left_id}
-        complete := fun f => by cases f; simp }
-  · exact
-    { elems := ∅
-      complete := fun f => by cases f }
-  · exact
-    { elems := {BiconeHom.left _}
-      complete := fun f => by cases f; simp }
-  · exact
-    { elems := ∅
-      complete := fun f => by cases f }
-  · exact
-      { elems := {BiconeHom.right_id}
-        complete := fun f => by cases f; simp }
-  · exact
-    { elems := {BiconeHom.right _}
-      complete := fun f => by cases f; simp }
-  · exact
-    { elems := ∅
-      complete := fun f => by cases f }
-  · exact
-    { elems := ∅
-      complete := fun f => by cases f }
-  · exact
-    { elems := Finset.image BiconeHom.diagram Fintype.elems
-      complete := fun f => by
-        rcases f with (_ | _ | _ | _ | f)
-        simp only [Finset.mem_image]
-        use f
-        simpa using Fintype.complete _ }
-
 instance biconeSmallCategory : SmallCategory (Bicone J) :=
   CategoryTheory.biconeCategory J
 
-instance biconeFinCategory [FinCategory J] : FinCategory (Bicone J) where
+instance biconeFinCategory [Finite J] [∀ j k : J, Finite (j ⟶ k)] :
+    FinCategory (Bicone J) where
 
 end SmallCategory
 

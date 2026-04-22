@@ -133,25 +133,25 @@ noncomputable example (E : C ⥤ D) [E.IsEquivalence] (c : Cocone K) (h : IsColi
     IsColimit (E.mapCocone c) :=
   isColimitOfPreserves E h
 
-theorem hasColimit_comp_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimit K] :
+theorem hasColimit_comp_equivalence (E : C ⥤ D) [PreservesColimit K E] [HasColimit K] :
     HasColimit (K ⋙ E) :=
   HasColimit.mk
     { cocone := E.mapCocone (colimit.cocone K)
       isColimit := isColimitOfPreserves _ (colimit.isColimit K) }
 
-theorem hasColimit_of_comp_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimit (K ⋙ E)] :
-    HasColimit K := by
-  rw [hasColimit_iff_of_iso
-    ((Functor.rightUnitor _).symm ≪≫ isoWhiskerLeft K E.asEquivalence.unitIso)]
-  exact hasColimit_comp_equivalence (K ⋙ E) E.inv
+theorem hasColimit_of_comp_equivalence (E : C ⥤ D) [CreatesColimit K E]
+    [HasColimit (K ⋙ E)] : HasColimit K :=
+  hasColimit_of_created K E
 
-/-- Transport a `HasColimitsOfShape` instance across an equivalence. -/
-theorem hasColimitsOfShape_of_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimitsOfShape J D] :
+/-- Transport a `HasColimitsOfShape` instance along a functor that creates colimits of that shape. -/
+theorem hasColimitsOfShape_of_equivalence (E : C ⥤ D) [CreatesColimitsOfShape J E]
+    [HasColimitsOfShape J D] :
     HasColimitsOfShape J C :=
   ⟨fun F => hasColimit_of_comp_equivalence F E⟩
 
-/-- Transport a `HasColimitsOfSize` instance across an equivalence. -/
-theorem has_colimits_of_equivalence (E : C ⥤ D) [E.IsEquivalence] [HasColimitsOfSize.{v, u} D] :
+/-- Transport a `HasColimitsOfSize` instance along a functor that creates colimits of that size. -/
+theorem has_colimits_of_equivalence (E : C ⥤ D) [CreatesColimitsOfSize.{v, u} E]
+    [HasColimitsOfSize.{v, u} D] :
     HasColimitsOfSize.{v, u} C :=
   ⟨fun _ _ => hasColimitsOfShape_of_equivalence E⟩
 
@@ -243,24 +243,25 @@ noncomputable example (E : D ⥤ C) [E.IsEquivalence] (c : Cone K) (h : IsLimit 
     IsLimit (E.mapCone c) :=
   isLimitOfPreserves E h
 
-theorem hasLimit_comp_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimit K] : HasLimit (K ⋙ E) :=
+theorem hasLimit_comp_equivalence (E : D ⥤ C) [PreservesLimit K E] [HasLimit K] :
+    HasLimit (K ⋙ E) :=
   HasLimit.mk
     { cone := E.mapCone (limit.cone K)
       isLimit := isLimitOfPreserves _ (limit.isLimit K) }
 
-theorem hasLimit_of_comp_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimit (K ⋙ E)] :
-    HasLimit K := by
-  rw [← hasLimit_iff_of_iso
-    (isoWhiskerLeft K E.asEquivalence.unitIso.symm ≪≫ Functor.rightUnitor _)]
-  exact hasLimit_comp_equivalence (K ⋙ E) E.inv
+theorem hasLimit_of_comp_equivalence (E : D ⥤ C) [CreatesLimit K E]
+    [HasLimit (K ⋙ E)] : HasLimit K :=
+  hasLimit_of_created K E
 
-/-- Transport a `HasLimitsOfShape` instance across an equivalence. -/
-theorem hasLimitsOfShape_of_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimitsOfShape J C] :
+/-- Transport a `HasLimitsOfShape` instance along a functor that creates limits of that shape. -/
+theorem hasLimitsOfShape_of_equivalence (E : D ⥤ C) [CreatesLimitsOfShape J E]
+    [HasLimitsOfShape J C] :
     HasLimitsOfShape J D :=
   ⟨fun F => hasLimit_of_comp_equivalence F E⟩
 
-/-- Transport a `HasLimitsOfSize` instance across an equivalence. -/
-theorem has_limits_of_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimitsOfSize.{v, u} C] :
+/-- Transport a `HasLimitsOfSize` instance along a functor that creates limits of that size. -/
+theorem has_limits_of_equivalence (E : D ⥤ C) [CreatesLimitsOfSize.{v, u} E]
+    [HasLimitsOfSize.{v, u} C] :
     HasLimitsOfSize.{v, u} D :=
   ⟨fun _ _ => hasLimitsOfShape_of_equivalence E⟩
 

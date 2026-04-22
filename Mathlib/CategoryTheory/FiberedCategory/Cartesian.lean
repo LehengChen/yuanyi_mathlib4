@@ -124,16 +124,26 @@ lemma map_self : IsCartesian.map p f φ φ = 𝟙 a := by
   apply map_uniq
   simp only [id_comp]
 
-instance of_comp_iso {b' : 𝒳} (φ' : b ≅ b') [IsHomLift p (𝟙 S) φ'.hom] :
-    IsCartesian p f (φ ≫ φ'.hom) where
+/-- Postcomposing a Cartesian morphism with a strongly Cartesian morphism lifting the identity is
+Cartesian. -/
+instance of_comp_iso {b' : 𝒳} (φ' : b ⟶ b') [IsStronglyCartesian p (𝟙 S) φ'] :
+    IsCartesian p f (φ ≫ φ') where
   universal_property := by
     intro c ψ hψ
-    use IsCartesian.map p f φ (ψ ≫ φ'.inv)
-    refine ⟨⟨inferInstance, by simp only [fac_assoc, assoc, Iso.inv_hom_id, comp_id]⟩, ?_⟩
-    rintro τ ⟨hτ₁, hτ₂⟩
-    apply map_uniq
-    rw [Iso.eq_comp_inv]
-    simp only [assoc, hτ₂]
+    subst_hom_lift p f ψ
+    let ψ₀ := Classical.choose <|
+      IsStronglyCartesian.universal_property' (p := p) (f := 𝟙 (p.obj b')) (φ := φ')
+        (p.map ψ) ψ
+    have hψ₀ := Classical.choose_spec <|
+      IsStronglyCartesian.universal_property' (p := p) (f := 𝟙 (p.obj b')) (φ := φ')
+        (p.map ψ) ψ
+    haveI : IsHomLift p (p.map ψ) ψ₀ := hψ₀.1.1
+    use IsCartesian.map p (p.map ψ) φ ψ₀
+    refine ⟨⟨inferInstance, by rw [← assoc, IsCartesian.fac, hψ₀.1.2]⟩, ?_⟩
+    intro τ hτ
+    haveI : IsHomLift p (𝟙 (p.obj c)) τ := hτ.1
+    apply IsCartesian.map_uniq
+    exact hψ₀.2 (τ ≫ φ) ⟨inferInstance, by simpa [assoc] using hτ.2⟩
 
 /-- The canonical isomorphism between the domains of two Cartesian arrows
 lying over the same object. -/
@@ -158,17 +168,29 @@ instance domainUniqueUpToIso_hom_isHomLift {a' : 𝒳} (φ' : a' ⟶ b) [IsCarte
     IsHomLift p (𝟙 R) (domainUniqueUpToIso p f φ φ').inv :=
   domainUniqueUpToIso_inv p f φ φ' ▸ IsCartesian.map_isHomLift p f φ' φ
 
-/-- Precomposing a Cartesian morphism with an isomorphism lifting the identity is Cartesian. -/
-instance of_iso_comp {a' : 𝒳} (φ' : a' ≅ a) [IsHomLift p (𝟙 R) φ'.hom] :
-    IsCartesian p f (φ'.hom ≫ φ) where
+/-- Precomposing a Cartesian morphism with a strongly Cartesian morphism lifting the identity is
+Cartesian. -/
+instance of_iso_comp {a' : 𝒳} (φ' : a' ⟶ a) [IsStronglyCartesian p (𝟙 R) φ'] :
+    IsCartesian p f (φ' ≫ φ) where
   universal_property := by
     intro c ψ hψ
-    use IsCartesian.map p f φ ψ ≫ φ'.inv
-    refine ⟨⟨inferInstance, by simp⟩, ?_⟩
-    rintro τ ⟨hτ₁, hτ₂⟩
-    rw [Iso.eq_comp_inv]
-    apply map_uniq
-    simp only [assoc, hτ₂]
+    subst_hom_lift p f ψ
+    let δ := IsCartesian.map p (p.map ψ) φ ψ
+    let χ := Classical.choose <|
+      IsStronglyCartesian.universal_property' (p := p) (f := 𝟙 (p.obj c)) (φ := φ')
+        (𝟙 (p.obj c)) δ
+    have hχ := Classical.choose_spec <|
+      IsStronglyCartesian.universal_property' (p := p) (f := 𝟙 (p.obj c)) (φ := φ')
+        (𝟙 (p.obj c)) δ
+    haveI : IsHomLift p (𝟙 (p.obj c)) χ := hχ.1.1
+    use χ
+    refine ⟨⟨inferInstance, by rw [← assoc, hχ.1.2, IsCartesian.fac]⟩, ?_⟩
+    intro τ hτ
+    haveI : IsHomLift p (𝟙 (p.obj c)) τ := hτ.1
+    apply hχ.2
+    refine ⟨hτ.1, ?_⟩
+    apply IsCartesian.map_uniq
+    simpa [assoc] using hτ.2
 
 end IsCartesian
 

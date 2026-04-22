@@ -40,15 +40,16 @@ lemma of_isPullback_of_descendsAlong [P.DescendsAlong Q] (h : IsPullback fst snd
     (hf : Q f) (hfst : P fst) : P g :=
   DescendsAlong.of_isPullback h hf hfst
 
-lemma iff_of_isPullback [P.IsStableUnderBaseChange] [P.DescendsAlong Q] (h : IsPullback fst snd f g)
-    (hf : Q f) : P fst ↔ P g :=
-  ⟨fun hfst ↦ of_isPullback_of_descendsAlong h hf hfst, fun hf ↦ P.of_isPullback h.flip hf⟩
+lemma iff_of_isPullback [P.IsStableUnderBaseChangeAlong f] [P.DescendsAlong Q]
+    (h : IsPullback fst snd f g) (hf : Q f) : P fst ↔ P g :=
+  ⟨fun hfst ↦ of_isPullback_of_descendsAlong h hf hfst,
+    fun hf ↦ IsStableUnderBaseChangeAlong.of_isPullback h.flip hf⟩
 
 lemma of_pullback_fst_of_descendsAlong [P.DescendsAlong Q] [HasPullback f g] (hf : Q f)
     (hfst : P (pullback.fst f g)) : P g :=
   of_isPullback_of_descendsAlong (.of_hasPullback f g) hf hfst
 
-lemma pullback_fst_iff [P.IsStableUnderBaseChange] [P.DescendsAlong Q] [HasPullback f g]
+lemma pullback_fst_iff [P.IsStableUnderBaseChangeAlong f] [P.DescendsAlong Q] [HasPullback f g]
     (hf : Q f) : P (pullback.fst f g) ↔ P g :=
   iff_of_isPullback (.of_hasPullback f g) hf
 
@@ -56,7 +57,7 @@ lemma of_pullback_snd_of_descendsAlong [P.DescendsAlong Q] [HasPullback f g] (hg
     (hsnd : P (pullback.snd f g)) : P f :=
   of_isPullback_of_descendsAlong (IsPullback.of_hasPullback f g).flip hg hsnd
 
-lemma pullback_snd_iff [P.IsStableUnderBaseChange] [P.DescendsAlong Q] [HasPullback f g]
+lemma pullback_snd_iff [P.IsStableUnderBaseChangeAlong g] [P.DescendsAlong Q] [HasPullback f g]
     (hg : Q g) : P (pullback.snd f g) ↔ P f :=
   iff_of_isPullback (IsPullback.of_hasPullback f g).flip hg
 
@@ -71,14 +72,16 @@ lemma DescendsAlong.of_le [P.DescendsAlong Q] (hle : W ≤ Q) : P.DescendsAlong 
   of_isPullback h hg hfst := DescendsAlong.of_isPullback h (hle _ hg) hfst
 
 /-- Alternative constructor for `CodescendsAlong` using `HasPullback`. -/
-lemma DescendsAlong.mk' [P.RespectsIso]
+lemma DescendsAlong.mk' [P.RespectsLeft (isomorphisms C)]
     (H : ∀ {X Y Z : C} {f : X ⟶ Z} {g : Y ⟶ Z} [HasPullback f g],
       Q f → P (pullback.fst f g) → P g) :
     P.DescendsAlong Q where
   of_isPullback {A X Y Z fst snd f g} h hf hfst := by
     have : HasPullback f g := h.hasPullback
     apply H hf
-    rwa [← P.cancel_left_of_respectsIso h.isoPullback.hom, h.isoPullback_hom_fst]
+    rw [← h.isoPullback_inv_fst]
+    exact RespectsLeft.precomp (P := P) (Q := isomorphisms C) h.isoPullback.inv
+      (by infer_instance) fst hfst
 
 instance [Q.IsStableUnderBaseChange] [P.HasOfPrecompProperty Q] [P.RespectsRight Q] :
     P.DescendsAlong Q where
@@ -112,9 +115,9 @@ instance [HasPullbacks C] (P Q : MorphismProperty C) [P.DescendsAlong Q] [P.Resp
     iterate 4 rw [cancel_left_of_respectsIso (P := P)]
     rwa [cancel_right_of_respectsIso (P := P)]
 
-lemma eq_of_isomorphisms_descendsAlong [(MorphismProperty.isomorphisms C).DescendsAlong P]
-    [P.IsStableUnderBaseChange] [HasEqualizers C]
-    [HasPullbacks C] {X Y S T : C} {f g : X ⟶ Y} {s : X ⟶ S} {t : Y ⟶ S} (hf : f ≫ t = s)
+lemma eq_of_isomorphisms_descendsAlong {X Y S T : C} {f g : X ⟶ Y} {s : X ⟶ S}
+    {t : Y ⟶ S} [(MorphismProperty.isomorphisms C).DescendsAlong P]
+    [P.IsStableUnderBaseChangeAlong s] [HasEqualizers C] [HasPullbacks C] (hf : f ≫ t = s)
     (hg : g ≫ t = s) (v : T ⟶ S) (hv : P v)
     (H :
       pullback.map s v t v f (𝟙 T) (𝟙 S) (by simp [hf]) (by simp) =
@@ -136,7 +139,8 @@ lemma faithful_overPullback_of_isomorphisms_descendAlong
     (Over.pullback f).Faithful := by
   refine ⟨fun {X} Y a b hab ↦ ?_⟩
   ext
-  apply P.eq_of_isomorphisms_descendsAlong (Over.w a) (Over.w b) f hf
+  apply P.eq_of_isomorphisms_descendsAlong (s := X.hom) (t := Y.hom)
+    (Over.w a) (Over.w b) f hf
   convert congr($(hab).left) <;> ext <;> simp
 
 end DescendsAlong
@@ -155,15 +159,16 @@ lemma of_isPushout_of_codescendsAlong [P.CodescendsAlong Q] (h : IsPushout f g i
     (hf : Q f) (hinl : P inl) : P g :=
   CodescendsAlong.of_isPushout h hf hinl
 
-lemma iff_of_isPushout [P.IsStableUnderCobaseChange] [P.CodescendsAlong Q]
+lemma iff_of_isPushout [P.IsStableUnderCobaseChangeAlong f] [P.CodescendsAlong Q]
     (h : IsPushout f g inl inr) (hg : Q f) : P inl ↔ P g :=
-  ⟨fun hinl ↦ of_isPushout_of_codescendsAlong h hg hinl, fun hf ↦ P.of_isPushout h hf⟩
+  ⟨fun hinl ↦ of_isPushout_of_codescendsAlong h hg hinl,
+    fun hf ↦ IsStableUnderCobaseChangeAlong.of_isPushout h hf⟩
 
 lemma of_pushout_inl_of_codescendsAlong [P.CodescendsAlong Q] [HasPushout f g] (hf : Q f)
     (hinl : P (pushout.inl f g)) : P g :=
   of_isPushout_of_codescendsAlong (.of_hasPushout f g) hf hinl
 
-lemma pushout_inl_iff [P.IsStableUnderCobaseChange] [P.CodescendsAlong Q] [HasPushout f g]
+lemma pushout_inl_iff [P.IsStableUnderCobaseChangeAlong f] [P.CodescendsAlong Q] [HasPushout f g]
     (hf : Q f) : P (pushout.inl f g) ↔ P g :=
   iff_of_isPushout (.of_hasPushout f g) hf
 
@@ -171,7 +176,7 @@ lemma of_pushout_inr_of_descendsAlong [P.CodescendsAlong Q] [HasPushout f g] (hg
     (hinr : P (pushout.inr f g)) : P f :=
   of_isPushout_of_codescendsAlong (IsPushout.of_hasPushout f g).flip hg hinr
 
-lemma pushout_inr_iff [P.IsStableUnderCobaseChange] [P.CodescendsAlong Q] [HasPushout f g]
+lemma pushout_inr_iff [P.IsStableUnderCobaseChangeAlong g] [P.CodescendsAlong Q] [HasPushout f g]
     (hg : Q g) : P (pushout.inr f g) ↔ P f :=
   iff_of_isPushout (IsPushout.of_hasPushout f g).flip hg
 
@@ -187,13 +192,15 @@ instance CodescendsAlong.inf [P.CodescendsAlong Q] [W.CodescendsAlong Q] :
     ⟨CodescendsAlong.of_isPushout h hg hfst.1, CodescendsAlong.of_isPushout h hg hfst.2⟩
 
 /-- Alternative constructor for `CodescendsAlong` using `HasPushout`. -/
-lemma CodescendsAlong.mk' [P.RespectsIso]
+lemma CodescendsAlong.mk' [P.RespectsRight (isomorphisms C)]
     (H : ∀ {X Y Z : C} {f : Z ⟶ X} {g : Z ⟶ Y} [HasPushout f g], Q f → P (pushout.inl f g) → P g) :
     P.CodescendsAlong Q where
   of_isPushout {A X Y Z f g inl inr} h hf hfst := by
     have : HasPushout f g := h.hasPushout
     apply H hf
-    rwa [← P.cancel_right_of_respectsIso _ h.isoPushout.inv, h.inl_isoPushout_inv]
+    rw [← h.inl_isoPushout_hom]
+    exact RespectsRight.postcomp (P := P) (Q := isomorphisms C) h.isoPushout.hom
+      (by infer_instance) inl hfst
 
 instance [Q.IsStableUnderCobaseChange] [P.HasOfPostcompProperty Q] [P.RespectsLeft Q] :
     P.CodescendsAlong Q where

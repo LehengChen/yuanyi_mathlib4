@@ -20,22 +20,26 @@ namespace CategoryTheory
 
 variable (C : Type u) [Category.{v} C]
 
-theorem IsFilteredOrEmpty.isPreconnected [IsFilteredOrEmpty C] : IsPreconnected C :=
-  zigzag_isPreconnected fun j j' => .trans
-    (.single <| .inl <| .intro <| IsFiltered.leftToMax j j')
-    (.single <| .inr <| .intro <| IsFiltered.rightToMax j j')
+theorem IsFilteredOrEmpty.isPreconnected
+    (cocone_objs : ∀ X Y : C, ∃ (Z : C) (_ : X ⟶ Z) (_ : Y ⟶ Z), True) :
+    IsPreconnected C :=
+  zigzag_isPreconnected fun j j' => by
+    obtain ⟨Z, f, g, _⟩ := cocone_objs j j'
+    exact .trans (.single <| .inl <| .intro f) (.single <| .inr <| .intro g)
 
-theorem IsCofilteredOrEmpty.isPreconnected [IsCofilteredOrEmpty C] : IsPreconnected C :=
-  zigzag_isPreconnected fun j j' => .trans
-    (.single <| .inr <| .intro <| IsCofiltered.minToLeft j j')
-    (.single <| .inl <| .intro <| IsCofiltered.minToRight j j')
+theorem IsCofilteredOrEmpty.isPreconnected
+    (cone_objs : ∀ X Y : C, ∃ (W : C) (_ : W ⟶ X) (_ : W ⟶ Y), True) :
+    IsPreconnected C :=
+  zigzag_isPreconnected fun j j' => by
+    obtain ⟨W, f, g, _⟩ := cone_objs j j'
+    exact .trans (.single <| .inr <| .intro f) (.single <| .inl <| .intro g)
 
 attribute [local instance] IsFiltered.nonempty in
 theorem IsFiltered.isConnected [IsFiltered C] : IsConnected C :=
-  { IsFilteredOrEmpty.isPreconnected C with }
+  { IsFilteredOrEmpty.isPreconnected C IsFilteredOrEmpty.cocone_objs with }
 
 attribute [local instance] IsCofiltered.nonempty in
 theorem IsCofiltered.isConnected [IsCofiltered C] : IsConnected C :=
-  { IsCofilteredOrEmpty.isPreconnected C with }
+  { IsCofilteredOrEmpty.isPreconnected C IsCofilteredOrEmpty.cone_objs with }
 
 end CategoryTheory

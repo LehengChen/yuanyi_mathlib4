@@ -34,36 +34,45 @@ namespace IsGrothendieckAbelian
 
 attribute [local instance] IsFiltered.isConnected
 
-variable {C : Type u} [Category.{v} C] [Abelian C] [IsGrothendieckAbelian.{w} C]
+variable {C : Type u} [Category.{v} C]
   {X : C} {J : Type w} [SmallCategory J] (F : J ⥤ MonoOver X)
 
 section
 
-variable [IsFiltered J] {c : Cocone (F ⋙ MonoOver.forget _ ⋙ Over.forget _)}
+variable [IsConnected J] [HasColimitsOfShape J C]
+  [(colim : (J ⥤ C) ⥤ C).PreservesMonomorphisms]
+  {c : Cocone (F ⋙ MonoOver.forget _ ⋙ Over.forget _)}
   (hc : IsColimit c) (f : c.pt ⟶ X) (hf : ∀ (j : J), c.ι.app j ≫ f = (F.obj j).obj.hom)
 
 include hc hf
 
 set_option backward.isDefEq.respectTransparency false in
-/-- If `C` is a Grothendieck abelian category, `X : C`, if `F : J ⥤ MonoOver X` is a
-functor from a filtered category `J`, `c` is a colimit cocone for the corresponding
-functor `J ⥤ C`, and `f : c.pt ⟶ X` is induced by the inclusions,
-then `f` is a monomorphism. -/
+/-- If colimits of shape `J` preserve monomorphisms in `C`, `J` is connected,
+`c` is a colimit cocone for the functor `F : J ⥤ MonoOver X` computed in `C`,
+and `f : c.pt ⟶ X` is induced by the inclusions, then `f` is a monomorphism. -/
 lemma mono_of_isColimit_monoOver : Mono f := by
   let α : F ⋙ MonoOver.forget _ ⋙ Over.forget _ ⟶ (Functor.const _).obj X :=
     { app j := (F.obj j).obj.hom }
   have := NatTrans.mono_of_mono_app α
   exact colim.map_mono' α hc (isColimitConstCocone J X) f (by simpa using hf)
 
+end
+
+section
+
+variable [LocallySmall.{w} C] [WellPowered.{w} C] [HasCoproducts.{w} C] [HasImages C]
+  {c : Cocone (F ⋙ MonoOver.forget _ ⋙ Over.forget _)}
+  (hc : IsColimit c) (f : c.pt ⟶ X) [Mono f]
+  (hf : ∀ (j : J), c.ι.app j ≫ f = (F.obj j).obj.hom)
+
+include hc hf
+
 set_option backward.isDefEq.respectTransparency false in
-/-- If `C` is a Grothendieck abelian category, `X : C`, if `F : J ⥤ MonoOver X` is a
-functor from a filtered category `J`, the colimit of `F` (computed in `C`) gives
-a subobject of `F` which is a supremum of the subobjects corresponding to
-the objects in the image of the functor `F`. -/
+/-- If `F : J ⥤ MonoOver X` has a colimit in `C` whose induced map to `X` is a
+monomorphism, then the corresponding subobject of `X` is a supremum of the
+subobjects corresponding to the objects in the image of `F`. -/
 lemma subobjectMk_of_isColimit_eq_iSup :
-    haveI := mono_of_isColimit_monoOver F hc f hf
     Subobject.mk f = ⨆ j, Subobject.mk (F.obj j).obj.hom := by
-  haveI := mono_of_isColimit_monoOver F hc f hf
   apply le_antisymm
   · rw [le_iSup_iff]
     intro s H
@@ -76,11 +85,16 @@ lemma subobjectMk_of_isColimit_eq_iSup :
             Category.comp_id] using MonoOver.w (F.map f) }
     exact Subobject.mk_le_mk_of_comm (hc.desc c')
       (hc.hom_ext (fun j ↦ by rw [hc.fac_assoc c' j, hf, Subobject.ofMkLEMk_comp]))
-  · rw [iSup_le_iff]
-    intro j
+  · rw [← sSup_range]
+    apply CategoryTheory.Subobject.sSup_le
+    rintro _ ⟨j, rfl⟩
     exact Subobject.mk_le_mk_of_comm (c.ι.app j) (hf j)
 
 end
+
+section
+
+variable [Abelian C] [IsGrothendieckAbelian.{w} C]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Let `X : C` be an object in a Grothendieck abelian category,
@@ -108,14 +122,18 @@ noncomputable def isColimitMapCoconeOfSubobjectMkEqISup
   rw [Category.assoc, Subobject.ofMkLEMk_comp, Over.w]
   apply colimit.ι_desc
 
+end
+
 set_option backward.isDefEq.respectTransparency false in
-/-- If `C` is a Grothendieck abelian category, `X : C`, if `F : J ⥤ MonoOver X` is a
-functor from a `κ`-filtered category `J` with `κ` a regular cardinal such
-that `HasCardinalLT (Subobject X) κ`, and if the colimit of `F` (computed in `C`)
-maps epimorphically onto `X`, then there exists `j : J` such that `(F.obj j).obj.hom`
-is an isomorphism. -/
+/-- If `F : J ⥤ MonoOver X` is a functor from a `κ`-filtered category `J`, where
+`κ` is a regular cardinal such that `HasCardinalLT (Subobject X) κ`, and if the
+colimit of `F` computed in `C` maps epimorphically onto `X`, then there exists
+`j : J` such that `(F.obj j).obj.hom` is an isomorphism. -/
 lemma exists_isIso_of_functor_from_monoOver
+    [Balanced C] [LocallySmall.{w} C] [WellPowered.{w} C]
+    [HasCoproducts.{w} C] [HasImages C]
     {κ : Cardinal.{w}} [hκ : Fact κ.IsRegular] [IsCardinalFiltered J κ]
+    [HasColimitsOfShape J C] [(colim : (J ⥤ C) ⥤ C).PreservesMonomorphisms]
     (hXκ : HasCardinalLT (Subobject X) κ)
     (c : Cocone (F ⋙ MonoOver.forget _ ⋙ Over.forget _)) (hc : IsColimit c)
     (f : c.pt ⟶ X) (hf : ∀ (j : J), c.ι.app j ≫ f = (F.obj j).obj.hom) (h : Epi f) :
@@ -132,8 +150,10 @@ lemma exists_isIso_of_functor_from_monoOver
   have hs : HasCardinalLT (Set.range s) κ :=
     hXκ.of_injective (f := Subtype.val) Subtype.val_injective
   refine ⟨IsCardinalFiltered.max σ hs, ?_⟩
-  rw [Subobject.isIso_iff_mk_eq_top, ← top_le_iff, ← h, iSup_le_iff]
-  intro j
+  rw [Subobject.isIso_iff_mk_eq_top, ← top_le_iff, ← h]
+  rw [← sSup_range]
+  apply CategoryTheory.Subobject.sSup_le
+  rintro _ ⟨j, rfl⟩
   let t : Set.range s := ⟨_, j, rfl⟩
   trans Subobject.mk (F.obj (σ t)).obj.hom
   · exact (hσ t).symm.le

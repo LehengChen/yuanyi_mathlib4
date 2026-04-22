@@ -11,8 +11,9 @@ public import Mathlib.CategoryTheory.MorphismProperty.Composition
 /-!
 # Epimorphisms with an injective kernel
 
-In this file, we define the class of morphisms `epiWithInjectiveKernel` in an
-abelian category. We show that this property of morphisms is multiplicative.
+In this file, we define the class of morphisms `epiWithInjectiveKernel` in a
+category with kernels. We show that this property of morphisms is multiplicative
+under weaker assumptions than abelianness.
 
 This shall be used in the file `Mathlib/Algebra/Homology/Factorizations/Basic.lean` in
 order to define morphisms of cochain complexes which satisfy this property
@@ -26,19 +27,30 @@ namespace CategoryTheory
 
 open Category Limits ZeroObject Preadditive
 
-variable {C : Type*} [Category* C] [Abelian C]
+variable {C : Type*} [Category* C]
 
 namespace Abelian
 
-/-- The class of morphisms in an abelian category that are epimorphisms
+section Kernels
+
+variable [HasZeroMorphisms C] [HasKernels C]
+
+/-- The class of morphisms in a category with kernels that are epimorphisms
 and have an injective kernel. -/
 def epiWithInjectiveKernel : MorphismProperty C :=
   fun _ _ f => Epi f ∧ Injective (kernel f)
 
+lemma epiWithInjectiveKernel_of_iso {X Y : C} (f : X ⟶ Y) [IsIso f] :
+    epiWithInjectiveKernel f := by
+  exact ⟨inferInstance, (isZero_kernel_of_mono f).injective⟩
+
+end Kernels
+
 /-- A morphism `g : X ⟶ Y` is epi with an injective kernel iff there exists a morphism
 `f : I ⟶ X` with `I` injective such that `f ≫ g = 0` and
 the short complex `I ⟶ X ⟶ Y` has a splitting. -/
-lemma epiWithInjectiveKernel_iff {X Y : C} (g : X ⟶ Y) :
+lemma epiWithInjectiveKernel_iff [Preadditive C] [HasKernels C] [Balanced C]
+    [CategoryWithHomology C] {X Y : C} (g : X ⟶ Y) :
     epiWithInjectiveKernel g ↔ ∃ (I : C) (_ : Injective I) (f : I ⟶ X) (w : f ≫ g = 0),
       Nonempty (ShortComplex.mk f g w).Splitting := by
   constructor
@@ -50,17 +62,21 @@ lemma epiWithInjectiveKernel_iff {X Y : C} (g : X ⟶ Y) :
         (by simp [S]) inferInstance⟩⟩
   · rintro ⟨I, _, f, w, ⟨σ⟩⟩
     have : IsSplitEpi g := ⟨σ.s, σ.s_g⟩
+    have hσ : IsLimit (KernelFork.ofι f w) := by
+      refine KernelFork.IsLimit.ofι f w (fun {W'} k hk => k ≫ σ.r) ?_ ?_
+      · intro W' k hk
+        simpa [Category.assoc, reassoc_of% hk] using congrArg (fun t => k ≫ t) σ.id
+      · intro W' k hk m hm
+        have hf_r : f ≫ σ.r = 𝟙 I := σ.f_r
+        calc
+          m = m ≫ (f ≫ σ.r) := by simp [hf_r]
+          _ = k ≫ σ.r := by rw [← Category.assoc, hm]
     let e : I ≅ kernel g :=
-      IsLimit.conePointUniqueUpToIso σ.shortExact.fIsKernel (limit.isLimit _)
+      IsLimit.conePointUniqueUpToIso hσ (limit.isLimit _)
     exact ⟨inferInstance, Injective.of_iso e inferInstance⟩
 
-lemma epiWithInjectiveKernel_of_iso {X Y : C} (f : X ⟶ Y) [IsIso f] :
-    epiWithInjectiveKernel f := by
-  rw [epiWithInjectiveKernel_iff]
-  exact ⟨0, inferInstance, 0, by simp,
-    ⟨ShortComplex.Splitting.ofIsZeroOfIsIso _ (isZero_zero C) (by assumption)⟩⟩
-
-instance : (epiWithInjectiveKernel : MorphismProperty C).IsMultiplicative where
+instance [Preadditive C] [HasKernels C] [Balanced C] [CategoryWithHomology C]
+    [HasBinaryBiproducts C] : (epiWithInjectiveKernel : MorphismProperty C).IsMultiplicative where
   id_mem _ := epiWithInjectiveKernel_of_iso _
   comp_mem {X Y Z} g₁ g₂ hg₁ hg₂ := by
     rw [epiWithInjectiveKernel_iff] at hg₁ hg₂ ⊢

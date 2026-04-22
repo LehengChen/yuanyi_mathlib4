@@ -66,10 +66,23 @@ instance : HasIterationOfShape J (K ⥤ C) where
     have := hasColimitsOfShape_of_isSuccLimit C j hj
     infer_instance
 
+instance (j : J) : HasIterationOfShape (Set.Iic j) C where
+  hasColimitsOfShape := by
+    have : OrderTop (Set.Iic j) :=
+      { top := ⟨j, le_rfl⟩
+        le_top k := k.2 }
+    infer_instance
+  hasColimitsOfShape_of_isSuccLimit k hk := by
+    have hk' : Order.IsSuccLimit (k : J) := hk.subtypeVal (isLowerSet_Iic j)
+    have := hasColimitsOfShape_of_isSuccLimit C (k : J) hk'
+    exact hasColimitsOfShape_of_equivalence
+      (Set.principalSegIioIicOfLE k.2).orderIsoIio.equivalence
+
 variable {J} [SuccOrder J] [WellFoundedLT J]
 
 lemma hasColimitsOfShape_of_initialSeg
-    {α : Type*} [PartialOrder α] (f : α ≤i J) [Nonempty α] :
+    {α : Type*} [PartialOrder α] (f : α ≤i J)
+    (hα : Function.Surjective f ∨ Nonempty α := by right; infer_instance) :
     HasColimitsOfShape α C := by
   by_cases hf : Function.Surjective f
   · exact hasColimitsOfShape_of_equivalence
@@ -79,6 +92,7 @@ lemma hasColimitsOfShape_of_initialSeg
     induction i using SuccOrder.limitRecOn with
     | isMin i hi =>
       subst hi₀
+      haveI : Nonempty α := hα.resolve_left hf
       exact (hi.not_lt (s.lt_top (Classical.arbitrary _))).elim
     | succ i hi _ =>
       obtain ⟨a, rfl⟩ := (s.mem_range_iff_rel (b := i)).2 (by
@@ -94,15 +108,13 @@ lemma hasColimitsOfShape_of_initialSeg
       exact hasColimitsOfShape_of_isSuccLimit' C s hi
 
 lemma hasIterationOfShape_of_initialSeg {α : Type*} [LinearOrder α]
-    (h : α ≤i J) [Nonempty α] :
+    (h : α ≤i J)
+    (hα : Function.Surjective h ∨ Nonempty α := by right; infer_instance) :
     HasIterationOfShape α C where
-  hasColimitsOfShape := hasColimitsOfShape_of_initialSeg C h
+  hasColimitsOfShape := hasColimitsOfShape_of_initialSeg C h hα
   hasColimitsOfShape_of_isSuccLimit j hj := by
     have := hj.nonempty_Iio.to_subtype
     exact hasColimitsOfShape_of_initialSeg _
       (InitialSeg.trans (Set.principalSegIio j) h)
-
-instance (j : J) : HasIterationOfShape (Set.Iic j) C :=
-  hasIterationOfShape_of_initialSeg C (Set.initialSegIic j)
 
 end CategoryTheory.Limits

@@ -38,13 +38,15 @@ namespace PreGaloisCategory
 
 open Limits Functor
 
-variable {C : Type*} [Category* C] (F : C ⥤ FintypeCat.{u}) [GaloisCategory C] [FiberFunctor F]
+variable {C : Type*} [Category* C] (F : C ⥤ FintypeCat.{u}) [PreGaloisCategory C]
+    [FiberFunctor F]
 
 /--
-Let `X` be an object of a Galois category with fiber functor `F` and `Y` a sub-`Aut F`-set
-of `F.obj X`, on which `Aut F` acts transitively (i.e. which is connected in the Galois category
-of finite `Aut F`-sets). Then there exists a connected sub-object `Z` of `X` and an isomorphism
-`Y ≅ F.obj X` as `Aut F`-sets such that the obvious triangle commutes.
+Let `X` be an object of a pre-Galois category with fiber functor `F` and `Y` a
+sub-`Aut F`-set of `F.obj X`, on which `Aut F` acts transitively (i.e. which is connected
+in the Galois category of finite `Aut F`-sets). Then there exists a connected sub-object
+`Z` of `X` and an isomorphism `Y ≅ F.obj X` as `Aut F`-sets such that the obvious triangle
+commutes.
 
 For a version without the connectedness assumption, see `exists_lift_of_mono`.
 -/
@@ -52,6 +54,9 @@ lemma exists_lift_of_mono_of_isConnected (X : C) (Y : Action FintypeCat.{u} (Aut
     (i : Y ⟶ (functorToAction F).obj X) [Mono i] [IsConnected Y] : ∃ (Z : C) (f : Z ⟶ X)
     (u : Y ≅ (functorToAction F).obj Z),
     IsConnected Z ∧ Mono f ∧ i = u.hom ≫ (functorToAction F).map f := by
+  letI : GaloisCategory C := {
+    hasFiberFunctor := ⟨F ⋙ FintypeCat.uSwitch, ⟨inferInstance⟩⟩
+  }
   obtain ⟨y⟩ := nonempty_fiber_of_isConnected (forget₂ _ FintypeCat) Y
   obtain ⟨Z, f, z, hz, hc, hm⟩ := fiber_in_connected_component F X (i.hom y)
   have : IsConnected ((functorToAction F).obj Z) := PreservesIsConnected.preserves
@@ -66,13 +71,16 @@ lemma exists_lift_of_mono_of_isConnected (X : C) (Y : Action FintypeCat.{u} (Aut
 
 set_option backward.isDefEq.respectTransparency false in
 /--
-Let `X` be an object of a Galois category with fiber functor `F` and `Y` a sub-`Aut F`-set
-of `F.obj X`. Then there exists a sub-object `Z` of `X` and an isomorphism
+Let `X` be an object of a pre-Galois category with fiber functor `F` and `Y` a
+sub-`Aut F`-set of `F.obj X`. Then there exists a sub-object `Z` of `X` and an isomorphism
 `Y ≅ F.obj X` as `Aut F`-sets such that the obvious triangle commutes.
 -/
 lemma exists_lift_of_mono (X : C) (Y : Action FintypeCat.{u} (Aut F))
     (i : Y ⟶ (functorToAction F).obj X) [Mono i] : ∃ (Z : C) (f : Z ⟶ X)
     (u : Y ≅ (functorToAction F).obj Z), Mono f ∧ u.hom ≫ (functorToAction F).map f = i := by
+  letI : GaloisCategory C := {
+    hasFiberFunctor := ⟨F ⋙ FintypeCat.uSwitch, ⟨inferInstance⟩⟩
+  }
   obtain ⟨ι, hf, f, t, hc⟩ := has_decomp_connected_components' Y
   let i' (j : ι) : f j ⟶ (functorToAction F).obj X := Sigma.ι f j ≫ t.hom ≫ i
   choose gZ gf gu _ _ h using fun i ↦ exists_lift_of_mono_of_isConnected F X (f i) (i' i)
@@ -94,6 +102,9 @@ set_option backward.isDefEq.respectTransparency false in
 finite `Aut F`-sets is full. -/
 instance functorToAction_full : Functor.Full (functorToAction F) where
   map_surjective {X Y} f := by
+    letI : GaloisCategory C := {
+      hasFiberFunctor := ⟨F ⋙ FintypeCat.uSwitch, ⟨inferInstance⟩⟩
+    }
     let u : (functorToAction F).obj X ⟶ (functorToAction F).obj X ⨯ (functorToAction F).obj Y :=
       prod.lift (𝟙 _) f
     let i : (functorToAction F).obj X ⟶ (functorToAction F).obj (X ⨯ Y) :=

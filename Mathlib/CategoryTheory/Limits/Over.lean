@@ -62,11 +62,18 @@ example : ReflectsColimits (forget X) :=
   inferInstance
 
 set_option backward.isDefEq.respectTransparency false in
-theorem epi_left_of_epi [HasPushouts C] {f g : Over X} (h : f ⟶ g) [Epi h] : Epi h.left :=
-  CostructuredArrow.epi_left_of_epi _
+theorem epi_left_of_epi {f g : Over X} (h : f ⟶ g) [Epi h] [HasPushout h.left h.left] :
+    Epi h.left := by
+  haveI : HasPushout ((forget X).map h) ((forget X).map h) := by
+    change HasPushout h.left h.left
+    infer_instance
+  haveI : HasColimit ((span h h) ⋙ forget X) := hasColimit_of_iso (spanCompIso (forget X) h h)
+  haveI : PreservesColimit (span h h) (forget X) := inferInstance
+  exact preserves_epi_of_preservesColimit (forget X) h
 
-theorem epi_iff_epi_left [HasPushouts C] {f g : Over X} (h : f ⟶ g) : Epi h ↔ Epi h.left :=
-  CostructuredArrow.epi_iff_epi_left _
+theorem epi_iff_epi_left {f g : Over X} (h : f ⟶ g) [HasPushout h.left h.left] :
+    Epi h ↔ Epi h.left :=
+  ⟨fun _ => epi_left_of_epi h, fun _ => epi_of_epi_left h⟩
 
 instance createsColimitsOfSizeMapCompForget {Y : C} (f : X ⟶ Y) :
     CreatesColimitsOfSize.{w, w'} (map f ⋙ forget Y) :=
@@ -112,11 +119,20 @@ instance [HasLimits C] : HasLimits (Under X) :=
   ⟨inferInstance⟩
 
 set_option backward.isDefEq.respectTransparency false in
-theorem mono_right_of_mono [HasPullbacks C] {f g : Under X} (h : f ⟶ g) [Mono h] : Mono h.right :=
-  StructuredArrow.mono_right_of_mono _
+theorem mono_right_of_mono {f g : Under X} (h : f ⟶ g) [Mono h]
+    [HasPullback h.right h.right] : Mono h.right := by
+  haveI : HasPullback ((forget X).map h) ((forget X).map h) := by
+    change HasPullback h.right h.right
+    infer_instance
+  haveI : HasLimit ((cospan h h) ⋙ forget X) :=
+    hasLimit_of_iso (cospanCompIso (forget X) h h).symm
+  haveI : CreatesLimit (cospan h h) (forget X) := StructuredArrow.createsLimit (cospan h h)
+  haveI : PreservesLimit (cospan h h) (forget X) := inferInstance
+  exact preserves_mono_of_preservesLimit (forget X) h
 
-theorem mono_iff_mono_right [HasPullbacks C] {f g : Under X} (h : f ⟶ g) : Mono h ↔ Mono h.right :=
-  StructuredArrow.mono_iff_mono_right _
+theorem mono_iff_mono_right {f g : Under X} (h : f ⟶ g) [HasPullback h.right h.right] :
+    Mono h ↔ Mono h.right :=
+  ⟨fun _ => mono_right_of_mono h, fun _ => mono_of_mono_right h⟩
 
 instance createsLimitsOfSize : CreatesLimitsOfSize.{w, w'} (forget X) :=
   StructuredArrow.createsLimitsOfSize

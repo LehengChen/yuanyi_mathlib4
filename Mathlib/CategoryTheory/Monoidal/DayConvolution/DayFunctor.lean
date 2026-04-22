@@ -69,11 +69,14 @@ instance : Category (C ⊛⥤ V) where
   comp α β := .mk <| α.natTrans ≫ β.natTrans
 
 @[ext]
-lemma hom_ext {F G : C ⊛⥤ V} {α β : F ⟶ G} (h : α.natTrans = β.natTrans) :
+lemma hom_ext {F G : C ⊛⥤ V} {α β : F ⟶ G}
+    (h : ∀ x, α.natTrans.app x = β.natTrans.app x) :
     α = β := by
   cases α
   cases β
-  grind
+  congr
+  ext x
+  exact h x
 
 variable (C V) in
 /-- The tautological equivalence of categories between `C ⥤ V` and `C ⊛⥤ V`. -/
@@ -143,11 +146,12 @@ theorem tensor_hom_ext {F G H : C ⊛⥤ V} {α β : F ⊗ G ⟶ H}
       (η F G).app (x, y) ≫ α.natTrans.app (x ⊗ y) =
       (η F G).app (x, y) ≫ β.natTrans.app (x ⊗ y)) :
     α = β := by
-  ext : 1
-  apply Functor.hom_ext_of_isLeftKanExtension
-    (F ⊗ G).functor (η F G) _
-  ext ⟨x, y⟩
-  exact h x y
+  have hαβ : α.natTrans = β.natTrans := by
+    apply Functor.hom_ext_of_isLeftKanExtension
+      (F ⊗ G).functor (η F G) _
+    ext ⟨x, y⟩
+    exact h x y
+  exact hom_ext (fun x => by simp [hαβ])
 
 /-- A natural transformation `F.functor ⊠ G.functor ⟶ tensor C ⋙ H.functor`
 defines a morphism `F ⨂ G ⟶ H`. -/
@@ -219,11 +223,12 @@ instance : (𝟙_ (C ⊛⥤ V)).functor.IsLeftKanExtension (νNatTrans C V) :=
 lemma unit_hom_ext {F : C ⊛⥤ V} {α β : 𝟙_ (C ⊛⥤ V) ⟶ F}
     (h : ν C V ≫ α.natTrans.app (𝟙_ C) = ν C V ≫ β.natTrans.app (𝟙_ C)) :
     α = β := by
-  ext1
-  apply Functor.hom_ext_of_isLeftKanExtension
-    (𝟙_ (C ⊛⥤ V)).functor (νNatTrans C V)
-  ext
-  exact h
+  have hαβ : α.natTrans = β.natTrans := by
+    apply Functor.hom_ext_of_isLeftKanExtension
+      (𝟙_ (C ⊛⥤ V)).functor (νNatTrans C V)
+    ext
+    exact h
+  exact hom_ext (fun x => by simp [hαβ])
 
 /-- Given `F : C ⊛⥤ V`, a morphism `𝟙_ V ⟶ F.functor.obj (𝟙_ C)` induces a
 (unique) morphism `𝟙_ (C ⊛⥤ V) ⟶ F`. -/

@@ -60,11 +60,13 @@ theorem eqToHom_trans {X Y Z : C} (p : X = Y) (q : Y = Z) :
   simp
 
 /-- `eqToHom h` is heterogeneously equal to the identity of its domain. -/
-lemma eqToHom_heq_id_dom (X Y : C) (h : X = Y) : eqToHom h ≍ 𝟙 X := by
+lemma eqToHom_heq_id_dom {C : Type u₁} [CategoryStruct.{v₁} C] (X Y : C) (h : X = Y) :
+    eqToHom h ≍ 𝟙 X := by
   subst h; rfl
 
 /-- `eqToHom h` is heterogeneously equal to the identity of its codomain. -/
-lemma eqToHom_heq_id_cod (X Y : C) (h : X = Y) : eqToHom h ≍ 𝟙 Y := by
+lemma eqToHom_heq_id_cod {C : Type u₁} [CategoryStruct.{v₁} C] (X Y : C) (h : X = Y) :
+    eqToHom h ≍ 𝟙 Y := by
   subst h; rfl
 
 /-- Two morphisms are conjugate via eqToHom if and only if they are heterogeneously equal.
@@ -210,12 +212,13 @@ theorem eqToIso_trans {X Y Z : C} (p : X = Y) (q : Y = Z) :
     eqToIso p ≪≫ eqToIso q = eqToIso (p.trans q) := by ext; simp
 
 @[simp]
-theorem eqToHom_op {X Y : C} (h : X = Y) : (eqToHom h).op = eqToHom (congr_arg op h.symm) := by
+theorem eqToHom_op {C : Type u₁} [CategoryStruct.{v₁} C] {X Y : C} (h : X = Y) :
+    (eqToHom h).op = eqToHom (congr_arg op h.symm) := by
   cases h
   rfl
 
 @[simp]
-theorem eqToHom_unop {X Y : Cᵒᵖ} (h : X = Y) :
+theorem eqToHom_unop {C : Type u₁} [CategoryStruct.{v₁} C] {X Y : Cᵒᵖ} (h : X = Y) :
     (eqToHom h).unop = eqToHom (congr_arg unop h.symm) := by
   cases h
   rfl
@@ -283,13 +286,15 @@ theorem map_comp_heq (hx : F.obj X = G.obj X) (hy : F.obj Y = G.obj Y) (hz : F.o
   rw [F.map_comp, G.map_comp]
   congr
 
-theorem map_comp_heq' (hobj : ∀ X : C, F.obj X = G.obj X)
+theorem map_comp_heq' (hx : F.obj X = G.obj X) (hy : F.obj Y = G.obj Y)
+    (hz : F.obj Z = G.obj Z)
     (hmap : ∀ {X Y} (f : X ⟶ Y), F.map f ≍ G.map f) :
     F.map (f ≫ g) ≍ G.map (f ≫ g) := by
-  rw [Functor.hext hobj fun _ _ => hmap]
+  exact map_comp_heq hx hy hz (hmap f) (hmap g)
 
-theorem precomp_map_heq (H : E ⥤ C) (hmap : ∀ {X Y} (f : X ⟶ Y), F.map f ≍ G.map f) {X Y : E}
-    (f : X ⟶ Y) : (H ⋙ F).map f ≍ (H ⋙ G).map f :=
+theorem precomp_map_heq (H : E ⥤ C)
+    (hmap : ∀ {X Y : E} (f : X ⟶ Y), F.map (H.map f) ≍ G.map (H.map f))
+    {X Y : E} (f : X ⟶ Y) : (H ⋙ F).map f ≍ (H ⋙ G).map f :=
   hmap _
 
 theorem postcomp_map_heq (H : D ⥤ E) (hx : F.obj X = G.obj X) (hy : F.obj Y = G.obj Y)
@@ -297,9 +302,10 @@ theorem postcomp_map_heq (H : D ⥤ E) (hx : F.obj X = G.obj X) (hy : F.obj Y = 
   dsimp
   congr
 
-theorem postcomp_map_heq' (H : D ⥤ E) (hobj : ∀ X : C, F.obj X = G.obj X)
+theorem postcomp_map_heq' (H : D ⥤ E) (hx : F.obj X = G.obj X) (hy : F.obj Y = G.obj Y)
     (hmap : ∀ {X Y} (f : X ⟶ Y), F.map f ≍ G.map f) :
-    (F ⋙ H).map f ≍ (G ⋙ H).map f := by rw [Functor.hext hobj fun _ _ => hmap]
+    (F ⋙ H).map f ≍ (G ⋙ H).map f :=
+  postcomp_map_heq H hx hy (hmap f)
 
 theorem hcongr_hom {F G : C ⥤ D} (h : F = G) {X Y} (f : X ⟶ Y) : F.map f ≍ G.map f := by
   rw [h]
@@ -342,7 +348,7 @@ theorem NatTrans.congr {F G : C ⥤ D} (α : F ⟶ G) {X Y : C} (h : X = Y) :
 theorem eq_conj_eqToHom {X Y : C} (f : X ⟶ Y) : f = eqToHom rfl ≫ f ≫ eqToHom rfl := by
   simp only [Category.id_comp, eqToHom_refl, Category.comp_id]
 
-theorem dcongr_arg {ι : Type*} {F G : ι → C} (α : ∀ i, F i ⟶ G i) {i j : ι} (h : i = j) :
+theorem dcongr_arg {ι : Sort*} {F G : ι → C} (α : ∀ i, F i ⟶ G i) {i j : ι} (h : i = j) :
     α i = eqToHom (congr_arg F h) ≫ α j ≫ eqToHom (congr_arg G h.symm) := by
   subst h
   simp

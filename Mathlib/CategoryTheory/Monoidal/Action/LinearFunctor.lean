@@ -185,15 +185,21 @@ instance : IsIso (μₗ F c d) := Iso.isIso_hom (μₗIso F c d)
 
 instance : IsIso (δₗ F c d) := Iso.isIso_inv (μₗIso F c d)
 
+omit [F.LeftLinear C] in
 @[simp]
-lemma inv_μₗ :
+lemma inv_μₗ [F.LaxLeftLinear C] [F.OplaxLeftLinear C]
+    [IsIso (μₗ F c d)]
+    (h : μₗ F c d ≫ δₗ F c d = 𝟙 _) :
     CategoryTheory.inv (μₗ F c d) = δₗ F c d :=
-  Eq.symm <| IsIso.eq_inv_of_hom_inv_id <| μₗ_comp_δₗ F c d
+  IsIso.inv_eq_of_hom_inv_id h
 
+omit [F.LeftLinear C] in
 @[simp]
-lemma inv_δₗ :
+lemma inv_δₗ [F.LaxLeftLinear C] [F.OplaxLeftLinear C]
+    [IsIso (δₗ F c d)]
+    (h : δₗ F c d ≫ μₗ F c d = 𝟙 _) :
     CategoryTheory.inv (δₗ F c d) = μₗ F c d :=
-  Eq.symm <| IsIso.eq_inv_of_hom_inv_id <| δₗ_comp_μₗ F c d
+  IsIso.inv_eq_of_hom_inv_id h
 
 end LeftLinear
 
@@ -347,15 +353,21 @@ instance : IsIso (μᵣ F d c) := Iso.isIso_hom (μᵣIso F d c)
 
 instance : IsIso (δᵣ F d c) := Iso.isIso_inv (μᵣIso F d c)
 
+omit [F.RightLinear C] in
 @[simp]
-lemma inv_μᵣ :
+lemma inv_μᵣ [F.LaxRightLinear C] [F.OplaxRightLinear C]
+    [IsIso (μᵣ F d c)]
+    (h : μᵣ F d c ≫ δᵣ F d c = 𝟙 _) :
     CategoryTheory.inv (μᵣ F d c) = δᵣ F d c :=
-  Eq.symm <| IsIso.eq_inv_of_hom_inv_id <| μᵣ_comp_δᵣ F d c
+  IsIso.inv_eq_of_hom_inv_id h
 
+omit [F.RightLinear C] in
 @[simp]
-lemma inv_δᵣ :
+lemma inv_δᵣ [F.LaxRightLinear C] [F.OplaxRightLinear C]
+    [IsIso (δᵣ F d c)]
+    (h : δᵣ F d c ≫ μᵣ F d c = 𝟙 _) :
     CategoryTheory.inv (δᵣ F d c) = μᵣ F d c :=
-  Eq.symm <| IsIso.eq_inv_of_hom_inv_id <| δᵣ_comp_μᵣ F d c
+  IsIso.inv_eq_of_hom_inv_id h
 
 end RightLinear
 

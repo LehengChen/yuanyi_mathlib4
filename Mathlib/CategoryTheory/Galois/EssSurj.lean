@@ -70,36 +70,43 @@ private local instance fintypeQuotientStabilizer {X : Type*} [MulAction G X]
 set_option backward.isDefEq.respectTransparency false in
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
-/-- If `X` is a finite discrete `G`-set, it can be written as the finite disjoint union
-of quotients of the form `G ⧸ Uᵢ` for open subgroups `(Uᵢ)`. Note that this
+/-- If `X` is a finite `G`-set with open stabilizers, it can be written as the finite
+disjoint union of quotients of the form `G ⧸ Uᵢ` for open subgroups `(Uᵢ)`. Note that this
 is simply the decomposition into orbits. -/
 lemma has_decomp_quotients (X : Action FintypeCat G)
-    [TopologicalSpace X.V] [DiscreteTopology X.V] [ContinuousSMul G X.V] :
+    (hX : ∀ x : X.V, IsOpen (MulAction.stabilizer G x : Set G) := by
+      intro x
+      exact stabilizer_isOpen G x) :
     ∃ (ι : Type) (_ : Finite ι) (f : ι → OpenSubgroup (G)),
       Nonempty ((∐ fun i ↦ G ⧸ₐ (f i).toSubgroup) ≅ X) := by
   obtain ⟨ι, hf, f, u, hc⟩ := has_decomp_connected_components' X
-  letI (i : ι) : TopologicalSpace (f i).V := ⊥
-  haveI (i : ι) : DiscreteTopology (f i).V := ⟨rfl⟩
-  have (i : ι) : ContinuousSMul G (f i).V := ContinuousSMul.mk <| by
-    let r : f i ⟶ X := Sigma.ι f i ≫ u.hom
-    let r'' (p : G × (f i).V) : G × X.V := (p.1, r.hom p.2)
-    let q (p : G × X.V) : X.V := (X.ρ p.1).hom p.2
-    let q' (p : G × (f i).V) : (f i).V := ((f i).ρ p.1).hom p.2
-    have heq : q ∘ r'' = r.hom ∘ q' := by
-      ext (p : G × (f i).V)
-      exact (ConcreteCategory.congr_hom (r.comm p.1) p.2).symm
-    have hrinj : Function.Injective r.hom :=
-      (ConcreteCategory.mono_iff_injective_of_preservesPullback r).mp <| mono_comp _ _
-    let t₁ : TopologicalSpace (G × (f i).V) := inferInstance
-    change @Continuous _ _ _ ⊥ q'
-    have : TopologicalSpace.induced r.hom inferInstance = ⊥ := by
-      rw [← le_bot_iff]
-      exact fun s _ ↦ ⟨r.hom '' s, ⟨isOpen_discrete (r.hom '' s), Set.preimage_image_eq s hrinj⟩⟩
-    rw [← this, continuous_induced_rng, ← heq]
-    exact Continuous.comp continuous_smul (by fun_prop)
   have (i : ι) : ∃ (U : OpenSubgroup (G)), (Nonempty ((f i) ≅ G ⧸ₐ U.toSubgroup)) := by
     obtain ⟨(x : (f i).V)⟩ := nonempty_fiber_of_isConnected (forget₂ _ _) (f i)
-    let U : OpenSubgroup (G) := ⟨MulAction.stabilizer (G) x, stabilizer_isOpen (G) x⟩
+    let r : f i ⟶ X := Sigma.ι f i ≫ u.hom
+    have hrinj : Function.Injective r.hom :=
+      (ConcreteCategory.mono_iff_injective_of_preservesPullback r).mp <| mono_comp _ _
+    have hstab :
+        (MulAction.stabilizer G x : Set G) = MulAction.stabilizer G (r.hom x) := by
+      ext σ
+      constructor
+      · intro hσ
+        calc
+          (X.ρ σ).hom (r.hom x) = r.hom (((f i).ρ σ).hom x) :=
+            (ConcreteCategory.congr_hom (r.comm σ) x).symm
+          _ = r.hom x := by rw [show ((f i).ρ σ).hom x = x from hσ]
+      · intro hσ
+        apply hrinj
+        calc
+          r.hom (((f i).ρ σ).hom x) = (X.ρ σ).hom (r.hom x) :=
+            ConcreteCategory.congr_hom (r.comm σ) x
+          _ = r.hom x := hσ
+    have hUopen : IsOpen (MulAction.stabilizer G x : Set G) := by
+      rw [hstab]
+      exact hX (r.hom x)
+    let U : OpenSubgroup (G) := ⟨MulAction.stabilizer (G) x, hUopen⟩
+    letI : Fintype (MulAction.orbit G x) := Fintype.ofFinite _
+    letI : Fintype (G ⧸ MulAction.stabilizer G x) :=
+      Fintype.ofEquiv (MulAction.orbit G x) (MulAction.orbitEquivQuotientStabilizer G x)
     exact ⟨U, ⟨FintypeCat.isoQuotientStabilizerOfIsConnected (f i) x⟩⟩
   choose g ui using this
   exact ⟨ι, hf, g, ⟨(Sigma.mapIso (fun i ↦ (ui i).some)).symm ≪≫ u⟩⟩
@@ -263,14 +270,17 @@ lemma exists_lift_of_quotient_openSubgroup (V : OpenSubgroup (Aut F)) :
     coconeQuotientDiagIsColimit hUnormal u hUinV⟩⟩⟩
 
 /--
-If `X` is a finite, discrete `Aut F`-set with continuous `Aut F`-action, then
-there exists `A : C` such that `F.obj A ≅ X` as `Aut F`-sets.
+If `X` is a finite `Aut F`-set with open stabilizers, then there exists `A : C` such that
+`F.obj A ≅ X` as `Aut F`-sets. In particular, this applies to finite discrete `Aut F`-sets
+with continuous `Aut F`-action.
 -/
 @[stacks 0BN4 "Essential surjectivity part"]
 theorem exists_lift_of_continuous (X : Action FintypeCat (Aut F))
-    [TopologicalSpace X.V] [DiscreteTopology X.V] [ContinuousSMul (Aut F) X.V] :
+    (hX : ∀ x : X.V, IsOpen (MulAction.stabilizer (Aut F) x : Set (Aut F)) := by
+      intro x
+      exact stabilizer_isOpen (Aut F) x) :
     ∃ A, Nonempty ((functorToAction F).obj A ≅ X) := by
-  obtain ⟨ι, hfin, f, ⟨u⟩⟩ := has_decomp_quotients X
+  obtain ⟨ι, hfin, f, ⟨u⟩⟩ := has_decomp_quotients X hX
   choose g gu using (fun i ↦ exists_lift_of_quotient_openSubgroup (f i))
   exact ⟨∐ g, ⟨PreservesCoproduct.iso (functorToAction F) g ≪≫
     Sigma.mapIso (fun i ↦ (gu i).some) ≪≫ u⟩⟩

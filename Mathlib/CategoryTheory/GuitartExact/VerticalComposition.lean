@@ -43,38 +43,47 @@ namespace GuitartExact
 
 /-- A 2-square stays Guitart exact if we replace the left and right functors
 by isomorphic functors. See also `whiskerVertical_iff`. -/
-lemma whiskerVertical [w.GuitartExact] (α : L ≅ L') (β : R ≅ R') :
-    (w.whiskerVertical α.hom β.inv).GuitartExact := by
+lemma whiskerVertical [w.GuitartExact] (α : L ⟶ L') (β : R' ⟶ R)
+    [IsIso α] [IsIso β] :
+    (w.whiskerVertical α β).GuitartExact := by
   rw [guitartExact_iff_initial]
   intro X₂
-  let e : structuredArrowDownwards (w.whiskerVertical α.hom β.inv) X₂ ≅
-      w.structuredArrowDownwards X₂ ⋙ (StructuredArrow.mapIso (β.app X₂)).functor :=
-    NatIso.ofComponents (fun f => StructuredArrow.isoMk (α.symm.app f.right) (by
+  let e : structuredArrowDownwards (w.whiskerVertical α β) X₂ ≅
+      w.structuredArrowDownwards X₂ ⋙
+        (StructuredArrow.mapIso ((asIso β).symm.app X₂)).functor :=
+    NatIso.ofComponents (fun f => StructuredArrow.isoMk ((asIso α).symm.app f.right) (by
       dsimp
-      simp only [NatTrans.naturality_assoc, assoc, ← B.map_comp,
-        Iso.hom_inv_id_app, B.map_id, comp_id]))
+      simp only [NatTrans.naturality_assoc, assoc, ← B.map_comp]
+      rw [show α.app f.right ≫ (inv α).app f.right = 𝟙 _ by
+        simp]
+      simp only [B.map_id, comp_id]))
   rw [Functor.initial_natIso_iff e]
   infer_instance
 
 /-- A 2-square is Guitart exact iff it is so after replacing the left and right functors by
 isomorphic functors. -/
 @[simp]
-lemma whiskerVertical_iff (α : L ≅ L') (β : R ≅ R') :
-    (w.whiskerVertical α.hom β.inv).GuitartExact ↔ w.GuitartExact := by
+lemma whiskerVertical_iff (α : L ⟶ L') (β : R' ⟶ R) [IsIso α] [IsIso β] :
+    (w.whiskerVertical α β).GuitartExact ↔ w.GuitartExact := by
   constructor
   · intro h
-    have : w = (w.whiskerVertical α.hom β.inv).whiskerVertical α.inv β.hom := by
+    have : w = (w.whiskerVertical α β).whiskerVertical (inv α) (inv β) := by
       ext X₁
-      simp only [Functor.comp_obj, whiskerVertical_app, assoc, Iso.hom_inv_id_app_assoc,
-        ← B.map_comp, Iso.hom_inv_id_app, B.map_id, comp_id]
+      simp only [Functor.comp_obj, whiskerVertical_app, assoc, ← B.map_comp]
+      rw [← assoc]
+      rw [show (inv β).app (T.obj X₁) ≫ β.app (T.obj X₁) = 𝟙 _ by
+          simp,
+        show α.app X₁ ≫ (inv α).app X₁ = 𝟙 _ by
+          simp]
+      simp only [B.map_id, id_comp, comp_id]
     rw [this]
-    exact whiskerVertical (w.whiskerVertical α.hom β.inv) α.symm β.symm
+    exact whiskerVertical (w.whiskerVertical α β) (inv α) (inv β)
   · intro h
     exact whiskerVertical w α β
 
 instance [w.GuitartExact] (α : L ⟶ L') (β : R' ⟶ R)
     [IsIso α] [IsIso β] : (w.whiskerVertical α β).GuitartExact :=
-  whiskerVertical w (asIso α) (asIso β).symm
+  whiskerVertical w α β
 
 end GuitartExact
 
@@ -120,19 +129,19 @@ instance vComp' [GuitartExact w] [GuitartExact w'] {L₁₂ : C₁ ⥤ C₃}
 
 set_option backward.isDefEq.respectTransparency false in
 lemma vComp_iff_of_equivalences (eL : C₂ ≌ C₃) (eR : D₂ ≌ D₃)
-    (w' : H₂ ⋙ eR.functor ≅ eL.functor ⋙ H₃) :
-    (w ≫ᵥ w'.hom).GuitartExact ↔ w.GuitartExact := by
+    (w' : H₂ ⋙ eR.functor ⟶ eL.functor ⋙ H₃) [IsIso w'] :
+    (w ≫ᵥ w').GuitartExact ↔ w.GuitartExact := by
   constructor
   · intro hww'
-    letI : CatCommSq H₂ eL.functor eR.functor H₃ := ⟨w'⟩
-    have hw' : CatCommSq.iso H₂ eL.functor eR.functor H₃ = w' := rfl
+    letI : CatCommSq H₂ eL.functor eR.functor H₃ := ⟨asIso w'⟩
+    have hw' : CatCommSq.iso H₂ eL.functor eR.functor H₃ = asIso w' := rfl
     letI : CatCommSq H₃ eL.inverse eR.inverse H₂ := CatCommSq.vInvEquiv _ _ _ _ inferInstance
     let w'' := CatCommSq.iso H₃ eL.inverse eR.inverse H₂
     let α : (L₁ ⋙ eL.functor) ⋙ eL.inverse ≅ L₁ :=
       Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft L₁ eL.unitIso.symm ≪≫ L₁.rightUnitor
     let β : (R₁ ⋙ eR.functor) ⋙ eR.inverse ≅ R₁ :=
       Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft R₁ eR.unitIso.symm ≪≫ R₁.rightUnitor
-    have : w = (w ≫ᵥ w'.hom).vComp' w''.hom α β := by
+    have : w = (w ≫ᵥ w').vComp' w''.hom α β := by
       ext X₁
       simp? [w'', α, β] says
         simp only [Functor.comp_obj, vComp'_app, Iso.trans_inv, Functor.isoWhiskerLeft_inv,
@@ -147,14 +156,15 @@ lemma vComp_iff_of_equivalences (eL : C₂ ≌ C₃) (eR : D₂ ≌ D₃)
     rw [this]
     infer_instance
   · intro
-    exact vComp w w'.hom
+    exact vComp w w'
 
 lemma vComp'_iff_of_equivalences (E : C₂ ≌ C₃) (E' : D₂ ≌ D₃)
     (w' : H₂ ⋙ E'.functor ≅ E.functor ⋙ H₃) {L₁₂ : C₁ ⥤ C₃}
     {R₁₂ : D₁ ⥤ D₃} (eL : L₁ ⋙ E.functor ≅ L₁₂)
     (eR : R₁ ⋙ E'.functor ≅ R₁₂) :
     (w.vComp' w'.hom eL eR).GuitartExact ↔ w.GuitartExact := by
-  rw [← vComp_iff_of_equivalences w E E' w', TwoSquare.vComp', whiskerVertical_iff]
+  rw [← vComp_iff_of_equivalences w E E' w'.hom, TwoSquare.vComp',
+    whiskerVertical_iff _ eL.hom eR.inv]
 
 end GuitartExact
 

@@ -29,14 +29,16 @@ namespace StructuredArrow
 
 variable {S : D} {T : C ⥤ D}
 
-instance [Small.{w} C] [LocallySmall.{w} D] : Small.{w} (StructuredArrow S T) :=
+instance [Small.{w} C] [∀ X : C, Small.{w} (S ⟶ T.obj X)] :
+    Small.{w} (StructuredArrow S T) :=
   small_of_surjective (f := fun (f : Σ (X : C), S ⟶ T.obj X) ↦ StructuredArrow.mk f.2)
     (fun f ↦ by
       obtain ⟨X, f, rfl⟩ := f.mk_surjective
       exact ⟨⟨X, f⟩, rfl⟩)
 
 instance small_inverseImage_proj_of_locallySmall
-    {P : ObjectProperty C} [ObjectProperty.Small.{v₁} P] [LocallySmall.{v₁} D] :
+    {P : ObjectProperty C} [ObjectProperty.Small.{v₁} P]
+    [∀ X : Subtype P, Small.{v₁} (S ⟶ T.obj X)] :
     ObjectProperty.Small.{v₁} (P.inverseImage (proj S T)) := by
   suffices P.inverseImage (proj S T) = .ofObj fun f : Σ (G : Subtype P), S ⟶ T.obj G => mk f.2 by
     rw [this]
@@ -46,10 +48,16 @@ instance small_inverseImage_proj_of_locallySmall
     Sigma.exists, Subtype.exists, exists_prop]
   exact ⟨fun h ↦ ⟨_, h, _, rfl⟩, by rintro ⟨_, h, _, rfl⟩; exact h⟩
 
-instance essentiallySmall [EssentiallySmall.{w} C] [LocallySmall.{w} D] :
+instance essentiallySmall [EssentiallySmall.{w} C]
+    [∀ X : C, Small.{w} (S ⟶ T.obj X)] :
     EssentiallySmall.{w} (StructuredArrow S T) := by
   rw [← essentiallySmall_congr
     (StructuredArrow.pre S (equivSmallModel.{w} C).inverse T).asEquivalence]
+  letI : ∀ X : SmallModel C,
+      Small.{w} (S ⟶ ((equivSmallModel.{w} C).inverse ⋙ T).obj X) :=
+    fun X ↦ by
+      dsimp
+      infer_instance
   exact essentiallySmall_of_small_of_locallySmall _
 
 @[deprecated (since := "2025-10-07")] alias small_proj_preimage_of_locallySmall :=
@@ -61,14 +69,16 @@ namespace CostructuredArrow
 
 variable {S : C ⥤ D} {T : D}
 
-instance [Small.{w} C] [LocallySmall.{w} D] : Small.{w} (CostructuredArrow S T) :=
+instance [Small.{w} C] [∀ X : C, Small.{w} (S.obj X ⟶ T)] :
+    Small.{w} (CostructuredArrow S T) :=
   small_of_surjective (f := fun (f : Σ (X : C), S.obj X ⟶ T) ↦ CostructuredArrow.mk f.2)
     (fun f ↦ by
       obtain ⟨X, f, rfl⟩ := f.mk_surjective
       exact ⟨⟨X, f⟩, rfl⟩)
 
 instance small_inverseImage_proj_of_locallySmall
-    {P : ObjectProperty C} [ObjectProperty.Small.{v₁} P] [LocallySmall.{v₁} D] :
+    {P : ObjectProperty C} [ObjectProperty.Small.{v₁} P]
+    [∀ X : Subtype P, Small.{v₁} (S.obj X ⟶ T)] :
     ObjectProperty.Small.{v₁} (P.inverseImage (proj S T)) := by
   suffices P.inverseImage (proj S T) = .ofObj fun f : Σ (G : Subtype P), S.obj G ⟶ T => mk f.2 by
     rw [this]
@@ -78,10 +88,16 @@ instance small_inverseImage_proj_of_locallySmall
     Sigma.exists, Subtype.exists, exists_prop]
   exact ⟨fun h ↦ ⟨_, h, _, rfl⟩, by rintro ⟨_, h, _, rfl⟩; exact h⟩
 
-instance essentiallySmall [EssentiallySmall.{w} C] [LocallySmall.{w} D] :
+instance essentiallySmall [EssentiallySmall.{w} C]
+    [∀ X : C, Small.{w} (S.obj X ⟶ T)] :
     EssentiallySmall.{w} (CostructuredArrow S T) := by
   rw [← essentiallySmall_congr
     (CostructuredArrow.pre (equivSmallModel.{w} C).inverse S T).asEquivalence]
+  letI : ∀ X : SmallModel C,
+      Small.{w} (((equivSmallModel.{w} C).inverse ⋙ S).obj X ⟶ T) :=
+    fun X ↦ by
+      dsimp
+      infer_instance
   exact essentiallySmall_of_small_of_locallySmall _
 
 @[deprecated (since := "2025-10-07")] alias small_proj_preimage_of_locallySmall :=

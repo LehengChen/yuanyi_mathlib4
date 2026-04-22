@@ -58,14 +58,13 @@ def Functor.fullyFaithfulOfReflective [Reflective i] : i.FullyFaithful :=
   (reflectorAdjunction i).fullyFaithfulROfIsIsoCounit
 
 set_option backward.isDefEq.respectTransparency false in
--- TODO: This holds more generally for idempotent adjunctions, not just reflective adjunctions.
-/-- For a reflective functor `i` (with left adjoint `L`), with unit `η`, we have `η_iL = iL η`.
+/-- For an adjunction `L ⊣ R`, with unit `η` and counit `ε`, if `R.map ε_{L X}` is
+monic then we have `η_RLX = RL η_X`.
 -/
-theorem unit_obj_eq_map_unit [Reflective i] (X : C) :
-    (reflectorAdjunction i).unit.app (i.obj ((reflector i).obj X)) =
-      i.map ((reflector i).map ((reflectorAdjunction i).unit.app X)) := by
-  rw [← cancel_mono (i.map ((reflectorAdjunction i).counit.app ((reflector i).obj X))),
-    ← i.map_comp]
+theorem unit_obj_eq_map_unit {L : C ⥤ D} {R : D ⥤ C} (adj : L ⊣ R) (X : C)
+    [Mono (R.map (adj.counit.app (L.obj X)))] :
+    adj.unit.app (R.obj (L.obj X)) = R.map (L.map (adj.unit.app X)) := by
+  rw [← cancel_mono (R.map (adj.counit.app (L.obj X))), ← R.map_comp]
   simp
 
 /--
@@ -202,11 +201,13 @@ def Functor.fullyFaithfulOfCoreflective [Coreflective j] : j.FullyFaithful :=
   (coreflectorAdjunction j).fullyFaithfulLOfIsIsoUnit
 
 set_option backward.isDefEq.respectTransparency false in
-lemma counit_obj_eq_map_counit [Coreflective j] (X : D) :
-    (coreflectorAdjunction j).counit.app (j.obj ((coreflector j).obj X)) =
-      j.map ((coreflector j).map ((coreflectorAdjunction j).counit.app X)) := by
-  rw [← cancel_epi (j.map ((coreflectorAdjunction j).unit.app ((coreflector j).obj X))),
-    ← j.map_comp]
+/-- For an adjunction `L ⊣ R`, with unit `η` and counit `ε`, if `L.map η_{R X}` is
+epic then we have `ε_LRX = LR ε_X`.
+-/
+lemma counit_obj_eq_map_counit {L : C ⥤ D} {R : D ⥤ C} (adj : L ⊣ R) (X : D)
+    [Epi (L.map (adj.unit.app (R.obj X)))] :
+    adj.counit.app (L.obj (R.obj X)) = L.map (R.map (adj.counit.app X)) := by
+  rw [← cancel_epi (L.map (adj.unit.app (R.obj X))), ← L.map_comp]
   simp
 
 example [Coreflective j] {B : C} : IsIso ((coreflectorAdjunction j).counit.app (j.obj B)) :=

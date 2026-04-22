@@ -6,11 +6,11 @@ Authors: Markus Himmel
 module
 
 public import Mathlib.CategoryTheory.Limits.Shapes.NormalMono.Basic
-public import Mathlib.CategoryTheory.Limits.Shapes.FiniteProducts
+public import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 public import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Kernels
 
 /-!
-# Normal mono categories with finite products and kernels have all equalizers.
+# Normal mono categories with binary products and kernels have all equalizers.
 
 This, and the dual result, are used in the development of abelian categories.
 -/
@@ -28,7 +28,7 @@ variable {C : Type*} [Category* C] [HasZeroMorphisms C]
 
 namespace CategoryTheory.NormalMonoCategory
 
-variable [HasFiniteProducts C] [HasKernels C] [IsNormalMonoCategory C]
+variable [HasBinaryProducts C] [HasKernels C] [IsNormalMonoCategory C]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The pullback of two monomorphisms exists. -/
@@ -132,15 +132,16 @@ section
 
 attribute [local instance] hasLimit_parallelPair
 
-/-- A `NormalMonoCategory` category with finite products and kernels has all equalizers. -/
+/-- A `NormalMonoCategory` category with binary products and kernels has all equalizers. -/
 instance (priority := 100) hasEqualizers : HasEqualizers C :=
   hasEqualizers_of_hasLimit_parallelPair _
 
 end
 
 set_option backward.isDefEq.respectTransparency false in
+omit [HasBinaryProducts C] [HasKernels C] in
 /-- If a zero morphism is a cokernel of `f`, then `f` is an epimorphism. -/
-theorem epi_of_zero_cokernel {X Y : C} (f : X ⟶ Y) (Z : C)
+theorem epi_of_zero_cokernel [HasEqualizers C] {X Y : C} (f : X ⟶ Y) (Z : C)
     (l : IsColimit (CokernelCofork.ofπ (0 : Y ⟶ Z) (show f ≫ 0 = 0 by simp))) : Epi f :=
   ⟨fun u v huv => by
     obtain ⟨W, w, hw, hl⟩ := normalMonoOfMono (equalizer.ι u v)
@@ -158,15 +159,18 @@ variable [HasZeroObject C]
 
 open ZeroObject
 
+omit [HasBinaryProducts C] [HasKernels C] in
 /-- If `f ≫ g = 0` implies `g = 0` for all `g`, then `g` is a monomorphism. -/
-theorem epi_of_zero_cancel {X Y : C} (f : X ⟶ Y)
+theorem epi_of_zero_cancel [HasEqualizers C] {X Y : C} (f : X ⟶ Y)
     (hf : ∀ (Z : C) (g : Y ⟶ Z) (_ : f ≫ g = 0), g = 0) : Epi f :=
   epi_of_zero_cokernel f 0 <| zeroCokernelOfZeroCancel f hf
 
 variable {D : Type*} [Category* D] [HasZeroMorphisms D] [HasZeroObject D]
 
-lemma preservesEpimorphisms_of_preservesCokernels (F : D ⥤ C) [F.PreservesZeroMorphisms]
-    [∀ {X Y : D} (f : X ⟶ Y), PreservesColimit (parallelPair f 0) F] :
+omit [HasBinaryProducts C] [HasKernels C] in
+lemma preservesEpimorphisms_of_preservesCokernels [HasEqualizers C] (F : D ⥤ C)
+    [F.PreservesZeroMorphisms]
+    [∀ {X Y : D} (f : X ⟶ Y) [Epi f], PreservesColimit (parallelPair f 0) F] :
     F.PreservesEpimorphisms where
   preserves f :=
     epi_of_zero_cokernel _ _ <| IsColimit.equivIsoColimit (mapZeroCokernelCofork F f) <|
@@ -178,7 +182,7 @@ end CategoryTheory.NormalMonoCategory
 
 namespace CategoryTheory.NormalEpiCategory
 
-variable [HasFiniteCoproducts C] [HasCokernels C] [IsNormalEpiCategory C]
+variable [HasBinaryCoproducts C] [HasCokernels C] [IsNormalEpiCategory C]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The pushout of two epimorphisms exists. -/
@@ -294,15 +298,16 @@ section
 
 attribute [local instance] hasColimit_parallelPair
 
-/-- A `NormalEpiCategory` category with finite coproducts and cokernels has all coequalizers. -/
+/-- A `NormalEpiCategory` category with binary coproducts and cokernels has all coequalizers. -/
 instance (priority := 100) hasCoequalizers : HasCoequalizers C :=
   hasCoequalizers_of_hasColimit_parallelPair _
 
 end
 
 set_option backward.isDefEq.respectTransparency false in
+omit [HasBinaryCoproducts C] [HasCokernels C] in
 /-- If a zero morphism is a kernel of `f`, then `f` is a monomorphism. -/
-theorem mono_of_zero_kernel {X Y : C} (f : X ⟶ Y) (Z : C)
+theorem mono_of_zero_kernel [HasCoequalizers C] {X Y : C} (f : X ⟶ Y) (Z : C)
     (l : IsLimit (KernelFork.ofι (0 : Z ⟶ X) (show 0 ≫ f = 0 by simp))) : Mono f :=
   ⟨fun u v huv => by
     obtain ⟨W, w, hw, hl⟩ := normalEpiOfEpi (coequalizer.π u v)
@@ -323,15 +328,18 @@ variable [HasZeroObject C]
 
 open ZeroObject
 
+omit [HasBinaryCoproducts C] [HasCokernels C] in
 /-- If `g ≫ f = 0` implies `g = 0` for all `g`, then `f` is a monomorphism. -/
-theorem mono_of_cancel_zero {X Y : C} (f : X ⟶ Y)
+theorem mono_of_cancel_zero [HasCoequalizers C] {X Y : C} (f : X ⟶ Y)
     (hf : ∀ (Z : C) (g : Z ⟶ X) (_ : g ≫ f = 0), g = 0) : Mono f :=
   mono_of_zero_kernel f 0 <| zeroKernelOfCancelZero f hf
 
 variable {D : Type*} [Category* D] [HasZeroMorphisms D] [HasZeroObject D]
 
-lemma preservesMonomorphisms_of_preservesKernels (F : D ⥤ C) [F.PreservesZeroMorphisms]
-    [∀ {X Y : D} (f : X ⟶ Y), PreservesLimit (parallelPair f 0) F] :
+omit [HasBinaryCoproducts C] [HasCokernels C] in
+lemma preservesMonomorphisms_of_preservesKernels [HasCoequalizers C] (F : D ⥤ C)
+    [F.PreservesZeroMorphisms]
+    [∀ {X Y : D} (f : X ⟶ Y) [Mono f], PreservesLimit (parallelPair f 0) F] :
     F.PreservesMonomorphisms where
   preserves f :=
     mono_of_zero_kernel _ _ <| IsLimit.equivIsoLimit (mapZeroKernelFork F f) <|

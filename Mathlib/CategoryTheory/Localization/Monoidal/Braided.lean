@@ -36,6 +36,25 @@ local notation "L'" => toMonoidalCategory L W ε
 
 instance : (L').IsLocalization W := inferInstanceAs (L.IsLocalization W)
 
+@[reassoc]
+lemma braidingNatIso_hom_app_naturality_μ_left
+    {τ : tensorBifunctor L W ε ⟶ (tensorBifunctor L W ε).flip} (X Y Z : C) :
+    (τ.app ((L').obj X)).app ((L').obj Y ⊗ (L').obj Z) ≫
+      (Functor.LaxMonoidal.μ (L') Y Z) ▷ (L').obj X =
+        (L').obj X ◁ (Functor.LaxMonoidal.μ (L') Y Z) ≫
+          (τ.app ((L').obj X)).app ((L').obj (Y ⊗ Z)) :=
+  ((τ.app ((L').obj X)).naturality ((Functor.LaxMonoidal.μ (L') Y Z))).symm
+
+@[reassoc]
+lemma braidingNatIso_hom_app_naturality_μ_right
+    {τ : tensorBifunctor L W ε ⟶ (tensorBifunctor L W ε).flip} (X Y Z : C) :
+    (τ.app ((L').obj X ⊗ (L').obj Y)).app ((L').obj Z) ≫
+      (L').obj Z ◁ (Functor.LaxMonoidal.μ (L') X Y) =
+        (Functor.LaxMonoidal.μ (L') X Y) ▷ (L').obj Z ≫
+          (τ.app ((L').obj (X ⊗ Y))).app ((L').obj Z) :=
+  (NatTrans.congr_app (τ.naturality ((Functor.LaxMonoidal.μ (L') X Y)))
+    ((L').obj Z)).symm
+
 section Braided
 
 variable [BraidedCategory C]
@@ -62,23 +81,6 @@ lemma braidingNatIso_hom_app (X Y : C) :
   simp [braidingNatIso, lift₂NatIso]
   rfl
 
-@[reassoc]
-lemma braidingNatIso_hom_app_naturality_μ_left (X Y Z : C) :
-    ((braidingNatIso L W ε).hom.app ((L').obj X)).app ((L').obj Y ⊗ (L').obj Z) ≫
-      (Functor.LaxMonoidal.μ (L') Y Z) ▷ (L').obj X =
-        (L').obj X ◁ (Functor.LaxMonoidal.μ (L') Y Z) ≫
-          ((braidingNatIso L W ε).hom.app ((L').obj X)).app ((L').obj (Y ⊗ Z)) :=
-  (((braidingNatIso L W ε).hom.app ((L').obj X)).naturality ((Functor.LaxMonoidal.μ (L') Y Z))).symm
-
-@[reassoc]
-lemma braidingNatIso_hom_app_naturality_μ_right (X Y Z : C) :
-    ((braidingNatIso L W ε).hom.app ((L').obj X ⊗ (L').obj Y)).app ((L').obj Z) ≫
-      (L').obj Z ◁ (Functor.LaxMonoidal.μ (L') X Y) =
-        (Functor.LaxMonoidal.μ (L') X Y) ▷ (L').obj Z ≫
-          ((braidingNatIso L W ε).hom.app ((L').obj (X ⊗ Y))).app ((L').obj Z) :=
-  (NatTrans.congr_app ((braidingNatIso L W ε).hom.naturality
-    ((Functor.LaxMonoidal.μ (L') X Y))) ((L').obj Z)).symm
-
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
 lemma map_hexagon_forward (X Y Z : C) :
@@ -94,7 +96,8 @@ lemma map_hexagon_forward (X Y Z : C) :
       Functor.CoreMonoidal.toMonoidal_toOplaxMonoidal, comp_whiskerRight, assoc,
       Functor.Monoidal.whiskerRight_δ_μ_assoc, Functor.LaxMonoidal.μ_natural_left]
   slice_lhs 6 7 =>
-    rw [braidingNatIso_hom_app_naturality_μ_left, braidingNatIso_hom_app]
+    rw [braidingNatIso_hom_app_naturality_μ_left
+      (τ := (braidingNatIso L W ε).hom), braidingNatIso_hom_app]
   simp
 
 set_option backward.isDefEq.respectTransparency false in
@@ -112,7 +115,8 @@ lemma map_hexagon_reverse (X Y Z : C) :
       Functor.CoreMonoidal.toMonoidal_toOplaxMonoidal, MonoidalCategory.whiskerLeft_comp, assoc,
       Functor.Monoidal.whiskerLeft_δ_μ, comp_id]
   slice_lhs 6 7 =>
-    rw [braidingNatIso_hom_app_naturality_μ_right, braidingNatIso_hom_app]
+    rw [braidingNatIso_hom_app_naturality_μ_right
+      (τ := (braidingNatIso L W ε).hom), braidingNatIso_hom_app]
   simp
 
 noncomputable instance : BraidedCategory (LocalizedMonoidal L W ε) := by
