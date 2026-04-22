@@ -274,8 +274,8 @@ namespace StrictlyUnitaryPseudofunctor
 variable {B C}
 
 /-- An alternate constructor for strictly unitary pseudofunctors that does not
-require the `mapId` fields, and that adapts the `map₂_leftUnitor` and
-`map₂_rightUnitor` to the fact that the functor is strictly unitary. -/
+require the `mapId` fields, and that adapts the `map₂_left_unitor` and
+`map₂_right_unitor` to the fact that the functor is strictly unitary. -/
 @[simps]
 def mk' (S : StrictlyUnitaryPseudofunctorCore B C) :
     StrictlyUnitaryPseudofunctor B C where
