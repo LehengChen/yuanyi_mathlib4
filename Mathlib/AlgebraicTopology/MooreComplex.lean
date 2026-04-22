@@ -129,11 +129,9 @@ def map (f : X ⟶ Y) : obj X ⟶ obj Y :=
       cases n <;> dsimp
       · apply top_factors
       · refine (finset_inf_factors _).mpr fun i _ => kernelSubobject_factors _ _ ?_
-        rw [Category.assoc, SimplicialObject.δ, ← f.naturality,
+        rw [Category.assoc, ← SimplicialObject.δ_naturality,
           ← factorThru_arrow _ _ (finset_inf_arrow_factors Finset.univ _ i (by simp)),
-          Category.assoc]
-        erw [kernelSubobject_arrow_comp_assoc]
-        rw [zero_comp, comp_zero]))
+          Category.assoc, kernelSubobject_arrow_comp_assoc, zero_comp, comp_zero]))
     fun n => by
     cases n <;> dsimp [objD, objX] <;> cat_disch
 
