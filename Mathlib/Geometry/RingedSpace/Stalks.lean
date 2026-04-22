@@ -91,12 +91,31 @@ theorem restrictStalkIso_inv_eq_ofRestrict {U : TopCat} (X : PresheafedSpace.{_,
   induction V with | op V => ?_
   let i : (h.functorNhds x).obj ((OpenNhds.map f x).obj V) ⟶ V :=
     homOfLE (Set.image_preimage_subset f _)
-  erw [Iso.comp_inv_eq, colimit.ι_map_assoc, colimit.ι_map_assoc, colimit.ι_pre]
-  simp_rw [Category.assoc]
-  erw [colimit.ι_pre ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf)
-      (h.functorNhds x).op]
-  erw [← X.presheaf.map_comp_assoc]
-  exact (colimit.w ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf) i.op).symm
+  have h₁ :
+      X.presheaf.germ V.1 (f x) V.2 ≫ (X.ofRestrict h).stalkMap x ≫ (X.restrictStalkIso h x).hom =
+        (X.ofRestrict h).c.app (op V.1) ≫
+          (X.restrict h).presheaf.germ ((Opens.map f).obj V.1) x V.2 ≫
+            (X.restrictStalkIso h x).hom := by
+    exact stalkMap_germ_assoc (X.ofRestrict h) V.1 x V.2 ((X.restrictStalkIso h x).hom)
+  have h₂ :
+      (X.ofRestrict h).c.app (op V.1) ≫
+          (X.restrict h).presheaf.germ ((Opens.map f).obj V.1) x V.2 ≫
+            (X.restrictStalkIso h x).hom =
+        X.presheaf.map ((OpenNhds.inclusion (f x)).map i).op ≫
+          colimit.ι ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf)
+            (op ((h.functorNhds x).obj ((OpenNhds.map f x).obj V))) := by
+    have hcomp :=
+      congrArg (((X.ofRestrict h).c.app (op V.1)) ≫ ·)
+        (restrictStalkIso_hom_eq_germ (X := X) (h := h)
+          (V := (Opens.map f).obj V.1) (x := x) (hx := V.2))
+    simpa [TopCat.Presheaf.germ, i, Category.assoc] using hcomp
+  have h₃ :
+      X.presheaf.map ((OpenNhds.inclusion (f x)).map i).op ≫
+          colimit.ι ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf)
+            (op ((h.functorNhds x).obj ((OpenNhds.map f x).obj V))) =
+        X.presheaf.germ V.1 (f x) V.2 := by
+    exact colimit.w ((OpenNhds.inclusion (f x)).op ⋙ X.presheaf) i.op
+  simpa [TopCat.Presheaf.germ, Iso.comp_inv_eq, Category.assoc] using (h₁.trans (h₂.trans h₃)).symm
 
 instance ofRestrict_stalkMap_isIso {U : TopCat} (X : PresheafedSpace.{_, _, v} C)
     {f : U ⟶ (X : TopCat.{v})} (h : IsOpenEmbedding f) (x : U) :
@@ -171,7 +190,8 @@ instance isIso {X Y : PresheafedSpace.{_, _, v} C} (α : X ⟶ Y) [IsIso α] (x 
           (β.stalkMap (α.base x) :),
         ?_, ?_⟩
     · rw [← Category.assoc, congr_point α x ((α ≫ β).base x) h_eq.symm, Category.assoc]
-      erw [← stalkMap.comp β α (α.base x)]
+      simp only [PresheafedSpace.comp_base, TopCat.comp_app]
+      rw [← stalkMap.comp β α (α.base x)]
       rw [congr_hom _ _ (IsIso.inv_hom_id α), stalkMap.id, eqToHom_trans_assoc, eqToHom_refl,
         Category.id_comp]
     · rw [Category.assoc, ← stalkMap.comp, congr_hom _ _ (IsIso.hom_inv_id α), stalkMap.id,
