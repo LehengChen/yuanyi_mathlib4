@@ -466,13 +466,17 @@ lemma inverseImage_equivalence_functor_eq_map_inverse
 lemma map_inverseImage_eq_of_isEquivalence
     (P : MorphismProperty D) [P.RespectsIso] (F : C ⥤ D) [F.IsEquivalence] :
     (P.inverseImage F).map F = P := by
-  erw [P.inverseImage_equivalence_inverse_eq_map_functor F.asEquivalence, map_map,
+  rw [← F.asEquivalence_functor,
+    P.inverseImage_equivalence_inverse_eq_map_functor F.asEquivalence, map_map,
     P.map_eq_of_iso F.asEquivalence.counitIso, map_id]
 
 lemma inverseImage_map_eq_of_isEquivalence
     (P : MorphismProperty C) [P.RespectsIso] (F : C ⥤ D) [F.IsEquivalence] :
     (P.map F).inverseImage F = P := by
-  erw [((P.map F).inverseImage_equivalence_inverse_eq_map_functor (F.asEquivalence)), map_map,
+  rw [← F.asEquivalence_functor,
+    (P.map F.asEquivalence.functor).inverseImage_equivalence_inverse_eq_map_functor
+      F.asEquivalence,
+    map_map,
     P.map_eq_of_iso F.asEquivalence.unitIso.symm, map_id]
 
 end
