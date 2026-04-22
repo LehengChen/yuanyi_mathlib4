@@ -543,13 +543,14 @@ theorem tr_respects_aux₂ [DecidableEq K] {k : K} {q : TM1.Stmt (Γ' K Γ) (Λ'
   | push f =>
     have := Tape.write_move_right_n fun a : Γ' K Γ ↦ (a.1, update a.2 k (some (f v)))
     refine
-      ⟨_, fun k' ↦ ?_, by
-        -- Porting note: `rw [...]` to `erw [...]; rfl`.
-        -- https://github.com/leanprover-community/mathlib4/issues/5164
-        rw [Tape.move_right_n_head, List.length, Tape.mk'_nth_nat, this]
-        erw [addBottom_modifyNth fun a ↦ update a k (some (f v))]
-        rw [Nat.add_one, iterate_succ']
-        rfl⟩
+      ⟨L.modifyNth (fun a ↦ update a k (some (f v))) (S k).length, fun k' ↦ ?_, by
+        rw [Tape.move_right_n_head, List.length, Tape.mk'_nth_nat, this, Nat.add_one,
+          iterate_succ']
+        exact congrArg
+          (fun R ↦
+            TM1.stepAux q v
+              (Tape.move Dir.right ((Tape.move Dir.right)^[(S k).length] (Tape.mk' ∅ R))))
+          (addBottom_modifyNth (fun a ↦ update a k (some (f v))) L (S k).length)⟩
     refine ListBlank.ext fun i ↦ ?_
     rw [ListBlank.nth_map, ListBlank.nth_modifyNth, proj, PointedMap.mk_val]
     by_cases h' : k' = k
@@ -584,15 +585,18 @@ theorem tr_respects_aux₂ [DecidableEq K] {k : K} {q : TM1.Stmt (Γ' K Γ) (Λ'
       rw [← e, Function.update_eq_self]
       exact ⟨L, hL, by rw [addBottom_head_fst, cond]⟩
     · refine
-        ⟨_, fun k' ↦ ?_, by
-          erw [List.length_cons, Tape.move_right_n_head, Tape.mk'_nth_nat, addBottom_nth_succ_fst,
+        ⟨L.modifyNth (fun a ↦ update a k none) tl.length, fun k' ↦ ?_, by
+          rw [List.length_cons, Tape.move_right_n_head, Tape.mk'_nth_nat, addBottom_nth_succ_fst,
             cond_false, iterate_succ', Function.comp, Tape.move_right_left, Tape.move_right_n_head,
             Tape.mk'_nth_nat, Tape.write_move_right_n fun a : Γ' K Γ ↦ (a.1, update a.2 k none),
-            addBottom_modifyNth fun a ↦ update a k none, addBottom_nth_snd,
-            stk_nth_val _ (hL k), e,
+            addBottom_nth_snd, stk_nth_val _ (hL k), e,
             show (List.cons hd tl).reverse[tl.length]? = some hd by
               rw [List.reverse_cons, ← List.length_reverse, List.getElem?_concat_length],
-            List.head?, List.tail]⟩
+            List.head?, List.tail]
+          exact congrArg
+            (fun R ↦
+              TM1.stepAux q (f v (some hd)) ((Tape.move Dir.right)^[tl.length] (Tape.mk' ∅ R)))
+            (addBottom_modifyNth (fun a ↦ update a k none) L tl.length)⟩
       refine ListBlank.ext fun i ↦ ?_
       rw [ListBlank.nth_map, ListBlank.nth_modifyNth, proj, PointedMap.mk_val]
       by_cases h' : k' = k
