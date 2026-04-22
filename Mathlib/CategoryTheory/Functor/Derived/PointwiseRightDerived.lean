@@ -38,8 +38,8 @@ variable {C : Type u₁} {D : Type u₂} {H : Type u₃}
   (F' : D ⥤ H) (F : C ⥤ H) (L : C ⥤ D) (α : F ⟶ L ⋙ F') (W : MorphismProperty C)
 
 /-- Given `F : C ⥤ H`, `W : MorphismProperty C` and `X : C`, we say that `F` has a
-pointwise right derived functor at `X` if `F` has a left Kan extension
-at `L.obj X` for any localization functor `L : C ⥤ D` for `W`. In the
+pointwise right derived functor at `X` if `F` has a pointwise left Kan extension
+along `L` at `L.obj X` for any localization functor `L : C ⥤ D` for `W`. In the
 definition, this is stated for `L := W.Q`, see `hasPointwiseRightDerivedFunctorAt_iff`
 for the more general equivalence. -/
 class HasPointwiseRightDerivedFunctorAt (X : C) : Prop where
