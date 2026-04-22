@@ -30,7 +30,7 @@ namespace Limits
 
 variable {C : Type u} (F : C → Type v)
 
-/-- Given a functor `F : Discrete C ⥤ Type v`, this is a "cofan" for `F`,
+/-- Given a family `F : C → Type v`, this is a "cofan" for `Discrete.functor F`,
 but we allow the point to be in `Type w` for an arbitrary universe `w`. -/
 abbrev CofanTypes := Functor.CoconeTypes.{w} (Discrete.functor F)
 
@@ -316,7 +316,8 @@ noncomputable def isCoprodOfMono {X Y : Type u} (f : X ⟶ Y) [Mono f] :
   rw [← eq_compl_iff_isCompl]
   exact Subtype.range_val
 
-/-- The category of types has `Σ j, f j` as the coproduct of a type family `f : J → Type`.
+/-- The category of types has `Σ j, F j` as the coproduct of a type family
+`F : J → Type max v u`.
 -/
 def coproductColimitCocone {J : Type v} (F : J → Type max v u) :
     Limits.ColimitCocone (Discrete.functor F) where
@@ -329,7 +330,8 @@ def coproductColimitCocone {J : Type v} (F : J → Type max v u) :
         funext ⟨j, x⟩
         exact congr_fun (w ⟨j⟩) x }
 
-/-- The categorical coproduct in `Type u` is the type-theoretic coproduct `Σ j, F j`. -/
+/-- The categorical coproduct in `Type max v u` is the type-theoretic coproduct
+`Σ j, F j`. -/
 noncomputable def coproductIso {J : Type v} (F : J → Type max v u) : ∐ F ≅ Σ j, F j :=
   colimit.isoColimitCocone (coproductColimitCocone F)
 
