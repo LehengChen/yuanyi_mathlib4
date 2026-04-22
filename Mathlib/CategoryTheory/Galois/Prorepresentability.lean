@@ -313,15 +313,27 @@ set_option backward.isDefEq.respectTransparency false in
 lemma endEquivSectionsFibers_π (f : End F) (A : PointedGaloisObject F) :
     (endEquivSectionsFibers F f).val A = f.app A A.pt := by
   dsimp [endEquivSectionsFibers, Types.sectionsEquiv]
-  erw [Types.limitEquivSections_apply]
-  simp only [colimitCoyonedaHomIsoLimit'_π_apply, incl_obj, comp_obj, FintypeCat.incl_obj, op_obj,
-    FunctorToTypes.comp]
-  change (((FullyFaithful.whiskeringRight (FullyFaithful.ofFullyFaithful
-      FintypeCat.incl) C).homEquiv) f).app A
-    (((colimit.ι _ _) ≫ (colimit.isoColimitCocone ⟨cocone F, isColimit F⟩).hom).app
-      A _) = f.app A A.pt
-  simp
-  rfl
+  let x :=
+    (colimitCoyonedaHomIsoLimit' (incl F) (F ⋙ FintypeCat.incl)).hom
+      ((colimit.isoColimitCocone ⟨cocone F, isColimit F⟩).hom ≫
+        ((FullyFaithful.ofFullyFaithful FintypeCat.incl).whiskeringRight C).homEquiv f)
+  let s : ∀ j, (incl F ⋙ (F ⋙ FintypeCat.incl) ⋙ uliftFunctor.{u₁, u₂}).obj j :=
+    Types.limitEquivSections (incl F ⋙ (F ⋙ FintypeCat.incl) ⋙ uliftFunctor.{u₁, u₂}) x
+  calc
+    (s A).down = (limit.π (incl F ⋙ (F ⋙ FintypeCat.incl) ⋙ uliftFunctor.{u₁, u₂}) A x).down := by
+        exact congrArg ULift.down
+          (Types.limitEquivSections_apply
+            (F := incl F ⋙ (F ⋙ FintypeCat.incl) ⋙ uliftFunctor.{u₁, u₂})
+            x A)
+    _ = f.app A A.pt := by
+      simp only [x, colimitCoyonedaHomIsoLimit'_π_apply, incl_obj, comp_obj,
+        FintypeCat.incl_obj, op_obj, FunctorToTypes.comp]
+      change (((FullyFaithful.whiskeringRight (FullyFaithful.ofFullyFaithful
+          FintypeCat.incl) C).homEquiv) f).app A
+        (((colimit.ι _ _) ≫ (colimit.isoColimitCocone ⟨cocone F, isColimit F⟩).hom).app
+          A _) = f.app A A.pt
+      simp
+      rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Functorial isomorphism `Aut A ≅ F.obj A` for Galois objects `A`. -/
@@ -350,7 +362,7 @@ lemma endEquivAutGalois_π (f : End F) (A : PointedGaloisObject F) :
   change F.map ((((sectionsFunctor _).map (autIsoFibers F).inv) _).val A).hom A.pt = _
   dsimp [autIsoFibers]
   simp only [endEquivSectionsFibers_π]
-  erw [evaluationEquivOfIsGalois_symm_fiber]
+  exact evaluationEquivOfIsGalois_symm_fiber F A A.pt ((f.app A) A.pt)
 
 @[simp]
 theorem endEquivAutGalois_mul (f g : End F) :
@@ -459,10 +471,30 @@ instance FiberFunctor.isPretransitive_of_isConnected (X : C) [IsConnected X] :
     let g : F ≅ F := NatIso.ofComponents gapp <| fun {X Y} f ↦ by
       ext x
       dsimp [gapp, e]
-      erw [FintypeCat.uSwitchEquiv_naturality (F.map f)]
-      rw [← Functor.comp_map]
-      erw [← FunctorToFintypeCat.naturality, FintypeCat.uSwitchEquiv_symm_naturality (F.map f)]
-      rfl
+      calc
+        (F.obj Y).uSwitchEquiv
+            ((ConcreteCategory.hom (g'.hom.app Y))
+              ((F.obj Y).uSwitchEquiv.symm ((ConcreteCategory.hom (F.map f)) x))) =
+          (F.obj Y).uSwitchEquiv
+            ((ConcreteCategory.hom (g'.hom.app Y))
+              ((ConcreteCategory.hom (FintypeCat.uSwitch.map (F.map f)))
+                ((F.obj X).uSwitchEquiv.symm x))) := by
+              exact congrArg
+                (fun z ↦ (F.obj Y).uSwitchEquiv ((ConcreteCategory.hom (g'.hom.app Y)) z))
+                (FintypeCat.uSwitchEquiv_symm_naturality (F.map f) x).symm
+        _ =
+          (F.obj Y).uSwitchEquiv
+            ((ConcreteCategory.hom (FintypeCat.uSwitch.map (F.map f)))
+              ((ConcreteCategory.hom (g'.hom.app X)) ((F.obj X).uSwitchEquiv.symm x))) := by
+              exact congrArg (fun z ↦ (F.obj Y).uSwitchEquiv z)
+                (FunctorToFintypeCat.naturality _ _ g'.hom f ((F.obj X).uSwitchEquiv.symm x))
+        _ =
+          (ConcreteCategory.hom (F.map f))
+            ((F.obj X).uSwitchEquiv
+              ((ConcreteCategory.hom (g'.hom.app X)) ((F.obj X).uSwitchEquiv.symm x))) := by
+              exact
+                (FintypeCat.uSwitchEquiv_naturality (F.map f)
+                  ((ConcreteCategory.hom (g'.hom.app X)) ((F.obj X).uSwitchEquiv.symm x))).symm
     refine ⟨g, show (gapp X).hom x = y from ?_⟩
     simp [gapp, ← hx', hg', hy', Equiv.apply_symm_apply]
 
