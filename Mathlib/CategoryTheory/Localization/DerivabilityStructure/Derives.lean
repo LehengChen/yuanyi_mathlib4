@@ -12,10 +12,11 @@ public import Mathlib.CategoryTheory.Localization.DerivabilityStructure.Pointwis
 
 Let `Φ : LocalizerMorphism W₁ W₂` be a localizer morphism between classes
 of morphisms on categories `C₁` and `C₂`. Let `F : C₂ ⥤ H`.
-When `Φ` is a left or right derivability structure, it allows to derive
-the functor `F` (with respect to `W₂`) when `Φ.functor ⋙ F : C₁ ⥤ H`
-inverts `W₁` (this is the most favorable case when we can apply the lemma
-`hasPointwiseRightDerivedFunctor_iff_of_isRightDerivabilityStructure`).
+When `Φ` is a left or right derivability structure, the condition that
+`Φ.functor ⋙ F : C₁ ⥤ H` inverts `W₁` is the basic hypothesis to derive
+the functor `F` with respect to `W₂`. In the right derivability case,
+this is the most favorable case when we can apply the lemma
+`hasPointwiseRightDerivedFunctor_iff_of_isRightDerivabilityStructure`.
 We define `Φ.Derives F` as an abbreviation for `W₁.IsInvertedBy (Φ.functor ⋙ F)`.
 
 When `h : Φ.Derives F` holds and `Φ` is a right derivability structure,
