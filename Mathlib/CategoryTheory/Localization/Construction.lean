@@ -331,8 +331,7 @@ def unitIso : 𝟭 (W.Localization ⥤ D) ≅ functor W D ⋙ inverse W D :=
       refine Functor.ext (fun G => ?_) fun G₁ G₂ τ => ?_
       · apply uniq
         dsimp [Functor]
-        erw [fac]
-        rfl
+        exact (fac ((functor W D).obj G).obj ((functor W D).obj G).property).symm
       · apply natTrans_hcomp_injective
         ext X
         simp)
