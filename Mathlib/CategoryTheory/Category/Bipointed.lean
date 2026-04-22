@@ -170,7 +170,8 @@ theorem pointedToBipointedSnd_comp_swap :
     pointedToBipointedSnd ⋙ Bipointed.swap = pointedToBipointedFst :=
   rfl
 
-/-- `BipointedToPointed_fst` is inverse to `PointedToBipointed`. -/
+/-- The composite `pointedToBipointed ⋙ bipointedToPointedFst` is isomorphic to the identity.
+-/
 @[simps!]
 def pointedToBipointedCompBipointedToPointedFst :
     pointedToBipointed ⋙ bipointedToPointedFst ≅ 𝟭 _ :=
@@ -178,7 +179,8 @@ def pointedToBipointedCompBipointedToPointedFst :
     { hom := ⟨id, rfl⟩
       inv := ⟨id, rfl⟩ }
 
-/-- `BipointedToPointed_snd` is inverse to `PointedToBipointed`. -/
+/-- The composite `pointedToBipointed ⋙ bipointedToPointedSnd` is isomorphic to the identity.
+-/
 @[simps!]
 def pointedToBipointedCompBipointedToPointedSnd :
     pointedToBipointed ⋙ bipointedToPointedSnd ≅ 𝟭 _ :=
@@ -186,7 +188,7 @@ def pointedToBipointedCompBipointedToPointedSnd :
     { hom := ⟨id, rfl⟩
       inv := ⟨id, rfl⟩ }
 
-/-- The free/forgetful adjunction between `PointedToBipointed_fst` and `BipointedToPointed_fst`.
+/-- The free/forgetful adjunction between `pointedToBipointedFst` and `bipointedToPointedFst`.
 -/
 def pointedToBipointedFstBipointedToPointedFstAdjunction :
     pointedToBipointedFst ⊣ bipointedToPointedFst :=
@@ -205,7 +207,7 @@ def pointedToBipointedFstBipointedToPointedFstAdjunction :
         funext x
         cases x <;> rfl }
 
-/-- The free/forgetful adjunction between `PointedToBipointed_snd` and `BipointedToPointed_snd`.
+/-- The free/forgetful adjunction between `pointedToBipointedSnd` and `bipointedToPointedSnd`.
 -/
 def pointedToBipointedSndBipointedToPointedSndAdjunction :
     pointedToBipointedSnd ⊣ bipointedToPointedSnd :=
