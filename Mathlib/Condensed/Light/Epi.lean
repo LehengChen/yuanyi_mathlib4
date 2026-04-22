@@ -145,8 +145,9 @@ instance : (lim (J := Discrete ℕ) (C := LightCondMod R)).PreservesEpimorphisms
         Functor.const_obj_obj, limit.cone_π, Pi.isoLimit, Limits.Pi.map, Category.assoc,
         limit.conePointUniqueUpToIso_hom_comp, Pi.cone_pt, Pi.cone_π, Discrete.natTrans_app,
         Discrete.functor_obj_eq_as]
-      erw [IsLimit.conePointUniqueUpToIso_inv_comp_assoc]
-      rfl
+      exact
+        (IsLimit.conePointUniqueUpToIso_inv_comp_assoc
+          (productIsProduct' _) (limit.isLimit _) _ _).symm
     rw [this]
     infer_instance
 
