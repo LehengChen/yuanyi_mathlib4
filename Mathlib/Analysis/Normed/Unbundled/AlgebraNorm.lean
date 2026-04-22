@@ -63,8 +63,7 @@ instance : FunLike (AlgebraNorm R S) S ℝ where
     cases f; cases f'; congr
     simp only at h
     ext s
-    erw [h]
-    rfl
+    exact congrFun h s
 
 set_option linter.style.whitespace false in -- manual alignment is not recognised
 instance algebraNormClass : AlgebraNormClass (AlgebraNorm R S) R S where
