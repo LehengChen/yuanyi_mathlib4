@@ -272,24 +272,27 @@ lemma isoLocallyConstantOfIsColimit_inv (X : Profinite.{u}ᵒᵖ ⥤ Type (u + 1
   suffices _ ≫ (isoFinYonedaComponents _ _).inv ≫ X.map g =
     (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X by
       simpa [locallyConstantIsoFinYoneda, isoFinYoneda, counitApp]
-  erw [(counitApp.{u, u + 1} X).naturality]
-  simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
-  congr
-  ext f
-  simp only [types_comp_apply, counitApp_app]
-  apply presheaf_ext.{u, u + 1} (X := X) (Y := X) (f := f)
-  intro x
-  rw [incl_of_counitAppApp]
-  simp only [counitAppAppImage]
-  have : Finite (fiber.{u, u + 1} f x) :=
-    Finite.of_injective (sigmaIncl.{u, u + 1} f x).1 Subtype.val_injective
-  apply injective_of_mono (isoFinYonedaComponents X (fiber.{u, u + 1} f x)).hom
-  ext y
-  simp only [isoFinYonedaComponents_hom_apply, ← FunctorToTypes.map_comp_apply, ← op_comp]
-  rw [show (Profinite.of PUnit.{u + 1}).const y ≫ IsTerminal.from _ (fiber f x) = 𝟙 _ from rfl]
-  simp only [op_comp, FunctorToTypes.map_comp_apply, op_id, FunctorToTypes.map_id_apply]
-  rw [← isoFinYonedaComponents_inv_comp X _ (sigmaIncl.{u, u + 1} f x)]
-  simpa [← isoFinYonedaComponents_hom_apply] using x.map_eq_image f y
+  calc
+    _ = (counitApp.{u, u + 1} X).app (toProfinite.op.obj Y) ≫ X.map g := by
+      simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
+      congr
+      ext f
+      simp only [types_comp_apply, counitApp_app]
+      apply presheaf_ext.{u, u + 1} (X := X) (Y := X) (f := f)
+      intro x
+      rw [incl_of_counitAppApp]
+      simp only [counitAppAppImage]
+      have : Finite (fiber.{u, u + 1} f x) :=
+        Finite.of_injective (sigmaIncl.{u, u + 1} f x).1 Subtype.val_injective
+      apply injective_of_mono (isoFinYonedaComponents X (fiber.{u, u + 1} f x)).hom
+      ext y
+      simp only [isoFinYonedaComponents_hom_apply, ← FunctorToTypes.map_comp_apply, ← op_comp]
+      rw [show (Profinite.of PUnit.{u + 1}).const y ≫ IsTerminal.from _ (fiber f x) = 𝟙 _ from rfl]
+      simp only [op_comp, FunctorToTypes.map_comp_apply, op_id, FunctorToTypes.map_id_apply]
+      rw [← isoFinYonedaComponents_inv_comp X _ (sigmaIncl.{u, u + 1} f x)]
+      simpa [← isoFinYonedaComponents_hom_apply] using x.map_eq_image f y
+    _ = (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X := by
+      simpa [counitApp] using (((counitApp.{u, u + 1} X).naturality g).symm)
 
 end Condensed
 
@@ -546,23 +549,26 @@ lemma isoLocallyConstantOfIsColimit_inv (X : LightProfinite.{u}ᵒᵖ ⥤ Type u
   suffices _ ≫ (isoFinYonedaComponents _ _).inv ≫ X.map g =
     (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X by
       simpa [locallyConstantIsoFinYoneda, isoFinYoneda, counitApp]
-  erw [(counitApp.{u, u} X).naturality]
-  simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
-  congr
-  ext f
-  simp only [types_comp_apply, counitApp_app]
-  apply presheaf_ext.{u, u} (X := X) (Y := X) (f := f)
-  intro x
-  rw [incl_of_counitAppApp]
-  simp only [counitAppAppImage]
-  have : Finite (fiber.{u, u} f x) :=
-    Finite.of_injective (sigmaIncl.{u, u} f x).1 Subtype.val_injective
-  apply injective_of_mono (isoFinYonedaComponents X (fiber.{u, u} f x)).hom
-  ext y
-  simp only [isoFinYonedaComponents_hom_apply, ← FunctorToTypes.map_comp_apply, ← op_comp]
-  rw [show (LightProfinite.of PUnit.{u + 1}).const y ≫ IsTerminal.from _ (fiber f x) = 𝟙 _ from rfl]
-  simp only [op_comp, FunctorToTypes.map_comp_apply, op_id, FunctorToTypes.map_id_apply]
-  rw [← isoFinYonedaComponents_inv_comp X _ (sigmaIncl.{u, u} f x)]
-  simpa [← isoFinYonedaComponents_hom_apply] using x.map_eq_image f y
+  calc
+    _ = (counitApp.{u, u} X).app (toLightProfinite.op.obj Y) ≫ X.map g := by
+      simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
+      congr
+      ext f
+      simp only [types_comp_apply, counitApp_app]
+      apply presheaf_ext.{u, u} (X := X) (Y := X) (f := f)
+      intro x
+      rw [incl_of_counitAppApp]
+      simp only [counitAppAppImage]
+      have : Finite (fiber.{u, u} f x) :=
+        Finite.of_injective (sigmaIncl.{u, u} f x).1 Subtype.val_injective
+      apply injective_of_mono (isoFinYonedaComponents X (fiber.{u, u} f x)).hom
+      ext y
+      simp only [isoFinYonedaComponents_hom_apply, ← FunctorToTypes.map_comp_apply, ← op_comp]
+      rw [show (LightProfinite.of PUnit.{u + 1}).const y ≫ IsTerminal.from _ (fiber f x) = 𝟙 _ from rfl]
+      simp only [op_comp, FunctorToTypes.map_comp_apply, op_id, FunctorToTypes.map_id_apply]
+      rw [← isoFinYonedaComponents_inv_comp X _ (sigmaIncl.{u, u} f x)]
+      simpa [← isoFinYonedaComponents_hom_apply] using x.map_eq_image f y
+    _ = (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X := by
+      simpa [counitApp] using (((counitApp.{u, u} X).naturality g).symm)
 
 end LightCondensed
