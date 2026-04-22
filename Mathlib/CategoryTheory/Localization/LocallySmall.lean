@@ -67,13 +67,13 @@ noncomputable irreducible_def hasLocalizationOfLocallySmall'
     Functor.IsLocalization.of_iso W (L₁ := L ⋙ e.inverse) e'
   exact hasLocalizationOfLocallySmall.{w} W L'
 
-/-- If a class of morphisms `W : MorphismProperty C` satisfies `HasLocalization.{w} W`,
-then any localized category for `W` (i.e. any target of a localization functor
-`L : C ⥤ D` for `W`) is locally `w`-small. -/
+/-- If the constructed localized category for `W : MorphismProperty C` is locally
+`w`-small, then any localized category for `W` (i.e. any target of a localization
+functor `L : C ⥤ D` for `W`) is locally `w`-small. -/
 lemma locallySmall_of_hasLocalization {D : Type u₂} [Category.{v₂} D]
-    (L : C ⥤ D) [L.IsLocalization W] [HasLocalization.{w} W] :
+    (L : C ⥤ D) [L.IsLocalization W] [LocallySmall.{w} W.Localization] :
     LocallySmall.{w} D where
   hom_small _ _ := small_of_injective (fun _ _ h ↦
-    (Localization.uniq L W.Q' W).functor.map_injective h)
+    (Localization.uniq L W.Q W).functor.map_injective h)
 
 end CategoryTheory.MorphismProperty

@@ -116,7 +116,7 @@ section Preserves
 variable (F : C ⥤ D)
 variable [PreservesLimitsOfShape (Discrete WalkingPair) F]
 variable [PreservesLimitsOfShape (Discrete.{0} PEmpty) F]
-variable [HasFiniteProducts.{v} C]
+variable [HasBinaryProducts C] [HasTerminal C]
 
 /-- If `F` preserves the terminal object and binary products, then it preserves products indexed by
 `Fin n` for any `n`.
@@ -130,6 +130,7 @@ lemma preservesFinOfPreservesBinaryAndTerminal :
   | n + 1 => by
     haveI := preservesFinOfPreservesBinaryAndTerminal n
     intro f
+    haveI : HasProduct (fun i : Fin n => f i.succ) := hasProduct_fin n _
     apply
       preservesLimit_of_preserves_limit_cone
         (extendFanIsLimit f (limit.isLimit _) (limit.isLimit _)) _
@@ -239,7 +240,7 @@ section Preserves
 variable (F : C ⥤ D)
 variable [PreservesColimitsOfShape (Discrete WalkingPair) F]
 variable [PreservesColimitsOfShape (Discrete.{0} PEmpty) F]
-variable [HasFiniteCoproducts.{v} C]
+variable [HasBinaryCoproducts C] [HasInitial C]
 
 /-- If `F` preserves the initial object and binary coproducts, then it preserves products indexed by
 `Fin n` for any `n`.
@@ -253,6 +254,7 @@ lemma preserves_fin_of_preserves_binary_and_initial :
   | n + 1 => by
     haveI := preserves_fin_of_preserves_binary_and_initial n
     intro f
+    haveI : HasCoproduct (fun i : Fin n => f i.succ) := hasCoproduct_fin n _
     apply
       preservesColimit_of_preserves_colimit_cocone
         (extendCofanIsColimit f (colimit.isColimit _) (colimit.isColimit _)) _

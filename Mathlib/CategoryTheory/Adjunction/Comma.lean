@@ -121,10 +121,14 @@ adjoint to `G`.
 def adjunctionOfCostructuredArrowTerminals : G ⊣ rightAdjointOfCostructuredArrowTerminals G :=
   Adjunction.adjunctionOfEquivRight _ _
 
+omit [∀ A, HasTerminal (CostructuredArrow G A)] in
 /-- If each costructured arrow category on `G` has a terminal object, `G` is a left adjoint. -/
-lemma isLeftAdjoint_of_costructuredArrowTerminals : G.IsLeftAdjoint where
-  exists_rightAdjoint :=
-    ⟨rightAdjointOfCostructuredArrowTerminals G, ⟨Adjunction.adjunctionOfEquivRight _ _⟩⟩
+lemma isLeftAdjoint_of_costructuredArrowTerminals
+    (h : ∀ A : C, Nonempty (Σ X : CostructuredArrow G A, IsTerminal X) := by
+      intro A
+      exact ⟨⟨⊤_ _, terminalIsTerminal⟩⟩) : G.IsLeftAdjoint := by
+  letI (A : C) : HasTerminal (CostructuredArrow G A) := (Classical.choice (h A)).2.hasTerminal
+  exact ⟨rightAdjointOfCostructuredArrowTerminals G, ⟨Adjunction.adjunctionOfEquivRight _ _⟩⟩
 
 end OfTerminals
 

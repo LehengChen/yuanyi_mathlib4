@@ -37,7 +37,7 @@ instance : HasProducts.{v} (Type v) := inferInstance
 -- The increased `@[simp]` priority here results in a minor speed up in
 -- `Mathlib/CategoryTheory/Sites/EqualizerSheafCondition.lean`.
 @[simp 1001]
-theorem pi_lift_π_apply {β : Type v} [Small.{u} β] (f : β → Type u) {P : Type u}
+theorem pi_lift_π_apply {β : Type v} (f : β → Type u) [HasProduct f] {P : Type u}
     (s : ∀ b, P ⟶ f b) (b : β) (x : P) :
     (Pi.π f b : (piObj f) → f b) (@Pi.lift β _ _ f _ P s x) = s b x :=
   congr_fun (limit.lift_π (Fan.mk P s) ⟨b⟩) x
@@ -51,10 +51,10 @@ theorem pi_lift_π_apply' {β : Type v} (f : β → Type v) {P : Type v}
 
 /-- A restatement of `Types.Limit.map_π_apply` that uses `Pi.π` and `Pi.map`. -/
 -- Not `@[simp]` since `simp` can prove it.
-theorem pi_map_π_apply {β : Type v} [Small.{u} β] {f g : β → Type u}
+theorem pi_map_π_apply {β : Type v} {f g : β → Type u} [HasProduct f] [HasProduct g]
     (α : ∀ j, f j ⟶ g j) (b : β) (x) :
     (Pi.π g b : ∏ᶜ g → g b) (Pi.map α x) = α b ((Pi.π f b : ∏ᶜ f → f b) x) :=
-  Limit.map_π_apply.{v, u} _ _ _
+  Limit.map_π_apply _ _ _
 
 /-- A restatement of `Types.Limit.map_π_apply` that uses `Pi.π` and `Pi.map`,
 with specialized universes. -/

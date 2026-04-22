@@ -14,7 +14,7 @@ public import Mathlib.CategoryTheory.Limits.Constructions.Equalizers
 /-!
 # Limits in the over category
 
-Declare instances for limits in the over category: If `C` has finite wide pullbacks, `Over B` has
+Declare instances for limits in the over category: If `C` has pullbacks, `Over B` has
 finite limits, and if `C` has arbitrary wide pullbacks then `Over B` has limits.
 -/
 
@@ -37,10 +37,9 @@ instance {B : C} [HasPullbacks C] : HasPullbacks (Over B) := inferInstance
 /-- Make sure we can derive equalizers in `Over B`. -/
 instance {B : C} [HasEqualizers C] : HasEqualizers (Over B) := inferInstance
 
-instance hasFiniteLimits {B : C} [HasFiniteWidePullbacks C] : HasFiniteLimits (Over B) := by
-  have := ConstructProducts.over_finiteProducts_of_finiteWidePullbacks (B := B)
-  have := hasEqualizers_of_hasPullbacks_and_binary_products (C := Over B)
-  apply hasFiniteLimits_of_hasEqualizers_and_finite_products
+instance hasFiniteLimits {B : C} [HasPullbacks C] : HasFiniteLimits (Over B) := by
+  have := over_hasTerminal B
+  apply hasFiniteLimits_of_hasTerminal_and_pullbacks
 
 instance hasLimits {B : C} [HasWidePullbacks.{w} C] : HasLimitsOfSize.{w, w} (Over B) := by
   have := ConstructProducts.over_binaryProduct_of_pullback (B := B)

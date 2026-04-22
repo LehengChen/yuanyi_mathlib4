@@ -95,8 +95,9 @@ theorem ι_colimitLimitToLimitColimit_π (j) (k) :
   simp
 
 @[simp]
-theorem ι_colimitLimitToLimitColimit_π_apply [Small.{v} J] [Small.{v} K] (F : J × K ⥤ Type v)
-    (j : J) (k : K) (f) : limit.π (curry.obj F ⋙ colim) j
+theorem ι_colimitLimitToLimitColimit_π_apply [HasLimitsOfShape J (Type v)]
+    [HasColimitsOfShape K (Type v)] (F : J × K ⥤ Type v) (j : J) (k : K) (f) :
+    limit.π (curry.obj F ⋙ colim) j
         (colimitLimitToLimitColimit F (colimit.ι (curry.obj (Prod.swap K J ⋙ F) ⋙ lim) k f)) =
       colimit.ι ((curry.obj F).obj j) k (limit.π ((curry.obj (Prod.swap K J ⋙ F)).obj k) j f) := by
   dsimp [colimitLimitToLimitColimit]

@@ -158,7 +158,7 @@ end IsMonoidal
 
 namespace Equivalence
 
-variable (e : C ≌ D) [e.functor.Monoidal] [e.inverse.Monoidal] [e.IsMonoidal]
+variable (e : C ≌ D) [e.functor.Monoidal] [e.inverse.LaxMonoidal] [e.toAdjunction.IsMonoidal]
 
 instance : NatTrans.IsMonoidal e.unit :=
   inferInstanceAs (NatTrans.IsMonoidal e.toAdjunction.unit)

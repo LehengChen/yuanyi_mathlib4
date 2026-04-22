@@ -84,7 +84,8 @@ noncomputable def homAsTypeEquiv : HomAsType α ≌ α :=
 
 end CountableCategory
 
-instance (α : Type*) [SmallCategory α] [FinCategory α] : CountableCategory α where
+instance (α : Type*) [Category* α] [Finite α] [∀ X Y : α, Finite (X ⟶ Y)] :
+    CountableCategory α where
 
 open Opposite
 
@@ -96,8 +97,8 @@ instance countableCategoryOpposite {J : Type*} [Category* J] [CountableCategory 
 
 attribute [local instance] uliftCategory in
 /-- Applying `ULift` to morphisms and objects of a category preserves countability. -/
-instance countableCategoryUlift {J : Type v} [Category.{v} J] [CountableCategory J] :
-    CountableCategory.{max w v} (ULiftHom.{w, max w v} (ULift.{w, v} J)) where
+instance countableCategoryUlift {J : Type u} [Category.{v} J] [CountableCategory J] :
+    CountableCategory.{max w v} (ULiftHom.{w, max w u} (ULift.{w, u} J)) where
   countableObj := instCountableULift
   countableHom := fun i j =>
     have : Countable ((ULiftHom.objDown i).down ⟶ (ULiftHom.objDown j).down) := inferInstance

@@ -105,7 +105,7 @@ instance : (fromFilteredFinalModel.{w} C).Final :=
 open Limits in
 lemma preservesColimitsOfShape_of_isFiltered
     {D E : Type*} [Category* D] [Category* E]
-    (F : D ⥤ E) [PreservesFilteredColimitsOfSize.{w, w} F] :
+    (F : D ⥤ E) [PreservesColimitsOfShape (FilteredFinalModel.{w} C) F] :
     PreservesColimitsOfShape C F :=
   Functor.Final.preservesColimitsOfShape_of_final
     (FinallySmall.fromFilteredFinalModel.{w} C) _

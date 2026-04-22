@@ -45,10 +45,16 @@ abbrev instComonObjOfCartesian (X : C) : ComonObj X :=
 
 attribute [local instance] instComonObjOfCartesian
 
+attribute [local instance] BraidedCategory.ofCartesianMonoidalCategory
+
+section BraidedCategory
+
 variable [BraidedCategory C]
 
 /-- Every object in a cartesian category has commutative comonoid structure. -/
 instance instIsCommComonObjOfCartesian (X : C) : IsCommComonObj X where
+
+end BraidedCategory
 
 /-- Cartesian categories have copy-discard structure. -/
 abbrev ofCartesianMonoidalCategory : CopyDiscardCategory C where

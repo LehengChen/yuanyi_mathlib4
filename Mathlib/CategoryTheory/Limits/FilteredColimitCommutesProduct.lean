@@ -128,7 +128,8 @@ end
 
 section types
 
-variable {α : Type u} {I : α → Type u} [∀ i, SmallCategory (I i)] [∀ i, IsFiltered (I i)]
+variable {α : Type u} {I : α → Type u} [∀ i, Category.{v} (I i)]
+  [∀ i, IsFilteredOrEmpty (I i)]
 
 theorem Types.isIso_colimitPointwiseProductToProductColimit (F : ∀ i, I i ⥤ Type u) :
     IsIso (colimitPointwiseProductToProductColimit F) := by

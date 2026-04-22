@@ -56,6 +56,14 @@ theorem app_p_comm : P.p.app X ≫ f.f.app X = f.f.app X ≫ Q.p.app X :=
 
 variable (J C)
 
+/-- When the indexing category is empty, the functor category is idempotent complete
+without any assumption on the target category. -/
+instance functor_category_isIdempotentComplete_of_isEmpty [IsEmpty J] :
+    IsIdempotentComplete (J ⥤ C) := by
+  refine ⟨fun F p hp => ?_⟩
+  use F, 𝟙 F, p
+  constructor <;> ext j <;> exact isEmptyElim j
+
 set_option backward.isDefEq.respectTransparency false in
 instance functor_category_isIdempotentComplete [IsIdempotentComplete C] :
     IsIdempotentComplete (J ⥤ C) := by

@@ -57,9 +57,11 @@ lemma isSeparating_separatingFamily :
 
 end
 
-variable [HasCoproductsOfShape ι C] [Preadditive C] [HasZeroObject C]
+variable [HasZeroMorphisms C] [HasZeroObject C]
 
-lemma isSeparator_coproduct_separatingFamily {X : C} (hX : IsSeparator X) :
+lemma isSeparator_coproduct_separatingFamily {X : C}
+    [HasCoproduct (fun i : ι ↦ separatingFamily c (fun (_ : Unit) ↦ X) ⟨⟨⟩, i⟩)]
+    (hX : IsSeparator X) :
     IsSeparator (∐ (fun i ↦ separatingFamily c (fun (_ : Unit) ↦ X) ⟨⟨⟩, i⟩)) := by
   let φ (i : ι) := separatingFamily c (fun (_ : Unit) ↦ X) ⟨⟨⟩, i⟩
   refine isSeparator_of_isColimit_cofan
@@ -68,7 +70,8 @@ lemma isSeparator_coproduct_separatingFamily {X : C} (hX : IsSeparator X) :
   exact IsColimit.ofWhiskerEquivalence
     (Discrete.equivalence (Equiv.punitProd.{0} ι).symm) (coproductIsCoproduct φ)
 
-instance [HasSeparator C] : HasSeparator (HomologicalComplex C c) :=
+instance [HasCoproductsOfShape ι (HomologicalComplex C c)] [HasSeparator C] :
+    HasSeparator (HomologicalComplex C c) :=
   ⟨_, isSeparator_coproduct_separatingFamily c (isSeparator_separator C)⟩
 
 end HomologicalComplex

@@ -66,7 +66,7 @@ def equivalence : Karoubi C ≌ Karoubi (Karoubi C) where
   unitIso := KaroubiKaroubi.unitIso C
   counitIso := KaroubiKaroubi.counitIso C
 
-instance equivalence.additive_functor [Preadditive C] :
+instance equivalence.additive_functor [Preadditive (Karoubi C)] :
     Functor.Additive (equivalence C).functor where
 
 instance equivalence.additive_inverse [Preadditive C] :

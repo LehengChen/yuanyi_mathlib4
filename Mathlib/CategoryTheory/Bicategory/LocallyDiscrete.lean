@@ -153,7 +153,7 @@ lemma comp_toLoc {a b c : C} (f : a ⟶ b) (g : b ⟶ c) : (f ≫ g).toLoc = f.t
 end Quiver.Hom
 
 @[simp]
-lemma CategoryTheory.LocallyDiscrete.eqToHom_toLoc {C : Type u} [Category.{v} C] {a b : C}
+lemma CategoryTheory.LocallyDiscrete.eqToHom_toLoc {C : Type u} [CategoryStruct.{v} C] {a b : C}
     (h : a = b) : (eqToHom h).toLoc = eqToHom (congrArg LocallyDiscrete.mk h) := by
   subst h; rfl
 

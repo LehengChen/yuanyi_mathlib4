@@ -126,7 +126,8 @@ instance guitartExact_of_isRightDerivabilityStructure [Φ.IsRightDerivabilityStr
 instance [W₁.ContainsIdentities] : (LocalizerMorphism.id W₁).HasRightResolutions :=
   fun X₂ => ⟨RightResolution.mk (𝟙 X₂) (W₁.id_mem X₂)⟩
 
-instance [W₁.ContainsIdentities] : (LocalizerMorphism.id W₁).IsRightDerivabilityStructure := by
+instance [(LocalizerMorphism.id W₁).HasRightResolutions] :
+    (LocalizerMorphism.id W₁).IsRightDerivabilityStructure := by
   rw [(LocalizerMorphism.id W₁).isRightDerivabilityStructure_iff W₁.Q W₁.Q (𝟭 W₁.Localization)
     (Iso.refl _)]
   dsimp
@@ -183,7 +184,8 @@ instance guitartExact_of_isLeftDerivabilityStructure [Φ.IsLeftDerivabilityStruc
 instance [W₁.ContainsIdentities] : (LocalizerMorphism.id W₁).HasLeftResolutions :=
   fun X₂ => ⟨LeftResolution.mk (𝟙 X₂) (W₁.id_mem X₂)⟩
 
-instance [W₁.ContainsIdentities] : (LocalizerMorphism.id W₁).IsLeftDerivabilityStructure := by
+instance [(LocalizerMorphism.id W₁).HasLeftResolutions] :
+    (LocalizerMorphism.id W₁).IsLeftDerivabilityStructure := by
   rw [(LocalizerMorphism.id W₁).isLeftDerivabilityStructure_iff W₁.Q W₁.Q (𝟭 W₁.Localization)
     (Iso.refl _)]
   dsimp

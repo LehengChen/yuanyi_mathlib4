@@ -41,10 +41,13 @@ variable (W : MorphismProperty C) {homRel : HomRel C}
   [HomRel.IsStableUnderPrecomp homRel]
   [HomRel.IsStableUnderPostcomp homRel]
 
-lemma HasQuotient.iff_of_eqvGen [W.HasQuotient homRel] {X Y : C} {f g : X ⟶ Y}
+omit [HomRel.IsStableUnderPrecomp homRel] [HomRel.IsStableUnderPostcomp homRel] in
+lemma HasQuotient.iff_of_eqvGen
+    (hW : ∀ ⦃X Y : C⦄ ⦃f g : X ⟶ Y⦄, homRel f g → (W f ↔ W g))
+    {X Y : C} {f g : X ⟶ Y}
     (h : Relation.EqvGen (@homRel _ _) f g) : W f ↔ W g := by
   induction h with
-  | rel _ _ h => exact iff W h
+  | rel _ _ h => exact hW h
   | refl => rfl
   | symm _ _ _ h => exact h.symm
   | trans _ _ _ _ _ h₁ h₂ => exact h₁.trans h₂
@@ -65,7 +68,7 @@ lemma quotient_iff {X Y : C} (f : X ⟶ Y) :
   refine ⟨fun ⟨f', hf', h⟩ ↦ ?_, fun hf ↦ ⟨f, hf, rfl⟩⟩
   rw [← Functor.homRel_iff, Quotient.functor_homRel_eq_compClosure_eqvGen,
     HomRel.compClosure_eq_self homRel] at h
-  rwa [HasQuotient.iff_of_eqvGen W h]
+  rwa [HasQuotient.iff_of_eqvGen W (HasQuotient.iff W) h]
 
 lemma eq_inverseImage_quotientFunctor :
     W = (W.quotient homRel).inverseImage (Quotient.functor _) := by

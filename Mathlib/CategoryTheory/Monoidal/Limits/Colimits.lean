@@ -22,7 +22,7 @@ We also introduce a definition `Cocone.tensor` which takes as an input two
 cocones `c₁` and `c₂` for two functors `F₁ : J ⥤ C` and `F₂ : J ⥤ C` and
 produces a cocone for `F₁ ⊗ F₂ : J ⥤ C` with point `c₁.pt ⊗ c₂.pt` and we show
 that it is a colimit cocone when `PreservesColimit₂ F₁ F₂ (curriedTensor C)`
-holds and `J` is sifted.
+holds and `J` is sifted or empty.
 
 -/
 
@@ -69,8 +69,8 @@ def Cocone.tensor : Cocone (F₁ ⊗ F₂) where
 attribute [local simp] tensorHom_def in
 /-- The tensor product of colimit cocones for functors `F₁ : J ⥤ C`
 and `F₂ : J ⥤ C` is a colimit cocone when `PreservesColimit₂ F₁ F₂ (curriedTensor C)`
-holds and `J` is sifted. -/
-noncomputable def IsColimit.tensor [PreservesColimit₂ F₁ F₂ (curriedTensor C)] [IsSifted J]
+holds and `J` is sifted or empty. -/
+noncomputable def IsColimit.tensor [PreservesColimit₂ F₁ F₂ (curriedTensor C)] [IsSiftedOrEmpty J]
     (hc₁ : IsColimit c₁) (hc₂ : IsColimit c₂) :
     IsColimit (c₁.tensor c₂) := by
   refine (IsColimit.equivOfNatIsoOfIso ?_ _ _ ?_).1

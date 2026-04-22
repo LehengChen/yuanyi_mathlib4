@@ -92,8 +92,8 @@ def objEquiv : X ≃ ActionCategory M X where
 theorem hom_as_subtype (p q : ActionCategory M X) : (p ⟶ q) = { m : M // m • p.back = q.back } :=
   rfl
 
-instance [Inhabited X] : Inhabited (ActionCategory M X) :=
-  ⟨show X from default⟩
+noncomputable instance [Nonempty X] : Inhabited (ActionCategory M X) :=
+  ⟨show X from Classical.choice inferInstance⟩
 
 instance [Nonempty X] : Nonempty (ActionCategory M X) :=
   Nonempty.map (objEquiv M X) inferInstance

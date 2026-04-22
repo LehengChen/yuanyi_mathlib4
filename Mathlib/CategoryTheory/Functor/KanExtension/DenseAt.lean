@@ -89,12 +89,14 @@ noncomputable def DenseAt.precompOfFinal
 @[deprecated (since := "2025-12-17")]
 alias DenseAt.precompEquivalence := DenseAt.precompOfFinal
 
-/-- If `F : C ⥤ D` is dense at `Y : D` and `G : D ⥤ D'` is an equivalence,
-then `F ⋙ G` is dense at `G.obj Y`. -/
+/-- If `F : C ⥤ D` is dense at `Y : D`, the canonical functor
+`CostructuredArrow F Y ⥤ CostructuredArrow (F ⋙ G) (G.obj Y)` is final,
+and `G` preserves the relevant canonical colimit, then `F ⋙ G` is dense at `G.obj Y`. -/
 noncomputable def DenseAt.postcompEquivalence
-    {D' : Type*} [Category* D'] (G : D ⥤ D') [G.IsEquivalence] :
+    {D' : Type*} [Category* D'] (G : D ⥤ D') [(CostructuredArrow.post F G Y).Final]
+    [PreservesColimit (CostructuredArrow.proj F Y ⋙ F) G] :
     (F ⋙ G).DenseAt (G.obj Y) :=
-  IsColimit.ofWhiskerEquivalence (CostructuredArrow.post F G Y).asEquivalence
+  Functor.Final.isColimitWhiskerEquiv (CostructuredArrow.post F G Y) _
     (IsColimit.ofIsoColimit ((isColimitOfPreserves G hY)) (Cocone.ext (Iso.refl _)))
 
 variable (F) in

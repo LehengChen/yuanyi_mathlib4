@@ -305,11 +305,15 @@ end FintypeCat
 
 namespace FunctorToFintypeCat
 
-universe u v w
+universe u v w w' w''
 
-variable {C : Type u} [Category.{v} C] (F G : C ⥤ FintypeCat.{w}) {X Y : C}
+variable {C : Type u} [Category.{v} C]
+  {D : Type w} [Category D]
+  {FD : outParam (D → D → Type w')} {CD : outParam (D → Type w'')}
+  [outParam ((X Y : D) → FunLike (FD X Y) (CD X) (CD Y))]
+  [ConcreteCategory D FD] (F G : C ⥤ D) {X Y : C}
 
-lemma naturality (σ : F ⟶ G) (f : X ⟶ Y) (x : F.obj X) :
+lemma naturality (σ : F ⟶ G) (f : X ⟶ Y) (x : ToType (F.obj X)) :
     σ.app Y (F.map f x) = G.map f (σ.app X x) :=
   (σ.naturality_apply f) x
 

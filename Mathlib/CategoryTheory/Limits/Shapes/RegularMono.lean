@@ -266,8 +266,7 @@ instance (priority := 100) (f : X ⟶ Y) [IsRegularMono f] : StrongMono f :=
   IsRegularMono.getStruct f |>.strongMono
 
 /-- A regular monomorphism is an isomorphism if it is an epimorphism. -/
-theorem isIso_of_regularMono_of_epi (f : X ⟶ Y) (h : RegularMono f) [Epi f] : IsIso f :=
-  have := RegularMono.strongMono h
+theorem isIso_of_regularMono_of_epi (f : X ⟶ Y) [IsRegularMono f] [Epi f] : IsIso f :=
   isIso_of_epi_of_strongMono _
 
 section
@@ -592,8 +591,7 @@ lemma strongEpi_of_regularEpi (f : X ⟶ Y) (h : RegularEpi f) : StrongEpi f :=
   inferInstance
 
 /-- A regular epimorphism is an isomorphism if it is a monomorphism. -/
-theorem isIso_of_regularEpi_of_mono (f : X ⟶ Y) (h : RegularEpi f) [Mono f] : IsIso f :=
-  have := isRegularEpi_of_regularEpi h
+theorem isIso_of_regularEpi_of_mono (f : X ⟶ Y) [IsRegularEpi f] [Mono f] : IsIso f :=
   isIso_of_mono_of_strongEpi _
 
 section

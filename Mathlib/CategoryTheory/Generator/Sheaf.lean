@@ -12,8 +12,9 @@ public import Mathlib.CategoryTheory.Sites.Limits
 /-!
 # Generators in the category of sheaves
 
-In this file, we show that if `J : GrothendieckTopology C` and `A` is a preadditive
-category which has a separator (and suitable coproducts), then `Sheaf J A` has a separator.
+In this file, we show that if `J : GrothendieckTopology C` and `A` is a category with
+zero morphisms which has a separator (and suitable coproducts), then `Sheaf J A` has a
+separator.
 
 -/
 
@@ -55,12 +56,13 @@ lemma isSeparating {ι : Type w} {S : ι → A} (hS : ObjectProperty.IsSeparatin
       (((sheafificationAdjunction _ _).homEquiv _ _).symm a)
 
 lemma isSeparator {ι : Type w} {S : ι → A} (hS : ObjectProperty.IsSeparating (.ofObj S))
-    [HasCoproduct (fun (⟨X, i⟩ : C × ι) ↦ freeYoneda J X (S i))] [Preadditive A] :
+    [HasCoproduct (fun (⟨X, i⟩ : C × ι) ↦ freeYoneda J X (S i))]
+    [HasZeroMorphisms A] :
     IsSeparator (∐ (fun (⟨X, i⟩ : C × ι) ↦ freeYoneda J X (S i))) :=
   (isSeparating J hS).isSeparator_coproduct
 
 variable (A) in
-instance hasSeparator [HasSeparator A] [Preadditive A] [HasCoproducts.{u} A] :
+instance hasSeparator [HasSeparator A] [HasZeroMorphisms A] [HasCoproducts.{u} A] :
     HasSeparator (Sheaf J A) where
   hasSeparator := ⟨_, isSeparator J (S := fun (_ : Unit) ↦ separator A)
       (by simpa using isSeparator_separator A)⟩

@@ -167,9 +167,9 @@ lemma mapZ_p :
     data.mapZ φ ≫ (data.factorizationData g).p = (data.factorizationData f).p ≫ φ.right :=
   data.p.naturality φ
 
-variable (f) in
+variable (F : Arrow C) in
 @[simp]
-lemma mapZ_id : data.mapZ (𝟙 (Arrow.mk f)) = 𝟙 _ :=
+lemma mapZ_id : data.Z.map (𝟙 F) = 𝟙 _ :=
   data.Z.map_id _
 
 @[reassoc, simp]
@@ -191,7 +191,8 @@ def functorCategory.Z : Arrow (J ⥤ C) ⥤ J ⥤ C where
     { obj j := (data.factorizationData (f.hom.app j)).Z
       map φ := data.mapZ (Arrow.homMk (f.left.map φ) (f.right.map φ))
       map_id j := by
-        rw [← data.mapZ_id (f.hom.app j)]
+        change data.Z.map _ = 𝟙 (data.Z.obj (Arrow.mk (f.hom.app j)))
+        rw [← data.mapZ_id (Arrow.mk (f.hom.app j))]
         congr <;> simp
       map_comp _ _ := by
         rw [← data.mapZ_comp]
@@ -206,7 +207,8 @@ def functorCategory.Z : Arrow (J ⥤ C) ⥤ J ⥤ C where
   map_id f := by
     ext j
     dsimp
-    rw [← data.mapZ_id]
+    change data.Z.map _ = 𝟙 (data.Z.obj (Arrow.mk (f.hom.app j)))
+    rw [← data.mapZ_id (Arrow.mk (f.hom.app j))]
     congr 1
   map_comp f g := by
     ext j

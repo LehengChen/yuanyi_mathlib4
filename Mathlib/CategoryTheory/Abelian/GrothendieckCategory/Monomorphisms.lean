@@ -27,7 +27,8 @@ namespace IsGrothendieckAbelian
 
 open MorphismProperty
 
-instance {C : Type u} [Category.{v} C] [Abelian C] [IsGrothendieckAbelian.{w} C] :
+instance {C : Type u} [Category.{v} C] [Limits.HasFilteredColimitsOfSize.{w, w} C]
+    [AB5OfSize.{w, w} C] :
     IsStableUnderTransfiniteComposition.{w} (monomorphisms C) := by
   infer_instance
 

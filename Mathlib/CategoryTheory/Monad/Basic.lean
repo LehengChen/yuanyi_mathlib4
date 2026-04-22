@@ -367,12 +367,12 @@ end Comonad
 namespace Monad
 
 set_option backward.isDefEq.respectTransparency false in
-lemma map_unit_app (T : Monad C) (X : C) [IsIso T.μ] :
+lemma map_unit_app (T : Monad C) (X : C) [Mono (T.μ.app X)] :
     T.map (T.η.app X) = T.η.app (T.obj X) := by
   simp [← cancel_mono (T.μ.app _)]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma isSplitMono_iff_isIso_unit (T : Monad C) (X : C) [IsIso T.μ] :
+lemma isSplitMono_iff_isIso_unit (T : Monad C) (X : C) [Mono (T.μ.app X)] :
     IsSplitMono (T.η.app X) ↔ IsIso (T.η.app X) := by
   refine ⟨fun _ ↦ ⟨retraction (T.η.app X), by simp, ?_⟩, fun _ ↦ inferInstance⟩
   rw [← map_id, ← show T.η.app X ≫ retraction (T.η.app X) = 𝟙 X from IsSplitMono.id _,
@@ -383,12 +383,12 @@ end Monad
 namespace Comonad
 
 set_option backward.isDefEq.respectTransparency false in
-lemma map_counit_app (T : Comonad C) (X : C) [IsIso T.δ] :
+lemma map_counit_app (T : Comonad C) (X : C) [Epi (T.δ.app X)] :
     T.map (T.ε.app X) = T.ε.app (T.obj X) := by
   simp [← cancel_epi (T.δ.app _)]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma isSplitEpi_iff_isIso_counit (T : Comonad C) (X : C) [IsIso T.δ] :
+lemma isSplitEpi_iff_isIso_counit (T : Comonad C) (X : C) [Epi (T.δ.app X)] :
     IsSplitEpi (T.ε.app X) ↔ IsIso (T.ε.app X) := by
   refine ⟨fun _ ↦ ⟨section_ (T.ε.app X), ?_, by simp⟩, fun _ ↦ inferInstance⟩
   rw [← map_id, ← show section_ (T.ε.app X) ≫ T.ε.app X = 𝟙 X from IsSplitEpi.id (T.ε.app X),

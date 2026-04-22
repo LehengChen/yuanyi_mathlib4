@@ -118,7 +118,7 @@ meta def discreteCases : TacticM Unit := do
 -- `attribute [aesop safe tactic (rule_sets := [CategoryTheory])] discreteCases`
 -- globally.
 
-instance [Unique α] : Unique (Discrete α) :=
+instance [Inhabited α] [Subsingleton α] : Unique (Discrete α) :=
   Unique.mk' (Discrete α)
 
 /-- Extract the equation from a morphism in a discrete category. -/

@@ -55,16 +55,18 @@ instance [HasFiniteColimits A] [HasLimitsOfShape K A] [HasExactLimitsOfShape K A
 end
 
 instance hasFilteredColimitsOfSize
-    [HasSheafify J A] [HasFilteredColimitsOfSize.{v₂, u₂} A] :
+    [HasWeakSheafify J A] [HasFilteredColimitsOfSize.{v₂, u₂} A] :
     HasFilteredColimitsOfSize.{v₂, u₂} (Sheaf J A) where
   HasColimitsOfShape K := by infer_instance
 
-instance hasExactColimitsOfShape [HasFiniteLimits A] [HasSheafify J A]
+instance hasExactColimitsOfShape [HasFiniteLimits A] [HasWeakSheafify J A]
+    [PreservesFiniteLimits (presheafToSheaf J A)]
     [HasColimitsOfShape K A] [HasExactColimitsOfShape K A] :
     HasExactColimitsOfShape K (Sheaf J A) :=
   (sheafificationAdjunction J A).hasExactColimitsOfShape K
 
-instance ab5ofSize [HasFiniteLimits A] [HasSheafify J A]
+instance ab5ofSize [HasFiniteLimits A] [HasWeakSheafify J A]
+    [PreservesFiniteLimits (presheafToSheaf J A)]
     [HasFilteredColimitsOfSize.{v₂, u₂} A] [AB5OfSize.{v₂, u₂} A] :
     AB5OfSize.{v₂, u₂} (Sheaf J A) where
   ofShape K _ _ := by infer_instance

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Abelian.Subobject
 public import Mathlib.CategoryTheory.Limits.EssentiallySmall
+public import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Products
 public import Mathlib.CategoryTheory.Preadditive.Injective.Basic
 public import Mathlib.CategoryTheory.Generator.Preadditive
 public import Mathlib.CategoryTheory.Abelian.Opposite
@@ -34,7 +35,8 @@ namespace CategoryTheory.Abelian
 
 variable {C : Type u} [Category.{v} C] [Abelian C]
 
-theorem has_injective_coseparator [HasLimits C] [EnoughInjectives C] (G : C) (hG : IsSeparator G) :
+theorem has_injective_coseparator [HasProducts.{v} C] [EnoughInjectives C] (G : C)
+    (hG : IsSeparator G) :
     ∃ G : C, Injective G ∧ IsCoseparator G := by
   haveI : WellPowered.{v} C := wellPowered_of_isDetector G hG.isDetector
   haveI : HasProductsOfShape (Subobject (op G)) C := hasProductsOfShape_of_small.{v} _ _
@@ -53,7 +55,7 @@ theorem has_injective_coseparator [HasLimits C] [EnoughInjectives C] (G : C) (hG
     (by rw [← Injective.comp_factorThru q (Limits.image.ι (h ≫ f)), Limits.image.fac_assoc,
       Category.assoc, hf, comp_zero])
 
-theorem has_projective_separator [HasColimits C] [EnoughProjectives C] (G : C)
+theorem has_projective_separator [HasCoproducts.{v} C] [EnoughProjectives C] (G : C)
     (hG : IsCoseparator G) : ∃ G : C, Projective G ∧ IsSeparator G := by
   obtain ⟨T, hT₁, hT₂⟩ := has_injective_coseparator (op G) ((isSeparator_op_iff _).2 hG)
   exact ⟨unop T, inferInstance, (isSeparator_unop_iff _).2 hT₂⟩

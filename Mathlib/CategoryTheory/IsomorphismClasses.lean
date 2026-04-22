@@ -60,8 +60,12 @@ def isomorphismClasses : Cat.{v, u} ⥤ Type u where
     · intro _
       rfl
 
-theorem Groupoid.isIsomorphic_iff_nonempty_hom {C : Type u} [Groupoid.{v} C] {X Y : C} :
-    IsIsomorphic X Y ↔ Nonempty (X ⟶ Y) :=
-  (Groupoid.isoEquivHom X Y).nonempty_congr
+theorem Groupoid.isIsomorphic_iff_nonempty_hom {C : Type u} [Category.{v} C] {X Y : C}
+    [∀ f : X ⟶ Y, IsIso f] : IsIsomorphic X Y ↔ Nonempty (X ⟶ Y) := by
+  constructor
+  · rintro ⟨α⟩
+    exact ⟨α.hom⟩
+  · rintro ⟨f⟩
+    exact ⟨asIso f⟩
 
 end CategoryTheory

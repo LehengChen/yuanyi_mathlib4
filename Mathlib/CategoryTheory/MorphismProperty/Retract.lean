@@ -95,9 +95,9 @@ lemma isStableUnderRetracts_iff_retracts_le (P : MorphismProperty C) :
   · intro h₁ _ _ _ _ _ _ h₂ h₃
     exact h₁ _ ⟨_, _, _, h₂, h₃⟩
 
-lemma retracts_le (P : MorphismProperty C) [P.IsStableUnderRetracts] :
-    P.retracts ≤ P := by
-  rwa [← isStableUnderRetracts_iff_retracts_le]
+lemma retracts_le (P : MorphismProperty C) (Q : MorphismProperty C := P)
+    [Q.IsStableUnderRetracts] (h : P ≤ Q := by rfl) : P.retracts ≤ Q :=
+  le_trans (retracts_monotone h) ((isStableUnderRetracts_iff_retracts_le Q).1 inferInstance)
 
 @[simp]
 lemma retracts_le_iff {P Q : MorphismProperty C} [Q.IsStableUnderRetracts] :
@@ -105,7 +105,7 @@ lemma retracts_le_iff {P Q : MorphismProperty C} [Q.IsStableUnderRetracts] :
   constructor
   · exact le_trans P.le_retracts
   · intro h
-    exact le_trans (retracts_monotone h) Q.retracts_le
+    exact P.retracts_le Q h
 
 instance {P : MorphismProperty C} [P.IsStableUnderRetracts] :
     P.RespectsIso :=

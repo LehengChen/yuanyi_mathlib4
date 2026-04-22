@@ -285,9 +285,11 @@ namespace CategoryTheory.Adjunction
 
 variable {C D : Type*} [Category* C] [Category* D] {F : C ⥤ D} {F' : D ⥤ C} {A B : C}
 
-theorem strongEpi_map_of_strongEpi (adj : F ⊣ F') (f : A ⟶ B) [F'.PreservesMonomorphisms]
-    [F.PreservesEpimorphisms] [StrongEpi f] : StrongEpi (F.map f) :=
-  ⟨inferInstance, fun X Y Z => by
+theorem strongEpi_map_of_strongEpi (adj : F ⊣ F') (f : A ⟶ B) [StrongEpi f] :
+    StrongEpi (F.map f) := by
+  letI : F'.PreservesMonomorphisms := Functor.preservesMonomorphisms_of_adjunction adj
+  letI : F.PreservesEpimorphisms := Functor.preservesEpimorphisms_of_adjunction adj
+  exact ⟨inferInstance, fun X Y Z => by
     intro
     rw [adj.hasLiftingProperty_iff]
     infer_instance⟩

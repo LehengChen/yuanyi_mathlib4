@@ -42,11 +42,8 @@ instance [IsFilteredOrEmpty C] [∀ c, IsFilteredOrEmpty (F.obj c)] :
       refine Eq.trans ?_ (eqToHom _ ≫= coeq_condition _ _)
       simp
 
-instance [IsFiltered C] [∀ c, IsFiltered (F.obj c)] : IsFiltered (Grothendieck F) := by
-  have : Nonempty (Grothendieck F) := by
-    obtain ⟨c⟩ : Nonempty C := IsFiltered.nonempty
-    obtain ⟨f⟩ : Nonempty (F.obj c) := IsFiltered.nonempty
-    exact ⟨⟨c, f⟩⟩
+instance [IsFilteredOrEmpty C] [∀ c, IsFilteredOrEmpty (F.obj c)]
+    [Nonempty (Grothendieck F)] : IsFiltered (Grothendieck F) := by
   apply IsFiltered.mk
 
 end CategoryTheory

@@ -62,8 +62,9 @@ lemma hasBinaryProduct_of_products : HasBinaryProduct (∏ᶜ (fun (i : {x : I /
 
 attribute [local instance] hasBinaryProduct_of_products
 
+open scoped Classical in
 set_option backward.isDefEq.respectTransparency false in
-lemma Pi.map_eq_prod_map [∀ i, Decidable (P i)] : Pi.map f =
+lemma Pi.map_eq_prod_map : Pi.map f =
     ((Pi.binaryFanOfPropIsLimit X P).conePointUniqueUpToIso (prodIsProd _ _)).hom ≫
       prod.map (Pi.map (fun (i : {x : I // P x}) ↦ f i.val))
       (Pi.map (fun (i : {x : I // ¬ P x}) ↦ f i.val)) ≫
