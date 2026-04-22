@@ -17,11 +17,11 @@ the category of types.
 
 @[expose] public section
 
-universe w w' v
+universe v
 
 namespace CategoryTheory.Limits
 
-instance [UnivLE.{w', v}] : AB5OfSize.{w, w'} (Type v) where
+instance : AB5 (Type v) where
   ofShape _ _ _ := ⟨inferInstance⟩
 
 end CategoryTheory.Limits

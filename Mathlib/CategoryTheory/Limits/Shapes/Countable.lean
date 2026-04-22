@@ -47,7 +47,7 @@ instance (priority := 100) hasFiniteLimits_of_hasCountableLimits [HasCountableLi
     HasFiniteLimits C where
   out J := HasCountableLimits.out J
 
-instance (priority := 100) hasCountableLimits_of_hasLimits [HasLimitsOfSize.{0, 0} C] :
+instance (priority := 100) hasCountableLimits_of_hasLimits [HasLimits C] :
     HasCountableLimits C where
   out := inferInstance
 
@@ -92,7 +92,7 @@ instance (priority := 100) hasFiniteColimits_of_hasCountableColimits [HasCountab
     HasFiniteColimits C where
   out J := HasCountableColimits.out J
 
-instance (priority := 100) hasCountableColimits_of_hasColimits [HasColimitsOfSize.{0, 0} C] :
+instance (priority := 100) hasCountableColimits_of_hasColimits [HasColimits C] :
     HasCountableColimits C where
   out := inferInstance
 

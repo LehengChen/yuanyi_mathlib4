@@ -178,8 +178,9 @@ lemma HasLeftDerivedFunctor.hasRightKanExtension [HasLeftDerivedFunctor F W] :
 
 variable {F L W}
 
-lemma HasLeftDerivedFunctor.mk' [LF.IsRightKanExtension α] :
+lemma HasLeftDerivedFunctor.mk' [LF.IsLeftDerivedFunctor α W] :
     HasLeftDerivedFunctor F W := by
+  have := IsLeftDerivedFunctor.isRightKanExtension LF α W
   simpa only [hasLeftDerivedFunctor_iff F L W] using HasRightKanExtension.mk LF α
 
 section

@@ -85,14 +85,8 @@ noncomputable def embedding : Cᵒᵖ ⥤ ModuleCat.{v} (EmbeddingRing F) :=
 instance faithful_embedding [Nonempty D] : (embedding F).Faithful :=
   (isSeparator_iff_faithful_preadditiveCoyonedaObj _).1 (isSeparator F)
 
-instance full_embedding [F.Full] : (F ⋙ embedding F).Full := by
-  classical
-  by_cases hD : Nonempty D
-  · letI := hD
-    exact full_comp_preadditiveCoyonedaObj _ (isSeparator F) (exists_epi F)
-  · constructor
-    intro X
-    exact (hD ⟨X⟩).elim
+instance full_embedding [Nonempty D] [F.Full] : (F ⋙ embedding F).Full :=
+  full_comp_preadditiveCoyonedaObj _ (isSeparator F) (exists_epi F)
 
 set_option backward.isDefEq.respectTransparency false in
 instance preservesFiniteLimits_embedding : PreservesFiniteLimits (embedding F) := by

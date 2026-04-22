@@ -131,14 +131,11 @@ theorem lift₃NatTrans_app_app_app (X₁ : C₁) (X₂ : C₂) (X₃ : C₃) :
 
 variable {F₁' F₂'} in
 include W₁ W₂ W₃ in
-omit [W₁.ContainsIdentities] [W₂.ContainsIdentities] [W₃.ContainsIdentities] in
 theorem natTrans₃_ext {τ τ' : F₁' ⟶ F₂'}
     (h : ∀ (X₁ : C₁) (X₂ : C₂) (X₃ : C₃), ((τ.app (L₁.obj X₁)).app (L₂.obj X₂)).app (L₃.obj X₃) =
       ((τ'.app (L₁.obj X₁)).app (L₂.obj X₂)).app (L₃.obj X₃)) : τ = τ' :=
-  natTrans_ext L₁ W₁ fun X₁ ↦
-    natTrans_ext L₂ W₂ fun X₂ ↦
-      natTrans_ext L₃ W₃ fun X₃ ↦
-        h X₁ X₂ X₃
+  uncurry₃.map_injective (natTrans_ext (L₁.prod (L₂.prod L₃)) (W₁.prod (W₂.prod W₃))
+    (fun _ ↦ h _ _ _))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The natural isomorphism `F₁' ≅ F₂'` of trifunctors induced by a

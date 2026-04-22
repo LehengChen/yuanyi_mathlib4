@@ -26,12 +26,9 @@ open CategoryTheory.Abelian
 
 namespace CategoryTheory
 
-variable {C : Type v} [SmallCategory C] [Preadditive C]
-  [Limits.HasFiniteLimits C] [Limits.HasFiniteColimits C]
-  [∀ {X Y : C} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f)]
+variable {C : Type v} [SmallCategory C] [Abelian C]
 
 instance {X Y : Ind C} (f : X ⟶ Y) : IsIso (Abelian.coimageImageComparison f) := by
-  let _ : Abelian C := Abelian.ofCoimageImageComparisonIsIso
   obtain ⟨I, _, _, F, G, ϕ, ⟨i⟩⟩ := Ind.exists_nonempty_arrow_mk_iso_ind_lim (f := f)
   let i' := coimageImageComparisonFunctor.mapIso i
   dsimp only [coimageImageComparisonFunctor_obj, Arrow.mk_left, Arrow.mk_right, Arrow.mk_hom] at i'
@@ -41,7 +38,6 @@ instance {X Y : Ind C} (f : X ⟶ Y) : IsIso (Abelian.coimageImageComparison f) 
   infer_instance
 
 noncomputable instance : Abelian (Ind C) :=
-  let _ : Abelian C := Abelian.ofCoimageImageComparisonIsIso
   .ofCoimageImageComparisonIsIso
 
 end CategoryTheory

@@ -162,17 +162,16 @@ end
 
 section
 variable {V W : Type u} [Quiver V] [Quiver W]
+  (e : V ≃ W) (he : ∀ X Y : V, (X ⟶ Y) ≃ (e X ⟶ e Y))
 
+include he in
 @[simp]
-lemma homOfEq_map_homOfEq (e : V → W) (he : ∀ X Y : V, (X ⟶ Y) → (e X ⟶ e Y))
-    {X Y : V} (f : X ⟶ Y) {X' Y' : V} (hX : X = X') (hY : Y = Y')
+lemma homOfEq_map_homOfEq {X Y : V} (f : X ⟶ Y) {X' Y' : V} (hX : X = X') (hY : Y = Y')
     {X'' Y'' : W} (hX' : e X' = X'') (hY' : e Y' = Y'') :
     Quiver.homOfEq (he _ _ (Quiver.homOfEq f hX hY)) hX' hY' =
       Quiver.homOfEq (he _ _ f) (by rw [hX, hX']) (by rw [hY, hY']) := by
   subst hX hY hX' hY'
   rfl
-
-variable (e : V ≃ W) (he : ∀ X Y : V, (X ⟶ Y) ≃ (e X ⟶ e Y))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Compatible equivalences of types and hom-types induce an isomorphism of quivers. -/
@@ -185,7 +184,7 @@ def isoOfEquiv : Quiv.of V ≅ Quiv.of W where
     dsimp [Quiv.id_eq_id, Quiv.comp_eq_comp]
     apply (he _ _).injective
     apply Quiver.homOfEq_injective (X' := e X) (Y' := e Y) (by simp) (by simp)
-    simp [homOfEq_map_homOfEq (e := e) (he := fun X Y f ↦ (he X Y) f)])
+    simp)
   inv_hom_id := Prefunctor.ext' e.right_inv (by simp [Quiv.id_eq_id, Quiv.comp_eq_comp])
 
 end

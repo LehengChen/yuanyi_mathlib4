@@ -68,12 +68,11 @@ lemma symm_add : φ.symm.add = φ.add := by
   grind
 
 @[simp]
-lemma map_add (F : C ⥤ D) (hF : W.IsInvertedBy F) [Preadditive D]
-    (hF_add : F.map (φ.f + φ.f') = F.map φ.f + F.map φ.f') :
+lemma map_add (F : C ⥤ D) (hF : W.IsInvertedBy F) [Preadditive D] [F.Additive] :
     φ.add.map F hF = φ.fst.map F hF + φ.snd.map F hF := by
   have := hF φ.s φ.hs
   rw [← cancel_mono (F.map φ.s), add_comp, LeftFraction.map_comp_map_s,
-    LeftFraction.map_comp_map_s, LeftFraction.map_comp_map_s, hF_add]
+    LeftFraction.map_comp_map_s, LeftFraction.map_comp_map_s, F.map_add]
 
 end LeftFraction₂
 
@@ -342,9 +341,8 @@ lemma functor_additive_iff {E : Type*} [Category* E] [Preadditive E] [Preadditiv
     intro X Y f g
     obtain ⟨φ, rfl, rfl⟩ := exists_leftFraction₂ L W f g
     have := Localization.inverts L W φ.s φ.hs
-    rw [← φ.map_add L (inverts L W) (Functor.map_add L),
-      ← cancel_mono (G.map (L.map φ.s)), ← G.map_comp, add_comp, ← G.map_comp,
-      ← G.map_comp, LeftFraction.map_comp_map_s,
+    rw [← φ.map_add L (inverts L W), ← cancel_mono (G.map (L.map φ.s)), ← G.map_comp,
+      add_comp, ← G.map_comp, ← G.map_comp, LeftFraction.map_comp_map_s,
       LeftFraction.map_comp_map_s, LeftFraction.map_comp_map_s, ← Functor.comp_map,
       Functor.map_add, Functor.comp_map, Functor.comp_map]
 

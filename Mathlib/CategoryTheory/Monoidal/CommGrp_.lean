@@ -241,15 +241,13 @@ theorem mapCommpGrp_id_mul (A : CommGrp C) :
     μ[((𝟭 C).mapCommGrp.obj A).X] = 𝟙 _ ≫ μ[A.X] :=
   rfl
 
-omit [CartesianMonoidalCategory D] [BraidedCategory D] in
 @[simp]
-theorem comp_mapCommGrp_one {F : C ⥤ D} {G : D ⥤ E} [(F ⋙ G).Braided] (A : CommGrp C) :
+theorem comp_mapCommGrp_one (A : CommGrp C) :
     η[((F ⋙ G).mapCommGrp.obj A).X] = LaxMonoidal.ε (F ⋙ G) ≫ (F ⋙ G).map η[A.X] :=
   rfl
 
-omit [CartesianMonoidalCategory D] [BraidedCategory D] in
 @[simp]
-theorem comp_mapCommGrp_mul {F : C ⥤ D} {G : D ⥤ E} [(F ⋙ G).Braided] (A : CommGrp C) :
+theorem comp_mapCommGrp_mul (A : CommGrp C) :
     μ[((F ⋙ G).mapCommGrp.obj A).X] = LaxMonoidal.μ (F ⋙ G) _ _ ≫ (F ⋙ G).map μ[A.X] :=
   rfl
 

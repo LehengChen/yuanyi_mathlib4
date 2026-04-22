@@ -24,7 +24,7 @@ homotopy category functor `SSet ⥤ Cat`.
 
 noncomputable section
 
-universe w v u
+universe v
 
 open CategoryTheory.Limits
 
@@ -32,9 +32,9 @@ namespace CategoryTheory
 
 namespace Cat
 
-/-- The category of small categories has all small colimits, of any size below the universe of
-objects, as a reflective subcategory of the category of simplicial sets. -/
-instance [UnivLE.{u, v}] : HasColimitsOfSize.{w, u} Cat.{v, v} :=
+/-- The category of small categories has all small colimits as a reflective subcategory of the
+category of simplicial sets, which has all small colimits. -/
+instance : HasColimits Cat.{v, v} :=
   hasColimits_of_reflective nerveFunctor
 
 end Cat

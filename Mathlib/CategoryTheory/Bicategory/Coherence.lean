@@ -174,13 +174,12 @@ theorem normalize_naturality {a b c : B} (p : Path a b) {f g : Hom b c} (η : f 
   | _ => simp
 
 -- Not `@[simp]` because it is not in `simp`-normal form.
-theorem normalizeAux_nil_comp {a b c d : B} {p : Path a b} (f : Hom b c) (g : Hom c d) :
-    normalizeAux p (f.comp g) = (normalizeAux p f).comp (normalizeAux nil g) := by
-  induction g generalizing a b with
+theorem normalizeAux_nil_comp {a b c : B} (f : Hom a b) (g : Hom b c) :
+    normalizeAux nil (f.comp g) = (normalizeAux nil f).comp (normalizeAux nil g) := by
+  induction g generalizing a with
   | id => rfl
   | of => rfl
-  | comp g _ ihf ihg =>
-      erw [ihg (p := p) (f.comp g), ihf (p := p) f, ihg (p := nil) g, comp_assoc]
+  | comp g _ ihf ihg => erw [ihg (f.comp g), ihf f, ihg g, comp_assoc]
 
 /-- The normalization pseudofunctor for the free bicategory on a quiver `B`. -/
 def normalize (B : Type u) [Quiver.{v} B] :

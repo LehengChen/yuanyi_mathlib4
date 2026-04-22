@@ -18,7 +18,7 @@ The notation `- ⊠ -` is scoped to `MonoidalCategory.ExternalProduct`.
 
 @[expose] public section
 
-universe v₁ v₂ v₃ v₄ v₅ u₁ u₂ u₃ u₄ u₅
+universe v₁ v₂ v₃ v₄ u₁ u₂ u₃ u₄
 
 namespace CategoryTheory.MonoidalCategory
 open Functor
@@ -91,7 +91,7 @@ def externalProductFlip [BraidedCategory C] :
 
 section Composition
 
-variable {J₁ J₂ C} {I₁ : Type u₄} {I₂ : Type u₅} [Category.{v₄} I₁] [Category.{v₅} I₂]
+variable {J₁ J₂ C} {I₁ : Type u₃} {I₂ : Type u₄} [Category.{v₃} I₁] [Category.{v₄} I₂]
 
 /-- Composing `F₁ × F₂` with `G₁ ⊠ G₂` is isomorphic to `(F₁ ⋙ G₁) ⊠ (F₂ ⋙ G₂)`. -/
 @[simps!]

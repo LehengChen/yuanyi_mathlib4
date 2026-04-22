@@ -27,11 +27,11 @@ namespace CategoryTheory.Limits
 
 open MonoidalCategory
 
-universe v₁ v u w
+universe v u w
 
 noncomputable section
 
-variable {J : Type w} [Category.{v₁} J] {C : Type u} [Category.{v} C] [HasLimitsOfShape J C]
+variable {J : Type w} [SmallCategory J] {C : Type u} [Category.{v} C] [HasLimitsOfShape J C]
   [MonoidalCategory.{v} C]
 
 open Functor.LaxMonoidal

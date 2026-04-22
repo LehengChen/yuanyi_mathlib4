@@ -37,10 +37,6 @@ abbrev HasConicalProduct {I : Type w} (f : I → C) :=
   HasConicalLimit V (Discrete.functor f)
 
 /-- ensure products exists from the existence of conical products -/
-example (h : ∀ (J : Type w) (f : J → C), HasConicalProduct V f) : HasProducts.{w} C := by
-  intro J
-  refine ⟨fun F => ?_⟩
-  have : HasConicalProduct V (F.obj ∘ Discrete.mk) := h J _
-  exact hasLimit_of_iso Discrete.natIsoFunctor.symm
+example [HasConicalProducts.{w} V C] : HasProducts.{w} C := inferInstance
 
 end CategoryTheory.Enriched

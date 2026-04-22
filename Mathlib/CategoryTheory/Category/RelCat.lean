@@ -57,12 +57,7 @@ instance instLargeCategory : LargeCategory RelCat where
 
 namespace Hom
 
-@[ext] lemma ext (f g : X ⟶ Y) (h : ∀ x y, x ~[f.rel] y ↔ x ~[g.rel] y) : f = g := by
-  cases f
-  cases g
-  congr
-  ext p
-  exact h p.1 p.2
+@[ext] lemma ext (f g : X ⟶ Y) (h : f.rel = g.rel) : f = g := by cases f; cases g; congr
 
 @[simp] protected lemma rel_id (X : RelCat.{u}) : rel (𝟙 X) = .id := rfl
 @[simp] protected lemma rel_comp (f : X ⟶ Y) (g : Y ⟶ Z) : (f ≫ g).rel = f.rel.comp g.rel := rfl
@@ -101,7 +96,7 @@ theorem rel_iso_iff {X Y : RelCat} (r : X ⟶ Y) :
     obtain ⟨g, hg⟩ := Classical.axiomOfChoice (fun a => (h2 a a).mpr rfl)
     suffices hif : IsIso (C := Type u) f by
       use asIso f
-      ext x y
+      ext ⟨x, y⟩
       exact ⟨by aesop, fun hxy ↦ (h2 (f x) y).1 ⟨x, (hf x).2, hxy⟩⟩
     use g
     constructor

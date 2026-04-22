@@ -38,14 +38,14 @@ def KleisliCat (_ : Type u → Type v) :=
 def KleisliCat.mk (m) (α : Type u) : KleisliCat m :=
   α
 
-instance KleisliCat.categoryStruct {m} [Pure.{u, v} m] [Bind m] :
+instance KleisliCat.categoryStruct {m} [Monad.{u, v} m] :
     CategoryStruct (KleisliCat m) where
   Hom α β := α → m β
   id _ x := pure x
   comp f g := f >=> g
 
 @[ext]
-theorem KleisliCat.ext {m} [Pure.{u, v} m] [Bind m] (α β : KleisliCat m)
+theorem KleisliCat.ext {m} [Monad.{u, v} m] (α β : KleisliCat m)
     (f g : α ⟶ β) (h : ∀ x, f x = g x) : f = g := funext h
 
 instance KleisliCat.category {m} [Monad.{u, v} m] [LawfulMonad m] : Category (KleisliCat m) := by
@@ -54,12 +54,10 @@ instance KleisliCat.category {m} [Monad.{u, v} m] [LawfulMonad m] : Category (Kl
   simp +unfoldPartialApp [CategoryStruct.id, CategoryStruct.comp, (· >=> ·)]
 
 @[simp]
-theorem KleisliCat.id_def {m} [Pure m] [Bind m] (α : KleisliCat m) :
-    𝟙 α = @pure m _ α :=
+theorem KleisliCat.id_def {m} [Monad m] (α : KleisliCat m) : 𝟙 α = @pure m _ α :=
   rfl
 
-theorem KleisliCat.comp_def {m} [Pure m] [Bind m] (α β γ : KleisliCat m) (xs : α ⟶ β)
-    (ys : β ⟶ γ) (a : α) :
+theorem KleisliCat.comp_def {m} [Monad m] (α β γ : KleisliCat m) (xs : α ⟶ β) (ys : β ⟶ γ) (a : α) :
     (xs ≫ ys) a = xs a >>= ys :=
   rfl
 

@@ -497,17 +497,16 @@ theorem mem_im_objs_iff (hφ : Function.Injective φ.obj) (d : D) :
     d ∈ (im φ hφ).objs ↔ ∃ c : C, φ.obj c = d := by
   simp only [im, mem_map_objs_iff, mem_top_objs, true_and]
 
-theorem obj_surjective_of_im_eq_top (hφ : Function.Injective φ.obj)
-    (hφ' : ∀ d : D, d ∈ (im φ hφ).objs) :
+theorem obj_surjective_of_im_eq_top (hφ : Function.Injective φ.obj) (hφ' : im φ hφ = ⊤) :
     Function.Surjective φ.obj := by
   rintro d
-  exact (mem_im_objs_iff φ hφ d).mp (hφ' d)
+  rw [← mem_im_objs_iff _ hφ, hφ']
+  apply mem_top_objs
 
 theorem isNormal_map (hφ : Function.Injective φ.obj) (hφ' : im φ hφ = ⊤) (Sn : S.IsNormal) :
     (map φ hφ S).IsNormal :=
   { wide := fun d => by
-      obtain ⟨c, rfl⟩ :=
-        obj_surjective_of_im_eq_top φ hφ (fun d => by rw [hφ']; apply mem_top_objs) d
+      obtain ⟨c, rfl⟩ := obj_surjective_of_im_eq_top φ hφ hφ' d
       change Map.Arrows φ hφ S _ _ (𝟙 _); rw [← Functor.map_id]
       constructor; exact Sn.wide c
     conj := fun {d d'} g δ hδ => by

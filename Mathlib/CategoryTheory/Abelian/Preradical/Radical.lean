@@ -79,9 +79,9 @@ namespace Radical
 
 instance (Φ : Radical C) : IsIso (Preradical.toColon Φ.obj Φ.obj) := Φ.property
 
-lemma isZero {Φ : Preradical C} (hΦ : Preradical.isRadical C Φ) :
-    IsZero (Φ.quotient ⋙ Φ.r) := by
-  rwa [← Preradical.isRadical_iff_isZero]
+lemma isZero (Φ : Radical C) : IsZero (Φ.obj.quotient ⋙ Φ.obj.r) := by
+  rw [← Preradical.isRadical_iff_isZero, Preradical.isRadical_iff_isIso]
+  infer_instance
 
 end Radical
 

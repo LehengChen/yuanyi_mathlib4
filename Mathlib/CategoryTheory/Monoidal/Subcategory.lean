@@ -73,7 +73,7 @@ lemma prop_ihom (P : ObjectProperty C) [MonoidalClosed C] [P.IsMonoidalClosed]
     {X Y : C} (hX : P X) (hY : P Y) : P ((ihom X).obj Y) :=
   IsMonoidalClosed.prop_ihom _ _ hX hY
 
-variable (P : ObjectProperty C) [P.ContainsUnit] [TensorLE P P P]
+variable (P : ObjectProperty C) [P.IsMonoidal]
 
 @[simps]
 instance : MonoidalCategoryStruct P.FullSubcategory where
@@ -117,7 +117,7 @@ variable [Preadditive C]
 instance [MonoidalPreadditive C] : MonoidalPreadditive P.FullSubcategory :=
   monoidalPreadditive_of_faithful P.ι
 
-variable (R : Type*) [Semiring R] [Linear R C]
+variable (R : Type*) [Ring R] [Linear R C]
 
 instance [MonoidalPreadditive C] [MonoidalLinear R C] : MonoidalLinear R P.FullSubcategory :=
   .ofFaithful R P.ι
@@ -126,7 +126,7 @@ end
 
 section
 
-variable {P} {P' : ObjectProperty C} [P'.ContainsUnit] [TensorLE P' P' P'] (h : P ≤ P')
+variable {P} {P' : ObjectProperty C} [P'.IsMonoidal] (h : P ≤ P')
 
 /-- An inequality `P ≤ P'` between monoidal properties of objects induces
 a monoidal functor between full monoidal subcategories. -/
@@ -160,7 +160,7 @@ variable {P}
 
 /-- An inequality `P ≤ P'` between monoidal properties of objects induces
 a braided functor between full braided subcategories. -/
-instance {P' : ObjectProperty C} [P'.ContainsUnit] [TensorLE P' P' P'] (h : P ≤ P') :
+instance {P' : ObjectProperty C} [P'.IsMonoidal] (h : P ≤ P') :
     (ιOfLE h).Braided where
 
 end Braided

@@ -51,14 +51,13 @@ def Functor.Elements (F : C ⥤ Type w) :=
 /-- Constructor for the type `F.Elements` when `F` is a functor to types. -/
 abbrev Functor.elementsMk (F : C ⥤ Type w) (X : C) (x : F.obj X) : F.Elements := ⟨X, x⟩
 
-omit [Category.{v} C] in
-lemma Functor.Elements.ext {F : C → Type w} (x y : Σ c : C, F c) (h₁ : x.fst = y.fst)
-    (h₂ : HEq x.snd y.snd) : x = y := by
+lemma Functor.Elements.ext {F : C ⥤ Type w} (x y : F.Elements) (h₁ : x.fst = y.fst)
+    (h₂ : F.map (eqToHom h₁) x.snd = y.snd) : x = y := by
   cases x
   cases y
   cases h₁
-  cases h₂
-  rfl
+  simp only [eqToHom_refl, FunctorToTypes.map_id_apply] at h₂
+  simp [h₂]
 
 /-- The category structure on `F.Elements`, for `F : C ⥤ Type`.
 A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C`, so `F.map f` takes `x` to `y`. -/

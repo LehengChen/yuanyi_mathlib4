@@ -66,12 +66,11 @@ lemma HasPointwiseLeftDerivedFunctorAt.hasLimit
     HasPointwiseRightKanExtensionAt L F (L.obj X) := by
   rwa [← hasPointwiseLeftDerivedFunctorAt_iff F L W]
 
-lemma hasPointwiseLeftDerivedFunctorAt_iff_of_mem {X Y : C} (w : X ⟶ Y)
-    [IsIso (W.Q.map w)] :
+lemma hasPointwiseLeftDerivedFunctorAt_iff_of_mem {X Y : C} (w : X ⟶ Y) (hw : W w) :
     F.HasPointwiseLeftDerivedFunctorAt W X ↔
       F.HasPointwiseLeftDerivedFunctorAt W Y := by
   simp only [F.hasPointwiseLeftDerivedFunctorAt_iff W.Q W]
-  exact hasPointwiseRightKanExtensionAt_iff_of_iso W.Q F (asIso (W.Q.map w))
+  exact hasPointwiseRightKanExtensionAt_iff_of_iso W.Q F (Localization.isoOfHom W.Q W w hw)
 
 section
 

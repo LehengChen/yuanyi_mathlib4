@@ -205,11 +205,13 @@ end surjectivity
 set_option backward.isDefEq.respectTransparency false in
 include hc in
 open surjectivity in
-lemma surjectivity [Mono c.ι]
+lemma surjectivity [∀ (j j' : J) (φ : j ⟶ j'), Mono (Y.map φ)]
     {κ : Cardinal.{w}} [hκ : Fact κ.IsRegular] [IsCardinalFiltered J κ]
     (hXκ : HasCardinalLT (Subobject X) κ) (z : X ⟶ c.pt) :
     ∃ (j₀ : J) (y : X ⟶ Y.obj j₀), z = y ≫ c.ι.app j₀ := by
   have := isFiltered_of_isCardinalFiltered J κ
+  have := hc.mono_ι_app_of_isFiltered
+  have := NatTrans.mono_of_mono_app c.ι
   obtain ⟨j, _⟩ := exists_isIso_of_functor_from_monoOver (F z) hXκ _
     (colimit.isColimit _) (f z) (hf z) (epi_f hc z)
   refine ⟨j, inv ((F z).obj j).obj.hom ≫ (pullback.fst c.ι _).app j, ?_⟩
@@ -231,8 +233,6 @@ lemma preservesColimit_coyoneda_obj_of_mono
     PreservesColimit Y ((coyoneda.obj (op X))) where
   preserves {c} hc := ⟨by
     have := isFiltered_of_isCardinalFiltered J κ
-    have := hc.mono_ι_app_of_isFiltered
-    have := NatTrans.mono_of_mono_app c.ι
     exact Types.FilteredColimit.isColimitOf' _ _
       (surjectivity hc hXκ) (injectivity hc hXκ)⟩
 

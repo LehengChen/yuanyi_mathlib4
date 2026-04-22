@@ -126,13 +126,9 @@ instance : P.isoModSerre.HasRightCalculusOfFractions where
 noncomputable example : Preadditive P.isoModSerre.Localization := inferInstance
 noncomputable example : P.isoModSerre.Q.Additive := inferInstance
 
-variable [L.IsLocalization P.isoModSerre]
+variable [L.IsLocalization P.isoModSerre] [Preadditive D] [L.Additive]
 
 include L P
-
-section ZeroMorphisms
-
-variable [HasZeroMorphisms D] [L.PreservesZeroMorphisms]
 
 lemma isZero_obj_iff (X : C) :
     IsZero (L.obj X) ↔ P X := by
@@ -157,10 +153,6 @@ lemma map_comp_eq_zero_iff_of_epi_mono {X Z Y : C} (f : X ⟶ Z) (g : Z ⟶ Y)
   rw [← L.map_comp, map_eq_zero_iff L P]
   have := strongEpi_of_epi f
   exact P.prop_iff_of_iso (Abelian.imageIsoImage _ ≪≫ (image.isoStrongEpiMono f g rfl).symm)
-
-end ZeroMorphisms
-
-variable [Preadditive D] [L.Additive]
 
 lemma mono_map_tfae {X Y : C} (f : X ⟶ Y) :
     List.TFAE [Mono (L.map f),

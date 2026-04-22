@@ -47,7 +47,7 @@ namespace CategoryTheory
 open Limits
 
 universe v u
-variable {C : Type u} [Category.{v} C] [HasBinaryProducts C] [HasPullbacks C]
+variable {C : Type u} [Category.{v} C] [HasFiniteProducts C] [HasPullbacks C]
 
 variable (C) in
 /-- The Dialectica category. An object of the category is a triple `⟨U, X, α ⊆ U × X⟩`,

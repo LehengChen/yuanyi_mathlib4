@@ -26,7 +26,7 @@ open Category Opposite Limits
 universe w v u
 
 variable {C : Type u} [Category.{v} C] {A : Cᵒᵖ ⥤ Type v}
-variable {J : Type v} [Category.{w} J] {A : Cᵒᵖ ⥤ Type v} (F : J ⥤ Over A)
+variable {J : Type v} [SmallCategory J] {A : Cᵒᵖ ⥤ Type v} (F : J ⥤ Over A)
 
 -- We introduce some local notation to reduce visual noise in the following proof
 local notation "E" => Equivalence.functor (overEquivPresheafCostructuredArrow A)

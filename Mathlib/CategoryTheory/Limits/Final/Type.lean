@@ -43,8 +43,7 @@ def sectionsPrecomp (F : C ⥤ D) {P : D ⥤ Type w} (x : P.sections) :
   property _ := x.property _
 
 set_option backward.isDefEq.respectTransparency false in
-lemma bijective_sectionsPrecomp (F : C ⥤ D) (P : D ⥤ Type w)
-    [∀ Y, IsConnected (CostructuredArrow F Y)] :
+lemma bijective_sectionsPrecomp (F : C ⥤ D) (P : D ⥤ Type w) [F.Initial] :
     Function.Bijective (F.sectionsPrecomp (P := P)) := by
   refine ⟨fun s₁ s₂ h ↦ ?_, fun t ↦ ?_⟩
   · ext Y
@@ -81,8 +80,7 @@ lemma colimitTypePrecomp_ιColimitType (F : C ⥤ D) {P : D ⥤ Type w}
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma bijective_colimitTypePrecomp (F : C ⥤ D) (P : D ⥤ Type w)
-    [∀ Y, IsConnected (StructuredArrow Y F)] :
+lemma bijective_colimitTypePrecomp (F : C ⥤ D) (P : D ⥤ Type w) [F.Final] :
     Function.Bijective (F.colimitTypePrecomp (P := P)) := by
   refine ⟨?_, fun x ↦ ?_⟩
   · have h (Y : D) := constant_of_preserves_morphisms'

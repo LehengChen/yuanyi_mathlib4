@@ -673,9 +673,9 @@ theorem isCoseparator_iff_mono (G : C) [∀ A : C, HasProduct fun _ : A ⟶ G =>
     refine (cancel_mono (Pi.lift fun f : Y ⟶ G => f)).1 (limit.hom_ext fun j => ?_)
     simpa using hh j.as
 
-section Zero
+section ZeroMorphisms
 
-variable [∀ X Y : C, Zero (X ⟶ Y)]
+variable [HasZeroMorphisms C]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma isSeparator_of_isColimit_cofan {β : Type w} {f : β → C}
@@ -766,7 +766,7 @@ theorem isCoseparator_pi_of_isCoseparator {β : Type w} (f : β → C) [HasProdu
     (hb : IsCoseparator (f b)) : IsCoseparator (∏ᶜ f) :=
   (isCoseparator_pi _).2 <| ObjectProperty.IsCoseparating.of_le hb <| by simp
 
-end Zero
+end ZeroMorphisms
 
 theorem isDetector_iff_reflectsIsomorphisms_coyoneda_obj (G : C) :
     IsDetector G ↔ (coyoneda.obj (op G)).ReflectsIsomorphisms := by

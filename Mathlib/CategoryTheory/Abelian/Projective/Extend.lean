@@ -80,10 +80,7 @@ lemma π'_f_zero :
 
 end
 
-section
-
-variable [HasZeroObject C] [Preadditive C] [CategoryWithHomology C] {X : C}
-  (R : ProjectiveResolution X)
+variable [Abelian C] {X : C} (R : ProjectiveResolution X)
 
 set_option backward.isDefEq.respectTransparency false in
 instance : QuasiIso R.π' := by dsimp [π']; infer_instance
@@ -91,10 +88,6 @@ instance : QuasiIso R.π' := by dsimp [π']; infer_instance
 instance : R.cochainComplex.IsGE 0 := by
   simp only [HomologicalComplex.isSupported_iff_of_quasiIso R.π']
   infer_instance
-
-end
-
-variable [Abelian C] {X : C}
 
 namespace Hom
 
