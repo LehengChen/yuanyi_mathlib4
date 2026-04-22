@@ -53,7 +53,9 @@ abbrev TwoSquare.overPost :
   TwoSquare.mk _ _ _ _ (𝟙 _)
 
 set_option backward.isDefEq.respectTransparency false in
-instance [∀ (Y : C), HasBinaryProduct X Y] [∀ (Y : C), PreservesLimit (pair X Y) F] :
+instance [∀ (Y : C), HasBinaryProduct X Y]
+    [∀ (Y : C), HasBinaryProduct (F.obj X) (F.obj Y)]
+    [∀ (Y : C), IsIso (prodComparison F X Y)] :
     (TwoSquare.overPost F X).GuitartExact where
   isConnected_rightwards {W Z} g := by
     let P : (TwoSquare.overPost F X).StructuredArrowRightwards g :=

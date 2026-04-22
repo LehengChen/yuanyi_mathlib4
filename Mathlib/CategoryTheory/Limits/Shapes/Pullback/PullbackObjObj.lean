@@ -126,7 +126,7 @@ lemma ι_flip : sq.flip.ι = sq.ι := by
   · rw [inr_ι, flip_inr, inl_ι, flip_map_app]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma ofHasPushout_ι [HasPushout ((F.map f₁).app X₂) ((F.obj X₁).map f₂)] :
+lemma ofHasPushout_ι [HasColimit (span ((F.map f₁).app X₂) ((F.obj X₁).map f₂))] :
     (ofHasPushout F f₁ f₂).ι =
       pushout.desc ((F.obj Y₁).map f₂) ((F.map f₁).app Y₂) (by simp) := by
   ext <;> simp [PushoutObjObj.ι, ofHasPushout_inl, ofHasPushout_inr]
@@ -308,7 +308,7 @@ lemma hom_ext {X₂ : C₂} {f g : X₂ ⟶ sq.pt} (h₁ : f ≫ sq.fst = g ≫ 
 
 set_option backward.isDefEq.respectTransparency false in
 lemma ofHasPullback_π
-    [HasPullback ((G.obj (op X₁)).map f₃) ((G.map f₁.op).app Y₃)] :
+    [HasLimit (cospan ((G.obj (op X₁)).map f₃) ((G.map f₁.op).app Y₃))] :
     (ofHasPullback G f₁ f₃).π =
       pullback.lift ((G.map f₁.op).app X₃) ((G.obj (op Y₁)).map f₃) (by simp) := by
   ext <;> simp [PullbackObjObj.π, ofHasPullback_fst, ofHasPullback_snd]

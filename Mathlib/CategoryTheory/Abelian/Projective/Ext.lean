@@ -199,18 +199,19 @@ lemma extMk_hom
 
 lemma extMk_eq_zero_iff (f : R.complex.X n ⟶ Y) (m : ℕ) (hm : n + 1 = m)
     (hf : R.complex.d m n ≫ f = 0)
-    (p : ℕ) (hp : p + 1 = n) :
+    (hn : 0 < n) :
     R.extMk f m hm hf = 0 ↔
-      ∃ (g : R.complex.X p ⟶ Y), R.complex.d n p ≫ g = f := by
+      ∃ (g : R.complex.X (n - 1) ⟶ Y), R.complex.d n (n - 1) ≫ g = f := by
   simp only [← R.extEquivCohomologyClass.apply_eq_iff_eq,
     extEquivCohomologyClass_extMk, extEquivCohomologyClass_zero,
     CohomologyClass.mk_eq_zero_iff]
-  rw [Cocycle.toSingleMk_mem_coboundaries_iff _ _ _ _ _ (-p) (by lia),
+  let p := n - 1
+  rw [Cocycle.toSingleMk_mem_coboundaries_iff _ _ _ _ _ (-p) (by omega),
     R.cochainComplex_d _ _ _ _ rfl rfl]
   refine ⟨fun ⟨g, hg⟩ ↦ ⟨(R.cochainComplexXIso (-p) p rfl).inv ≫ g, ?_⟩,
-    fun ⟨g, hg⟩ ↦ ⟨(R.cochainComplexXIso (-p) p rfl).hom ≫ g, by simpa⟩⟩
+    fun ⟨g, hg⟩ ↦ ⟨(R.cochainComplexXIso (-p) p rfl).hom ≫ g, by simpa [p]⟩⟩
   rw [← cancel_epi (R.cochainComplexXIso (-n) n rfl).hom]
-  simpa [Category.assoc] using hg
+  simpa [Category.assoc, p] using hg
 
 lemma extMk_surjective (α : Ext X Y n) (m : ℕ) (hm : n + 1 = m) :
     ∃ (f : R.complex.X n ⟶ Y) (hf : R.complex.d m n ≫ f = 0),

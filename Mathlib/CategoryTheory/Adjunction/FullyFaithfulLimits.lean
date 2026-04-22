@@ -11,8 +11,9 @@ public import Mathlib.CategoryTheory.Adjunction.Limits
 /-!
 # Preservation of colimits and reflective adjunctions
 
-Let `adj : F ⊣ G` be an adjunction with `G : D ⥤ C` full and faithful.
-We show that if colimits of shape `J` exist in `C`, then a functor
+Let `adj : F ⊣ G` be an adjunction whose counit is an isomorphism.
+We show that if colimits exist in `C` for diagrams of shape `K ⋙ G` with `K : J ⥤ D`,
+then a functor
 `H : D ⥤ E` preserves colimits of shape `J` iff `F ⋙ H` does.
 
 In particular, a functor from a category of sheaves preserves colimits
@@ -36,10 +37,11 @@ variable {C : Type u₁} [Category.{v₁} C] {D : Type u₂} [Category.{v₂} D]
 include adj
 
 lemma preservesColimitsOfShape_iff (J : Type u) [Category.{v} J]
-    [HasColimitsOfShape J C] [G.Full] [G.Faithful] :
+    [∀ K : J ⥤ D, HasColimit (K ⋙ G)] [IsIso adj.counit] :
     PreservesColimitsOfShape J H ↔ PreservesColimitsOfShape J (F ⋙ H) := by
   have := adj.isLeftAdjoint
   refine ⟨fun _ ↦ inferInstance, fun _ ↦ ⟨fun {K} ↦ ?_⟩⟩
+  haveI : HasColimit (K ⋙ G) := inferInstance
   let iso : (K ⋙ G) ⋙ F ≅ K :=
     Functor.associator _ _ _ ≪≫ Functor.isoWhiskerLeft _ (asIso adj.counit) ≪≫ K.rightUnitor
   refine preservesColimit_of_preserves_colimit_cocone
@@ -52,7 +54,8 @@ lemma preservesColimitsOfShape_iff (J : Type u) [Category.{v} J]
           (Cocone.ext (Iso.refl _))
 
 lemma preservesColimitsOfSize_iff
-    [HasColimitsOfSize.{v, u} C] [G.Full] [G.Faithful] :
+    [∀ (J : Type u) [Category.{v} J] (K : J ⥤ D), HasColimit (K ⋙ G)]
+    [IsIso adj.counit] :
     PreservesColimitsOfSize.{v, u} H ↔ PreservesColimitsOfSize.{v, u} (F ⋙ H) := by
   have := adj.isLeftAdjoint
   refine ⟨fun _ ↦ inferInstance, fun _ ↦ ⟨fun {J _} ↦ ?_⟩⟩

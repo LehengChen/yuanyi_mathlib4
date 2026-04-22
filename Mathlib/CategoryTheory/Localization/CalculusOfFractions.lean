@@ -925,14 +925,14 @@ lemma symm {X Y : C} {z₁ z₂ : W.RightFraction X Y} (h : RightFractionRel z�
   h.op.symm.unop
 
 lemma trans {X Y : C} {z₁ z₂ z₃ : W.RightFraction X Y}
-    [HasRightCalculusOfFractions W]
+    [W.op.HasLeftCalculusOfFractions]
     (h₁₂ : RightFractionRel z₁ z₂) (h₂₃ : RightFractionRel z₂ z₃) :
     RightFractionRel z₁ z₃ :=
   (h₁₂.op.trans h₂₃.op).unop
 
 end RightFractionRel
 
-lemma equivalenceRightFractionRel (X Y : C) [HasRightCalculusOfFractions W] :
+lemma equivalenceRightFractionRel (X Y : C) [W.op.HasLeftCalculusOfFractions] :
     @_root_.Equivalence (W.RightFraction X Y) RightFractionRel where
   refl := RightFractionRel.refl
   symm := RightFractionRel.symm
@@ -942,7 +942,7 @@ end MorphismProperty
 
 section
 
-variable [W.HasRightCalculusOfFractions]
+variable [W.op.HasLeftCalculusOfFractions]
 
 lemma Localization.exists_rightFraction {X Y : C} (f : L.obj X ⟶ L.obj Y) :
     ∃ (φ : W.RightFraction X Y), f = φ.map L (Localization.inverts L W) := by
@@ -963,6 +963,7 @@ lemma MorphismProperty.RightFraction.map_eq_iff
 
 lemma MorphismProperty.map_eq_iff_precomp {Y Z : C} (f₁ f₂ : Y ⟶ Z) :
     L.map f₁ = L.map f₂ ↔ ∃ (X : C) (s : X ⟶ Y) (_ : W s), s ≫ f₁ = s ≫ f₂ := by
+  letI : W.ContainsIdentities := MorphismProperty.ContainsIdentities.of_op W
   constructor
   · intro h
     rw [← RightFraction.map_ofHom W _ L (Localization.inverts _ _),

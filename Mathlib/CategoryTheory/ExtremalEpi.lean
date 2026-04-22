@@ -48,7 +48,7 @@ lemma ExtremalEpi.subobject_eq_top [ExtremalEpi f]
   exact isIso f (Subobject.factorThru A f hA) _ (by simp)
 
 set_option backward.isDefEq.respectTransparency false in
-lemma ExtremalEpi.mk_of_hasEqualizers [HasEqualizers C]
+lemma ExtremalEpi.mk_of_hasEqualizers [∀ ⦃Z : C⦄ (p q : Y ⟶ Z), HasEqualizer p q]
     (hf : ∀ ⦃Z : C⦄ (p : X ⟶ Z) (i : Z ⟶ Y) (_ : p ≫ i = f) [Mono i], IsIso i) :
     ExtremalEpi f where
   left_cancellation {Z} p q h := by
@@ -62,7 +62,8 @@ instance [StrongEpi f] : ExtremalEpi f where
     exact ⟨sq.lift, by simp [← cancel_mono i], by simp⟩
 
 set_option backward.isDefEq.respectTransparency false in
-lemma extremalEpi_iff_strongEpi_of_hasPullbacks [HasPullbacks C] :
+lemma extremalEpi_iff_strongEpi_of_hasPullbacks
+    [∀ ⦃A B : C⦄ (i : A ⟶ B) [Mono i] (b : Y ⟶ B), HasPullback i b] :
     ExtremalEpi f ↔ StrongEpi f := by
   refine ⟨fun _ ↦ ⟨inferInstance, fun A B i _ ↦ ⟨fun {t b} sq ↦ ⟨⟨?_⟩⟩⟩⟩,
     fun _ ↦ inferInstance⟩

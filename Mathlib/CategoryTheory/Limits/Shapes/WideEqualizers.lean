@@ -697,11 +697,13 @@ theorem hasWideCoequalizers_of_hasColimit_parallelFamily
     HasWideCoequalizers.{w} C := fun _ =>
   { has_colimit := fun F => hasColimit_of_iso (diagramIsoParallelFamily F) }
 
-instance (priority := 10) hasEqualizers_of_hasWideEqualizers [HasWideEqualizers.{w} C] :
+instance (priority := 10) hasEqualizers_of_hasWideEqualizers
+    [HasLimitsOfShape (WalkingParallelFamily.{w} (ULift Bool)) C] :
     HasEqualizers C :=
   hasLimitsOfShape_of_equivalence.{w} walkingParallelFamilyEquivWalkingParallelPair
 
-instance (priority := 10) hasCoequalizers_of_hasWideCoequalizers [HasWideCoequalizers.{w} C] :
+instance (priority := 10) hasCoequalizers_of_hasWideCoequalizers
+    [HasColimitsOfShape (WalkingParallelFamily.{w} (ULift Bool)) C] :
     HasCoequalizers C :=
   hasColimitsOfShape_of_equivalence.{w} walkingParallelFamilyEquivWalkingParallelPair
 

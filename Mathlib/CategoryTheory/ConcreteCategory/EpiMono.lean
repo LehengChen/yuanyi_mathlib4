@@ -150,11 +150,11 @@ section
 open CategoryTheory.Limits
 
 theorem injective_of_mono_of_preservesPullback {X Y : C} (f : X ⟶ Y) [Mono f]
-    [PreservesLimitsOfShape WalkingCospan (forget C)] : Function.Injective f :=
+    [(forget C).PreservesMonomorphisms] : Function.Injective f :=
   (mono_iff_injective ((forget C).map f)).mp inferInstance
 
 theorem mono_iff_injective_of_preservesPullback {X Y : C} (f : X ⟶ Y)
-    [PreservesLimitsOfShape WalkingCospan (forget C)] : Mono f ↔ Function.Injective f :=
+    [(forget C).PreservesMonomorphisms] : Mono f ↔ Function.Injective f :=
   ((forget C).mono_map_iff_mono _).symm.trans (mono_iff_injective _)
 
 /-- In any concrete category, surjective morphisms are epimorphisms. -/
@@ -163,11 +163,11 @@ theorem epi_of_surjective {X Y : C} (f : X ⟶ Y) (s : Function.Surjective f) :
   (forget C).epi_of_epi_map ((epi_iff_surjective ((forget C).map f)).2 s)
 
 theorem surjective_of_epi_of_preservesPushout {X Y : C} (f : X ⟶ Y) [Epi f]
-    [PreservesColimitsOfShape WalkingSpan (forget C)] : Function.Surjective f :=
+    [(forget C).PreservesEpimorphisms] : Function.Surjective f :=
   (epi_iff_surjective ((forget C).map f)).mp inferInstance
 
 theorem epi_iff_surjective_of_preservesPushout {X Y : C} (f : X ⟶ Y)
-    [PreservesColimitsOfShape WalkingSpan (forget C)] : Epi f ↔ Function.Surjective f :=
+    [(forget C).PreservesEpimorphisms] : Epi f ↔ Function.Surjective f :=
   ((forget C).epi_map_iff_epi _).symm.trans (epi_iff_surjective _)
 
 theorem bijective_of_isIso {X Y : C} (f : X ⟶ Y) [IsIso f] :

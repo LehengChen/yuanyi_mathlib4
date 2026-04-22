@@ -78,12 +78,13 @@ lemma isSeparating {ι : Type w} {S : ι → A} (hS : ObjectProperty.IsSeparatin
 
 lemma isSeparator {ι : Type w} {S : ι → A} (hS : ObjectProperty.IsSeparating (.ofObj S))
     [HasCoproduct (fun (⟨X, i⟩ : C × ι) ↦ freeYoneda X (S i))]
-    [HasZeroMorphisms A] :
+    [HasZeroMorphisms (Cᵒᵖ ⥤ A)] :
     IsSeparator (∐ (fun (⟨X, i⟩ : C × ι) ↦ freeYoneda X (S i))) :=
   (isSeparating C hS).isSeparator_coproduct
 
 variable (A) in
-instance hasSeparator [HasSeparator A] [HasZeroMorphisms A] [HasCoproducts.{u} A] :
+instance hasSeparator [HasSeparator A] [HasZeroMorphisms (Cᵒᵖ ⥤ A)]
+    [HasCoproduct (fun (⟨X, _⟩ : C × Unit) ↦ freeYoneda X (separator A))] :
     HasSeparator (Cᵒᵖ ⥤ A) where
   hasSeparator := ⟨_, isSeparator C (S := fun (_ : Unit) ↦ separator A)
       (by simpa using isSeparator_separator A)⟩

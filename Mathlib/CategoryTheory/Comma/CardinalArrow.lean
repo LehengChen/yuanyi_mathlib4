@@ -43,10 +43,13 @@ lemma Arrow.finite_iff (C : Type u) [SmallCategory C] :
     have := Fintype.ofEquiv _ (Arrow.equivSigma C).symm
     infer_instance
 
-instance Arrow.finite {C : Type u} [SmallCategory C] [FinCategory C] :
-    Finite (Arrow C) := by
-  rw [Arrow.finite_iff]
-  exact ⟨inferInstance⟩
+instance Arrow.finite {C : Type u} [Category.{v} C] [Finite C]
+    [∀ X Y : C, Finite (X ⟶ Y)] : Finite (Arrow C) := by
+  classical
+  haveI := Fintype.ofFinite C
+  haveI : ∀ X Y : C, Fintype (X ⟶ Y) := fun X Y => Fintype.ofFinite (X ⟶ Y)
+  have := Fintype.ofEquiv _ (Arrow.equivSigma C).symm
+  infer_instance
 
 /-- The bijection `Arrow Cᵒᵖ ≃ Arrow C`. -/
 def Arrow.opEquiv (C : Type u) [Category.{v} C] : Arrow Cᵒᵖ ≃ Arrow C where

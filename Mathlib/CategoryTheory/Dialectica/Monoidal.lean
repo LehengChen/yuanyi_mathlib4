@@ -7,6 +7,7 @@ module
 
 public import Mathlib.CategoryTheory.Subobject.Lattice
 public import Mathlib.CategoryTheory.Monoidal.Braided.Basic
+public import Mathlib.CategoryTheory.Limits.Constructions.FiniteProductsOfBinaryProducts
 public import Mathlib.CategoryTheory.Dialectica.Basic
 
 /-!
@@ -24,7 +25,9 @@ namespace CategoryTheory
 open MonoidalCategory Limits
 
 universe v u
-variable {C : Type u} [Category.{v} C] [HasFiniteProducts C] [HasPullbacks C]
+variable {C : Type u} [Category.{v} C] [HasTerminal C] [HasBinaryProducts C] [HasPullbacks C]
+
+attribute [local instance] hasFiniteProducts_of_has_binary_and_terminal
 
 namespace Dial
 

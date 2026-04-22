@@ -236,9 +236,12 @@ instance : ((whiskeringLeft C (Karoubi C) D).obj (toKaroubi C)).IsEquivalence :=
     ((whiskeringRight C _ _).obj (toKaroubi D) ⋙
       (whiskeringRight C (Karoubi D) D).obj (Functor.inv (toKaroubi D)))
 
+end IsIdempotentComplete
+
 variable {C D}
 
 theorem whiskeringLeft_obj_preimage_app {F G : Karoubi C ⥤ D}
+    [((whiskeringLeft C (Karoubi C) D).obj (toKaroubi C)).Full]
     (τ : toKaroubi _ ⋙ F ⟶ toKaroubi _ ⋙ G) (P : Karoubi C) :
     (((whiskeringLeft _ _ _).obj (toKaroubi _)).preimage τ).app P =
       F.map P.decompId_i ≫ τ.app P.X ≫ G.map P.decompId_p := by
@@ -248,10 +251,7 @@ theorem whiskeringLeft_obj_preimage_app {F G : Karoubi C ⥤ D}
   dsimp
   congr
 
-end IsIdempotentComplete
-
 set_option backward.isDefEq.respectTransparency false in
-variable {C D} in
 /-- The precomposition of functors with `toKaroubi C` is fully faithful. -/
 def whiskeringLeftObjToKaroubiFullyFaithful :
     ((Functor.whiskeringLeft C (Karoubi C) D).obj (toKaroubi C)).FullyFaithful where

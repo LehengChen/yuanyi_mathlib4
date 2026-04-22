@@ -22,14 +22,16 @@ namespace CategoryTheory
 
 open CategoryTheory.Limits
 
-variable (C : Type*) [Category* C] [Abelian C]
+variable (C : Type*) [Category* C]
 
-instance : Abelian Cᵒᵖ :=
+instance [Preadditive C] [HasFiniteLimits C] [HasFiniteColimits C]
+    [IsNormalMonoCategory C] [IsNormalEpiCategory C] : Abelian Cᵒᵖ :=
   { normalMonoOfMono f := ⟨normalMonoOfNormalEpiUnop _ (normalEpiOfEpi f.unop)⟩
     normalEpiOfEpi f := ⟨normalEpiOfNormalMonoUnop _ (normalMonoOfMono f.unop)⟩ }
 
 section
 
+variable [Abelian C]
 variable {C}
 variable {X Y : C} (f : X ⟶ Y) {A B : Cᵒᵖ} (g : A ⟶ B)
 

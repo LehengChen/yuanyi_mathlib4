@@ -26,12 +26,15 @@ open Limits Subobject
 
 universe v u
 
-variable {C : Type u} [Category.{v} C] [Adhesive C] {X : C}
+variable {C : Type u} [Category.{v} C] {X : C}
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Given an object `X` of an adhesive category `C`, the coproduct of two subobjects of `X` is their
-  pushout in `C` over their pullback. -/
-noncomputable def isColimitBinaryCofan (a b : Subobject X) :
+/-- Given an object `X`, if the pullback-pushout of two subobjects of `X` is again a subobject,
+then it is their coproduct. -/
+noncomputable def isColimitBinaryCofan (a b : Subobject X)
+    [HasPullback a.arrow b.arrow]
+    [HasPushout (pullback.fst a.arrow b.arrow) (pullback.snd a.arrow b.arrow)]
+    [Mono (pushout.desc a.arrow b.arrow pullback.condition)] :
     IsColimit (BinaryCofan.mk (P := Subobject.mk (pushout.desc a.arrow b.arrow pullback.condition))
       (le_mk_of_comm (pushout.inl _ _) (pushout.inl_desc _ _ _)).hom
       (le_mk_of_comm (pushout.inr _ _) (pushout.inr_desc _ _ _)).hom) :=

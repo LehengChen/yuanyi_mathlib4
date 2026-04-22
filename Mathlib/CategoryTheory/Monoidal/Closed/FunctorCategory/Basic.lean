@@ -96,7 +96,7 @@ lemma homEquiv_naturality_two_symm (f₂ : F₂ ⟶ F₂') (g : F₂' ⟶ functo
   simp [← uncurry_natural_left]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma homEquiv_naturality_three [∀ (F₁ F₂ : J ⥤ C), HasEnrichedHom C F₁ F₂]
+lemma homEquiv_naturality_three [HasEnrichedHom C F₃ F₃']
     (f : F₁ ⊗ F₂ ⟶ F₃) (f₃ : F₃ ⟶ F₃') :
     homEquiv (f ≫ f₃) = homEquiv f ≫ (ρ_ _).inv ≫ _ ◁ functorHomEquiv _ f₃ ≫
       functorEnrichedComp C F₁ F₃ F₃' := by

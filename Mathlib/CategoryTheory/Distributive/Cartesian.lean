@@ -68,8 +68,9 @@ lemma of_isMonoidalLeftDistrib [IsMonoidalLeftDistrib C] : IsCartesianDistributi
   SymmetricCategory.isMonoidalDistrib_of_isMonoidalLeftDistrib
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The coproduct coprojections are monic in a Cartesian distributive category. -/
-instance monoCoprod [IsCartesianDistributive C] : MonoCoprod C :=
+/-- The coproduct coprojections are monic when Cartesian tensoring on the left preserves
+binary coproducts. -/
+instance monoCoprod [IsMonoidalLeftDistrib C] : MonoCoprod C :=
   MonoCoprod.mk' fun A B =>
     ⟨_, coprodIsCoprod A B, ⟨fun {Z} f g he ↦ by
       let ι := coprod.inl (X := A) (Y := B)

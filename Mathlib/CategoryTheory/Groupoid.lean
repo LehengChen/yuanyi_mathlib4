@@ -152,8 +152,11 @@ def Groupoid.ofHomUnique (all_unique : ∀ {X Y : C}, Unique (X ⟶ Y)) : Groupo
 
 end
 
+/-- A category equipped with a functor which reflects isomorphisms and maps every morphism
+to an isomorphism is a groupoid. -/
 lemma isGroupoid_of_reflects_iso {C D : Type*} [Category* C] [Category* D]
-    (F : C ⥤ D) [F.ReflectsIsomorphisms] [IsGroupoid D] :
+    (F : C ⥤ D) [F.ReflectsIsomorphisms]
+    [∀ {X Y : C} (f : X ⟶ Y), IsIso (F.map f)] :
     IsGroupoid C where
   all_isIso _ := isIso_of_reflects_iso _ F
 

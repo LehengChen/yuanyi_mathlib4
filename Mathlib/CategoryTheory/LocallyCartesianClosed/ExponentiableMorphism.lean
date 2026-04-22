@@ -53,8 +53,9 @@ abbrev IsExponentiable [ChosenPullbacks C] : MorphismProperty C :=
 
 namespace ExponentiableMorphism
 
-instance isExponentiable [ChosenPullbacks C] {I J : C} (f : I ⟶ J) [ExponentiableMorphism f] :
-  IsExponentiable f := ⟨pushforward f, ⟨pullbackPushforwardAdj f⟩⟩
+instance isExponentiable {I J : C} (f : I ⟶ J) [ChosenPullbacksAlong f]
+    [ExponentiableMorphism f] : IsLeftAdjoint (pullback f) :=
+  ⟨pushforward f, ⟨pullbackPushforwardAdj f⟩⟩
 
 section
 

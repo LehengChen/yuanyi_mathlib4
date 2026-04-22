@@ -173,7 +173,7 @@ theorem coeq_condition {j j' : C} (f f' : j ⟶ j') : f ≫ coeqHom f f' = f' �
 
 end AllowEmpty
 
-lemma isDirectedOrder (α : Type u) [Preorder α] [IsFiltered α] :
+lemma isDirectedOrder (α : Type u) [Preorder α] [IsFilteredOrEmpty α] :
     IsDirectedOrder α where
   directed i j := ⟨max i j, leOfHom (leftToMax i j), leOfHom (rightToMax i j)⟩
 

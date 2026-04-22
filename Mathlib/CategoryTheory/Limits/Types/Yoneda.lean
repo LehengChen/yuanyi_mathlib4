@@ -18,7 +18,7 @@ and the type `lim Hom(F·, X)`.
 
 @[expose] public section
 
-universe v u
+universe v u w
 
 namespace CategoryTheory.Limits
 
@@ -71,7 +71,7 @@ def compYonedaSectionsEquiv (F : J ⥤ Cᵒᵖ) (X : C) :
 
 end
 
-variable {J : Type v} [SmallCategory J] {C : Type u} [Category.{v} C]
+variable {J : Type v} [Category.{w} J] {C : Type u} [Category.{v} C]
 
 /-- A cone on `F` with cone point `X` is the same as an element of `lim Hom(X, F·)`. -/
 @[simps!]

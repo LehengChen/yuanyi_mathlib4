@@ -11,9 +11,9 @@ public import Mathlib.SetTheory.Cardinal.Basic
 /-!
 # Any small complete category is a preorder
 
-We show that any small category which has all (small) limits is a preorder: In particular, we show
-that if a small category `C` in universe `u` has products of size `u`, then for any `X Y : C`
-there is at most one morphism `X ⟶ Y`.
+We show that any small category with sufficiently large powers is a preorder: In particular, it
+suffices for each object of `C` to have a product indexed by the type of morphisms in `C`; this
+follows if a small category `C` in universe `u` has products of size `u`.
 Note that in Lean, a preorder category is strictly one where the morphisms are in `Prop`, so
 we instead show that the homsets are subsingleton.
 
@@ -37,10 +37,11 @@ open Cardinal
 
 universe u
 
-variable {C : Type u} [SmallCategory C] [HasProducts.{u} C]
+variable {C : Type u} [SmallCategory C]
+    [∀ Y : C, HasProduct (fun _ : Σ Z W : C, Z ⟶ W => Y)]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A small category with products is a thin category.
+/-- A small category with powers indexed by its type of morphisms is a thin category.
 
 in Lean, a preorder category is one where the morphisms are in Prop, which is weaker than the usual
 notion of a preorder/thin category which says that each homset is subsingleton; we show the latter

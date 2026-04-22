@@ -430,7 +430,10 @@ theorem zigzag_isPreconnected (h : ∀ j₁ j₂ : J, Zigzag j₁ j₂) : IsPrec
 theorem zigzag_isConnected [Nonempty J] (h : ∀ j₁ j₂ : J, Zigzag j₁ j₂) : IsConnected J :=
   { zigzag_isPreconnected h with }
 
-theorem exists_zigzag' [IsConnected J] (j₁ j₂ : J) :
+/-- Any two objects in a preconnected category are linked by a sequence of
+(potentially reversed) morphisms.
+-/
+theorem exists_zigzag' [IsPreconnected J] (j₁ j₂ : J) :
     ∃ l, List.IsChain Zag (j₁ :: l) ∧ List.getLast (j₁ :: l) (List.cons_ne_nil _ _) = j₂ :=
   List.exists_isChain_cons_of_relationReflTransGen (isPreconnected_zigzag _ _)
 

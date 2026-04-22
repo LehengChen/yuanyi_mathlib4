@@ -26,13 +26,13 @@ Can the indexing category live in a lower universe?
 
 noncomputable section
 
-universe v u
+universe w v u
 
 open CategoryTheory.Limits
 
 namespace CategoryTheory
 
-variable {J : Type v} [SmallCategory J]
+variable {J : Type v} [Category.{w} J]
 
 namespace Cat
 

@@ -221,7 +221,7 @@ theorem obj_η_app (n : M) (X : C) [F.Monoidal] :
   simp
 
 @[reassoc]
-theorem right_unitality_app (n : M) (X : C) [F.Monoidal] :
+theorem right_unitality_app (n : M) (X : C) [F.LaxMonoidal] :
     (ε F).app ((F.obj n).obj X) ≫ (μ F n (𝟙_ M)).app X ≫ (F.map (ρ_ n).hom).app X = 𝟙 _ :=
   congr_app (Functor.LaxMonoidal.right_unitality F n).symm X
 

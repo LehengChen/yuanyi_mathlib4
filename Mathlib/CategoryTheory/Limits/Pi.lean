@@ -27,10 +27,10 @@ open CategoryTheory.Limits
 
 namespace CategoryTheory.pi
 
-universe v₁ v₂ u₁ u₂
+universe w v₁ v₂ u₁ u₂
 
-variable {I : Type v₁} {C : I → Type u₁} [∀ i, Category.{v₁} (C i)]
-variable {J : Type v₁} [SmallCategory J]
+variable {I : Type w} {C : I → Type u₁} [∀ i, Category.{v₁} (C i)]
+variable {J : Type u₂} [Category.{v₂} J]
 variable {F : J ⥤ ∀ i, C i}
 
 /-- A cone over `F : J ⥤ Π i, C i` has as its components cones over each of the `F ⋙ Pi.eval C i`.

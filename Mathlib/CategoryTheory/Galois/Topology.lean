@@ -151,7 +151,9 @@ noncomputable def autEquivAutWhiskerRight {G : FintypeCat.{w} ⥤ FintypeCat.{v}
     (f := ((h.whiskeringRight C).autMulEquivOfFullyFaithful F).toEquiv)
     (continuous_mapAut_whiskeringRight F G)
 
-variable [GaloisCategory C] [FiberFunctor F]
+section PreGalois
+
+variable [PreGaloisCategory C] [FiberFunctor F]
 
 set_option backward.isDefEq.respectTransparency false in
 /--
@@ -164,6 +166,9 @@ lemma exists_set_ker_evaluation_subset_of_isOpen
     {H : Set (Aut F)} (h1 : 1 ∈ H) (h : IsOpen H) :
     ∃ (I : Set C) (_ : Fintype I), (∀ X ∈ I, IsConnected X) ∧
       (∀ σ : Aut F, (∀ X : I, σ.hom.app X = 𝟙 (F.obj X)) → σ ∈ H) := by
+  let F' : C ⥤ FintypeCat.{u₂} := F ⋙ FintypeCat.uSwitch.{w, u₂}
+  letI : FiberFunctor F' := FiberFunctor.comp_right _
+  letI : GaloisCategory C := { hasFiberFunctor := ⟨F', ⟨inferInstance⟩⟩ }
   obtain ⟨U, hUopen, rfl⟩ := isOpen_induced_iff.mp h
   obtain ⟨I, u, ho, ha⟩ := isOpen_pi_iff.mp hUopen 1 h1
   choose fι ff fc h4 h5 h6 using (fun X : I => has_decomp_connected_components X.val)
@@ -184,7 +189,11 @@ lemma exists_set_ker_evaluation_subset_of_isOpen
       simp [h ⟨(ff _) j, ⟨Set.range (ff ⟨X, XinI⟩), ⟨⟨_, rfl⟩, ⟨j, rfl⟩⟩⟩⟩]
     exact Iso.ext h
 
+end PreGalois
+
 open Limits
+
+variable [GaloisCategory C] [FiberFunctor F]
 
 /-- The stabilizers of points in the fibers of Galois objects form a neighbourhood basis
 of the identity in `Aut F`. -/

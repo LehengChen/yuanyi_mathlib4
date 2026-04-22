@@ -115,7 +115,7 @@ instance : IsIso (prodComparison G X Y) := by
 /-- If the product comparison maps of `G` at every pair `(X,Y)` is an
 isomorphism, then `G` preserves binary products. -/
 lemma preservesBinaryProducts_of_isIso_prodComparison
-    [HasBinaryProducts C] [HasBinaryProducts D]
+    [HasBinaryProducts C] [∀ X Y : C, HasBinaryProduct (G.obj X) (G.obj Y)]
     [i : ∀ {X Y : C}, IsIso (prodComparison G X Y)] :
     PreservesLimitsOfShape (Discrete WalkingPair) G where
   preservesLimit := by
@@ -196,7 +196,7 @@ instance : IsIso (coprodComparison G X Y) := by
 /-- If the coproduct comparison maps of `G` at every pair `(X,Y)` is an
 isomorphism, then `G` preserves binary coproducts. -/
 lemma preservesBinaryCoproducts_of_isIso_coprodComparison
-    [HasBinaryCoproducts C] [HasBinaryCoproducts D]
+    [HasBinaryCoproducts C] [∀ X Y : C, HasBinaryCoproduct (G.obj X) (G.obj Y)]
     [i : ∀ {X Y : C}, IsIso (coprodComparison G X Y)] :
     PreservesColimitsOfShape (Discrete WalkingPair) G where
   preservesColimit := by
