@@ -79,7 +79,7 @@ class PreGaloisCategory (C : Type u₁) [Category.{u₂, u₁} C] : Prop where
 
 namespace PreGaloisCategory
 
-/-- Definition of a fiber functor from a Galois category. Lenstra, Def 3.1, (G4)-(G6) -/
+/-- Definition of a fiber functor on a pre-Galois category. Lenstra, Def 3.1, (G4)-(G6) -/
 class FiberFunctor {C : Type u₁} [Category.{u₂, u₁} C] [PreGaloisCategory C]
     (F : C ⥤ FintypeCat.{w}) where
   /-- `F` preserves terminal objects (G4). -/
@@ -393,14 +393,14 @@ lemma card_fiber_coprod_eq_sum (X Y : C) :
   rw [← Nat.card_sum]
   exact Nat.card_eq_of_bijective e.toFun (Equiv.bijective e)
 
-/-- The cardinality of morphisms `A ⟶ X` is smaller than the cardinality of
+/-- The cardinality of morphisms `A ⟶ X` is at most the cardinality of
 the fiber of the target if the source is connected. -/
 lemma card_hom_le_card_fiber_of_connected (A X : C) [IsConnected A] :
     Nat.card (A ⟶ X) ≤ Nat.card (F.obj X) := by
   apply Nat.card_le_card_of_injective
   exact evaluation_injective_of_isConnected F A X (Classical.arbitrary _)
 
-/-- If `A` is connected, the cardinality of `Aut A` is smaller than the cardinality of the
+/-- If `A` is connected, the cardinality of `Aut A` is at most the cardinality of the
 fiber of `A`. -/
 lemma card_aut_le_card_fiber_of_connected (A : C) [IsConnected A] :
     Nat.card (Aut A) ≤ Nat.card (F.obj A) := by
