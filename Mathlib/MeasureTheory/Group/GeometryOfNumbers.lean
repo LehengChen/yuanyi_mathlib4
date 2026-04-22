@@ -106,11 +106,14 @@ theorem exists_ne_zero_mem_lattice_of_measure_mul_two_pow_le_measure [NormedAddC
   -- `S n` contains a nonzero point of `L`. Since the intersection of the `S n` is equal to `s`,
   -- it follows that `s` contains a nonzero point of `L`.
   have h_zero : 0 ∈ K := K.zero_mem_of_symmetric h_symm
+  have hu : Tendsto u atTop (nhds 0) :=
+    (exists_seq_strictAnti_tendsto (0 : ℝ≥0)).choose_spec.2.2
+  have hS : (⋂ n, (S n : Set E)) = (K : Set E) := by
+    simpa [S] using K.iInter_smul_eq_self h_zero hu
   suffices Set.Nonempty (⋂ n, Z n) by
-    erw [← Set.iInter_inter, K.iInter_smul_eq_self h_zero] at this
-    · obtain ⟨x, hx⟩ := this
-      exact ⟨⟨x, by simp_all⟩, by aesop⟩
-    · exact (exists_seq_strictAnti_tendsto (0 : ℝ≥0)).choose_spec.2.2
+    rw [← Set.iInter_inter, hS] at this
+    obtain ⟨x, hx⟩ := this
+    exact ⟨⟨x, by simp_all⟩, by aesop⟩
   have h_clos : IsClosed ((L : Set E) \ {0}) := by
     rsuffices ⟨U, hU⟩ : ∃ U : Set E, IsOpen U ∧ U ∩ L = {0}
     · rw [sdiff_eq_sdiff_iff_inf_eq_inf (z := U).mpr (by simp [Set.inter_comm .. ▸ hU.2, zero_mem])]
