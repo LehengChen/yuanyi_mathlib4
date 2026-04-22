@@ -123,18 +123,15 @@ theorem of_arrow_iso_right {A B X Y X' Y' : C} (i : A ⟶ B) {p : X ⟶ Y} {p' :
   infer_instance
 
 theorem iff_of_arrow_iso_left {A B A' B' X Y : C} {i : A ⟶ B} {i' : A' ⟶ B'}
-    (e : Arrow.mk i ⟶ Arrow.mk i') [IsIso e.left] [IsIso e.right] (p : X ⟶ Y) :
+    (e : Arrow.mk i ≅ Arrow.mk i') (p : X ⟶ Y) :
     HasLiftingProperty i p ↔ HasLiftingProperty i' p := by
-  haveI : IsIso e := Arrow.isIso_of_isIso_left_of_isIso_right e
   constructor <;> intro
-  exacts [of_arrow_iso_left (asIso e) p, of_arrow_iso_left (asIso e).symm p]
+  exacts [of_arrow_iso_left e p, of_arrow_iso_left e.symm p]
 
 theorem iff_of_arrow_iso_right {A B X Y X' Y' : C} (i : A ⟶ B) {p : X ⟶ Y} {p' : X' ⟶ Y'}
-    (e : Arrow.mk p ⟶ Arrow.mk p') [IsIso e.left] [IsIso e.right] :
-    HasLiftingProperty i p ↔ HasLiftingProperty i p' := by
-  haveI : IsIso e := Arrow.isIso_of_isIso_left_of_isIso_right e
+    (e : Arrow.mk p ≅ Arrow.mk p') : HasLiftingProperty i p ↔ HasLiftingProperty i p' := by
   constructor <;> intro
-  exacts [of_arrow_iso_right i (asIso e), of_arrow_iso_right i (asIso e).symm]
+  exacts [of_arrow_iso_right i e, of_arrow_iso_right i e.symm]
 
 end HasLiftingProperty
 

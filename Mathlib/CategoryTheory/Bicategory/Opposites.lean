@@ -41,7 +41,7 @@ open CategoryTheory Bicategory Opposite
 
 namespace Bicategory.Opposite
 
-variable {B : Type u} [CategoryStruct.{v} B] [∀ a b : B, Category.{w} (a ⟶ b)]
+variable {B : Type u} [Bicategory.{w, v} B]
 
 /-- Type synonym for 2-morphisms in the opposite bicategory. -/
 structure Hom2 {a b : Bᵒᵖ} (f g : a ⟶ b) where
@@ -115,7 +115,7 @@ namespace CategoryTheory.Iso
 
 open Bicategory.Opposite
 
-variable {B : Type u} [CategoryStruct.{v} B] [∀ a b : B, Category.{w} (a ⟶ b)]
+variable {B : Type u} [Bicategory.{w, v} B]
 
 /-- A 2-isomorphism in `B` gives a 2-isomorphism in `Bᵒᵖ` -/
 @[simps!]
