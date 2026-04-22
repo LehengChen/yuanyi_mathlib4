@@ -29,15 +29,31 @@ variable {C : Type u} [Category.{v} C] [Preadditive C]
 
 theorem Preadditive.isSeparating_iff (P : ObjectProperty C) :
     P.IsSeparating ↔
-      ∀ ⦃X Y : C⦄ (f : X ⟶ Y), (∀ (G : C) (_ : P G), ∀ (h : G ⟶ X), h ≫ f = 0) → f = 0 :=
-  ⟨fun h𝒢 X Y f hf => h𝒢 _ _ (by simpa only [Limits.comp_zero] using hf), fun h𝒢 X Y f g hfg =>
-    sub_eq_zero.1 <| h𝒢 _ (by simpa only [Preadditive.comp_sub, sub_eq_zero] using hfg)⟩
+      ∀ ⦃X Y : C⦄ (f : X ⟶ Y),
+        (∀ (G : C) (_ : P G), ∀ (h : G ⟶ X), h ≠ 0 → h ≫ f = 0) → f = 0 :=
+  ⟨fun h𝒢 X Y f hf => h𝒢 _ _ (by
+    intro G hG h
+    by_cases hh : h = 0
+    · subst h
+      simp
+    · simpa only [Limits.comp_zero] using hf G hG h hh), fun h𝒢 X Y f g hfg =>
+    sub_eq_zero.1 <| h𝒢 _ (by
+      intro G hG h _
+      simpa only [Preadditive.comp_sub, sub_eq_zero] using hfg G hG h)⟩
 
 theorem Preadditive.isCoseparating_iff (P : ObjectProperty C) :
     P.IsCoseparating ↔
-      ∀ ⦃X Y : C⦄ (f : X ⟶ Y), (∀ (G : C) (_ : P G), ∀ (h : Y ⟶ G), f ≫ h = 0) → f = 0 :=
-  ⟨fun h𝒢 X Y f hf => h𝒢 _ _ (by simpa only [Limits.zero_comp] using hf), fun h𝒢 X Y f g hfg =>
-    sub_eq_zero.1 <| h𝒢 _ (by simpa only [Preadditive.sub_comp, sub_eq_zero] using hfg)⟩
+      ∀ ⦃X Y : C⦄ (f : X ⟶ Y),
+        (∀ (G : C) (_ : P G), ∀ (h : Y ⟶ G), h ≠ 0 → f ≫ h = 0) → f = 0 :=
+  ⟨fun h𝒢 X Y f hf => h𝒢 _ _ (by
+    intro G hG h
+    by_cases hh : h = 0
+    · subst h
+      simp
+    · simpa only [Limits.zero_comp] using hf G hG h hh), fun h𝒢 X Y f g hfg =>
+    sub_eq_zero.1 <| h𝒢 _ (by
+      intro G hG h _
+      simpa only [Preadditive.sub_comp, sub_eq_zero] using hfg G hG h)⟩
 
 theorem Preadditive.isSeparator_iff (G : C) :
     IsSeparator G ↔ ∀ ⦃X Y : C⦄ (f : X ⟶ Y), (∀ h : G ⟶ X, h ≫ f = 0) → f = 0 :=

@@ -489,31 +489,35 @@ variable {F : C ⥤ D}
       topMapᵣ ε ≫ ((flipFunctor _ _ _).map μ).app (𝟙_ C) ≫ bottomMapᵣ F)
     /- counit morphism -/
     (η : F.obj (𝟙_ C) ⟶ 𝟙_ D)
-    /- oplax tensorator as a morphism of bifunctors -/
+    /- inverse tensorator as a morphism of bifunctors -/
     (δ : curriedTensorPost F ⟶ curriedTensorPre F)
-    /- the oplax associativity hexagon commutes -/
-    (oplax_associativity : firstMap δ = secondMap δ)
-    /- the left unitality square commutes -/
-    (oplax_left_unitality : OplaxMonoidal.ofBifunctor.leftMapₗ F =
-      topMapₗ F ≫ δ.app (𝟙_ C) ≫ bottomMapₗ η)
-    /- the right unitality square commutes -/
-    (oplax_right_unitality : OplaxMonoidal.ofBifunctor.leftMapᵣ F =
-      topMapᵣ F ≫ ((flipFunctor _ _ _).map δ).app (𝟙_ C) ≫ bottomMapᵣ η)
 
 /--
 `F` is monoidal given a co/unit morphisms `ε/η : 𝟙_ D ↔ F.obj (𝟙_ C)` and tensorators
-`μ / δ : F - ⊗ F - ↔ F (- ⊗ -)` as natural transformations between bifunctors, satisfying the
-relevant compatibilities.
+`μ / δ : F - ⊗ F - ↔ F (- ⊗ -)` as natural transformations between bifunctors, where `μ`
+satisfies the relevant lax compatibilities.
 -/
 @[implicit_reducible]
 def ofBifunctor (ε_η : ε ≫ η = 𝟙 _) (η_ε : η ≫ ε = 𝟙 _) (μ_δ : μ ≫ δ = 𝟙 _)
-    (δ_μ : δ ≫ μ = 𝟙 _) : F.Monoidal where
-  toLaxMonoidal := .ofBifunctor ε μ associativity left_unitality right_unitality
-  toOplaxMonoidal := .ofBifunctor η δ oplax_associativity oplax_left_unitality oplax_right_unitality
-  ε_η := ε_η
-  η_ε := η_ε
-  μ_δ X Y := NatTrans.congr_app ((NatTrans.congr_app μ_δ) X) Y
-  δ_μ X Y := NatTrans.congr_app ((NatTrans.congr_app δ_μ) X) Y
+    (δ_μ : δ ≫ μ = 𝟙 _) : F.Monoidal :=
+  let h : F.CoreMonoidal :=
+    { εIso :=
+        { hom := ε
+          inv := η
+          hom_inv_id := ε_η
+          inv_hom_id := η_ε }
+      μIso := fun X Y ↦
+        { hom := (μ.app X).app Y
+          inv := (δ.app X).app Y
+          hom_inv_id := NatTrans.congr_app ((NatTrans.congr_app μ_δ) X) Y
+          inv_hom_id := NatTrans.congr_app ((NatTrans.congr_app δ_μ) X) Y }
+      μIso_hom_natural_left := fun f X ↦ NatTrans.congr_app (μ.naturality f) X
+      μIso_hom_natural_right := fun X f ↦ (μ.app X).naturality f
+      associativity := fun X Y Z ↦
+        NatTrans.congr_app (NatTrans.congr_app (NatTrans.congr_app associativity X) Y) Z
+      left_unitality := fun X ↦ NatTrans.congr_app left_unitality X
+      right_unitality := fun X ↦ NatTrans.congr_app right_unitality X }
+  h.toMonoidal
 
 end Monoidal
 

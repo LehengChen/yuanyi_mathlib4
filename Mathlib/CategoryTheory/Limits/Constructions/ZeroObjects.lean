@@ -26,17 +26,18 @@ variable {C : Type*} [Category* C]
 
 namespace CategoryTheory.Limits
 
-variable [HasZeroObject C] [HasZeroMorphisms C]
+variable [HasZeroObject C]
 
 open ZeroObject
 
 /-- The limit cone for the product with a zero object. -/
 def binaryFanZeroLeft (X : C) : BinaryFan (0 : C) X :=
-  BinaryFan.mk 0 (𝟙 X)
+  BinaryFan.mk ((isZero_zero C).from_ X) (𝟙 X)
 
 /-- The limit cone for the product with a zero object is limiting. -/
 def binaryFanZeroLeftIsLimit (X : C) : IsLimit (binaryFanZeroLeft X) :=
-  BinaryFan.isLimitMk (fun s => BinaryFan.snd s) (by cat_disch) (by simp)
+  BinaryFan.isLimitMk (fun s => BinaryFan.snd s)
+    (fun _ => (isZero_zero C).eq_of_tgt _ _) (by simp)
     (fun s m _ h₂ => by simpa using h₂)
 
 instance hasBinaryProduct_zero_left (X : C) : HasBinaryProduct (0 : C) X :=
@@ -58,11 +59,12 @@ theorem zeroProdIso_inv_snd (X : C) : (zeroProdIso X).inv ≫ prod.snd = 𝟙 X 
 
 /-- The limit cone for the product with a zero object. -/
 def binaryFanZeroRight (X : C) : BinaryFan X (0 : C) :=
-  BinaryFan.mk (𝟙 X) 0
+  BinaryFan.mk (𝟙 X) ((isZero_zero C).from_ X)
 
 /-- The limit cone for the product with a zero object is limiting. -/
 def binaryFanZeroRightIsLimit (X : C) : IsLimit (binaryFanZeroRight X) :=
-  BinaryFan.isLimitMk (fun s => BinaryFan.fst s) (by simp) (by cat_disch)
+  BinaryFan.isLimitMk (fun s => BinaryFan.fst s) (by simp)
+    (fun _ => (isZero_zero C).eq_of_tgt _ _)
     (fun s m h₁ _ => by simpa using h₁)
 
 instance hasBinaryProduct_zero_right (X : C) : HasBinaryProduct X (0 : C) :=
@@ -84,11 +86,13 @@ theorem prodZeroIso_iso_inv_snd (X : C) : (prodZeroIso X).inv ≫ prod.fst = �
 
 /-- The colimit cocone for the coproduct with a zero object. -/
 def binaryCofanZeroLeft (X : C) : BinaryCofan (0 : C) X :=
-  BinaryCofan.mk 0 (𝟙 X)
+  BinaryCofan.mk ((isZero_zero C).to_ X) (𝟙 X)
 
 /-- The colimit cocone for the coproduct with a zero object is colimiting. -/
 def binaryCofanZeroLeftIsColimit (X : C) : IsColimit (binaryCofanZeroLeft X) :=
-  BinaryCofan.isColimitMk (fun s => BinaryCofan.inr s) (by cat_disch) (by simp)
+  BinaryCofan.isColimitMk (fun s => BinaryCofan.inr s)
+    (fun _ => (isZero_zero C).eq_of_src _ _)
+    (by simp)
     (fun s m _ h₂ => by simpa using h₂)
 
 instance hasBinaryCoproduct_zero_left (X : C) : HasBinaryCoproduct (0 : C) X :=
@@ -110,11 +114,12 @@ theorem zeroCoprodIso_inv (X : C) : (zeroCoprodIso X).inv = coprod.inr :=
 
 /-- The colimit cocone for the coproduct with a zero object. -/
 def binaryCofanZeroRight (X : C) : BinaryCofan X (0 : C) :=
-  BinaryCofan.mk (𝟙 X) 0
+  BinaryCofan.mk (𝟙 X) ((isZero_zero C).to_ X)
 
 /-- The colimit cocone for the coproduct with a zero object is colimiting. -/
 def binaryCofanZeroRightIsColimit (X : C) : IsColimit (binaryCofanZeroRight X) :=
-  BinaryCofan.isColimitMk (fun s => BinaryCofan.inl s) (by simp) (by cat_disch)
+  BinaryCofan.isColimitMk (fun s => BinaryCofan.inl s) (by simp)
+    (fun _ => (isZero_zero C).eq_of_src _ _)
     (fun s m h₁ _ => by simpa using h₁)
 
 instance hasBinaryCoproduct_zero_right (X : C) : HasBinaryCoproduct X (0 : C) :=
@@ -133,6 +138,8 @@ theorem inr_coprodZeroIso_hom (X : C) : coprod.inl ≫ (coprodZeroIso X).hom = �
 @[simp]
 theorem coprodZeroIso_inv (X : C) : (coprodZeroIso X).inv = coprod.inl :=
   rfl
+
+variable [HasZeroMorphisms C]
 
 instance hasPullback_over_zero (X Y : C) [HasBinaryProduct X Y] :
     HasPullback (0 : X ⟶ 0) (0 : Y ⟶ 0) :=

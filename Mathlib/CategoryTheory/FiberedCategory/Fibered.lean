@@ -118,21 +118,20 @@ instance isStronglyCartesian_of_isCartesian (p : 𝒳 ⥤ 𝒮) [p.IsFibered] {R
     apply map_uniq
     rwa [← assoc, IsCartesian.fac]
 
-/-- In a category which admits strongly Cartesian pullbacks, any Cartesian morphism is
-strongly Cartesian. This is a helper-lemma for the fact that admitting strongly Cartesian pullbacks
-implies being fibered. -/
-lemma isStronglyCartesian_of_exists_isCartesian (p : 𝒳 ⥤ 𝒮) (h : ∀ (a : 𝒳) (R : 𝒮)
-    (f : R ⟶ p.obj a), ∃ (b : 𝒳) (φ : b ⟶ a), IsStronglyCartesian p f φ) {R S : 𝒮} (f : R ⟶ S)
-      {a b : 𝒳} (φ : a ⟶ b) [p.IsCartesian f φ] : p.IsStronglyCartesian f φ := by
+/-- If a strongly Cartesian lift exists over the same base morphism and codomain, any Cartesian
+morphism over that base morphism and codomain is strongly Cartesian. This is a helper-lemma for the
+fact that admitting strongly Cartesian pullbacks implies being fibered. -/
+lemma isStronglyCartesian_of_exists_isCartesian (p : 𝒳 ⥤ 𝒮) {R S : 𝒮} (f : R ⟶ S)
+    {a b : 𝒳} (φ : a ⟶ b) [p.IsCartesian f φ]
+    (h : ∃ (a' : 𝒳) (ψ : a' ⟶ b), IsStronglyCartesian p f ψ) : p.IsStronglyCartesian f φ := by
   constructor
   intro c g φ' hφ'
-  subst_hom_lift p f φ; clear a b R S
-  -- Let `ψ` be a Cartesian arrow lying over `g`
-  obtain ⟨a', ψ, hψ⟩ := h _ _ (p.map φ)
+  -- Let `ψ` be a strongly Cartesian arrow lying over `f`
+  obtain ⟨a', ψ, hψ⟩ := h
   -- Let `τ' : c ⟶ a'` be the map induced by the universal property of `ψ`
-  let τ' := IsStronglyCartesian.map p (p.map φ) ψ (f' := g ≫ p.map φ) rfl φ'
+  let τ' := IsStronglyCartesian.map p f ψ (f' := g ≫ f) rfl φ'
   -- Let `Φ : a' ≅ a` be natural isomorphism induced between `φ` and `ψ`.
-  let Φ := domainUniqueUpToIso p (p.map φ) φ ψ
+  let Φ := domainUniqueUpToIso p f φ ψ
   -- The map induced by `φ` will be `τ' ≫ Φ.hom`
   use τ' ≫ Φ.hom
   -- It is easily verified that `τ' ≫ Φ.hom` lifts `g` and `τ' ≫ Φ.hom ≫ φ = φ'`
@@ -141,7 +140,7 @@ lemma isStronglyCartesian_of_exists_isCartesian (p : 𝒳 ⥤ 𝒮) (h : ∀ (a 
   -- It remains to check that it is unique. This follows from the universal property of `ψ`.
   intro π ⟨hπ, hπ_comp⟩
   rw [← Iso.comp_inv_eq]
-  apply IsStronglyCartesian.map_uniq p (p.map φ) ψ rfl φ'
+  apply IsStronglyCartesian.map_uniq p f ψ rfl φ'
   simp [hπ_comp, Φ]
 
 /-- Alternate constructor for `IsFibered`, a functor `p : 𝒳 ⥤ 𝒴` is fibered if any diagram of the
@@ -163,8 +162,14 @@ lemma of_exists_isStronglyCartesian {p : 𝒳 ⥤ 𝒮}
     obtain ⟨b, φ, hφ⟩ := h a R f
     refine ⟨b, φ, inferInstance⟩
   comp := fun R S T f g {a b c} φ ψ _ _ =>
-    have : p.IsStronglyCartesian f φ := isStronglyCartesian_of_exists_isCartesian p h _ _
-    have : p.IsStronglyCartesian g ψ := isStronglyCartesian_of_exists_isCartesian p h _ _
+    have hφ : ∃ (a' : 𝒳) (φ' : a' ⟶ b), IsStronglyCartesian p f φ' := by
+      subst_hom_lift p f φ
+      exact h _ _ (p.map φ)
+    have hψ : ∃ (b' : 𝒳) (ψ' : b' ⟶ c), IsStronglyCartesian p g ψ' := by
+      subst_hom_lift p g ψ
+      exact h _ _ (p.map ψ)
+    have : p.IsStronglyCartesian f φ := isStronglyCartesian_of_exists_isCartesian p f φ hφ
+    have : p.IsStronglyCartesian g ψ := isStronglyCartesian_of_exists_isCartesian p g ψ hψ
     inferInstance
 
 /-- Given a diagram

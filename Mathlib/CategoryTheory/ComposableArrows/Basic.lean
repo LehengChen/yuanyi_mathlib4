@@ -363,9 +363,9 @@ lemma map_zero_succ_succ (j : ℕ) (hj : j + 2 < n + 1 + 1) :
     map F f 0 ⟨j + 2, hj⟩ (by simp) = f ≫ F.map' 0 (j + 1) := rfl
 
 @[simp]
-lemma map_succ_succ (i j : ℕ) (hi : i + 1 < n + 1 + 1) (hj : j + 1 < n + 1 + 1)
+lemma map_succ_succ (i j : ℕ) (hj : j + 1 < n + 1 + 1)
     (hij : i + 1 ≤ j + 1) :
-    map F f ⟨i + 1, hi⟩ ⟨j + 1, hj⟩ hij = F.map' i j := rfl
+    map F f ⟨i + 1, by valid⟩ ⟨j + 1, hj⟩ hij = F.map' i j := rfl
 
 @[simp]
 lemma map_one_succ (j : ℕ) (hj : j + 1 < n + 1 + 1) :
@@ -533,11 +533,12 @@ lemma homMkSucc_app_succ (i : ℕ) (hi : i + 1 < n + 1 + 1) :
 end
 
 lemma hom_ext_succ {F G : ComposableArrows C (n + 1)} {f g : F ⟶ G}
-    (h₀ : app' f 0 = app' g 0) (h₁ : δ₀Functor.map f = δ₀Functor.map g) : f = g := by
+    (h₀ : app' f 0 = app' g 0)
+    (h₁ : ∀ i, (δ₀Functor.map f).app i = (δ₀Functor.map g).app i) : f = g := by
   ext ⟨i, hi⟩
   obtain _ | i := i
   · exact h₀
-  · exact congr_app h₁ ⟨i, by valid⟩
+  · exact h₁ ⟨i, by valid⟩
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Inductive construction of isomorphisms in `ComposableArrows C (n + 1)`: in order to
@@ -554,13 +555,13 @@ def isoMkSucc {F G : ComposableArrows C (n + 1)} (α : F.obj' 0 ≅ G.obj' 0)
   hom_inv_id := by
     apply hom_ext_succ
     · simp
-    · ext ⟨i, hi⟩
-      simp
+    · intro i
+      exact congr_app β.hom_inv_id i
   inv_hom_id := by
     apply hom_ext_succ
     · simp
-    · ext ⟨i, hi⟩
-      simp
+    · intro i
+      exact congr_app β.inv_hom_id i
 
 set_option backward.isDefEq.respectTransparency false in
 lemma ext_succ {F G : ComposableArrows C (n + 1)} (h₀ : F.obj' 0 = G.obj' 0)
@@ -609,8 +610,12 @@ end
 @[ext]
 lemma hom_ext₂ {f g : ComposableArrows C 2} {φ φ' : f ⟶ g}
     (h₀ : app' φ 0 = app' φ' 0) (h₁ : app' φ 1 = app' φ' 1) (h₂ : app' φ 2 = app' φ' 2) :
-    φ = φ' :=
-  hom_ext_succ h₀ (hom_ext₁ h₁ h₂)
+    φ = φ' := by
+  apply hom_ext_succ h₀
+  intro i
+  fin_cases i
+  · exact h₁
+  · exact h₂
 
 /-- Constructor for isomorphisms in `ComposableArrows C 2`. -/
 @[simps]
@@ -685,8 +690,13 @@ end
 lemma hom_ext₃ {f g : ComposableArrows C 3} {φ φ' : f ⟶ g}
     (h₀ : app' φ 0 = app' φ' 0) (h₁ : app' φ 1 = app' φ' 1) (h₂ : app' φ 2 = app' φ' 2)
     (h₃ : app' φ 3 = app' φ' 3) :
-    φ = φ' :=
-  hom_ext_succ h₀ (hom_ext₂ h₁ h₂ h₃)
+    φ = φ' := by
+  apply hom_ext_succ h₀
+  intro i
+  fin_cases i
+  · exact h₁
+  · exact h₂
+  · exact h₃
 
 /-- Constructor for isomorphisms in `ComposableArrows C 3`. -/
 @[simps]
@@ -756,8 +766,14 @@ end
 lemma hom_ext₄ {f g : ComposableArrows C 4} {φ φ' : f ⟶ g}
     (h₀ : app' φ 0 = app' φ' 0) (h₁ : app' φ 1 = app' φ' 1) (h₂ : app' φ 2 = app' φ' 2)
     (h₃ : app' φ 3 = app' φ' 3) (h₄ : app' φ 4 = app' φ' 4) :
-    φ = φ' :=
-  hom_ext_succ h₀ (hom_ext₃ h₁ h₂ h₃ h₄)
+    φ = φ' := by
+  apply hom_ext_succ h₀
+  intro i
+  fin_cases i
+  · exact h₁
+  · exact h₂
+  · exact h₃
+  · exact h₄
 
 lemma map'_inv_eq_inv_map' {n m : ℕ} (h : n + 1 ≤ m) {f g : ComposableArrows C m}
     (app : f.obj' n ≅ g.obj' n) (app' : f.obj' (n + 1) ≅ g.obj' (n + 1))
@@ -841,8 +857,15 @@ end
 lemma hom_ext₅ {f g : ComposableArrows C 5} {φ φ' : f ⟶ g}
     (h₀ : app' φ 0 = app' φ' 0) (h₁ : app' φ 1 = app' φ' 1) (h₂ : app' φ 2 = app' φ' 2)
     (h₃ : app' φ 3 = app' φ' 3) (h₄ : app' φ 4 = app' φ' 4) (h₅ : app' φ 5 = app' φ' 5) :
-    φ = φ' :=
-  hom_ext_succ h₀ (hom_ext₄ h₁ h₂ h₃ h₄ h₅)
+    φ = φ' := by
+  apply hom_ext_succ h₀
+  intro i
+  fin_cases i
+  · exact h₁
+  · exact h₂
+  · exact h₃
+  · exact h₄
+  · exact h₅
 
 /-- Constructor for isomorphisms in `ComposableArrows C 5`. -/
 @[simps]

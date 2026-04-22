@@ -169,11 +169,11 @@ def comp (F : StrictlyUnitaryLaxFunctor B C)
       PrelaxFunctor.map₂_eqToHom]
 
 section
-attribute [local ext] StrictlyUnitaryLaxFunctor
+attribute [local ext] LaxFunctor
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Composition of `StrictlyUnitaryLaxFunctor` is strictly right unitary -/
-lemma comp_id (F : StrictlyUnitaryLaxFunctor B C) :
+/-- Composition of `LaxFunctor` is strictly right unitary. -/
+lemma comp_id (F : B ⥤ᴸ C) :
     F.comp (.id C) = F := by
   ext
   · simp
@@ -183,9 +183,9 @@ lemma comp_id (F : StrictlyUnitaryLaxFunctor B C) :
     simp
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Composition of `StrictlyUnitaryLaxFunctor` is strictly left unitary -/
-lemma id_comp (F : StrictlyUnitaryLaxFunctor B C) :
-    (StrictlyUnitaryLaxFunctor.id B).comp F = F := by
+/-- Composition of `LaxFunctor` is strictly left unitary. -/
+lemma id_comp (F : B ⥤ᴸ C) :
+    (LaxFunctor.id B).comp F = F := by
   ext
   · simp
   all_goals
@@ -194,10 +194,9 @@ lemma id_comp (F : StrictlyUnitaryLaxFunctor B C) :
     simp
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Composition of `StrictlyUnitaryLaxFunctor` is strictly associative -/
+/-- Composition of `LaxFunctor` is strictly associative. -/
 lemma comp_assoc {E : Type u₄} [Bicategory.{w₄, v₄} E]
-    (F : StrictlyUnitaryLaxFunctor B C) (G : StrictlyUnitaryLaxFunctor C D)
-    (H : StrictlyUnitaryLaxFunctor D E) :
+    (F : B ⥤ᴸ C) (G : C ⥤ᴸ D) (H : D ⥤ᴸ E) :
     (F.comp G).comp H = F.comp (G.comp H) := by
   ext
   · simp

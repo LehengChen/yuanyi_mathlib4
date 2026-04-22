@@ -91,22 +91,22 @@ def associator (F : EnrichedFunctor V C D) (G : EnrichedFunctor V D E)
     Functor.isoWhiskerLeft _ (G.forgetComp H).symm ≪≫
     (F.forgetComp _).symm
 
-lemma comp_whiskerRight {F G H : EnrichedFunctor V C D} (α : F ⟶ G)
-    (β : G ⟶ H) (I : EnrichedFunctor V D E) :
-    whiskerRight ⟨α.out ≫ β.out⟩ I = whiskerRight α I ≫ whiskerRight β I := by
+lemma comp_whiskerRight {F G H : EnrichedFunctor V C D} (α : F.forget ⟶ G.forget)
+    (β : G.forget ⟶ H.forget) (I : EnrichedFunctor V D E) :
+    whiskerRight ⟨α ≫ β⟩ I = whiskerRight ⟨α⟩ I ≫ whiskerRight ⟨β⟩ I := by
   ext X
   simp only [whiskerRight_out_app, NatTrans.comp_app, EnrichedFunctor.category_comp_out,
     EnrichedFunctor.forget, EnrichedFunctor.comp_obj, EnrichedFunctor.comp_map]
   simp [← ForgetEnrichment.homOf_comp]
 
 lemma whisker_exchange {F G : EnrichedFunctor V C D} {H I : EnrichedFunctor V D E}
-    (α : F ⟶ G) (β : H ⟶ I) :
-    whiskerLeft F β ≫ whiskerRight α I = whiskerRight α H ≫ whiskerLeft G β := by
+    (α : F.forget ⟶ G.forget) (β : H.forget ⟶ I.forget) :
+    whiskerLeft F ⟨β⟩ ≫ whiskerRight ⟨α⟩ I = whiskerRight ⟨α⟩ H ≫ whiskerLeft G ⟨β⟩ := by
   ext X
   simp only [EnrichedFunctor.forget_obj, EnrichedFunctor.comp_obj,
     EnrichedFunctor.category_comp_out, NatTrans.comp_app, whiskerLeft_out_app,
     whiskerRight_out_app]
-  exact (β.out.naturality (α.out.app (ForgetEnrichment.of V X))).symm
+  exact (β.naturality (α.app (ForgetEnrichment.of V X))).symm
 
 /-- The bicategory structure on `EnrichedCat V` for a monoidal category `V`. -/
 instance bicategory : Bicategory (EnrichedCat.{w, v, u} V) where
@@ -118,8 +118,12 @@ instance bicategory : Bicategory (EnrichedCat.{w, v, u} V) where
   associator := associator
   leftUnitor := leftUnitor
   rightUnitor := rightUnitor
-  comp_whiskerRight := comp_whiskerRight
-  whisker_exchange := whisker_exchange
+  comp_whiskerRight := by
+    intro C D E F G H α β I
+    exact comp_whiskerRight α.out β.out I
+  whisker_exchange := by
+    intro C D E F G H I α β
+    exact whisker_exchange α.out β.out
 
 end EnrichedCat
 

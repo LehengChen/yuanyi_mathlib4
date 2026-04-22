@@ -109,13 +109,15 @@ theorem isLeftAdjoint_TFAE (f : a ⟶ b) :
     List.TFAE [
       IsLeftAdjoint f,
       HasAbsLeftKanExtension f (𝟙 a),
-      ∃ _ : HasLeftKanExtension f (𝟙 a), Lan.CommuteWith f (𝟙 a) f] := by
+      ∃ t : LeftExtension f (𝟙 a), Nonempty (IsKan t) ∧ Nonempty (IsKan (t.whisker f))] := by
   tfae_have 1 → 2
   | h => IsAbsKan.hasAbsLeftKanExtension (Adjunction.ofIsLeftAdjoint f).isAbsoluteLeftKan
   tfae_have 2 → 3
-  | h => ⟨inferInstance, inferInstance⟩
+  | h =>
+    letI := h
+    ⟨lanLeftExtension f (𝟙 a), ⟨lanIsKan f (𝟙 a)⟩, ⟨Lan.CommuteWith.isKan f (𝟙 a) f⟩⟩
   tfae_have 3 → 1
-  | ⟨h, h'⟩ => .mk <| (lanIsKan f (𝟙 a)).adjunction <| Lan.CommuteWith.isKan f (𝟙 a) f
+  | ⟨t, ⟨H⟩, ⟨H'⟩⟩ => .mk <| H.adjunction H'
   tfae_finish
 
 end LeftExtension
@@ -189,13 +191,16 @@ theorem isRightAdjoint_TFAE (u : b ⟶ a) :
     List.TFAE [
       IsRightAdjoint u,
       HasAbsLeftKanLift u (𝟙 a),
-      ∃ _ : HasLeftKanLift u (𝟙 a), LanLift.CommuteWith u (𝟙 a) u] := by
+      ∃ t : LeftLift u (𝟙 a), Nonempty (IsKan t) ∧ Nonempty (IsKan (t.whisker u))] := by
   tfae_have 1 → 2
   | h => IsAbsKan.hasAbsLeftKanLift (Adjunction.ofIsRightAdjoint u).isAbsoluteLeftKanLift
   tfae_have 2 → 3
-  | h => ⟨inferInstance, inferInstance⟩
+  | h =>
+    letI := h
+    ⟨lanLiftLeftLift u (𝟙 a), ⟨lanLiftIsKan u (𝟙 a)⟩,
+      ⟨LanLift.CommuteWith.isKan u (𝟙 a) u⟩⟩
   tfae_have 3 → 1
-  | ⟨h, h'⟩ => .mk <| (lanLiftIsKan u (𝟙 a)).adjunction <| LanLift.CommuteWith.isKan u (𝟙 a) u
+  | ⟨t, ⟨H⟩, ⟨H'⟩⟩ => .mk <| H.adjunction H'
   tfae_finish
 
 end LeftLift

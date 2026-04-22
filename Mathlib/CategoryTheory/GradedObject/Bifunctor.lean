@@ -117,17 +117,30 @@ section
 
 variable {X₁ X₂ : GradedObject I C₁} {Y₁ Y₂ : GradedObject J C₂}
     [HasMap (((mapBifunctor F I J).obj X₁).obj Y₁) p]
-    [HasMap (((mapBifunctor F I J).obj X₂).obj Y₂) p]
 
 /-- The isomorphism `mapBifunctorMapObj F p X₁ Y₁ ≅ mapBifunctorMapObj F p X₂ Y₂`
 induced by isomorphisms `X₁ ≅ X₂` and `Y₁ ≅ Y₂`. -/
 @[simps]
 noncomputable def mapBifunctorMapMapIso (e : X₁ ≅ X₂) (e' : Y₁ ≅ Y₂) :
-    mapBifunctorMapObj F p X₁ Y₁ ≅ mapBifunctorMapObj F p X₂ Y₂ where
-  hom := mapBifunctorMapMap F p e.hom e'.hom
-  inv := mapBifunctorMapMap F p e.inv e'.inv
-  hom_inv_id := by ext; simp
-  inv_hom_id := by ext; simp
+    letI : HasMap (((mapBifunctor F I J).obj X₂).obj Y₂) p := by
+      let e'' : (((mapBifunctor F I J).obj X₁).obj Y₁) ≅
+          (((mapBifunctor F I J).obj X₂).obj Y₂) := isoMk _ _
+          (fun ⟨i, j⟩ => (F.mapIso ((eval i).mapIso e)).app (Y₁ j) ≪≫
+            (F.obj (X₂ i)).mapIso ((eval j).mapIso e'))
+      exact hasMap_of_iso e'' p
+    mapBifunctorMapObj F p X₁ Y₁ ≅ mapBifunctorMapObj F p X₂ Y₂ :=
+  letI : HasMap (((mapBifunctor F I J).obj X₂).obj Y₂) p := by
+    let e'' : (((mapBifunctor F I J).obj X₁).obj Y₁) ≅
+        (((mapBifunctor F I J).obj X₂).obj Y₂) := isoMk _ _
+        (fun ⟨i, j⟩ => (F.mapIso ((eval i).mapIso e)).app (Y₁ j) ≪≫
+          (F.obj (X₂ i)).mapIso ((eval j).mapIso e'))
+    exact hasMap_of_iso e'' p
+  { hom := mapBifunctorMapMap F p e.hom e'.hom
+    inv := mapBifunctorMapMap F p e.inv e'.inv
+    hom_inv_id := by ext; simp
+    inv_hom_id := by ext; simp }
+
+variable [HasMap (((mapBifunctor F I J).obj X₂).obj Y₂) p]
 
 instance (f : X₁ ⟶ X₂) (g : Y₁ ⟶ Y₂) [IsIso f] [IsIso g] :
     IsIso (mapBifunctorMapMap F p f g) :=

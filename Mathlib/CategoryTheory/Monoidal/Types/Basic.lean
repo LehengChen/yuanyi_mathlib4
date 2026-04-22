@@ -71,13 +71,13 @@ theorem rightUnitor_inv_apply {X : Type u} {x : X} :
   rfl
 
 @[simp]
-theorem associator_hom_apply {X Y Z : Type u} {x : X} {y : Y} {z : Z} :
-    dsimp% (α_ X Y Z).hom ((x, y), z) = (x, (y, z)) :=
+theorem associator_hom_apply {X Y Z : Type u} (p : (X ⊗ Y) ⊗ Z) :
+    dsimp% (α_ X Y Z).hom p = (p.1.1, (p.1.2, p.2)) :=
   rfl
 
 @[simp]
-theorem associator_inv_apply {X Y Z : Type u} {x : X} {y : Y} {z : Z} :
-    dsimp% (α_ X Y Z).inv (x, (y, z)) = ((x, y), z) :=
+theorem associator_inv_apply {X Y Z : Type u} (p : X ⊗ (Y ⊗ Z)) :
+    dsimp% (α_ X Y Z).inv p = ((p.1, p.2.1), p.2.2) :=
   rfl
 
 @[simp] theorem associator_hom_apply_1 {X Y Z : Type u} {x} :
@@ -105,13 +105,13 @@ theorem associator_inv_apply {X Y Z : Type u} {x : X} {y : Y} {z : Z} :
   rfl
 
 @[simp]
-theorem braiding_hom_apply {X Y : Type u} {x : X} {y : Y} :
-    dsimp% (β_ X Y).hom (x, y) = (y, x) :=
+theorem braiding_hom_apply {X Y : Type u} (p : X ⊗ Y) :
+    dsimp% (β_ X Y).hom p = (p.2, p.1) :=
   rfl
 
 @[simp]
-theorem braiding_inv_apply {X Y : Type u} {x : X} {y : Y} :
-    dsimp% (β_ X Y).inv (y, x) = (x, y) :=
+theorem braiding_inv_apply {X Y : Type u} (p : Y ⊗ X) :
+    dsimp% (β_ X Y).inv p = (p.2, p.1) :=
   rfl
 
 @[simp]

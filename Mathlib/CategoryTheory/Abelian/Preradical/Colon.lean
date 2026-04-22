@@ -173,10 +173,10 @@ lemma toColon_hom_left_app_colon_ι_app (X : C) :
   rw [← NatTrans.comp_app, Over.w]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For `X : C`, the morphism `(toColon Φ Ψ)` is an isomorphism if and only if
+/-- For `X : C`, the component `(toColon Φ Ψ).hom.left.app X` is an epimorphism if and only if
 `(Ψ.r.obj (Φ.quotient.obj X))` is the zero object. -/
 theorem isIso_toColon_hom_left_app_iff {Φ Ψ : Preradical C} {X : C} :
-    IsIso ((toColon Φ Ψ).hom.left.app X) ↔ IsZero (Ψ.r.obj (Φ.quotient.obj X)) := by
+    Epi ((toColon Φ Ψ).hom.left.app X) ↔ IsZero (Ψ.r.obj (Φ.quotient.obj X)) := by
   constructor <;> intro h
   · exact IsZero.of_epi_eq_zero ((colonπ Φ Ψ).app X)
       (zero_of_epi_comp ((toColon Φ Ψ).hom.left.app X) (by simp))
@@ -184,16 +184,30 @@ theorem isIso_toColon_hom_left_app_iff {Φ Ψ : Preradical C} {X : C} :
       KernelFork.IsLimit.lift' (Φ.isLimitKernelForkObj X) ((colon Φ Ψ).ι.app X) (by
         rw [colon_ι_app_π_app, h.eq_zero_of_tgt ((colonπ Φ Ψ).app X), zero_comp])
     dsimp at hinv
-    refine ⟨inv, ?_, ?_⟩
-    · simp [← cancel_mono (Φ.ι.app X), hinv]
-    · simp [← cancel_mono ((Φ.colon Ψ).ι.app X), hinv]
+    haveI : IsIso ((toColon Φ Ψ).hom.left.app X) := by
+      refine ⟨inv, ?_, ?_⟩
+      · simp [← cancel_mono (Φ.ι.app X), hinv]
+      · simp [← cancel_mono ((Φ.colon Ψ).ι.app X), hinv]
+    infer_instance
 
 /-- The morphism `(toColon Φ Ψ)` is an isomorphism if and only if `Φ.quotient ⋙ Ψ.r` is the zero
 object. -/
 theorem isIso_toColon_iff {Φ Ψ : Preradical C} :
     IsIso (toColon Φ Ψ) ↔ IsZero (Φ.quotient ⋙ Ψ.r) := by
+  have h_app (X : C) :
+      IsIso ((toColon Φ Ψ).hom.left.app X) ↔ IsZero (Ψ.r.obj (Φ.quotient.obj X)) := by
+    constructor
+    · intro h
+      haveI := h
+      exact (isIso_toColon_hom_left_app_iff (Φ := Φ) (Ψ := Ψ) (X := X)).1 inferInstance
+    · intro h
+      haveI : Epi ((toColon Φ Ψ).hom.left.app X) :=
+        (isIso_toColon_hom_left_app_iff (Φ := Φ) (Ψ := Ψ) (X := X)).2 h
+      haveI : Mono ((toColon Φ Ψ).hom.left.app X) :=
+        mono_of_mono_fac (toColon_hom_left_app_colon_ι_app (Φ := Φ) (Ψ := Ψ) X)
+      exact isIso_of_mono_of_epi _
   simpa [MonoOver.isIso_iff_isIso_hom_left, isZero_iff (Φ.quotient ⋙ Ψ.r),
-    NatTrans.isIso_iff_isIso_app] using forall_congr' fun x ↦ isIso_toColon_hom_left_app_iff
+    NatTrans.isIso_iff_isIso_app] using forall_congr' h_app
 
 end Preradical
 

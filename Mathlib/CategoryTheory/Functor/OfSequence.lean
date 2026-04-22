@@ -52,45 +52,54 @@ def map : ∀ {X : ℕ → C} (_ : ∀ n, X n ⟶ X (n + 1)) (i j : ℕ), i ≤ 
   | _, _, _ + 1, 0 => nofun
   | _, f, k + 1, l + 1 => fun _ ↦ map (fun n ↦ f (n + 1)) k l (by lia)
 
-lemma map_id (i : ℕ) : map f i i (by lia) = 𝟙 _ := by
-  revert X f
-  induction i with
-  | zero => intros; rfl
-  | succ _ hi =>
-      intro X f
-      apply hi
+lemma map_id (i : ℕ) {h : i ≤ i} : map f i i h = 𝟙 _ := by
+  have h' : map f i i (by lia) = 𝟙 _ := by
+    clear h
+    revert X f
+    induction i with
+    | zero => intros; rfl
+    | succ _ hi =>
+        intro X f
+        apply hi
+  convert h'
 
-lemma map_le_succ (i : ℕ) : map f i (i + 1) (by lia) = f i := by
-  revert X f
-  induction i with
-  | zero => intros; rfl
-  | succ _ hi =>
-      intro X f
-      apply hi
+lemma map_le_succ (i : ℕ) {h : i ≤ i + 1} : map f i (i + 1) h = f i := by
+  have h' : map f i (i + 1) (by lia) = f i := by
+    clear h
+    revert X f
+    induction i with
+    | zero => intros; rfl
+    | succ _ hi =>
+        intro X f
+        apply hi
+  convert h'
 
 @[reassoc]
-lemma map_comp (i j k : ℕ) (hij : i ≤ j) (hjk : j ≤ k) :
-    map f i k (hij.trans hjk) = map f i j hij ≫ map f j k hjk := by
-  induction i generalizing X j k with
-  | zero =>
-      induction j generalizing X k with
-      | zero =>
-          rw [map_id, id_comp]
-      | succ j hj =>
-          obtain (_ | _ | k) := k
-          · lia
-          · obtain rfl : j = 0 := by lia
-            rw [map_id, comp_id]
-          · simp only [map, Nat.reduceAdd]
-            rw [hj (fun n ↦ f (n + 1)) (k + 1) (by lia) (by lia)]
-            obtain _ | j := j
-            all_goals simp [map]
-  | succ i hi =>
-      rcases j, k with ⟨(_ | j), (_ | k)⟩
-      · lia
-      · lia
-      · lia
-      · exact hi _ j k (by lia) (by lia)
+lemma map_comp (i j k : ℕ) (hij : i ≤ j) (hjk : j ≤ k) {hik : i ≤ k} :
+    map f i k hik = map f i j hij ≫ map f j k hjk := by
+  have h' : map f i k (hij.trans hjk) = map f i j hij ≫ map f j k hjk := by
+    clear hik
+    induction i generalizing X j k with
+    | zero =>
+        induction j generalizing X k with
+        | zero =>
+            rw [map_id, id_comp]
+        | succ j hj =>
+            obtain (_ | _ | k) := k
+            · lia
+            · obtain rfl : j = 0 := by lia
+              rw [map_id, comp_id]
+            · simp only [map, Nat.reduceAdd]
+              rw [hj (fun n ↦ f (n + 1)) (k + 1) (by lia) (by lia)]
+              obtain _ | j := j
+              all_goals simp [map]
+    | succ i hi =>
+        rcases j, k with ⟨(_ | j), (_ | k)⟩
+        · lia
+        · lia
+        · lia
+        · exact hi _ j k (by lia) (by lia)
+  convert h'
 
 -- `map` has good definitional properties when applied to explicit natural numbers
 example : map f 5 5 (by lia) = 𝟙 _ := rfl
@@ -109,9 +118,10 @@ def ofSequence : ℕ ⥤ C where
   map_comp {i j k} α β := OfSequence.map_comp f i j k (leOfHom α) (leOfHom β)
 
 @[simp]
-lemma ofSequence_map_homOfLE_succ (n : ℕ) :
-    (ofSequence f).map (homOfLE (Nat.le_add_right n 1)) = f n :=
-  OfSequence.map_le_succ f n
+lemma ofSequence_map_homOfLE_succ (n : ℕ) {φ : n ⟶ n + 1} :
+    (ofSequence f).map φ = f n := by
+  obtain rfl := Subsingleton.elim φ (homOfLE (Nat.le_add_right n 1))
+  exact OfSequence.map_le_succ f n
 
 end Functor
 
@@ -161,8 +171,9 @@ example : (ofOpSequence f).map (homOfLE (show 3 ≤ 7 by lia)).op =
     ((f 6 ≫ f 5) ≫ f 4) ≫ f 3 := rfl
 
 @[simp]
-lemma ofOpSequence_map_homOfLE_succ (n : ℕ) :
-    (ofOpSequence f).map (homOfLE (Nat.le_add_right n 1)).op = f n := by
+lemma ofOpSequence_map_homOfLE_succ (n : ℕ) {φ : n ⟶ n + 1} :
+    (ofOpSequence f).map φ.op = f n := by
+  obtain rfl := Subsingleton.elim φ (homOfLE (Nat.le_add_right n 1))
   simp [ofOpSequence]
 
 end Functor

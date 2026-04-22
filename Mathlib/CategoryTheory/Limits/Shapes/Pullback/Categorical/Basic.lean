@@ -244,8 +244,13 @@ instance : Category (CatCommSqOver F G X) where
 
 @[ext]
 lemma hom_ext {S S' : CatCommSqOver F G X} {f g : S ⟶ S'}
-    (h₁ : f.fst = g.fst) (h₂ : f.snd = g.snd) : f = g :=
-  Hom.ext h₁ h₂
+    (h₁ : ∀ x, f.fst.app x = g.fst.app x)
+    (h₂ : ∀ x, f.snd.app x = g.snd.app x) : f = g := by
+  apply Hom.ext
+  · ext x
+    exact h₁ x
+  · ext x
+    exact h₂ x
 
 /-- Interpret a `CatCommSqOver F G X` as a `CatCommSq`. -/
 @[simps]
@@ -393,12 +398,12 @@ suffices to do so after whiskering with the projections. -/
 @[ext]
 lemma natTrans_ext
     {J K : X ⥤ F ⊡ G} {α β : J ⟶ K}
-    (e₁ : whiskerRight α (π₁ F G) = whiskerRight β (π₁ F G))
-    (e₂ : whiskerRight α (π₂ F G) = whiskerRight β (π₂ F G)) :
+    (e₁ : ∀ x, (α.app x).fst = (β.app x).fst)
+    (e₂ : ∀ x, (α.app x).snd = (β.app x).snd) :
     α = β := by
   ext x
-  · exact congrArg (fun t ↦ t.app x) e₁
-  · exact congrArg (fun t ↦ t.app x) e₂
+  · exact e₁ x
+  · exact e₂ x
 
 section
 

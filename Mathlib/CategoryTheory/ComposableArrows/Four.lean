@@ -60,70 +60,76 @@ def fourδ₁Toδ₀ (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch) :
     mk₃ f₁₂ f₃ f₄ ⟶ mk₃ f₂ f₃ f₄ :=
   homMk₃ f₁ (𝟙 _) (𝟙 _) (𝟙 _)
 
-variable (h₁₂ : f₁ ≫ f₂ = f₁₂) (h₂₃ : f₂ ≫ f₃ = f₂₃) (h₃₄ : f₃ ≫ f₄ = f₃₄)
-
 @[simp]
-lemma fourδ₄Toδ₃_app_zero :
+lemma fourδ₄Toδ₃_app_zero (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₄Toδ₃ f₁ f₂ f₃ f₄ f₃₄ h₃₄).app 0 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₄Toδ₃_app_one :
+lemma fourδ₄Toδ₃_app_one (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₄Toδ₃ f₁ f₂ f₃ f₄ f₃₄ h₃₄).app 1 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₄Toδ₃_app_two :
+lemma fourδ₄Toδ₃_app_two (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₄Toδ₃ f₁ f₂ f₃ f₄ f₃₄ h₃₄).app 2 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₄Toδ₃_app_three :
+lemma fourδ₄Toδ₃_app_three (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₄Toδ₃ f₁ f₂ f₃ f₄ f₃₄ h₃₄).app 3 = f₄ := rfl
 
 @[simp]
-lemma fourδ₃Toδ₂_app_zero :
+lemma fourδ₃Toδ₂_app_zero (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch)
+    (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₃Toδ₂ f₁ f₂ f₃ f₄ f₂₃ f₃₄ h₂₃ h₃₄).app 0 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₃Toδ₂_app_one :
+lemma fourδ₃Toδ₂_app_one (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch)
+    (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₃Toδ₂ f₁ f₂ f₃ f₄ f₂₃ f₃₄ h₂₃ h₃₄).app 1 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₃Toδ₂_app_two :
+lemma fourδ₃Toδ₂_app_two (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch)
+    (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₃Toδ₂ f₁ f₂ f₃ f₄ f₂₃ f₃₄ h₂₃ h₃₄).app 2 = f₃ := rfl
 
 @[simp]
-lemma fourδ₃Toδ₂_app_three :
+lemma fourδ₃Toδ₂_app_three (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch)
+    (h₃₄ : f₃ ≫ f₄ = f₃₄ := by cat_disch) :
     (fourδ₃Toδ₂ f₁ f₂ f₃ f₄ f₂₃ f₃₄ h₂₃ h₃₄).app 3 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₂Toδ₁_app_zero :
+lemma fourδ₂Toδ₁_app_zero (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch)
+    (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch) :
     (fourδ₂Toδ₁ f₁ f₂ f₃ f₄ f₁₂ f₂₃ h₁₂ h₂₃).app 0 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₂Toδ₁_app_one :
+lemma fourδ₂Toδ₁_app_one (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch)
+    (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch) :
     (fourδ₂Toδ₁ f₁ f₂ f₃ f₄ f₁₂ f₂₃ h₁₂ h₂₃).app 1 = f₂ := rfl
 
 @[simp]
-lemma fourδ₂Toδ₁_app_two :
+lemma fourδ₂Toδ₁_app_two (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch)
+    (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch) :
     (fourδ₂Toδ₁ f₁ f₂ f₃ f₄ f₁₂ f₂₃ h₁₂ h₂₃).app 2 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₂Toδ₁_app_three :
+lemma fourδ₂Toδ₁_app_three (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch)
+    (h₂₃ : f₂ ≫ f₃ = f₂₃ := by cat_disch) :
     (fourδ₂Toδ₁ f₁ f₂ f₃ f₄ f₁₂ f₂₃ h₁₂ h₂₃).app 3 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₁Toδ₀_app_zero :
+lemma fourδ₁Toδ₀_app_zero (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch) :
     (fourδ₁Toδ₀ f₁ f₂ f₃ f₄ f₁₂ h₁₂).app 0 = f₁ := rfl
 
 @[simp]
-lemma fourδ₁Toδ₀_app_one :
+lemma fourδ₁Toδ₀_app_one (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch) :
     (fourδ₁Toδ₀ f₁ f₂ f₃ f₄ f₁₂ h₁₂).app 1 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₁Toδ₀_app_two :
+lemma fourδ₁Toδ₀_app_two (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch) :
     (fourδ₁Toδ₀ f₁ f₂ f₃ f₄ f₁₂ h₁₂).app 2 = 𝟙 _ := rfl
 
 @[simp]
-lemma fourδ₁Toδ₀_app_three :
+lemma fourδ₁Toδ₀_app_three (h₁₂ : f₁ ≫ f₂ = f₁₂ := by cat_disch) :
     (fourδ₁Toδ₀ f₁ f₂ f₃ f₄ f₁₂ h₁₂).app 3 = 𝟙 _ := rfl
 
 end

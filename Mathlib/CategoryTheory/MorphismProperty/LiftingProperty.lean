@@ -124,24 +124,22 @@ lemma antitone_rlp : Antitone (rlp : MorphismProperty C → _) :=
 lemma antitone_llp : Antitone (llp : MorphismProperty C → _) :=
   fun _ _ h ↦ gc_llp_rlp.monotone_l h
 
-lemma pushouts_le_llp_rlp : T.pushouts ≤ T.rlp.llp := by
-  intro A B i hi
-  exact (T.rlp.llp.isStableUnderCobaseChange_iff_pushouts_le).1 inferInstance i
-    (pushouts_monotone T.le_llp_rlp _ hi)
+lemma pushouts_le_llp_rlp : T.rlp.llp.pushouts ≤ T.rlp.llp := by
+  exact (T.rlp.llp.isStableUnderCobaseChange_iff_pushouts_le).1 inferInstance
 
 @[simp]
 lemma rlp_pushouts : T.pushouts.rlp = T.rlp := by
   apply le_antisymm
   · exact antitone_rlp T.le_pushouts
   · rw [← le_llp_iff_le_rlp]
-    exact T.pushouts_le_llp_rlp
+    exact (pushouts_monotone T.le_llp_rlp).trans T.pushouts_le_llp_rlp
 
 lemma colimitsOfShape_discrete_le_llp_rlp (J : Type w) :
-    T.colimitsOfShape (Discrete J) ≤ T.rlp.llp := by
+    (T.rlp.llp).colimitsOfShape (Discrete J) ≤ T.rlp.llp := by
   intro A B i hi
-  exact MorphismProperty.colimitsOfShape_le _ (colimitsOfShape_monotone T.le_llp_rlp _ _ hi)
+  exact MorphismProperty.colimitsOfShape_le _ hi
 
-lemma coproducts_le_llp_rlp : (coproducts.{w} T) ≤ T.rlp.llp := by
+lemma coproducts_le_llp_rlp : (coproducts.{w} (T.rlp.llp)) ≤ T.rlp.llp := by
   intro A B i hi
   rw [coproducts_iff] at hi
   obtain ⟨J, hi⟩ := hi
@@ -152,17 +150,17 @@ lemma rlp_coproducts : (coproducts.{w} T).rlp = T.rlp := by
   apply le_antisymm
   · exact antitone_rlp T.le_coproducts
   · rw [← le_llp_iff_le_rlp]
-    exact T.coproducts_le_llp_rlp
+    exact (coproducts_monotone T.le_llp_rlp).trans T.coproducts_le_llp_rlp
 
-lemma retracts_le_llp_rlp : T.retracts ≤ T.rlp.llp :=
-  le_trans (retracts_monotone T.le_llp_rlp) T.rlp.llp.retracts_le
+lemma retracts_le_llp_rlp : T.rlp.llp.retracts ≤ T.rlp.llp :=
+  T.rlp.llp.retracts_le
 
 @[simp]
 lemma rlp_retracts : T.retracts.rlp = T.rlp := by
   apply le_antisymm
   · exact antitone_rlp T.le_retracts
   · rw [← le_llp_iff_le_rlp]
-    exact T.retracts_le_llp_rlp
+    exact (retracts_monotone T.le_llp_rlp).trans T.retracts_le_llp_rlp
 
 end MorphismProperty
 
