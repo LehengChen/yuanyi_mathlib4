@@ -77,8 +77,15 @@ theorem _root_.MeasureTheory.Measure.ext_of_integral_eq_on_compactlySupported_nn
   apply Measure.ext_of_integral_eq_on_compactlySupported
   intro f
   repeat rw [integral_eq_integral_pos_part_sub_integral_neg_part f.integrable]
-  erw [hμν f.nnrealPart, hμν (-f).nnrealPart]
-  rfl
+  calc
+    ∫ (a : X), ((f a).toNNReal : ℝ) ∂μ - ∫ (a : X), (((-f) a).toNNReal : ℝ) ∂μ =
+        ∫ (x : X), (f.nnrealPart x : ℝ) ∂μ - ∫ (x : X), (((-f).nnrealPart x : ℝ)) ∂μ := by
+          simp [CompactlySupportedContinuousMap.nnrealPart_apply]
+    _ =
+        ∫ (x : X), (f.nnrealPart x : ℝ) ∂ν - ∫ (x : X), (((-f).nnrealPart x : ℝ)) ∂ν := by
+          rw [hμν f.nnrealPart, hμν (-f).nnrealPart]
+    _ = ∫ (a : X), ((f a).toNNReal : ℝ) ∂ν - ∫ (a : X), (((-f) a).toNNReal : ℝ) ∂ν := by
+          simp [CompactlySupportedContinuousMap.nnrealPart_apply]
 
 /-- If two regular measures induce the same linear functional on `C_c(X, ℝ≥0)`, then they are
 equal. -/
