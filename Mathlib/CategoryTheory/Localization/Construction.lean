@@ -300,7 +300,7 @@ def functor : (W.Localization ⥤ D) ⥤ W.FunctorsInverting D :=
     MorphismProperty.IsInvertedBy.of_comp W W.Q W.Q_inverts _
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The function `(W.FunctorsInverting D) ⥤ (W.Localization ⥤ D)` induced by
+/-- The functor `(W.FunctorsInverting D) ⥤ (W.Localization ⥤ D)` induced by
 `Construction.lift`. -/
 @[simps!]
 def inverse : W.FunctorsInverting D ⥤ W.Localization ⥤ D where
@@ -338,7 +338,7 @@ def unitIso : 𝟭 (W.Localization ⥤ D) ≅ functor W D ⋙ inverse W D :=
         simp)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The counit isomorphism of the equivalence of categories `WhiskeringLeftEquivalence W D`. -/
+/-- The counit isomorphism of the equivalence of categories `whiskeringLeftEquivalence W D`. -/
 @[simps!]
 def counitIso : inverse W D ⋙ functor W D ≅ 𝟭 (W.FunctorsInverting D) :=
   eqToIso
