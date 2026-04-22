@@ -269,9 +269,10 @@ instance [Full F] [Faithful F] : IsIso (hf'.symmetry hg) :=
 
 end
 
-/-- When `C` has pullbacks, then `F.map f` is representable with respect to `F` for any
-`f : a ⟶ b` in `C`. -/
-lemma map [Full F] [HasPullbacks C] {a b : C} (f : a ⟶ b)
+/-- When the pullbacks of `f` exist and are preserved by `F`, then `F.map f` is representable with
+respect to `F`. -/
+lemma map [Full F] {a b : C} (f : a ⟶ b)
+    [∀ c (g : c ⟶ b), HasPullback f g]
     [∀ c (g : c ⟶ b), PreservesLimit (cospan f g) F] :
     F.relativelyRepresentable (F.map f) := fun c g ↦ by
   obtain ⟨g, rfl⟩ := F.map_surjective g
@@ -362,11 +363,12 @@ lemma relative_of_snd [F.Faithful] [F.Full] [P.RespectsIso] {f : X ⟶ Y}
     P.relative F f :=
   relative.of_exists (fun _ g ↦ ⟨hf.pullback g, hf.fst g, hf.snd g, hf.isPullback g, h g⟩)
 
-/-- If `P : MorphismProperty C` is stable under base change, `F` is fully faithful and preserves
-pullbacks, and `C` has all pullbacks, then for any `f : a ⟶ b` in `C`, `F.map f` satisfies
-`P.relative` if `f` satisfies `P`. -/
-lemma relative_map [F.Faithful] [F.Full] [HasPullbacks C] [IsStableUnderBaseChange P]
-    {a b : C} {f : a ⟶ b} [∀ c (g : c ⟶ b), PreservesLimit (cospan f g) F]
+/-- If `P : MorphismProperty C` is stable under base change, `F` is fully faithful, and the
+pullbacks of `f` exist and are preserved by `F`, then `F.map f` satisfies `P.relative` if `f`
+satisfies `P`. -/
+lemma relative_map [F.Faithful] [F.Full] [IsStableUnderBaseChange P]
+    {a b : C} {f : a ⟶ b} [∀ c (g : c ⟶ b), HasPullback f g]
+    [∀ c (g : c ⟶ b), PreservesLimit (cospan f g) F]
     (hf : P f) : P.relative F (F.map f) := by
   apply relative.of_exists
   intro Y' g
@@ -376,8 +378,9 @@ lemma relative_map [F.Faithful] [F.Full] [HasPullbacks C] [IsStableUnderBaseChan
 lemma of_relative_map {a b : C} {f : a ⟶ b} (hf : P.relative F (F.map f)) : P f :=
   hf.property (𝟙 _) (𝟙 _) f (IsPullback.id_horiz (F.map f))
 
-lemma relative_map_iff [F.Faithful] [F.Full] [PreservesLimitsOfShape WalkingCospan F]
-    [HasPullbacks C] [IsStableUnderBaseChange P] {X Y : C} {f : X ⟶ Y} :
+lemma relative_map_iff [F.Faithful] [F.Full] [IsStableUnderBaseChange P] {X Y : C} {f : X ⟶ Y}
+    [∀ c (g : c ⟶ Y), HasPullback f g]
+    [∀ c (g : c ⟶ Y), PreservesLimit (cospan f g) F] :
     P.relative F (F.map f) ↔ P f :=
   ⟨fun hf ↦ of_relative_map hf, fun hf ↦ relative_map hf⟩
 

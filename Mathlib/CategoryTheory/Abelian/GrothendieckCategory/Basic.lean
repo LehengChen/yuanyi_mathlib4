@@ -78,8 +78,9 @@ attribute [instance] IsGrothendieckAbelian.locallySmall
   IsGrothendieckAbelian.hasSeparator
 
 variable {C} {D} in
-theorem IsGrothendieckAbelian.of_equivalence [Abelian C] [Abelian D]
-    [IsGrothendieckAbelian.{w} C] (α : C ≌ D) : IsGrothendieckAbelian.{w} D := by
+theorem IsGrothendieckAbelian.of_equivalence [Abelian D]
+    [LocallySmall.{w} C] [HasFilteredColimitsOfSize.{w, w} C] [AB5OfSize.{w, w} C]
+    [HasSeparator C] (α : C ≌ D) : IsGrothendieckAbelian.{w} D := by
   have hasFilteredColimits : HasFilteredColimitsOfSize.{w, w, v₂, u₂} D :=
     ⟨fun _ _ _ => Adjunction.hasColimitsOfShape_of_equivalence α.inverse⟩
   refine ⟨?_, hasFilteredColimits, ?_, ?_⟩

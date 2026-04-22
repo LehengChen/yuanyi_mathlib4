@@ -53,20 +53,39 @@ noncomputable def IsColimit.pullbackOfHasExactColimitsOfShape [HasPullbacks C]
 set_option backward.isDefEq.respectTransparency false in
 /-- Detecting equality of morphisms factoring through a connected colimit by pulling back along
 the inclusions of the colimit. -/
-theorem IsColimit.pullback_hom_ext [HasPullbacks C] [HasColimitsOfShape J C]
+theorem IsColimit.pullback_hom_ext [HasColimitsOfShape J C]
     [HasExactColimitsOfShape J C] {F : J ⥤ C} {c : Cocone F} (hc : IsColimit c) {X Y : C}
-    {f : X ⟶ c.pt} {g h : c.pt ⟶ Y}
+    {f : X ⟶ c.pt} [∀ j, HasPullback (c.ι.app j) f] {g h : c.pt ⟶ Y}
     (hf : ∀ j, pullback.snd (c.ι.app j) f ≫ f ≫ g = pullback.snd (c.ι.app j) f ≫ f ≫ h) :
     f ≫ g = f ≫ h := by
-  refine (hc.pullbackOfHasExactColimitsOfShape f).hom_ext (fun j => ?_)
-  rw [← cancel_epi (pullbackObjIso _ _ _).inv]
-  simpa using hf j
+  haveI : ∀ j, HasLimit (((cospan c.ι ((Functor.const J).map f)).flip.obj j)) := fun j => by
+    haveI : HasLimit (cospan (((evaluation J C).obj j).map c.ι)
+        (((evaluation J C).obj j).map ((Functor.const J).map f))) := by
+      change HasLimit (cospan (c.ι.app j) f)
+      infer_instance
+    exact hasLimit_of_iso (cospanCompIso ((evaluation J C).obj j) c.ι
+      ((Functor.const J).map f)).symm
+  letI : HasPullback c.ι ((Functor.const J).map f) := inferInstance
+  suffices IsIso (colimMap (pullback.snd c.ι ((Functor.const J).map f))) by
+    let d : Cocone (pullback c.ι ((Functor.const J).map f)) :=
+      Cocone.mk _ (pullback.snd c.ι ((Functor.const J).map f))
+    refine (Cocone.isColimitOfIsIsoColimMapι d).hom_ext (fun j => ?_)
+    have hApp : IsPullback ((pullback.fst c.ι ((Functor.const J).map f)).app j)
+        ((pullback.snd c.ι ((Functor.const J).map f)).app j) (c.ι.app j) f :=
+      (IsPullback.of_hasPullback c.ι ((Functor.const J).map f)).map ((evaluation J C).obj j)
+    rw [← cancel_epi ((IsPullback.of_hasPullback (c.ι.app j) f).isoIsPullback _ _ hApp).hom]
+    simpa [d] using hf j
+  have hpull := colim.map_isPullback (IsPullback.of_hasPullback c.ι ((Functor.const J).map f))
+  dsimp only [colim_obj, colim_map] at hpull
+  have := hc.isIso_colimMap_ι
+  apply hpull.isIso_snd_of_isIso
 
 /-- Detecting vanishing of a morphism factoring through a connected colimit by pulling back along
 the inclusions of the colimit. -/
-theorem IsColimit.pullback_zero_ext [HasZeroMorphisms C] [HasPullbacks C] [HasColimitsOfShape J C]
+theorem IsColimit.pullback_zero_ext [HasZeroMorphisms C] [HasColimitsOfShape J C]
     [HasExactColimitsOfShape J C] {F : J ⥤ C} {c : Cocone F} (hc : IsColimit c) {X Y : C}
-    {f : X ⟶ c.pt} {g : c.pt ⟶ Y} (hf : ∀ j, pullback.snd (c.ι.app j) f ≫ f ≫ g = 0) :
+    {f : X ⟶ c.pt} [∀ j, HasPullback (c.ι.app j) f] {g : c.pt ⟶ Y}
+    (hf : ∀ j, pullback.snd (c.ι.app j) f ≫ f ≫ g = 0) :
     f ≫ g = 0 := by
   suffices f ≫ g = f ≫ 0 by simpa
   exact hc.pullback_hom_ext (by simpa using hf)
@@ -90,20 +109,40 @@ noncomputable def IsLimit.pushoutOfHasExactLimitsOfShape [HasPushouts C]
 set_option backward.isDefEq.respectTransparency false in
 /-- Detecting equality of morphisms factoring through a connected limit by pushing out along
 the projections of the limit. -/
-theorem IsLimit.pushout_hom_ext [HasPushouts C] [HasLimitsOfShape J C]
+theorem IsLimit.pushout_hom_ext [HasLimitsOfShape J C]
     [HasExactLimitsOfShape J C] {F : J ⥤ C} {c : Cone F} (hc : IsLimit c) {X Y : C}
-    {g h : Y ⟶ c.pt} {f : c.pt ⟶ X}
+    {g h : Y ⟶ c.pt} {f : c.pt ⟶ X} [∀ j, HasPushout (c.π.app j) f]
     (hf : ∀ j, g ≫ f ≫ pushout.inr (c.π.app j) f = h ≫ f ≫ pushout.inr (c.π.app j) f) :
     g ≫ f = h ≫ f := by
-  refine (hc.pushoutOfHasExactLimitsOfShape f).hom_ext (fun j => ?_)
-  rw [← cancel_mono (pushoutObjIso _ _ _).hom]
-  simpa using hf j
+  haveI : ∀ j, HasColimit (((span c.π ((Functor.const J).map f)).flip.obj j)) := fun j => by
+    haveI : HasColimit (span (((evaluation J C).obj j).map c.π)
+        (((evaluation J C).obj j).map ((Functor.const J).map f))) := by
+      change HasColimit (span (c.π.app j) f)
+      infer_instance
+    exact hasColimit_of_iso (spanCompIso ((evaluation J C).obj j) c.π
+      ((Functor.const J).map f))
+  letI : HasPushout c.π ((Functor.const J).map f) := inferInstance
+  suffices IsIso (limMap (pushout.inr c.π ((Functor.const J).map f))) by
+    let d : Cone (pushout c.π ((Functor.const J).map f)) :=
+      Cone.mk _ (pushout.inr c.π ((Functor.const J).map f))
+    refine (Cone.isLimitOfIsIsoLimMapπ d).hom_ext (fun j => ?_)
+    have hApp : IsPushout (c.π.app j) f
+        ((pushout.inl c.π ((Functor.const J).map f)).app j)
+        ((pushout.inr c.π ((Functor.const J).map f)).app j) :=
+      (IsPushout.of_hasPushout c.π ((Functor.const J).map f)).map ((evaluation J C).obj j)
+    rw [← cancel_mono (hApp.isoIsPushout _ _ (IsPushout.of_hasPushout (c.π.app j) f)).hom]
+    simpa [d] using hf j
+  have hpush := lim.map_isPushout (IsPushout.of_hasPushout c.π ((Functor.const J).map f))
+  dsimp only [lim_obj, lim_map] at hpush
+  have := hc.isIso_limMap_π
+  apply hpush.isIso_inr_of_isIso
 
 /-- Detecting vanishing of a morphism factoring through a connected limit by pushing out along the
 projections of the limit. -/
-theorem IsLimit.pushout_zero_ext [HasZeroMorphisms C] [HasPushouts C] [HasLimitsOfShape J C]
+theorem IsLimit.pushout_zero_ext [HasZeroMorphisms C] [HasLimitsOfShape J C]
     [HasExactLimitsOfShape J C] {F : J ⥤ C} {c : Cone F} (hc : IsLimit c) {X Y : C}
-    {g : Y ⟶ c.pt} {f : c.pt ⟶ X} (hf : ∀ j, g ≫ f ≫ pushout.inr (c.π.app j) f = 0) :
+    {g : Y ⟶ c.pt} {f : c.pt ⟶ X} [∀ j, HasPushout (c.π.app j) f]
+    (hf : ∀ j, g ≫ f ≫ pushout.inr (c.π.app j) f = 0) :
     g ≫ f = 0 := by
   suffices g ≫ f = 0 ≫ f by simpa
   exact hc.pushout_hom_ext (by simpa using hf)

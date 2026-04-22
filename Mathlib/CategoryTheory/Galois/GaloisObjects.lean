@@ -99,7 +99,9 @@ instance isPretransitive_of_isGalois (X : C) [IsGalois X] :
   rw [← isGalois_iff_pretransitive]
   infer_instance
 
-lemma stabilizer_normal_of_isGalois (X : C) [IsGalois X] (x : F.obj X) :
+omit [GaloisCategory C] in
+lemma stabilizer_normal_of_isGalois (X : C)
+    [MulAction.IsPretransitive (Aut X) (F.obj X)] (x : F.obj X) :
     Subgroup.Normal (MulAction.stabilizer (Aut F) x) where
   conj_mem n ninstab g := by
     rw [MulAction.mem_stabilizer_iff]
@@ -110,11 +112,17 @@ lemma stabilizer_normal_of_isGalois (X : C) [IsGalois X] (x : F.obj X) :
     rw [← h, mulAction_naturality, ninstab, h]
     simp
 
-theorem evaluation_aut_surjective_of_isGalois (A : C) [IsGalois A] (a : F.obj A) :
+omit [GaloisCategory C] in
+theorem evaluation_aut_surjective_of_isGalois (A : C)
+    [MulAction.IsPretransitive (Aut A) (F.obj A)] (a : F.obj A) :
     Function.Surjective (fun f : Aut A ↦ F.map f.hom a) :=
   MulAction.IsPretransitive.exists_smul_eq a
 
-theorem evaluation_aut_bijective_of_isGalois (A : C) [IsGalois A] (a : F.obj A) :
+omit [GaloisCategory C] in
+/-- For a connected object whose automorphisms act transitively on its fiber,
+evaluation at a point of the fiber is bijective. -/
+theorem evaluation_aut_bijective_of_isGalois [PreGaloisCategory C] [FiberFunctor F]
+    (A : C) [IsConnected A] [MulAction.IsPretransitive (Aut A) (F.obj A)] (a : F.obj A) :
     Function.Bijective (fun f : Aut A ↦ F.map f.hom a) :=
   ⟨evaluation_aut_injective_of_isConnected F A a, evaluation_aut_surjective_of_isGalois F A a⟩
 

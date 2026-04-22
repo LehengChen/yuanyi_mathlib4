@@ -487,7 +487,7 @@ Checking exactness of colimits of shape `Discrete ℕ` and `Discrete J` for fini
 countable AB4.
 -/
 lemma CountableAB4.of_hasExactColimitsOfShape_nat_and_finite [HasCountableCoproducts C]
-    [HasFiniteLimits C] [∀ (J : Type) [Finite J], HasExactColimitsOfShape (Discrete J) C]
+    [∀ (J : Type) [Finite J], HasExactColimitsOfShape (Discrete J) C]
     [HasExactColimitsOfShape (Discrete ℕ) C] :
     CountableAB4 C where
   ofShape J := by
@@ -496,14 +496,15 @@ lemma CountableAB4.of_hasExactColimitsOfShape_nat_and_finite [HasCountableCoprod
     · have : Infinite J := ⟨h⟩
       let _ := Encodable.ofCountable J
       let _ := Denumerable.ofEncodableOfInfinite J
-      exact hasExactColimitsOfShape_of_final C (Discrete.equivalence (Denumerable.eqv J)).inverse
+      exact HasExactColimitsOfShape.of_domain_equivalence C
+        (Discrete.equivalence (Denumerable.eqv J)).symm
 
 /--
 Checking exactness of limits of shape `Discrete ℕ` and `Discrete J` for finite `J` is enough for
 countable AB4*.
 -/
 lemma CountableAB4Star.of_hasExactLimitsOfShape_nat_and_finite [HasCountableProducts C]
-    [HasFiniteColimits C] [∀ (J : Type) [Finite J], HasExactLimitsOfShape (Discrete J) C]
+    [∀ (J : Type) [Finite J], HasExactLimitsOfShape (Discrete J) C]
     [HasExactLimitsOfShape (Discrete ℕ) C] :
     CountableAB4Star C where
   ofShape J := by
@@ -512,7 +513,8 @@ lemma CountableAB4Star.of_hasExactLimitsOfShape_nat_and_finite [HasCountableProd
     · have : Infinite J := ⟨h⟩
       let _ := Encodable.ofCountable J
       let _ := Denumerable.ofEncodableOfInfinite J
-      exact hasExactLimitsOfShape_of_initial C (Discrete.equivalence (Denumerable.eqv J)).inverse
+      exact HasExactLimitsOfShape.of_domain_equivalence C
+        (Discrete.equivalence (Denumerable.eqv J)).symm
 
 section EpiMono
 
@@ -532,19 +534,19 @@ noncomputable instance hasExactLimitsOfShape_discrete_finite {J : Type*} [Finite
 
 /--
 Checking exact colimits of shape `Discrete ℕ` is enough for countable AB4, provided that the
-category has finite biproducts and finite limits.
+category has finite biproducts.
 -/
-lemma CountableAB4.of_hasExactColimitsOfShape_nat [HasFiniteLimits C] [HasCountableCoproducts C]
+lemma CountableAB4.of_hasExactColimitsOfShape_nat [HasCountableCoproducts C]
     [HasExactColimitsOfShape (Discrete ℕ) C] : CountableAB4 C := by
   apply +allowSynthFailures CountableAB4.of_hasExactColimitsOfShape_nat_and_finite
   exact fun _ ↦ inferInstance
 
 /--
 Checking exact limits of shape `Discrete ℕ` is enough for countable AB4*, provided that the
-category has finite biproducts and finite colimits.
+category has finite biproducts.
 -/
-lemma CountableAB4Star.of_hasExactLimitsOfShape_nat [HasFiniteColimits C]
-    [HasCountableProducts C] [HasExactLimitsOfShape (Discrete ℕ) C] : CountableAB4Star C := by
+lemma CountableAB4Star.of_hasExactLimitsOfShape_nat [HasCountableProducts C]
+    [HasExactLimitsOfShape (Discrete ℕ) C] : CountableAB4Star C := by
   apply +allowSynthFailures CountableAB4Star.of_hasExactLimitsOfShape_nat_and_finite
   exact fun _ ↦ inferInstance
 

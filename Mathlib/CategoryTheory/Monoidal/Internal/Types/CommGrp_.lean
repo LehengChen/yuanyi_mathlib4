@@ -50,11 +50,12 @@ noncomputable def inverse : CommGrpCat.{u} ⥤ CommGrp (Type u) where
 @[simp]
 theorem inverse_obj_X {A : CommGrpCat.{u}} : (inverse.obj A).X = A := rfl
 @[simp]
-theorem inverse_obj_one {A : CommGrpCat.{u}} {x} : η[(inverse.obj A).X] x = (1 : A) := rfl
+theorem inverse_obj_one {A : CommGrpCat.{u}} : η[(inverse.obj A).X] = fun _ => (1 : A) := rfl
 @[simp]
-theorem inverse_obj_mul {A : CommGrpCat.{u}} {p} : μ[(inverse.obj A).X] p = (p.1 : A) * p.2 := rfl
+theorem inverse_obj_mul {A : CommGrpCat.{u}} :
+    μ[(inverse.obj A).X] = fun p => (p.1 : A) * p.2 := rfl
 @[simp]
-theorem inverse_obj_inv {A : CommGrpCat.{u}} {x} : ι[(inverse.obj A).X] x = (x : A)⁻¹ := rfl
+theorem inverse_obj_inv {A : CommGrpCat.{u}} : ι[(inverse.obj A).X] = fun x => (x : A)⁻¹ := rfl
 
 end CommGrpTypeEquivalenceCommGrp
 

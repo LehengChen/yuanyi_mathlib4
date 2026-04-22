@@ -107,16 +107,21 @@ end
 instance {i j : Pairwise ι} [DecidableEq ι] : DecidableEq (i ⟶ j) :=
   inferInstanceAs (DecidableEq (Pairwise.Hom i j))
 
-instance [Fintype ι] [DecidableEq ι] : FinCategory (Pairwise ι) where
-  fintypeHom
-  | .single i, .single j => ⟨if h : i = j then {eqToHom (h ▸ rfl)} else ∅, by rintro ⟨⟩; cat_disch⟩
-  | .single i, .pair j k => ⟨∅, by rintro ⟨⟩⟩
-  | .pair i j, .single k =>
-    ⟨(if h : i = k then {Hom.left i j ≫ eqToHom (h ▸ rfl)} else ∅) ∪
-      (if h : j = k then {Hom.right i j ≫ eqToHom (h ▸ rfl)} else ∅),
-        by rintro ⟨⟩ <;> cat_disch⟩
-  | .pair i j, .pair k l =>
-    ⟨if h : i = k ∧ j = l then {eqToHom (h.1 ▸ h.2 ▸ rfl)} else ∅, by rintro ⟨⟩; cat_disch⟩
+instance [Fintype ι] : FinCategory (Pairwise ι) := by
+  classical
+  exact {
+    fintypeHom
+    | .single i, .single j =>
+      ⟨if h : i = j then {eqToHom (h ▸ rfl)} else ∅, by rintro ⟨⟩; cat_disch⟩
+    | .single i, .pair j k => ⟨∅, by rintro ⟨⟩⟩
+    | .pair i j, .single k =>
+      ⟨(if h : i = k then {Hom.left i j ≫ eqToHom (h ▸ rfl)} else ∅) ∪
+        (if h : j = k then {Hom.right i j ≫ eqToHom (h ▸ rfl)} else ∅),
+          by rintro ⟨⟩ <;> cat_disch⟩
+    | .pair i j, .pair k l =>
+      ⟨if h : i = k ∧ j = l then {eqToHom (h.1 ▸ h.2 ▸ rfl)} else ∅, by
+        rintro ⟨⟩
+        cat_disch⟩ }
 
 variable {α : Type u} (U : ι → α)
 

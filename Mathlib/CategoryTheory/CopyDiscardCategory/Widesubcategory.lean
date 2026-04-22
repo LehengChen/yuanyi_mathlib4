@@ -14,7 +14,7 @@ Given a monoidal category `C`, a morphism property `P : MorphismProperty C` sati
 `P.IsMonoidalStable` and a comonoid object `c : C`, we introduce a condition `P.
 IsStableUnderComonoid c` saying that `c` inherits a comonoid object structure in the category of
 `WideSubcategory P`. If `C` is a copy-discard category, if `P` is also stable under braiding and
-that this condition `P. IsStableUnderComonoid` holds for all objects `c : C`, we show that
+that this condition holds for the underlying object of each `c : WideSubcategory P`, we show that
 `WideSubcategory P` is also a copy-discard category.
 -/
 
@@ -47,7 +47,8 @@ instance [BraidedCategory C] [P.IsStableUnderBraiding] (c : WideSubcategory P) [
 
 open CopyDiscardCategory in
 attribute [local simp] copy_tensor discard_tensor copy_unit discard_unit in
-instance [CopyDiscardCategory C] [P.IsStableUnderBraiding] [∀ c, P.IsStableUnderComonoid c] :
+instance [CopyDiscardCategory C] [P.IsStableUnderBraiding]
+    [∀ c : WideSubcategory P, P.IsStableUnderComonoid c.obj] :
     CopyDiscardCategory (WideSubcategory P) where
 
 end CategoryTheory.MorphismProperty

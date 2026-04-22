@@ -592,8 +592,11 @@ def mapPairEquiv (e : C ≌ C') (e' : D ≌ D') : C ⋆ D ≌ C' ⋆ D' where
     cases x <;>
     simp [← (inclLeft C' D').map_comp, ← (inclRight C' D').map_comp]
 
-instance isEquivalenceMapPair {F : C ⥤ C'} {F' : D ⥤ D'} [F.IsEquivalence] [F'.IsEquivalence] :
+instance isEquivalenceMapPair {F : C ⥤ C'} {F' : D ⥤ D'} [F.Full] [F.Faithful]
+    [F.EssSurj] [F'.Full] [F'.Faithful] [F'.EssSurj] :
     (mapPair F F').IsEquivalence :=
+  letI : F.IsEquivalence := {}
+  letI : F'.IsEquivalence := {}
   inferInstanceAs (mapPairEquiv F.asEquivalence F'.asEquivalence).functor.IsEquivalence
 
 end mapPairEquiv

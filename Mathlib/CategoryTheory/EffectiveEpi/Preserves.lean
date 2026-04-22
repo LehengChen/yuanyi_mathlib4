@@ -104,20 +104,20 @@ instance map_effectiveEpi (F : C ⥤ D) [F.PreservesEffectiveEpis] {X Y : C} (f 
     [EffectiveEpi f] : EffectiveEpi (F.map f) :=
   PreservesEffectiveEpis.preserves f
 
-instance [IsRegularEpiCategory D] (F : C ⥤ D) [F.PreservesEpimorphisms] [Limits.HasPullbacks D] :
-    F.PreservesEffectiveEpis where
+instance [IsRegularEpiCategory D] (F : C ⥤ D) [F.PreservesEpimorphisms]
+    [∀ {X Y : D} (f : X ⟶ Y) [Epi f], HasPullback f f] : F.PreservesEffectiveEpis where
   preserves _ _ := by
     rw [← isRegularEpi_iff_effectiveEpi]
     apply IsRegularEpiCategory.regularEpiOfEpi
 
 /--
-Applying a functor which preserves pullbacks and effective epimorphisms to a regular epi diagram
-of the form `X ×_Y X ⇉ X → Y` gives a regular epi diagram.
+Applying a functor which preserves the relevant pullback to a diagram of the form
+`X ×_Y X ⇉ X → Y` gives a regular epi diagram if the image of `X → Y` is an effective epi.
 -/
 @[simps]
 noncomputable def regularEpiOfPreserves {C D : Type*} [Category* C] [Category* D] {X Y : C}
-    (f : X ⟶ Y) [EffectiveEpi f] (F : C ⥤ D) [PreservesEffectiveEpis F]
-    [PreservesLimitsOfShape WalkingCospan F] (c : PullbackCone f f) (hc : IsLimit c) :
+    (f : X ⟶ Y) (F : C ⥤ D) [EffectiveEpi (F.map f)] [PreservesLimit (cospan f f) F]
+    (c : PullbackCone f f) (hc : IsLimit c) :
     RegularEpi (F.map f) where
   W := F.obj c.pt
   left := F.map c.fst

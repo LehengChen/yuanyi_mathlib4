@@ -148,25 +148,21 @@ variable [HasFiniteBiproducts C]
 def leftDistributor {J : Type} [Finite J] (X : C) (f : J → C) : X ⊗ ⨁ f ≅ ⨁ fun j => X ⊗ f j :=
   (tensorLeft X).mapBiproduct f
 
-theorem leftDistributor_hom {J : Type} [Fintype J] (X : C) (f : J → C) :
+attribute [local instance] Fintype.ofFinite in
+theorem leftDistributor_hom {J : Type} [Finite J] (X : C) (f : J → C) :
     (leftDistributor X f).hom =
       ∑ j : J, (X ◁ biproduct.π f j) ≫ biproduct.ι (fun j => X ⊗ f j) j := by
-  classical
-  ext
   dsimp [leftDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
-  simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
-    Finset.sum_dite_eq', Finset.mem_univ, ite_true, eqToHom_refl, Category.comp_id]
+  rw [biproduct.lift_eq]
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
-theorem leftDistributor_inv {J : Type} [Fintype J] (X : C) (f : J → C) :
+attribute [local instance] Fintype.ofFinite in
+theorem leftDistributor_inv {J : Type} [Finite J] (X : C) (f : J → C) :
     (leftDistributor X f).inv = ∑ j : J, biproduct.π _ j ≫ (X ◁ biproduct.ι f j) := by
-  classical
-  ext
   dsimp [leftDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  simp only [Preadditive.comp_sum, biproduct.ι_π_assoc, dite_comp, zero_comp,
-    Finset.sum_dite_eq, Finset.mem_univ, ite_true, eqToHom_refl, Category.id_comp,
-    biproduct.ι_desc]
+  rw [biproduct.desc_eq]
+  rfl
 
 @[reassoc (attr := simp)]
 theorem leftDistributor_hom_comp_biproduct_π {J : Type} [Finite J] (X : C) (f : J → C) (j : J) :
@@ -217,24 +213,21 @@ theorem leftDistributor_assoc {J : Type} [Finite J] (X Y : C) (f : J → C) :
 def rightDistributor {J : Type} [Finite J] (f : J → C) (X : C) : (⨁ f) ⊗ X ≅ ⨁ fun j => f j ⊗ X :=
   (tensorRight X).mapBiproduct f
 
-theorem rightDistributor_hom {J : Type} [Fintype J] (f : J → C) (X : C) :
+attribute [local instance] Fintype.ofFinite in
+theorem rightDistributor_hom {J : Type} [Finite J] (f : J → C) (X : C) :
     (rightDistributor f X).hom =
       ∑ j : J, (biproduct.π f j ▷ X) ≫ biproduct.ι (fun j => f j ⊗ X) j := by
-  classical
-  ext
   dsimp [rightDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
-  simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
-    Finset.sum_dite_eq', Finset.mem_univ, eqToHom_refl, Category.comp_id, ite_true]
+  rw [biproduct.lift_eq]
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
-theorem rightDistributor_inv {J : Type} [Fintype J] (f : J → C) (X : C) :
+attribute [local instance] Fintype.ofFinite in
+theorem rightDistributor_inv {J : Type} [Finite J] (f : J → C) (X : C) :
     (rightDistributor f X).inv = ∑ j : J, biproduct.π _ j ≫ (biproduct.ι f j ▷ X) := by
-  classical
-  ext
   dsimp [rightDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  simp only [biproduct.ι_desc, Preadditive.comp_sum, biproduct.ι_π_assoc, dite_comp,
-    zero_comp, Finset.sum_dite_eq, Finset.mem_univ, eqToHom_refl, Category.id_comp, ite_true]
+  rw [biproduct.desc_eq]
+  rfl
 
 @[reassoc (attr := simp)]
 theorem rightDistributor_hom_comp_biproduct_π {J : Type} [Finite J] (f : J → C) (X : C) (j : J) :

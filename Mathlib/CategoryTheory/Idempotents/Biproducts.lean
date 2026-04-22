@@ -72,8 +72,10 @@ def bicone [HasFiniteBiproducts C] {J : Type} [Finite J] (F : J → Karoubi C) :
 
 end Biproducts
 
-theorem karoubi_hasFiniteBiproducts [HasFiniteBiproducts C] : HasFiniteBiproducts (Karoubi C) :=
-  { out := fun n =>
+theorem karoubi_hasFiniteBiproducts [HasFiniteProducts C] : HasFiniteBiproducts (Karoubi C) := by
+  haveI : HasFiniteBiproducts C := HasFiniteBiproducts.of_hasFiniteProducts
+  exact
+    { out := fun n =>
       { has_biproduct := fun F => by
           apply hasBiproduct_of_total (Biproducts.bicone F)
           simpa using biproduct.map_eq.symm } }

@@ -239,12 +239,19 @@ abbrev snd : W.RightFraction X Y where
   s := φ.s
   hs := φ.hs
 
-lemma exists_leftFraction₂ [W.HasLeftCalculusOfFractions] :
+/-- If right fractions can be completed to left fractions and `W` is stable under composition,
+then two right fractions with the same denominator can be completed to two left fractions with
+the same denominator. -/
+lemma exists_leftFraction₂ [W.IsStableUnderComposition]
+    (hW : ∀ ⦃X Y : C⦄ (φ : W.RightFraction X Y),
+      ∃ (ψ : W.LeftFraction X Y), φ.f ≫ ψ.s = φ.s ≫ ψ.f := by
+        intro X Y φ
+        exact φ.exists_leftFraction) :
     ∃ (ψ : W.LeftFraction₂ X Y), φ.f ≫ ψ.s = φ.s ≫ ψ.f ∧
       φ.f' ≫ ψ.s = φ.s ≫ ψ.f' := by
-  obtain ⟨ψ₁, hψ₁⟩ := φ.fst.exists_leftFraction
-  obtain ⟨ψ₂, hψ₂⟩ := φ.snd.exists_leftFraction
-  obtain ⟨α, hα⟩ := (RightFraction.mk _ ψ₁.hs ψ₂.s).exists_leftFraction
+  obtain ⟨ψ₁, hψ₁⟩ := hW φ.fst
+  obtain ⟨ψ₂, hψ₂⟩ := hW φ.snd
+  obtain ⟨α, hα⟩ := hW (RightFraction.mk _ ψ₁.hs ψ₂.s)
   dsimp at hψ₁ hψ₂ hα
   refine ⟨LeftFraction₂.mk (ψ₁.f ≫ α.f) (ψ₂.f ≫ α.s) (ψ₂.s ≫ α.s)
       (W.comp_mem _ _ ψ₂.hs α.hs), ?_, ?_⟩

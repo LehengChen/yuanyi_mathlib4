@@ -71,8 +71,11 @@ def equivalenceEffectivePresentation (e : C ≌ D) (X : D) :
   f := e.counit.app _
   effectiveEpi := inferInstance
 
-instance [IsEquivalence F] : EffectivelyEnough F where
-  presentation X := ⟨equivalenceEffectivePresentation F.asEquivalence X⟩
+instance [F.EssSurj] : EffectivelyEnough F where
+  presentation X := ⟨{
+    p := F.objPreimage X
+    f := (F.objObjPreimageIso X).hom
+    effectiveEpi := inferInstance }⟩
 
 end Functor
 

@@ -75,12 +75,14 @@ instance Pi.containsIdentities {J : Type w} {C : J → Type u}
     (pi W).ContainsIdentities :=
   ⟨fun _ _ => MorphismProperty.id_mem _ _⟩
 
-lemma of_isIso (P : MorphismProperty C) [P.ContainsIdentities] [P.RespectsIso] {X Y : C} (f : X ⟶ Y)
-    [IsIso f] : P f :=
-  Category.id_comp f ▸ RespectsIso.postcomp P f (𝟙 X) (P.id_mem X)
+lemma of_isIso (P : MorphismProperty C) [P.ContainsIdentities]
+    [P.RespectsRight (isomorphisms C)] {X Y : C} (f : X ⟶ Y) [IsIso f] : P f :=
+  Category.id_comp f ▸
+    RespectsRight.postcomp (P := P) (Q := isomorphisms C) f
+      (isomorphisms.infer_property f) (𝟙 X) (P.id_mem X)
 
 lemma isomorphisms_le_of_containsIdentities (P : MorphismProperty C) [P.ContainsIdentities]
-    [P.RespectsIso] :
+    [P.RespectsRight (isomorphisms C)] :
     isomorphisms C ≤ P := fun _ _ f (_ : IsIso f) ↦ P.of_isIso f
 
 /-- A morphism property satisfies `IsStableUnderComposition` if the composition of
@@ -414,11 +416,17 @@ instance (F : C ⥤ D) (W : MorphismProperty D) [W.HasTwoOutOfThreeProperty] :
   of_postcomp f g hg hfg := W.of_postcomp (F.map f) (F.map g) hg (by simpa using hfg)
   of_precomp f g hf hfg := W.of_precomp (F.map f) (F.map g) hf (by simpa using hfg)
 
-instance [W.RespectsIso] : W.HasOfPrecompProperty (isomorphisms C) where
-  of_precomp _ _ (_ : IsIso _) := (W.cancel_left_of_respectsIso _ _).mp
+instance [W.RespectsLeft (isomorphisms C)] : W.HasOfPrecompProperty (isomorphisms C) where
+  of_precomp f g (_ : IsIso f) hfg := by
+    simpa only [Category.assoc, IsIso.inv_hom_id_assoc] using
+      RespectsLeft.precomp (P := W) (Q := isomorphisms C) (inv f)
+        (isomorphisms.infer_property (inv f)) (f ≫ g) hfg
 
-instance [W.RespectsIso] : W.HasOfPostcompProperty (isomorphisms C) where
-  of_postcomp _ _ (_ : IsIso _) := (W.cancel_right_of_respectsIso _ _).mp
+instance [W.RespectsRight (isomorphisms C)] : W.HasOfPostcompProperty (isomorphisms C) where
+  of_postcomp f g (_ : IsIso g) hfg := by
+    simpa only [Category.assoc, IsIso.hom_inv_id, Category.comp_id] using
+      RespectsRight.postcomp (P := W) (Q := isomorphisms C) (inv g)
+        (isomorphisms.infer_property (inv g)) (f ≫ g) hfg
 
 end MorphismProperty
 
