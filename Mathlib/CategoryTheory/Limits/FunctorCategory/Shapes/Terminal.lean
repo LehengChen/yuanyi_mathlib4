@@ -12,7 +12,8 @@ public import Mathlib.CategoryTheory.Limits.Shapes.Terminal
 # Initial and terminal objects in the category of functors
 
 We show that if a functor `F : C ⥤ D` is such that `F.obj X`
-is terminal for all `X`, then `F` is a terminal object.
+is terminal (resp. initial) for all `X`, then `F` is a terminal
+(resp. initial) object.
 
 -/
 
