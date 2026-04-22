@@ -102,10 +102,14 @@ theorem terminates_parallel.aux :
             match o with
             | Sum.inl a => Sum.inl a
             | Sum.inr ls => rmap (fun c' => c' :: ls) (destruct c))
-          (Sum.inr List.nil) l with a' | ls <;> erw [e] at e'
-        · contradiction
-        have := IH' m _ e
-        grind
+          (Sum.inr List.nil) l with a' | ls
+        · simp only [rmap] at e
+          rw [e] at e'
+          contradiction
+        · simp only [rmap] at e
+          rw [e] at e'
+          have := IH' m _ e
+          grind
     rcases h : parallel.aux2 l with a | l'
     · exact lem1 _ _ ⟨a, h⟩
     · have H2 : corec parallel.aux1 (l, S) = think _ := destruct_eq_think (by
