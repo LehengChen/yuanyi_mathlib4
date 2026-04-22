@@ -98,41 +98,37 @@ theorem associator_inv (X Y Z : C) :
       prod.lift (prod.lift prod.fst (prod.snd ≫ prod.fst)) (prod.snd ≫ prod.snd) :=
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.deprecated false in
+local instance : HasFiniteProducts C := hasFiniteProducts_of_has_binary_and_terminal
+local instance : CartesianMonoidalCategory C := .ofHasFiniteProducts
 @[deprecated CartesianMonoidalCategory.associator_hom_fst (since := "2025-10-19")]
 theorem associator_hom_fst (X Y Z : C) :
-    (α_ X Y Z).hom ≫ prod.fst = prod.fst ≫ prod.fst := by simp [associator_hom]
+    (α_ X Y Z).hom ≫ prod.fst = prod.fst ≫ prod.fst :=
+  CartesianMonoidalCategory.associator_hom_fst X Y Z
 
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.deprecated false in
 @[deprecated CartesianMonoidalCategory.associator_hom_snd_fst (since := "2025-10-19")]
 theorem associator_hom_snd_fst (X Y Z : C) :
-    (α_ X Y Z).hom ≫ prod.snd ≫ prod.fst = prod.fst ≫ prod.snd := by simp [associator_hom]
+    (α_ X Y Z).hom ≫ prod.snd ≫ prod.fst = prod.fst ≫ prod.snd :=
+  CartesianMonoidalCategory.associator_hom_snd_fst X Y Z
 
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.deprecated false in
 @[deprecated CartesianMonoidalCategory.associator_hom_snd_snd (since := "2025-10-19")]
 theorem associator_hom_snd_snd (X Y Z : C) :
-    (α_ X Y Z).hom ≫ prod.snd ≫ prod.snd = prod.snd := by simp [associator_hom]
+    (α_ X Y Z).hom ≫ prod.snd ≫ prod.snd = prod.snd :=
+  CartesianMonoidalCategory.associator_hom_snd_snd X Y Z
 
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.deprecated false in
 @[deprecated CartesianMonoidalCategory.associator_inv_fst_fst (since := "2025-10-19")]
 theorem associator_inv_fst_fst (X Y Z : C) :
-    (α_ X Y Z).inv ≫ prod.fst ≫ prod.fst = prod.fst := by simp [associator_inv]
+    (α_ X Y Z).inv ≫ prod.fst ≫ prod.fst = prod.fst :=
+  CartesianMonoidalCategory.associator_inv_fst_fst X Y Z
 
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.deprecated false in
 @[deprecated CartesianMonoidalCategory.associator_inv_fst_snd (since := "2025-10-19")]
 theorem associator_inv_fst_snd (X Y Z : C) :
-    (α_ X Y Z).inv ≫ prod.fst ≫ prod.snd = prod.snd ≫ prod.fst := by simp [associator_inv]
+    (α_ X Y Z).inv ≫ prod.fst ≫ prod.snd = prod.snd ≫ prod.fst :=
+  CartesianMonoidalCategory.associator_inv_fst_snd X Y Z
 
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.deprecated false in
 @[deprecated CartesianMonoidalCategory.associator_inv_snd (since := "2025-10-19")]
 theorem associator_inv_snd (X Y Z : C) :
-    (α_ X Y Z).inv ≫ prod.snd = prod.snd ≫ prod.snd := by simp [associator_inv]
+    (α_ X Y Z).inv ≫ prod.snd = prod.snd ≫ prod.snd :=
+  CartesianMonoidalCategory.associator_inv_snd X Y Z
 
 end monoidalOfHasFiniteProducts
 

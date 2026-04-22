@@ -104,33 +104,29 @@ lemma associator_inv_congr {x y z t : B} {f f' : x ⟶ y} {g g' : y ⟶ z}
 lemma congr_whiskerLeft {x y : B} {f f' : x ⟶ y} (h : f = f') {z : B}
     {g g' : y ⟶ z} (η : g ⟶ g') :
       f ◁ η = eqToHom (by rw [h]) ≫ f' ◁ η ≫ eqToHom (by rw [h]) := by
-  subst h
-  simp
+  simpa using CategoryTheory.eqToHom_naturality_assoc
+    (fun k => k ◁ η) h (eqToHom (show f' ≫ g' = f ≫ g' by rw [h]))
 
 lemma whiskerRight_congr {y z : B} {g g' : y ⟶ z} (h : g = g') {x : B}
     {f f' : x ⟶ y} (η : f ⟶ f') :
       η ▷ g = eqToHom (by rw [h]) ≫ η ▷ g' ≫ eqToHom (by rw [h]) := by
-  subst h
-  simp
+  simpa using CategoryTheory.eqToHom_naturality_assoc
+    (fun k => η ▷ k) h (eqToHom (show f' ≫ g' = f' ≫ g by rw [h]))
 
+set_option linter.style.longLine false in set_option linter.unnecessarySimpa false in
 lemma leftUnitor_hom_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (λ_ f).hom = 𝟙 _ ◁ (eqToHom h) ≫ (λ_ f').hom ≫ eqToHom h.symm := by
-  subst h
-  simp
+    (λ_ f).hom = 𝟙 _ ◁ (eqToHom h) ≫ (λ_ f').hom ≫ eqToHom h.symm := by simpa using (eqToHom_iso_hom_naturality_assoc (fun k => λ_ k) h (eqToHom h.symm)).symm
 
+set_option linter.style.longLine false in set_option linter.unnecessarySimpa false in
 lemma leftUnitor_inv_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (λ_ f).inv = (eqToHom h) ≫ (λ_ f').inv ≫ 𝟙 _ ◁ eqToHom h.symm := by
-  subst h
-  simp
+    (λ_ f).inv = (eqToHom h) ≫ (λ_ f').inv ≫ 𝟙 _ ◁ eqToHom h.symm := by simpa using eqToHom_iso_inv_naturality_assoc (fun k => λ_ k) h (𝟙 _ ◁ eqToHom h.symm)
 
+set_option linter.style.longLine false in set_option linter.unnecessarySimpa false in
 lemma rightUnitor_hom_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (ρ_ f).hom = (eqToHom h) ▷ 𝟙 _ ≫ (ρ_ f').hom ≫ eqToHom h.symm := by
-  subst h
-  simp
+    (ρ_ f).hom = (eqToHom h) ▷ 𝟙 _ ≫ (ρ_ f').hom ≫ eqToHom h.symm := by simpa using (eqToHom_iso_hom_naturality_assoc (fun k => ρ_ k) h (eqToHom h.symm)).symm
 
+set_option linter.style.longLine false in set_option linter.unnecessarySimpa false in
 lemma rightUnitor_inv_congr {x y : B} {f f' : x ⟶ y} (h : f = f') :
-    (ρ_ f).inv = (eqToHom h) ≫ (ρ_ f').inv ≫ eqToHom h.symm ▷ 𝟙 _ := by
-  subst h
-  simp
+    (ρ_ f).inv = (eqToHom h) ≫ (ρ_ f').inv ≫ eqToHom h.symm ▷ 𝟙 _ := by simpa using eqToHom_iso_inv_naturality_assoc (fun k => ρ_ k) h (eqToHom h.symm ▷ 𝟙 _)
 
 end CategoryTheory.Bicategory

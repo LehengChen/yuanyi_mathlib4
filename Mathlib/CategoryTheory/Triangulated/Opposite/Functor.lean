@@ -54,19 +54,15 @@ noncomputable scoped instance commShift_natTrans_op_int {G : C ⥤ D} [G.CommShi
 set_option backward.isDefEq.respectTransparency false in
 noncomputable scoped instance commShift_adjunction_op_int {G : D ⥤ C} [G.CommShift ℤ] (adj : F ⊣ G)
     [Adjunction.CommShift adj ℤ] : Adjunction.CommShift adj.op ℤ := by
-  have eq : adj.op = PullbackShift.adjunction
-    (AddMonoidHom.mk' (fun (n : ℤ) => -n) (by intros; dsimp; lia))
-      (OppositeShift.adjunction ℤ adj) := by
-    ext
-    dsimp [PullbackShift.adjunction, NatTrans.PullbackShift.natIsoId,
-      NatTrans.PullbackShift.natIsoComp, PullbackShift.functor, PullbackShift.natTrans,
-      OppositeShift.adjunction, OppositeShift.natTrans, NatTrans.OppositeShift.natIsoId,
-      NatTrans.OppositeShift.natIsoComp, OppositeShift.functor]
-    simp only [Category.comp_id, Category.id_comp]
-  rw [eq]
-  exact inferInstanceAs (Adjunction.CommShift (PullbackShift.adjunction
-    (AddMonoidHom.mk' (fun (n : ℤ) => -n) (by intros; dsimp; lia))
-      (OppositeShift.adjunction ℤ adj)) ℤ)
+  let φ : ℤ →+ ℤ := AddMonoidHom.mk' (fun (n : ℤ) => -n) (by intros; dsimp; lia)
+  convert (inferInstance : Adjunction.CommShift (PullbackShift.adjunction φ
+      (OppositeShift.adjunction ℤ adj)) ℤ) using 1
+  ext
+  dsimp [φ, PullbackShift.adjunction, NatTrans.PullbackShift.natIsoId,
+    NatTrans.PullbackShift.natIsoComp, PullbackShift.functor, PullbackShift.natTrans,
+    OppositeShift.adjunction, OppositeShift.natTrans, NatTrans.OppositeShift.natIsoId,
+    NatTrans.OppositeShift.natIsoComp, OppositeShift.functor]
+  simp only [Category.comp_id, Category.id_comp]
 
 end Pretriangulated.Opposite
 

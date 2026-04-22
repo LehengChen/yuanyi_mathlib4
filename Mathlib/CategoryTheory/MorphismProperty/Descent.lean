@@ -94,23 +94,19 @@ instance [HasPullbacks C] (P Q : MorphismProperty C) [P.DescendsAlong Q] [P.Resp
     DescendsAlong (diagonal P) Q := by
   apply DescendsAlong.mk'
   introv hf hfst
-  have heq : pullback.fst (pullback.fst (pullback.snd g g ≫ g) f) (pullback.diagonal g) =
-      (pullbackSymmetry _ _).hom ≫
-      (pullbackRightPullbackFstIso _ _ _).hom ≫
-      (pullback.congrHom (by simp) rfl).hom ≫
-      (pullbackSymmetry _ _).hom ≫
-      pullback.diagonal (pullback.fst f g) ≫
-      (diagonalObjPullbackFstIso f g).hom := by
-    apply pullback.hom_ext
-    apply pullback.hom_ext <;> simp [pullback.condition]
-    simp [pullback.condition]
+  let e := pullbackSymmetry (pullback.fst (pullback.snd g g ≫ g) f) (pullback.diagonal g) ≪≫
+    pullbackRightPullbackFstIso (pullback.snd g g ≫ g) f (pullback.diagonal g) ≪≫
+      pullback.congrHom (by simp) rfl ≪≫ pullbackSymmetry g f
   rw [diagonal_iff]
   apply MorphismProperty.of_pullback_fst_of_descendsAlong (P := P) (Q := Q)
       (f := pullback.fst (pullback.snd g g ≫ g) f)
   · exact MorphismProperty.pullback_fst _ _ hf
-  · rw [heq]
-    iterate 4 rw [cancel_left_of_respectsIso (P := P)]
-    rwa [cancel_right_of_respectsIso (P := P)]
+  · rw [← P.arrow_mk_iso_iff (Arrow.isoMk' (pullback.diagonal (pullback.fst f g))
+        (pullback.fst (pullback.fst (pullback.snd g g ≫ g) f) (pullback.diagonal g))
+        e.symm (diagonalObjPullbackFstIso f g) (by
+          rw [Iso.symm_hom, Iso.inv_comp_eq]
+          ext <;> simp [e, pullback.condition]))]
+    simpa [diagonal_iff] using hfst
 
 lemma eq_of_isomorphisms_descendsAlong [(MorphismProperty.isomorphisms C).DescendsAlong P]
     [P.IsStableUnderBaseChange] [HasEqualizers C]

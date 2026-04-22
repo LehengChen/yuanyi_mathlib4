@@ -155,37 +155,30 @@ def ofIso {X₁' X₂' X₃' Z₁₂' Z₂₃' Z₁₃' : C} (u₁₂' : X₁' �
   let iso₂₃ := isoTriangleOfIso₁₂ _ _ h₂₃ h₂₃' e₂ e₃ comm₂₃
   let iso₁₃ := isoTriangleOfIso₁₂ _ _ h₁₃ h₁₃' e₁ e₃ (by
     dsimp; rw [← comm, assoc, ← comm', ← reassoc_of% comm₁₂, comm₂₃])
-  have eq₁₂ := iso₁₂.hom.comm₂
-  have eq₁₂' := iso₁₂.hom.comm₃
-  have eq₁₃ := iso₁₃.hom.comm₂
-  have eq₁₃' := iso₁₃.hom.comm₃
-  have eq₂₃ := iso₂₃.hom.comm₂
-  have eq₂₃' := iso₂₃.hom.comm₃
-  have rel₁₂ := H.triangleMorphism₁.comm₂
-  have rel₁₃ := H.triangleMorphism₁.comm₃
-  have rel₂₂ := H.triangleMorphism₂.comm₂
-  have rel₂₃ := H.triangleMorphism₂.comm₃
-  dsimp [iso₁₂, iso₂₃, iso₁₃] at eq₁₂ eq₁₂' eq₁₃ eq₁₃' eq₂₃ eq₂₃' rel₁₂ rel₁₃ rel₂₂ rel₂₃
-  rw [Functor.map_id, comp_id] at rel₁₃
-  rw [id_comp] at rel₂₂
+  let φ₁ := iso₁₂.hom ≫ H.triangleMorphism₁ ≫ iso₁₃.inv
+  let φ₂ := iso₁₃.hom ≫ H.triangleMorphism₂ ≫ iso₂₃.inv
+  have φ₁₂ : φ₁.hom₂ = u₂₃ := by
+    rw [← cancel_mono e₃.hom]
+    dsimp [φ₁, iso₁₂, iso₁₃]
+    simp [comm₂₃]
+  have φ₂₁ : φ₂.hom₁ = u₁₂ := by
+    rw [← cancel_mono e₂.hom]
+    dsimp [φ₂, iso₁₃, iso₂₃]
+    simp [comm₁₂]
   refine ⟨iso₁₂.hom.hom₃ ≫ H.m₁ ≫ iso₁₃.inv.hom₃,
     iso₁₃.hom.hom₃ ≫ H.m₃ ≫ iso₂₃.inv.hom₃, ?_, ?_, ?_, ?_, ?_⟩
-  · rw [reassoc_of% eq₁₂, ← cancel_mono iso₁₃.hom.hom₃, assoc, assoc, assoc, assoc,
-      iso₁₃.inv_hom_id_triangle_hom₃, eq₁₃, reassoc_of% comm₂₃, ← rel₁₂]
-    dsimp
-    rw [comp_id]
-  · rw [← cancel_mono (e₁.hom⟦(1 : ℤ)⟧'), eq₁₂', assoc, assoc, assoc, eq₁₃',
-      iso₁₃.inv_hom_id_triangle_hom₃_assoc, ← rel₁₃]
-  · rw [reassoc_of% eq₁₃, reassoc_of% rel₂₂, ← cancel_mono iso₂₃.hom.hom₃, assoc, assoc,
-      iso₂₃.inv_hom_id_triangle_hom₃, eq₂₃]
-    dsimp
-    rw [comp_id]
-  · rw [← cancel_mono (e₂.hom⟦(1 : ℤ)⟧'), assoc, assoc, assoc, assoc, eq₂₃',
-      iso₂₃.inv_hom_id_triangle_hom₃_assoc, ← rel₂₃, ← Functor.map_comp, comm₁₂,
-      Functor.map_comp, reassoc_of% eq₁₃']
+  · change v₁₂ ≫ φ₁.hom₃ = u₂₃ ≫ v₁₃
+    simpa [φ₁₂] using φ₁.comm₂
+  · simpa [φ₁, iso₁₂, iso₁₃] using φ₁.comm₃.symm
+  · simpa [φ₂, iso₁₃, iso₂₃] using φ₂.comm₂
+  · change w₁₃ ≫ (shiftFunctor C 1).map u₁₂ = φ₂.hom₃ ≫ w₂₃
+    simpa [φ₂₁] using φ₂.comm₃
   · refine isomorphic_distinguished _ H.mem _ ?_
     refine Triangle.isoMk _ _ (Triangle.π₃.mapIso iso₁₂) (Triangle.π₃.mapIso iso₁₃)
       (Triangle.π₃.mapIso iso₂₃) (by simp) (by simp) ?_
+    have eq₁₂ := iso₁₂.hom.comm₂
+    have eq₂₃' := iso₂₃.hom.comm₃
+    dsimp [iso₁₂, iso₂₃] at eq₁₂ eq₂₃'
     dsimp
     rw [assoc, ← Functor.map_comp, eq₁₂, Functor.map_comp, reassoc_of% eq₂₃']
 

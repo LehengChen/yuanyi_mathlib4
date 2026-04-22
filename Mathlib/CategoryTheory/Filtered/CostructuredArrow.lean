@@ -5,6 +5,7 @@ Authors: Jakob von Raumer
 -/
 module
 
+public import Mathlib.CategoryTheory.Filtered.Grothendieck
 public import Mathlib.CategoryTheory.Filtered.OfColimitCommutesFiniteLimit
 public import Mathlib.CategoryTheory.Functor.KanExtension.Adjunction
 public import Mathlib.CategoryTheory.Limits.ConcreteCategory.Basic
@@ -37,19 +38,14 @@ variable {T : Type u₁} [SmallCategory T]
 set_option backward.isDefEq.respectTransparency false in
 private lemma isFiltered_of_isFiltered_costructuredArrow_small (L : A ⥤ T) (R : B ⥤ T)
     [IsFiltered B] [Final R] [∀ b, IsFiltered (CostructuredArrow L (R.obj b))] : IsFiltered A := by
-  refine isFiltered_of_nonempty_limit_colimit_to_colimit_limit fun J {_ _} F => ⟨?_⟩
-  let R' := Grothendieck.pre (CostructuredArrow.functor L) R
-  haveI : ∀ b, PreservesLimitsOfShape J
-      (colim (J := (R ⋙ CostructuredArrow.functor L).obj b) (C := Type u₁)) := fun b => by
-    simp only [comp_obj, CostructuredArrow.functor_obj, Cat.of_α]
-    exact filtered_colim_preservesFiniteLimits
-  refine lim.map ((colimitIsoColimitGrothendieck L F.flip).hom ≫
-    (inv (colimit.pre (CostructuredArrow.grothendieckProj L ⋙ F.flip) R'))) ≫
-    (colimitLimitIso (R' ⋙ CostructuredArrow.grothendieckProj L ⋙ F.flip).flip).inv ≫
-    colim.map ?_ ≫
-    colimit.pre _ R' ≫
-    (colimitIsoColimitGrothendieck L (limit F)).inv
-  exact (limitCompWhiskeringLeftIsoCompLimit F (R' ⋙ CostructuredArrow.grothendieckProj L)).hom
+  haveI : Final (CostructuredArrow.grothendieckProj L) :=
+    (Functor.final_iff_isIso_colimit_pre (CostructuredArrow.grothendieckProj L)).mpr fun G => by
+      convert (colimitIsoColimitGrothendieck L G).isIso_inv
+      exact colimit.hom_ext fun X => by simp
+  haveI : ∀ b, IsFiltered ((R ⋙ CostructuredArrow.functor L).obj b) := fun b =>
+    inferInstanceAs (IsFiltered (CostructuredArrow L (R.obj b)))
+  exact IsFiltered.of_final
+    (Grothendieck.pre (CostructuredArrow.functor L) R ⋙ CostructuredArrow.grothendieckProj L)
 
 end Small
 

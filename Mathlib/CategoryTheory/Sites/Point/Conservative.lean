@@ -209,25 +209,21 @@ private lemma mk'.isLocallySurjective
   suffices Presheaf.imageSieve f (shrinkYonedaObjObjEquiv.symm (𝟙 U)) ∈ J U from ⟨by
     intro V g
     obtain ⟨g, rfl⟩ := shrinkYonedaObjObjEquiv.symm.surjective g
-    replace this := J.pullback_stable g this
-    rw [Presheaf.pullback_imageSieve] at this
-    have hg := shrinkYoneda_obj_map_shrinkYonedaObjObjEquiv_symm g.op (𝟙 _)
-    simp only [Quiver.Hom.unop_op, Category.comp_id] at hg
-    simpa [← hg]⟩
+    have hg := by simpa using (shrinkYonedaObjObjEquiv_symm_comp g (𝟙 U)).symm
+    simpa [Presheaf.pullback_imageSieve, ← hg] using J.pullback_stable g this⟩
   refine hP _ (fun Φ u ↦ ?_)
   obtain ⟨x₁, hx₁⟩ := hf Φ (Φ.obj.shrinkYonedaCompPresheafFiberIso.inv.app _ u)
   obtain ⟨V, v, y, rfl⟩ := Φ.obj.toPresheafFiber_jointly_surjective (A := Type w) x₁
   obtain ⟨t, ht⟩ := shrinkYonedaObjObjEquiv.symm.surjective (f.app _ y)
-  refine ⟨V, t, ⟨y, ht.symm.trans ?_⟩, v, ?_⟩
-  · simpa using (shrinkYoneda_obj_map_shrinkYonedaObjObjEquiv_symm t.op (𝟙 _)).symm
-  · refine (Φ.obj.shrinkYonedaCompPresheafFiberIso.symm.app U).toEquiv.injective ?_
-    dsimp
-    trans (Φ.obj.toPresheafFiber V v (shrinkYoneda.{w}.obj U)) (shrinkYonedaObjObjEquiv.symm t)
-    · rw [← Φ.obj.presheafFiber_map_shrinkYoneda_map_shrinkYonedaCompPresheafFiberIso_inv_app]
-      exact Φ.obj.shrinkYonedaCompPresheafFiberIso.inv.naturality_apply t v
-    · rw [← hx₁]
-      refine Eq.trans (congr_arg _ ht)
-        (Φ.obj.toPresheafFiber_naturality_apply f _ v y).symm
+  refine ⟨V, t, ⟨y, ht.symm.trans (by simpa using
+    (shrinkYoneda_obj_map_shrinkYonedaObjObjEquiv_symm t.op (𝟙 _)).symm)⟩, v, ?_⟩
+  refine (Φ.obj.shrinkYonedaCompPresheafFiberIso.symm.app U).toEquiv.injective ?_
+  dsimp
+  refine (Φ.obj.shrinkYonedaCompPresheafFiberIso.inv.naturality_apply t v).trans ?_
+  change (Φ.obj.presheafFiber.map (shrinkYoneda.map t))
+      (Φ.obj.shrinkYonedaCompPresheafFiberIso.inv.app V v) = _
+  rw [Φ.obj.presheafFiber_map_shrinkYoneda_map_shrinkYonedaCompPresheafFiberIso_inv_app, ← hx₁]
+  exact (congr_arg _ ht).trans ((Φ.obj.toPresheafFiber_naturality_apply f _ v y).symm)
 
 /- Let `P` be family of points of a site `(C, J)`, we show that `P` is a conservative
 family of points if the following condition is satisfied (SGA 4 IV 6.5 (a)):

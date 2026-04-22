@@ -126,28 +126,23 @@ noncomputable def mk_of_isPullback (sq : Square C) [Mono sq.f₂₄] [Mono sq.f�
     J.MayerVietorisSquare :=
   have : Mono sq.f₁₃ := h₁.mono_f₁₃
   mk' sq (fun F ↦ by
-    apply Square.IsPullback.mk
-    refine PullbackCone.IsLimit.mk _
-      (fun s ↦ F.2.amalgamateOfArrows _ h₂
-        (fun j ↦ WalkingPair.casesOn j s.fst s.snd)
-        (fun W ↦ by
-          rintro (_ | _) (_ | _) a b fac
-          · obtain rfl : a = b := by simpa only [← cancel_mono sq.f₂₄] using fac
-            rfl
-          · obtain ⟨φ, rfl, rfl⟩ := PullbackCone.IsLimit.lift' h₁.isLimit _ _ fac
-            simpa using s.condition =≫ F.obj.map φ.op
-          · obtain ⟨φ, rfl, rfl⟩ := PullbackCone.IsLimit.lift' h₁.isLimit _ _ fac.symm
-            simpa using s.condition.symm =≫ F.obj.map φ.op
-          · obtain rfl : a = b := by simpa only [← cancel_mono sq.f₃₄] using fac
-            rfl)) (fun _ ↦ ?_) (fun _ ↦ ?_) (fun s m hm₁ hm₂ ↦ ?_)
-    · exact F.2.amalgamateOfArrows_map _ _ _ _ WalkingPair.left
-    · exact F.2.amalgamateOfArrows_map _ _ _ _ WalkingPair.right
-    · apply F.2.hom_ext_ofArrows _ h₂
-      rintro (_ | _)
-      · rw [F.2.amalgamateOfArrows_map _ _ _ _ WalkingPair.left]
-        exact hm₁
-      · rw [F.2.amalgamateOfArrows_map _ _ _ _ WalkingPair.right]
-        exact hm₂)
+    refine Square.IsPullback.mk _ ((sq.op.map F.obj).pullbackCone.isLimitEquivBijective.symm ?_)
+    exact (Function.bijective_iff_existsUnique _).2 (fun y ↦ by
+      rcases y with ⟨⟨u, v⟩, huv⟩
+      simpa [PullbackCone.toPullbackObj] using
+        (existsUnique_congr (fun t : F.obj.obj (op sq.X₄) ↦
+          ⟨fun h ↦ ⟨h .left, h .right⟩, fun h j ↦ WalkingPair.casesOn j h.1 h.2⟩)).1
+        (((Presieve.isSheafFor_arrows_iff _ _).1
+          (((isSheaf_iff_isSheaf_of_type J F.obj).1 F.2).isSheafFor _ h₂))
+          (fun j ↦ WalkingPair.casesOn j u v)
+          (by
+            rintro (_ | _) (_ | _) W a b fac
+            · simp [show a = b by simpa only [← cancel_mono sq.f₂₄] using fac]
+            · obtain ⟨φ, rfl, rfl⟩ := PullbackCone.IsLimit.lift' h₁.isLimit _ _ fac
+              simpa using congrArg (F.obj.map φ.op) huv
+            · obtain ⟨φ, rfl, rfl⟩ := PullbackCone.IsLimit.lift' h₁.isLimit _ _ fac.symm
+              simpa using congrArg (F.obj.map φ.op) huv.symm
+            · simp [show a = b by simpa only [← cancel_mono sq.f₃₄] using fac]))))
 
 variable (S : J.MayerVietorisSquare)
 

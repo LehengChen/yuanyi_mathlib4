@@ -79,19 +79,15 @@ theorem final_of_final_costructuredArrowToOver (L : A ⥤ T) (R : B ⥤ T) [Fina
   let L' := sA.inverse ⋙ L ⋙ sT.functor
   let R' := sB.inverse ⋙ R ⋙ sT.functor
   have (b : _) : (CostructuredArrow.toOver L' (R'.obj b)).Final := by
-    dsimp only [L', R', CostructuredArrow.toOver] at hB ⊢
-    let x := (sB.inverse ⋙ R ⋙ sT.functor).obj b
-    let F'' : CostructuredArrow (sA.inverse ⋙ L ⋙ sT.functor) x ⥤ CostructuredArrow (𝟭 _) x :=
-      map₂ (F := sA.inverse) (G := sT.inverse) (whiskerLeft (sA.inverse ⋙ L) sT.unit) (𝟙 _) ⋙
-      pre L (𝟭 T) (R.obj _) ⋙ map₂ (F := sT.functor) (G := sT.functor) (𝟙 _) (𝟙 _)
-    apply final_of_natIso (F := F'')
-    have hsT (X) : sT.counitInv.app X = 𝟙 _ := rfl
-    exact NatIso.ofComponents (fun X => CostructuredArrow.isoMk (Iso.refl _) (by simp [F'', hsT]))
-  have := final_of_final_costructuredArrowToOver_small L' R'
-  apply final_of_natIso (F := (sA.functor ⋙ L' ⋙ sT.inverse))
-  exact (sA.functor.associator (sA.inverse ⋙ L ⋙ sT.functor) sT.inverse).symm ≪≫
-    ((sA.functor.associator sA.inverse (L ⋙ sT.functor)).symm ≪≫
-      isoWhiskerRight sA.unitIso.symm _ ≪≫ (L ⋙ sT.functor).leftUnitor).compInverseIso
+    let y := R.obj (sB.inverse.obj b); let x := R'.obj b
+    change Final (pre sA.inverse _ x ⋙ CostructuredArrow.toOver (L ⋙ sT.functor) x)
+    exact (final_iff_equivalence_comp _ _).1 <| (final_iff_equivalence_comp _ _).2 <|
+      (final_natIso_iff (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _)) :
+        CostructuredArrow.toOver L y ⋙ Over.post sT.functor ≅
+          post L sT.functor y ⋙ CostructuredArrow.toOver _ x)).1 <|
+      (final_iff_comp_equivalence _ _).1 (hB _)
+  have h : Final L' := final_of_final_costructuredArrowToOver_small L' R'
+  simpa [L'] using (final_iff_comp_equivalence _ _).2 <| (final_iff_equivalence_comp _ _).2 h
 
 end Functor
 

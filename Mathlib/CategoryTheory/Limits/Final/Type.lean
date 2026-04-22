@@ -45,27 +45,21 @@ def sectionsPrecomp (F : C ⥤ D) {P : D ⥤ Type w} (x : P.sections) :
 set_option backward.isDefEq.respectTransparency false in
 lemma bijective_sectionsPrecomp (F : C ⥤ D) (P : D ⥤ Type w) [F.Initial] :
     Function.Bijective (F.sectionsPrecomp (P := P)) := by
-  refine ⟨fun s₁ s₂ h ↦ ?_, fun t ↦ ?_⟩
-  · ext Y
+  let cone (t : (F ⋙ P).sections) := Limits.Types.coneOfSection t.property
+  let g (t : (F ⋙ P).sections) : P.sections :=
+    Limits.Types.sectionOfCone (Initial.extendCone.obj (cone t)) PUnit.unit
+  refine ⟨Function.LeftInverse.injective (g := g) ?_,
+    Function.RightInverse.surjective (g := g) ?_⟩
+  · intro s
+    ext Y
     let X : CostructuredArrow F Y := Classical.arbitrary _
-    have := congr_fun (congr_arg Subtype.val h) X.left
-    have h₁ := s₁.property X.hom
-    have h₂ := s₂.property X.hom
-    dsimp at this h₁ h₂
-    rw [← h₁, this, h₂]
-  · have h (Y : D) := constant_of_preserves_morphisms'
-      (fun (Z : CostructuredArrow F Y) ↦ P.map Z.hom (t.val Z.left)) (by
-          intro Z₁ Z₂ φ
-          dsimp
-          rw [← t.property φ.left]
-          dsimp
-          rw [← FunctorToTypes.map_comp_apply, CostructuredArrow.w])
-    choose val hval using h
-    refine ⟨⟨val, fun {Y₁ Y₂} f ↦ ?_⟩, ?_⟩
-    · let X : CostructuredArrow F Y₁ := Classical.arbitrary _
-      simp [← hval Y₁ X, ← hval Y₂ ((CostructuredArrow.map f).obj X)]
-    · ext X : 2
-      simpa using (hval (F.obj X) (CostructuredArrow.mk (𝟙 _))).symm
+    exact (congr_fun (Initial.extendCone_obj_π_app' (F := F) (G := P)
+      (cone (F.sectionsPrecomp s)) (X := X.left) (Y := Y) X.hom) PUnit.unit).trans
+      (s.property X.hom)
+  · intro t
+    ext X
+    simpa [g] using congr_fun (Initial.limit_cone_comp_aux (F := F) (G := P) (cone t) X)
+      PUnit.unit
 
 /-- Given `P : D ⥤ Type w` and `F : C ⥤ D`, this is the obvious map
 `(F ⋙ P).ColimitType → P.ColimitType`. -/

@@ -302,22 +302,18 @@ lemma injectiveDimension_eq_bot_iff (X : C) :
 
 lemma injectiveDimension_ne_top_iff (X : C) :
     injectiveDimension X ≠ ⊤ ↔ ∃ n, HasInjectiveDimensionLE X n := by
-  generalize hd : injectiveDimension X = d
-  induction d with
-  | bot =>
-    simp only [ne_eq, bot_ne_top, not_false_eq_true, true_iff]
-    exact ⟨0, by simp [← injectiveDimension_le_iff, hd]⟩
-  | coe d =>
-    induction d with
-    | top =>
-      by_contra!
-      simp only [WithBot.coe_top, ne_eq, not_true_eq_false, false_and, true_and, false_or] at this
-      obtain ⟨n, hn⟩ := this
-      rw [← injectiveDimension_le_iff, hd, WithBot.coe_top, top_le_iff] at hn
-      exact ENat.coe_ne_top _ ((WithBot.coe_eq_coe).1 hn)
-    | coe d =>
-      simp only [ne_eq, WithBot.coe_eq_top, ENat.coe_ne_top, not_false_eq_true, true_iff]
-      exact ⟨d, by simpa only [← injectiveDimension_le_iff] using hd.le⟩
+  rw [injectiveDimension]
+  simp only [ne_eq, sInf_eq_top, Set.mem_setOf_eq, not_forall]
+  constructor
+  · rintro ⟨x, hx, hxtop⟩
+    have hnot : ¬ ∀ a : ℕ, (a : WithBot ℕ∞) ≤ x :=
+      fun hx' ↦ hxtop ((WithBot.eq_top_iff_forall_ge).2 hx')
+    obtain ⟨n, hn⟩ := not_forall.mp hnot
+    let _ : HasInjectiveDimensionLT X n := hx n (by simpa [not_le] using hn)
+    exact ⟨n, hasInjectiveDimensionLT_of_ge X n (n + 1) (by lia)⟩
+  · rintro ⟨n, h⟩
+    exact ⟨n, fun i hi ↦ hasInjectiveDimensionLT_of_ge _ (n + 1) _ (by simpa using hi),
+      fun htop ↦ ENat.coe_ne_top n (WithBot.coe_eq_coe.mp htop)⟩
 
 end CategoryTheory
 

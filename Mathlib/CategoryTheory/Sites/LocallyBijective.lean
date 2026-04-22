@@ -53,24 +53,20 @@ private lemma isLocallyBijective_iff_isIso' :
     intro X s
     have H := (isSheaf_iff_isSheaf_of_type J F.obj).1 F.property _
       (Presheaf.imageSieve_mem J f.hom s)
-    let t : Presieve.FamilyOfElements F.obj (Presheaf.imageSieve f.hom s).arrows :=
-      fun Y g hg => Presheaf.localPreimage f.hom s g hg
+    let t := Presieve.FamilyOfElements.localPreimage f.hom s
     have ht : t.Compatible := by
       intro Y₁ Y₂ W g₁ g₂ f₁ f₂ hf₁ hf₂ w
       apply h₁
-      have eq₁ := FunctorToTypes.naturality _ _ f.hom g₁.op (t f₁ hf₁)
-      have eq₂ := FunctorToTypes.naturality _ _ f.hom g₂.op (t f₂ hf₂)
-      have eq₃ := congr_arg (G.obj.map g₁.op) (Presheaf.app_localPreimage f.hom s _ hf₁)
-      have eq₄ := congr_arg (G.obj.map g₂.op) (Presheaf.app_localPreimage f.hom s _ hf₂)
-      refine eq₁.trans (eq₃.trans (Eq.trans ?_ (eq₄.symm.trans eq₂.symm)))
-      erw [← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply]
-      simp only [← op_comp, w]
+      change f.hom.app (Opposite.op W) (F.obj.map g₁.op (t f₁ hf₁)) =
+        f.hom.app (Opposite.op W) (F.obj.map g₂.op (t f₂ hf₂))
+      simpa only [Presieve.FamilyOfElements.map, FunctorToTypes.naturality] using
+        (Presieve.is_compatible_of_exists_amalgamation (t.map f.hom) ⟨s,
+          Presieve.FamilyOfElements.isAmalgamation_map_localPreimage f.hom s⟩)
+          g₁ g₂ hf₁ hf₂ w
     refine ⟨H.amalgamate t ht, ?_⟩
-    · apply (((isSheaf_iff_isSheaf_of_type J G.obj).1 G.property).isSeparated _
-        (Presheaf.imageSieve_mem J f.hom s)).ext
-      intro Y g hg
-      rw [← FunctorToTypes.naturality, H.valid_glue ht]
-      exact Presheaf.app_localPreimage f.hom s g hg
+    exact (((isSheaf_iff_isSheaf_of_type J G.obj).1 G.property).isSeparated _
+      (Presheaf.imageSieve_mem J f.hom s)) _ _ _ ((H.isAmalgamation ht).map f.hom)
+      (Presieve.FamilyOfElements.isAmalgamation_map_localPreimage f.hom s)
   · intro
     constructor <;> infer_instance
 

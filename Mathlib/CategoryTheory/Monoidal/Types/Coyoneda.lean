@@ -6,7 +6,7 @@ Authors: Michael Jendrusch, Kim Morrison
 module
 
 public import Mathlib.CategoryTheory.Monoidal.Types.Basic
-public import Mathlib.CategoryTheory.Monoidal.CoherenceLemmas
+public import Mathlib.CategoryTheory.Monoidal.Comon_
 
 /-!
 # `(𝟙_ C ⟶ -)` is a lax monoidal functor to `Type`
@@ -18,7 +18,9 @@ universe v u
 
 namespace CategoryTheory
 
-open Opposite MonoidalCategory
+open Opposite MonoidalCategory Category
+
+attribute [local instance] ComonObj.instTensorUnit
 
 attribute [local simp] types_tensorObj_def types_tensorUnit_def in
 instance (C : Type u) [Category.{v} C] [MonoidalCategory C] :
@@ -28,17 +30,11 @@ instance (C : Type u) [Category.{v} C] [MonoidalCategory C] :
     (μ := fun X Y p ↦ (λ_ (𝟙_ C)).inv ≫ (p.1 ⊗ₘ p.2))
     (μ_natural := by cat_disch)
     (associativity := fun X Y Z => by
-      ext ⟨⟨f, g⟩, h⟩; dsimp at f g h
-      dsimp; simp only [Iso.cancel_iso_inv_left, Category.assoc]
-      conv_lhs =>
-        rw [← Category.id_comp h, ← tensorHom_comp_tensorHom, Category.assoc, associator_naturality,
-          ← Category.assoc, unitors_inv_equal, tensorHom_id, triangle_assoc_comp_right_inv]
-      conv_rhs => rw [← Category.id_comp f, ← tensorHom_comp_tensorHom]
-      simp)
-    (left_unitality := by
-      intros
-      ext ⟨⟨⟩, f⟩; dsimp at f
-      simp)
+      ext ⟨⟨f, g⟩, h⟩; dsimp at f g h ⊢; simp only [Iso.cancel_iso_inv_left, assoc]
+      rw [← id_comp h, ← tensorHom_comp_tensorHom, assoc, associator_naturality,
+        ← id_comp f, ← tensorHom_comp_tensorHom]
+      simpa [ComonObj.instTensorUnit_comul] using
+        (ComonObj.comul_assoc_assoc (𝟙_ C) (f ⊗ₘ g ⊗ₘ h)).symm)
     (right_unitality := fun X => by
       ext ⟨f, ⟨⟩⟩; dsimp at f
       simp [unitors_inv_equal])

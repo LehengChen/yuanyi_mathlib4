@@ -72,28 +72,24 @@ lemma smulOfRingMorphism_smul_eq' (a : R) (f : X ⟶ Y) :
 
 variable (X Y)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The `R`-module structure on the type `X ⟶ Y` of morphisms in
 a category `C` equipped with a ring morphism `R →+* CatCenter C`. -/
 @[implicit_reducible]
 def homModuleOfRingMorphism : Module R (X ⟶ Y) := by
   letI := smulOfRingMorphism φ X Y
-  exact
-  { one_smul := fun a => by
-      simp only [smulOfRingMorphism_smul_eq,
-        Functor.id_obj, map_one, End.one_def, NatTrans.id_app, id_comp]
-    mul_smul := fun a b f => by
-      simp only [smulOfRingMorphism_smul_eq', Functor.id_obj, map_mul, End.mul_def,
-        NatTrans.comp_app, assoc]
-    smul_zero := fun a => by
-      simp only [smulOfRingMorphism_smul_eq, comp_zero]
-    zero_smul := fun a => by
-      simp only [smulOfRingMorphism_smul_eq, map_zero,
-        zero_app, zero_comp]
-    smul_add := fun a b => by
-      simp [smulOfRingMorphism_smul_eq]
-    add_smul := fun a b f => by
-      simp [smulOfRingMorphism_smul_eq] }
+  let ψ : CatCenter C →+* End Y :=
+    { toFun := fun z => z.app Y
+      map_one' := rfl
+      map_mul' := fun x y => by simp
+      map_zero' := rfl
+      map_add' := fun x y => rfl }
+  letI : Module (CatCenter C) (X ⟶ Y) := Module.compHom (X ⟶ Y) ψ
+  letI : Module R (X ⟶ Y) := Module.compHom (X ⟶ Y) φ
+  exact Function.Injective.module R (AddMonoidHom.id (X ⟶ Y)) (by
+    intro f g h
+    simpa using h) fun a f => by
+      simpa [smulOfRingMorphism, AddMonoidHom.id_apply] using
+        (CatCenter.smul_eq' (z := φ a) f).symm
 
 /-- The `R`-linear structure on a preadditive category `C` equipped with
 a ring morphism `R →+* CatCenter C`. -/

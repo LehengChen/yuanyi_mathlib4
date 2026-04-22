@@ -5,7 +5,7 @@ Authors: Joël Riou
 -/
 module
 
-public import Mathlib.CategoryTheory.Abelian.Refinements
+public import Mathlib.CategoryTheory.Abelian.DiagramLemmas.Four
 public import Mathlib.CategoryTheory.MorphismProperty.Limits
 public import Mathlib.Algebra.Homology.CommSq
 
@@ -96,20 +96,17 @@ then `X₄ ⟶ X₅` is a mono.
 -/
 lemma mono_of_isPullback_of_mono
     (h₁ : IsPushout t l r b) {X₅ : C} {r' : X₂ ⟶ X₅} {b' : X₃ ⟶ X₅}
-    (h₂ : IsPullback t l r' b') (k : X₄ ⟶ X₅)
-    (fac₁ : r ≫ k = r') (fac₂ : b ≫ k = b') [Mono r'] : Mono k :=
-  Preadditive.mono_of_cancel_zero _ (fun {T₀} x₄ hx₄ ↦ by
-    obtain ⟨T₁, π, _, x₂, x₃, eq⟩ := hom_eq_add_up_to_refinements h₁ x₄
-    have fac₃ : (-x₂) ≫ r' = x₃ ≫ b' := by
-      rw [Preadditive.neg_comp, neg_eq_iff_add_eq_zero, ← fac₂, ← fac₁,
-        ← assoc, ← assoc, ← Preadditive.add_comp, ← eq, assoc, hx₄, comp_zero]
-    obtain ⟨x₂', hx₂'⟩ : ∃ x₂', π ≫ x₄ = x₂' ≫ r := by
-      refine ⟨x₂ + h₂.lift (-x₂) x₃ fac₃ ≫ t, ?_⟩
-      rw [eq, Preadditive.add_comp, assoc, h₁.w, IsPullback.lift_snd_assoc, add_comm]
-    rw [← cancel_epi π, comp_zero, reassoc_of% hx₂', fac₁] at hx₄
-    obtain rfl := zero_of_comp_mono _ hx₄
-    rw [zero_comp] at hx₂'
-    rw [← cancel_epi π, hx₂', comp_zero])
+    (h₂ : IsPullback t l r' b') (k : X₄ ⟶ X₅) (fac₁ : r ≫ k = r') (fac₂ : b ≫ k = b')
+    [Mono r'] : Mono k := by
+  let φ : h₁.shortComplex' ⟶ h₂.shortComplex' := ShortComplex.homMk (𝟙 _) (𝟙 _) k (by simp)
+    (by apply biprod.hom_ext' <;> simp [fac₁, fac₂])
+  simpa [φ] using (ShortComplex.mono_of_epi_of_epi_of_mono φ
+      (h₂.shortComplex'.exact_of_f_is_kernel h₂.isLimitKernelFork) (by
+      change Epi (biprod.desc r (-b)); haveI : IsIso (-𝟙 X₃ : X₃ ⟶ X₃) := ⟨⟨-𝟙 _, by simp, by simp⟩⟩
+      haveI : Epi (biprod.desc r b) := h₁.epi_shortComplex_g
+      exact epi_of_epi_fac (show biprod.map (𝟙 X₂) (-𝟙 X₃) ≫ biprod.desc r (-b) = biprod.desc r b by
+        apply biprod.hom_ext' <;> simp))
+    (show Epi (𝟙 X₁) by infer_instance) (show Mono (𝟙 (X₂ ⊞ X₃)) by infer_instance))
 
 end IsPushout
 
@@ -151,14 +148,11 @@ lemma epi_kernel_map_of_isPushout (sq : IsPushout t l r b) :
     Epi (kernel.map _ _ _ _ sq.w) := by
   rw [epi_iff_surjective_up_to_refinements]
   intro A₀ z
-  obtain ⟨A₁, π₁, _, x₁, hx₁⟩ := ((ShortComplex.mk _ _
-    sq.cokernelCofork.condition).exact_of_g_is_cokernel
-      sq.isColimitCokernelCofork).exact_up_to_refinements
-        (z ≫ kernel.ι _ ≫ biprod.inr) (by simp)
-  refine ⟨A₁, π₁, inferInstance, -kernel.lift _ x₁ ?_, ?_⟩
-  · simpa using hx₁.symm =≫ biprod.fst
-  · ext
-    simpa using hx₁ =≫ biprod.snd
+  obtain ⟨A₁, π₁, _, x₁, hx₁⟩ := sq.exact_shortComplex.exact_up_to_refinements
+    (z ≫ kernel.ι _ ≫ biprod.inr) (by simp)
+  refine ⟨A₁, π₁, inferInstance, -kernel.lift _ x₁ (by simpa using hx₁.symm =≫ biprod.fst), ?_⟩
+  ext
+  simpa using hx₁ =≫ biprod.snd
 
 end Abelian
 

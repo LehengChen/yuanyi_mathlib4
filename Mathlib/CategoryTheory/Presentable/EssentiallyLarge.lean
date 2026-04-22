@@ -6,6 +6,7 @@ Authors: Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Presentable.CardinalFilteredPresentation
+public import Mathlib.CategoryTheory.ObjectProperty.ColimitsClosure
 
 /-!
 # Accessible categories are essentially large
@@ -35,24 +36,18 @@ variable [LocallySmall.{w} C] {P : ObjectProperty C} [ObjectProperty.Essentially
 include hP in
 lemma essentiallyLarge_top :
     ObjectProperty.EssentiallySmall.{w + 1} (C := C) ⊤ := by
-  let e := equivSmallModel.{w} P.FullSubcategory
-  let ι := Σ (J : Type w) (_ : SmallCategory J),
-    { F : J ⥤ _ // HasColimit (F ⋙ e.inverse ⋙ P.ι) }
-  let φ : ι → C := fun ⟨j, _, F, hF⟩ ↦ colimit (F ⋙ e.inverse ⋙ P.ι)
-  refine ⟨ObjectProperty.ofObj φ, inferInstance, fun X _ ↦ ?_⟩
+  haveI : LocallySmall.{w + 1} C := ⟨fun X Y ↦ small_lift.{v, w + 1, w} (X ⟶ Y)⟩
+  haveI : ObjectProperty.EssentiallySmall.{w + 1} P := by
+    obtain ⟨Q, hQ, hPQ⟩ := ObjectProperty.EssentiallySmall.exists_small_le' P
+    exact ⟨Q, small_lift.{u, w + 1, w} (Subtype Q), hPQ⟩
+  let ι := Σ (J : Type w), SmallCategory J
+  let shape : ι → Type w := fun i ↦ i.1
+  letI (i : ι) : SmallCategory (shape i) := i.2
+  refine ObjectProperty.EssentiallySmall.of_le (Q := P.colimitsClosure shape) ?_
+  intro X _
   obtain ⟨J, _, _, ⟨p⟩⟩ := hP.exists_colimitsOfShape X
-  let G : J ⥤ P.FullSubcategory := P.lift p.diag p.prop_diag_obj
-  let iso : (G ⋙ e.functor) ⋙ e.inverse ⋙ P.ι ≅ p.diag :=
-    Functor.associator _ _ _ ≪≫
-    G.isoWhiskerLeft ((Functor.associator _ _ _).symm ≪≫
-    Functor.isoWhiskerRight e.unitIso.symm P.ι) ≪≫
-    (Functor.associator _ _ _).symm ≪≫
-    Functor.isoWhiskerRight (Functor.rightUnitor _) _
-  have : HasColimit p.diag := ⟨_, p.isColimit⟩
-  have := hasColimit_of_iso iso
-  let i : ι := ⟨J, inferInstance, G ⋙ e.functor, inferInstance⟩
-  exact ⟨_, ⟨i⟩, ⟨((IsColimit.precomposeHomEquiv iso _).2
-    (p.isColimit)).coconePointUniqueUpToIso (colimit.isColimit _)⟩⟩
+  exact .of_colimitPresentation (a := ⟨J, inferInstance⟩) p.toColimitPresentation
+    (fun j ↦ .of_mem _ (p.prop_diag_obj j))
 
 end ObjectProperty.IsCardinalFilteredGenerator
 

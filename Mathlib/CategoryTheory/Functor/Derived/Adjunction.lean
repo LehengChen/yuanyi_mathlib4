@@ -48,44 +48,37 @@ open Functor
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Auxiliary definition for `Adjunction.derived`. -/
-@[simps]
+@[simps!]
 def derived' [G'.IsLeftDerivedFunctor α W₁] [F'.IsRightDerivedFunctor β W₂]
     (η : 𝟭 D₁ ⟶ G' ⋙ F') (ε : F' ⋙ G' ⟶ 𝟭 D₂)
     (hη : ∀ (X₁ : C₁), η.app (L₁.obj X₁) ≫ F'.map (α.app X₁) =
       L₁.map (adj.unit.app X₁) ≫ β.app (G.obj X₁) := by cat_disch)
     (hε : ∀ (X₂ : C₂), G'.map (β.app X₂) ≫ ε.app (L₂.obj X₂) =
-      α.app (F.obj X₂) ≫ L₂.map (adj.counit.app X₂) := by cat_disch) : G' ⊣ F' where
-  unit := η
-  counit := ε
-  left_triangle_components := by
-    suffices G'.leftUnitor.inv ≫ whiskerRight η G' ≫ (Functor.associator _ _ _).hom ≫
-        whiskerLeft G' ε ≫ G'.rightUnitor.hom = 𝟙 _ from
-      fun Y₁ ↦ by simpa using congr_app this Y₁
-    apply G'.leftDerived_ext α W₁
-    ext X₁
-    have eq₁ := ε.naturality (α.app X₁)
-    have eq₂ := G'.congr_map (hη X₁)
-    have eq₃ := α.naturality (adj.unit.app X₁)
-    dsimp at eq₁ eq₂ eq₃ ⊢
-    simp only [Functor.map_comp] at eq₂
-    rw [Category.assoc, Category.assoc, Category.assoc, Category.comp_id,
-      Category.id_comp, Category.id_comp, Category.id_comp, ← eq₁, reassoc_of% eq₂,
-      hε (G.obj X₁), reassoc_of% eq₃, ← L₂.map_comp, adj.left_triangle_components,
-      Functor.map_id, Category.comp_id]
-  right_triangle_components := by
-    suffices F'.leftUnitor.inv ≫ whiskerLeft F' η ≫ (Functor.associator _ _ _).inv ≫
-      whiskerRight ε F' ≫ F'.rightUnitor.hom = 𝟙 _ from
-        fun Y₂ ↦ by simpa using congr_app this Y₂
-    apply F'.rightDerived_ext β W₂
-    ext X₂
-    have eq₁ := η.naturality (β.app X₂)
-    have eq₂ := F'.congr_map (hε X₂)
-    have eq₃ := β.naturality (adj.counit.app X₂)
-    dsimp at eq₁ eq₂ eq₃ ⊢
-    simp only [Functor.map_comp] at eq₂
-    rw [Category.comp_id, Category.comp_id, Category.id_comp, Category.id_comp,
-      reassoc_of% eq₁, eq₂, reassoc_of% (hη (F.obj X₂)), ← eq₃, ← L₁.map_comp_assoc,
-      adj.right_triangle_components, Functor.map_id, Category.id_comp]
+      α.app (F.obj X₂) ≫ L₂.map (adj.counit.app X₂) := by cat_disch) : G' ⊣ F' :=
+  mkOfUnitCounit
+    { unit := η
+      counit := ε
+      left_triangle := by
+        apply G'.leftDerived_ext α W₁
+        ext X₁
+        dsimp
+        simp only [Category.assoc, Category.id_comp]
+        erw [← ε.naturality (α.app X₁)]
+        dsimp
+        rw [← G'.map_comp_assoc, hη X₁, Functor.map_comp_assoc, hε (G.obj X₁),
+          reassoc_of% (α.naturality (adj.unit.app X₁)), ← L₂.map_comp,
+          adj.left_triangle_components, Functor.map_id, Category.comp_id]
+      right_triangle := by
+        apply F'.rightDerived_ext β W₂
+        ext X₂
+        dsimp
+        simp only [Category.comp_id, Category.id_comp]
+        rw [reassoc_of% (η.naturality (β.app X₂)), ← F'.map_comp, hε X₂,
+          Functor.map_comp, reassoc_of% (hη (F.obj X₂))]
+        erw [← β.naturality (adj.counit.app X₂)]
+        dsimp
+        rw [← L₁.map_comp_assoc, adj.right_triangle_components, Functor.map_id,
+          Category.id_comp] }
 
 section
 

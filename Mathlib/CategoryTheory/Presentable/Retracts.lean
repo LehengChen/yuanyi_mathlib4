@@ -5,8 +5,8 @@ Authors: Joël Riou
 -/
 module
 
-public import Mathlib.CategoryTheory.Presentable.Basic
-public import Mathlib.CategoryTheory.ObjectProperty.Retract
+public import Mathlib.CategoryTheory.Presentable.Limits
+public import Mathlib.CategoryTheory.Limits.Shapes.SplitCoequalizer
 
 /-!
 # Presentable objects are stable under retracts
@@ -23,21 +23,17 @@ open Limits
 
 variable {C : Type u} [Category.{v} C]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma Retract.isCardinalPresentable
     {X Y : C} (h : Retract Y X) (κ : Cardinal.{w}) [Fact κ.IsRegular]
     [IsCardinalPresentable X κ] :
-    IsCardinalPresentable Y κ where
-  preservesColimitOfShape J _ _ := ⟨fun {F} ↦ ⟨fun {c} hc ↦ ⟨by
-    have := essentiallySmallSelf J
-    have := isFiltered_of_isCardinalFiltered J κ
-    refine Types.FilteredColimit.isColimitOf' _ _ (fun f ↦ ?_) (fun j f₁ f₂ hf ↦ ?_)
-    · obtain ⟨i, g, hg⟩ := IsCardinalPresentable.exists_hom_of_isColimit κ hc (h.r ≫ f)
-      exact ⟨i, h.i ≫ g, by simp [hg]⟩
-    · dsimp at f₁ f₂ hf ⊢
-      obtain ⟨k, u, hj⟩ := IsCardinalPresentable.exists_eq_of_isColimit'
-        κ hc (h.r ≫ f₁) (h.r ≫ f₂) (by simp [hf])
-      exact ⟨k, u, by simpa [← cancel_epi h.r] using hj⟩⟩⟩⟩
+    IsCardinalPresentable Y κ := by
+  let t : IsSplitCoequalizer (h.r ≫ h.i) (𝟙 X) h.r :=
+    { rightSection := h.i, leftSection := 𝟙 X }
+  have (j : WalkingParallelPair) :
+      IsCardinalPresentable ((parallelPair (h.r ≫ h.i) (𝟙 X)).obj j) κ := by
+    cases j <;> change IsCardinalPresentable X κ <;> infer_instance
+  exact isCardinalPresentable_of_isColimit' t.asCofork t.isCoequalizer κ
+    (hasCardinalLT_of_finite (Arrow WalkingParallelPair) κ (Cardinal.IsRegular.aleph0_le Fact.out))
 
 instance (κ : Cardinal.{w}) [Fact κ.IsRegular] :
     (isCardinalPresentable C κ).IsStableUnderRetracts where

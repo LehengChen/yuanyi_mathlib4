@@ -288,31 +288,26 @@ noncomputable def isColimitCofanMkYoneda {ι : Type*} (X : ι → C) {c : Cofan 
     · obtain ⟨h⟩ := hdisj h a b hab
       have := Types.isTerminalEquivUnique _ (Sheaf.isTerminalOfBotCover s.pt _ (hempty Y h))
       exact Subsingleton.elim _ _
-  refine mkCofanColimit _ (fun s ↦ ⟨?_⟩) (fun s j ↦ ?_) fun s m hm ↦ ?_
-  · refine (s.pt.2.isSheafFor _ H).extend ?_
-    refine ⟨fun Y g ↦ ((s.inj (Sieve.ofArrows.i g.2)).hom.app Y) (Sieve.ofArrows.h g.2), ?_⟩
-    intro ⟨Y⟩ ⟨Z⟩ ⟨(g : Z ⟶ Y)⟩
-    ext u
-    dsimp
-    rw [← heq s (g ≫ Sieve.ofArrows.h u.2)
-      (Sieve.ofArrows.h <| Sieve.downward_closed _ u.2 g) (by simp)]
-    exact congrFun ((s.inj _).hom.naturality g.op) _
-  · ext : 1
-    let u (j : ι) : CategoryTheory.yoneda.obj (X j) ⟶ (Sieve.ofArrows _ c.inj).functor :=
-      (Sieve.ofArrows _ c.inj).toFunctor (c.inj j) (Sieve.ofArrows_mk _ _ j)
-    have (j : ι) : u j ≫ (Sieve.ofArrows _ c.inj).functorInclusion =
-      CategoryTheory.yoneda.map (c.inj j) := rfl
-    dsimp
-    simp only [← this, Category.assoc, Presieve.IsSheafFor.functorInclusion_comp_extend]
-    ext Z (g : Z.unop ⟶ X j)
-    have h : Sieve.ofArrows X c.inj (g ≫ c.inj j) :=
-      Sieve.downward_closed _ (Sieve.ofArrows_mk _ _ j) _
-    exact heq s (Sieve.ofArrows.h h) g (by simp)
-  · ext : 1
-    dsimp
-    apply Presieve.IsSheafFor.unique_extend
-    ext Y ⟨g, hg⟩
-    simp [← hm (Sieve.ofArrows.i hg)]
+  have hs (s : Cofan fun i ↦ J.yoneda.obj (X i)) :
+      ∃! t : s.pt.obj.obj (op c.pt),
+        ∀ i, s.pt.obj.map (c.inj i).op t = J.yonedaEquiv (s.inj i) := by
+    refine (Presieve.isSheafFor_arrows_iff s.pt.obj c.inj).1 ?_ _ ?_
+    · exact (Presieve.isSheafFor_iff_generate _).2 (s.pt.2.isSheafFor _ H)
+    · intro i j Y a b hab
+      simpa [map_yonedaEquiv] using heq s a b hab
+  have hmap (j : ι) : J.yonedaEquiv ((Cofan.mk _ fun i ↦ J.yoneda.map (c.inj i)).inj j) =
+      c.inj j := J.yonedaEquiv_yoneda_map (c.inj j)
+  refine mkCofanColimit _ (fun s ↦ J.yonedaEquiv.symm (hs s).exists.choose)
+    (fun s j ↦ ?_) fun s m hm ↦ ?_
+  · apply J.yonedaEquiv.injective
+    rw [yonedaEquiv_comp, hmap j]
+    exact (hs s).exists.choose_spec j
+  · apply J.yonedaEquiv.injective
+    simpa using ((hs s).unique (hs s).exists.choose_spec (fun j ↦ by
+      rw [map_yonedaEquiv]
+      have h := congr_arg (J.yonedaEquiv) (hm j)
+      rw [yonedaEquiv_comp, hmap j] at h
+      exact h)).symm
 
 /-- If the coproduct inclusions form a covering of `J` and coproducts are disjoint,
 the yoneda embedding to `J`-sheaves preserves coproducts. -/

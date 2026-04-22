@@ -31,31 +31,27 @@ instance subcanonical_over (J : GrothendieckTopology C) [J.Subcanonical] (X : C)
       (Over.homMk (U := Over.mk (gi ≫ (T i).hom)) gj
       (by dsimp; rw [← Over.w (g i), reassoc_of% hgij, ← Over.w (g j)]))
       (Sieve.ofArrows_mk _ _ i) (Sieve.ofArrows_mk _ _ j) (by ext; exact hgij)).left)
-  rw [J.mem_over_iff, Sieve.ofArrows, Sieve.overEquiv_generate,
-    ← Sieve.arrows_generate_map_eq_functorPushforward, Sieve.generate_sieve,
-    Presieve.map_ofArrows] at hR
-  obtain ⟨a, ha, huniq⟩ := Subcanonical.isSheaf_of_isRepresentable
-    (CategoryTheory.yoneda.obj E.left) _ hR _ hg.familyOfElements_compatible.sieveExtend
+  simp only [J.mem_over_iff, Sieve.ofArrows, Sieve.overEquiv_generate,
+    Presieve.functorPushforward_overForget, Sieve.generate_sieve, Presieve.map_ofArrows] at hR
+  obtain ⟨a, ha, huniq⟩ := (Presieve.isSheafFor_arrows_iff _ _).1
+    ((Subcanonical.isSheaf_of_isRepresentable
+      (CategoryTheory.yoneda.obj E.left)).isSheafFor _ hR) _ hg
   refine ⟨?_, ?_, fun y hty ↦ ?_⟩
   · refine Over.homMk a ?_
-    refine (Subcanonical.isSheaf_of_isRepresentable <| CategoryTheory.yoneda.obj X)
-      (.ofArrows _ <| fun i ↦ (g i).left) hR |>.isSeparatedFor.ext ?_
-    rintro W u ⟨V, v, _, ⟨i⟩, rfl⟩
-    have := ha _ (Sieve.ofArrows_mk _ _ i)
+    refine ((Subcanonical.isSheaf_of_isRepresentable
+      (CategoryTheory.yoneda.obj X)).isSheafFor _ hR).isSeparatedFor.ext ?_
+    rintro W u ⟨i⟩
+    have := ha i
     dsimp at this
-    simp [reassoc_of% this, Presieve.extend_agrees hg.familyOfElements_compatible (.mk i)]
+    simp [reassoc_of% this]
   · rintro W p ⟨V, v, _, ⟨i⟩, rfl⟩
     refine Over.OverMorphism.ext ?_
-    have := ha (g i).left (Sieve.ofArrows_mk _ _ i)
+    have := ha i
     dsimp at this
-    simp [Category.assoc, this, Presieve.extend_agrees hg.familyOfElements_compatible (.mk i),
+    simp [Category.assoc, this,
       Presieve.FamilyOfElements.comp_of_compatible _ ht (Sieve.ofArrows_mk _ _ i)]
   · refine Over.OverMorphism.ext (huniq _ ?_)
-    rintro W p ⟨V, v, _, ⟨i⟩, rfl⟩
-    have := congr($(hty _ (Sieve.ofArrows_mk _ _ i)).left)
-    dsimp at this
-    simp [Presieve.FamilyOfElements.comp_of_compatible _
-      hg.familyOfElements_compatible.sieveExtend (Sieve.ofArrows_mk _ _ i),
-      Presieve.extend_agrees hg.familyOfElements_compatible (.mk i), this]
+    intro i
+    exact congr($(hty _ (Sieve.ofArrows_mk _ _ i)).left)
 
 end CategoryTheory.GrothendieckTopology

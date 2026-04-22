@@ -92,20 +92,16 @@ theorem rel_iso_iff {X Y : RelCat} (r : X ⟶ Y) :
     have h1 := congr_fun₂ congr((· ~[($h.hom_inv_id).rel] ·))
     have h2 := congr_fun₂ congr((· ~[($h.inv_hom_id).rel] ·))
     simp only [RelCat.Hom.rel_comp_apply₂, RelCat.Hom.rel_id_apply₂, eq_iff_iff] at h1 h2
-    obtain ⟨f, hf⟩ := Classical.axiomOfChoice (fun a => (h1 a a).mpr rfl)
-    obtain ⟨g, hg⟩ := Classical.axiomOfChoice (fun a => (h2 a a).mpr rfl)
-    suffices hif : IsIso (C := Type u) f by
-      use asIso f
-      ext ⟨x, y⟩
+    choose f hf using fun a => (h1 a a).mpr rfl
+    choose g hg using fun a => (h2 a a).mpr rfl
+    refine ⟨(Equiv.ofBijective f <| (Function.bijective_iff_has_inverse).2 ?_).toIso, ?_⟩
+    · refine ⟨g, ?_, ?_⟩
+      · intro x
+        exact (h1 _ _).mp ⟨f x, (hg _).2, (hf _).2⟩
+      · intro y
+        exact (h2 _ _).mp ⟨g y, (hf _).2, (hg _).2⟩
+    · ext ⟨x, y⟩
       exact ⟨by aesop, fun hxy ↦ (h2 (f x) y).1 ⟨x, (hf x).2, hxy⟩⟩
-    use g
-    constructor
-    · ext x
-      apply (h1 _ _).mp
-      use f x, (hg _).2, (hf _).2
-    · ext y
-      apply (h2 _ _).mp
-      use g y, (hf (g y)).2, (hg y).2
   · rintro ⟨f, rfl⟩
     apply graphFunctor.map_isIso
 

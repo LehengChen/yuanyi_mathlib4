@@ -33,23 +33,19 @@ namespace Injective
 
 theorem injective_iff_preservesEpimorphisms_preadditiveYoneda_obj (J : C) :
     Injective J ↔ (preadditiveYoneda.obj J).PreservesEpimorphisms := by
-  rw [injective_iff_preservesEpimorphisms_yoneda_obj]
-  refine
-    ⟨fun h : (preadditiveYoneda.obj J ⋙ (forget AddCommGrpCat)).PreservesEpimorphisms => ?_, ?_⟩
-  · exact
-      Functor.preservesEpimorphisms_of_preserves_of_reflects (preadditiveYoneda.obj J) (forget _)
-  · intro
-    exact (inferInstance : (preadditiveYoneda.obj J ⋙ forget _).PreservesEpimorphisms)
+  exact (injective_iff_preservesEpimorphisms_yoneda_obj J).trans <| Iff.intro
+    (fun h => @Functor.preservesEpimorphisms_of_preserves_of_reflects _ _ _ _ _ _
+      (preadditiveYoneda.obj J) (forget AddCommGrpCat) h inferInstance)
+    (fun h => @Functor.preservesEpimorphisms_comp _ _ _ _ _ _
+      (preadditiveYoneda.obj J) (forget AddCommGrpCat) h inferInstance)
 
 theorem injective_iff_preservesEpimorphisms_preadditive_yoneda_obj' (J : C) :
     Injective J ↔ (preadditiveYonedaObj J).PreservesEpimorphisms := by
-  rw [injective_iff_preservesEpimorphisms_yoneda_obj]
-  refine ⟨fun h : (preadditiveYonedaObj J ⋙ (forget <| ModuleCat (End J))).PreservesEpimorphisms =>
-    ?_, ?_⟩
-  · exact
-      Functor.preservesEpimorphisms_of_preserves_of_reflects (preadditiveYonedaObj J) (forget _)
-  · intro
-    exact (inferInstance : (preadditiveYonedaObj J ⋙ forget _).PreservesEpimorphisms)
+  exact (injective_iff_preservesEpimorphisms_preadditiveYoneda_obj J).trans <| Iff.intro
+    (fun h => @Functor.preservesEpimorphisms_of_preserves_of_reflects _ _ _ _ _ _
+      (preadditiveYonedaObj J) (forget₂ _ _) h inferInstance)
+    (fun h => @Functor.preservesEpimorphisms_comp _ _ _ _ _ _
+      (preadditiveYonedaObj J) (forget₂ _ _) h inferInstance)
 
 end Injective
 

@@ -65,14 +65,12 @@ theorem effectiveEpiFamilyStructOfEffectiveEpiDesc_aux {B : C} {α : Type*} {X :
       g₁ ≫ π a₁ = g₂ ≫ π a₂ → g₁ ≫ e a₁ = g₂ ≫ e a₂) {Z : C}
     {g₁ g₂ : Z ⟶ ∐ fun b ↦ X b} (hg : g₁ ≫ Sigma.desc π = g₂ ≫ Sigma.desc π) :
     g₁ ≫ Sigma.desc e = g₂ ≫ Sigma.desc e := by
-  apply_fun ((Sigma.desc fun a ↦ pullback.fst g₁ (Sigma.ι X a)) ≫ ·) using
-    (fun a b ↦ (cancel_epi _).mp)
+  rw [← cancel_epi (Sigma.desc fun a ↦ pullback.fst g₁ (Sigma.ι X a))]
   ext a
-  simp only [colimit.ι_desc_assoc, Discrete.functor_obj, Cofan.mk_pt, Cofan.mk_ι_app]
-  rw [← Category.assoc, pullback.condition]
-  simp only [Category.assoc, colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app]
-  apply_fun ((Sigma.desc fun a ↦ pullback.fst (pullback.fst _ _ ≫ g₂) (Sigma.ι X a)) ≫ ·)
-    using (fun a b ↦ (cancel_epi _).mp)
+  suffices pullback.snd g₁ (Sigma.ι X a) ≫ e a =
+      pullback.fst g₁ (Sigma.ι X a) ≫ g₂ ≫ Sigma.desc e by
+    simpa [Category.assoc, pullback.condition_assoc] using this
+  rw [← cancel_epi (Sigma.desc fun b ↦ pullback.fst (pullback.fst _ _ ≫ g₂) (Sigma.ι X b))]
   ext b
   simp only [colimit.ι_desc_assoc, Discrete.functor_obj, Cofan.mk_pt, Cofan.mk_ι_app]
   simp only [← Category.assoc]
@@ -83,12 +81,10 @@ theorem effectiveEpiFamilyStructOfEffectiveEpiDesc_aux {B : C} {α : Type*} {X :
   apply_fun (pullback.fst g₁ (Sigma.ι X a) ≫ ·) at hg
   rw [← Category.assoc, pullback.condition] at hg
   simp only [Category.assoc, colimit.ι_desc, Cofan.mk_pt, Cofan.mk_ι_app] at hg
-  apply_fun ((Sigma.ι (fun a ↦ pullback _ _) b) ≫ (Sigma.desc fun a ↦
-    pullback.fst (pullback.fst _ _ ≫ g₂) (Sigma.ι X a)) ≫ ·) at hg
-  simp only [colimit.ι_desc_assoc, Discrete.functor_obj, Cofan.mk_pt, Cofan.mk_ι_app] at hg
-  simp only [← Category.assoc] at hg
-  rw [(Category.assoc _ _ g₂), pullback.condition] at hg
-  simpa using hg
+  rw [Category.assoc, hg]
+  simpa [Category.assoc] using
+    (pullback.condition_assoc (f := pullback.fst g₁ (Sigma.ι X a) ≫ g₂)
+      (g := Sigma.ι X b) (Sigma.desc π))
 
 set_option backward.isDefEq.respectTransparency false in
 /--

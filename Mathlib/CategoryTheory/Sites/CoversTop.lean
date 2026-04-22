@@ -130,23 +130,18 @@ lemma existsUnique_section (hx : x.IsCompatible) (hY : J.CoversTop Y) (hF : IsSh
   apply existsUnique_of_exists_of_unique
   · let s := fun (X : C) => (H _ (hY X)).amalgamate _
       (hx.familyOfElements_isCompatible X)
-    have hs : ∀ {X : C} (i : I) (f : X ⟶ Y i), s X = F.map f.op (x i) := fun {X} i f => by
-      have h := Presieve.IsSheafFor.valid_glue (H _ (hY X))
-          (hx.familyOfElements_isCompatible _) (𝟙 _) ⟨i, ⟨f⟩⟩
-      simp only [op_id, F.map_id, types_id_apply] at h
-      exact h.trans (hx.familyOfElements_apply _ _ _)
-    have hs' : ∀ {W X : C} (a : W ⟶ X) (i : I) (_ : W ⟶ Y i), F.map a.op (s X) = s W := by
-      intro W X a i b
-      rw [hs i b]
-      exact (Presieve.IsSheafFor.valid_glue (H _ (hY X))
-        (hx.familyOfElements_isCompatible _) a ⟨i, ⟨b⟩⟩).trans (familyOfElements_apply hx _ _ _)
-    refine ⟨⟨fun X => s X.unop, ?_⟩, fun i => (hs i (𝟙 (Y i))).trans (by simp)⟩
-    rintro ⟨Y₁⟩ ⟨Y₂⟩ ⟨f : Y₂ ⟶ Y₁⟩
-    change F.map f.op (s Y₁) = s Y₂
-    apply (H.isSeparated _ (hY Y₂)).ext
-    rintro Z φ ⟨i, ⟨g⟩⟩
-    rw [hs' φ i g, ← hs' (φ ≫ f) i g, op_comp, F.map_comp]
-    rfl
+    have hs : ∀ {W X : C} (a : W ⟶ X) (i : I) (f : W ⟶ Y i),
+        F.map a.op (s X) = F.map f.op (x i) := fun {W X} a i f =>
+      (Presieve.IsSheafFor.valid_glue (H _ (hY X))
+        (hx.familyOfElements_isCompatible _) a ⟨i, ⟨f⟩⟩).trans (familyOfElements_apply hx _ _ _)
+    refine ⟨⟨fun X => s X.unop, ?_⟩, fun i => ?_⟩
+    · rintro ⟨Y₁⟩ ⟨Y₂⟩ ⟨f : Y₂ ⟶ Y₁⟩
+      change F.map f.op (s Y₁) = s Y₂
+      apply (H.isSeparated _ (hY Y₂)).ext
+      rintro Z φ ⟨i, ⟨g⟩⟩
+      rw [hs φ i g, ← hs (φ ≫ f) i g, op_comp, F.map_comp]
+      rfl
+    · simpa using hs (𝟙 (Y i)) i (𝟙 (Y i))
   · intro y₁ y₂ hy₁ hy₂
     exact hY.sections_ext ⟨F, hF⟩ (fun i => by rw [hy₁, hy₂])
 
