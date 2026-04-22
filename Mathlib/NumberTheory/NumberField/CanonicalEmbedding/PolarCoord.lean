@@ -401,7 +401,32 @@ theorem volume_eq_two_pi_pow_mul_integral [NumberField K]
       ← two_mul, Finset.prod_const, Finset.card_univ, ← Set.indicator_const_mul,
       ← Set.indicator_comp_right, Function.comp_def, Pi.one_apply, mul_one]
     rw [lintegral_mul_const' _ _ (ne_of_beq_false rfl).symm, mul_comm]
-    erw [setLIntegral_indicator (by convert hm.preimage mixedSpaceOfRealSpace.measurable)]
+    have hm' :
+        MeasurableSet
+          (mixedSpaceOfRealSpace ⁻¹' (normAtComplexPlaces ⁻¹' (normAtComplexPlaces '' A))) := by
+      rw [hA]
+      exact hm.preimage (mixedSpaceOfRealSpace (K := K)).measurable
+    have h_indicator :
+        ENNReal.ofReal (2 * π) ^ Fintype.card {w : InfinitePlace K // IsComplex w} *
+            (∫⁻ a : InfinitePlace K → ℝ in
+              Set.univ.pi fun w ↦ if w.IsReal then Set.univ else Set.Ioi 0,
+              (mixedSpaceOfRealSpace ⁻¹'
+                  (normAtComplexPlaces ⁻¹' (normAtComplexPlaces '' A))).indicator
+                (fun a : InfinitePlace K → ℝ ↦
+                  ∏ w : {w // IsComplex w}, ENNReal.ofReal (a w.1)) a
+                ∂Measure.pi fun _ : InfinitePlace K ↦ (volume : Measure ℝ)) =
+          ENNReal.ofReal (2 * π) ^ Fintype.card {w : InfinitePlace K // IsComplex w} *
+            (∫⁻ a : InfinitePlace K → ℝ in
+              (mixedSpaceOfRealSpace ⁻¹'
+                  (normAtComplexPlaces ⁻¹' (normAtComplexPlaces '' A))) ∩
+                Set.univ.pi fun w ↦ if w.IsReal then Set.univ else Set.Ioi 0,
+              ∏ w : {w // IsComplex w}, ENNReal.ofReal (a w.1)
+                ∂Measure.pi fun _ : InfinitePlace K ↦ (volume : Measure ℝ)) := by
+      exact congrArg
+        (fun z ↦ ENNReal.ofReal (2 * π) ^ Fintype.card {w : InfinitePlace K // IsComplex w} * z)
+        (setLIntegral_indicator
+          (μ := Measure.pi fun _ : InfinitePlace K ↦ (volume : Measure ℝ)) hm' _)
+    refine h_indicator.trans ?_
     rw [hA, volume_eq_two_pi_pow_mul_integral_aux hA]
     congr 1
     refine setLIntegral_congr (ae_eq_set_inter (by rfl) (Measure.ae_eq_set_pi fun w _ ↦ ?_))
