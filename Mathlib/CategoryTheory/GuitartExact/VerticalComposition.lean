@@ -96,7 +96,7 @@ def structuredArrowDownwardsComp (Y₁ : D₁) :
   NatIso.ofComponents (fun _ => StructuredArrow.isoMk (Iso.refl _))
 
 /-- The vertical composition of 2-squares. (Variant where we allow the replacement of
-the vertical compositions by isomorphic functors.) -/
+the composite left and right functors by isomorphic functors.) -/
 @[simps!]
 def vComp' {L₁₂ : C₁ ⥤ C₃} {R₁₂ : D₁ ⥤ D₃} (eL : L₁ ⋙ L₂ ≅ L₁₂)
     (eR : R₁ ⋙ R₂ ≅ R₁₂) : TwoSquare H₁ L₁₂ R₁₂ H₃ :=
