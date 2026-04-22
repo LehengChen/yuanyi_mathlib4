@@ -314,13 +314,21 @@ def Cofan.isColimitTrans {X : α → C} (c : Cofan X) (hc : IsColimit c)
   refine mkCofanColimit _ ?_ ?_ ?_
   · exact fun t ↦ hc.desc (Cofan.mk _ fun a ↦ (hs a).desc (Cofan.mk t.pt (fun b ↦ t.inj ⟨a, b⟩)))
   · intro t ⟨a, b⟩
-    simp only [mk_pt, cofan_mk_inj, Category.assoc]
-    erw [hc.fac, (hs a).fac]
-    rfl
+    have hc_fac := Cofan.IsColimit.fac hc
+      (fun a' ↦ Cofan.IsColimit.desc (hs a') (fun b' ↦ t.inj ⟨a', b'⟩)) a
+    have hs_fac := Cofan.IsColimit.fac (hs a) (fun b' ↦ t.inj ⟨a, b'⟩) b
+    have hc_fac' := congrArg (fun k => π a b ≫ k) hc_fac
+    simp only [mk_pt, cofan_mk_inj, Category.assoc] at hc_fac' hs_fac ⊢
+    exact hc_fac'.trans hs_fac
   · intro t m h
     refine hc.hom_ext fun ⟨a⟩ ↦ (hs a).hom_ext fun ⟨b⟩ ↦ ?_
-    erw [hc.fac, (hs a).fac]
-    simpa using h ⟨a, b⟩
+    have hm := h ⟨a, b⟩
+    have hc_fac := Cofan.IsColimit.fac hc
+      (fun a' ↦ Cofan.IsColimit.desc (hs a') (fun b' ↦ t.inj ⟨a', b'⟩)) a
+    have hs_fac := Cofan.IsColimit.fac (hs a) (fun b' ↦ t.inj ⟨a, b'⟩) b
+    have hc_fac' := congrArg (fun k => π a b ≫ k) hc_fac
+    simp only [mk_pt, cofan_mk_inj, Category.assoc] at hm hc_fac' hs_fac ⊢
+    exact hm.trans (hc_fac'.trans hs_fac).symm
 
 /-- Construct a morphism between categorical products (indexed by the same type)
 from a family of morphisms between the factors.
@@ -886,10 +894,13 @@ theorem Sigma.ι_reindex_hom (b : β) :
   simp only [HasColimit.isoOfEquivalence_hom_π, Functor.id_obj, Discrete.functor_obj,
     Function.comp_apply, Discrete.equivalence_functor, Discrete.equivalence_inverse,
     Functor.comp_obj, Discrete.natIso_inv_app, Iso.refl_inv, Category.id_comp]
-  have h := colimit.w (Discrete.functor f) (Discrete.eqToHom' (ε.apply_symm_apply (ε b)))
-  simp only [Discrete.functor_obj] at h
-  erw [← h, eqToHom_map, eqToHom_map, eqToHom_trans_assoc]
-  all_goals { simp }
+  have hunit :
+      (Discrete.functor (f ∘ ε)).map ((Discrete.equivalence ε).unit.app { as := b }) =
+        eqToHom (by simp) := by
+    dsimp [Discrete.equivalence]
+    simp [eqToHom_map]
+  rw [hunit]
+  exact Sigma.eqToHom_comp_ι (f := f) (w := (ε.apply_symm_apply (ε b)).symm)
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
