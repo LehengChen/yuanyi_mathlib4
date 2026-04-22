@@ -204,13 +204,27 @@ theorem range_prod_map {W X Y Z : TopCat.{u}} (f : W ⟶ Y) (g : X ⟶ Z) :
     apply Concrete.limit_ext
     rintro ⟨⟨⟩⟩
     · rw [← ConcreteCategory.comp_apply]
-      erw [Limits.prod.map_fst]
-      rw [ConcreteCategory.comp_apply, TopCat.prodIsoProd_inv_fst_apply]
-      exact hx₁
+      have hfst :
+          Limits.prod.map f g ≫ limit.π (pair Y Z) ⟨WalkingPair.left⟩ = Limits.prod.fst ≫ f :=
+        Limits.prod.map_fst f g
+      rw [hfst]
+      have hfst_apply :
+          (ConcreteCategory.hom (Limits.prod.fst ≫ f))
+              ((ConcreteCategory.hom (prodIsoProd W X).inv) (x₁, x₂)) =
+            (ConcreteCategory.hom f) x₁ := by
+        simp [TopCat.hom_comp, ContinuousMap.comp_apply, TopCat.prodIsoProd_inv_fst_apply]
+      exact hfst_apply.trans hx₁
     · rw [← ConcreteCategory.comp_apply]
-      erw [Limits.prod.map_snd]
-      rw [ConcreteCategory.comp_apply, TopCat.prodIsoProd_inv_snd_apply]
-      exact hx₂
+      have hsnd :
+          Limits.prod.map f g ≫ limit.π (pair Y Z) ⟨WalkingPair.right⟩ = Limits.prod.snd ≫ g :=
+        Limits.prod.map_snd f g
+      rw [hsnd]
+      have hsnd_apply :
+          (ConcreteCategory.hom (Limits.prod.snd ≫ g))
+              ((ConcreteCategory.hom (prodIsoProd W X).inv) (x₁, x₂)) =
+            (ConcreteCategory.hom g) x₂ := by
+        simp [TopCat.hom_comp, ContinuousMap.comp_apply, TopCat.prodIsoProd_inv_snd_apply]
+      exact hsnd_apply.trans hx₂
 
 theorem isInducing_prodMap {W X Y Z : TopCat.{u}} {f : W ⟶ X} {g : Y ⟶ Z} (hf : IsInducing f)
     (hg : IsInducing g) : IsInducing (Limits.prod.map f g) := by
@@ -265,8 +279,25 @@ theorem binaryCofan_isColimit_iff {X Y : TopCat} (c : BinaryCofan X Y) :
             (binaryCofanIsColimit X Y)).symm.isOpenEmbedding.comp .inr, ?_⟩
       rw [Set.range_comp, ← eq_compl_iff_isCompl]
       conv_rhs => rw [Set.range_comp]
-      erw [← Set.image_compl_eq (homeoOfIso <| h.coconePointUniqueUpToIso
-            (binaryCofanIsColimit X Y)).symm.bijective, Set.compl_range_inr, Set.image_comp]
+      have himage :
+          (Hom.hom (h.coconePointUniqueUpToIso (binaryCofanIsColimit X Y)).inv) ''
+              (Set.range ((TopCat.binaryCofan X Y).ι.app ⟨WalkingPair.right⟩))ᶜ =
+            ((Hom.hom (h.coconePointUniqueUpToIso (binaryCofanIsColimit X Y)).inv) ''
+              Set.range ((TopCat.binaryCofan X Y).ι.app ⟨WalkingPair.right⟩))ᶜ :=
+        Set.image_compl_eq
+          (f := Hom.hom (h.coconePointUniqueUpToIso (binaryCofanIsColimit X Y)).inv)
+          (s := Set.range ((TopCat.binaryCofan X Y).ι.app ⟨WalkingPair.right⟩))
+          (homeoOfIso (h.coconePointUniqueUpToIso (binaryCofanIsColimit X Y))).symm.bijective
+      have hcompl :
+          (Set.range ((TopCat.binaryCofan X Y).ι.app ⟨WalkingPair.right⟩))ᶜ =
+            Set.range ((TopCat.binaryCofan X Y).ι.app ⟨WalkingPair.left⟩) := by
+        ext x
+        simp [TopCat.binaryCofan]
+      have hleft := congrArg
+        (fun s =>
+          (Hom.hom (h.coconePointUniqueUpToIso (binaryCofanIsColimit X Y)).inv) '' s)
+        hcompl
+      exact hleft.symm.trans himage
     · rintro ⟨h₁, h₂, h₃⟩
       have : ∀ x, x ∈ Set.range c.inl ∨ x ∈ Set.range c.inr := by
         rw [eq_compl_iff_isCompl.mpr h₃.symm]
