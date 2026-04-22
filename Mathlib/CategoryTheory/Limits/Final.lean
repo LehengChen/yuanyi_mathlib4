@@ -337,7 +337,12 @@ instance (priority := 100) compCreatesColimit {B : Type u₄} [Category.{v₄} B
 
 instance colimit_pre_isIso [HasColimit G] : IsIso (colimit.pre G F) := by
   rw [colimit.pre_eq (colimitCoconeComp F (getColimitCocone G)) (getColimitCocone G)]
-  erw [IsColimit.desc_self]
+  have h :
+      (colimitCoconeComp F (getColimitCocone G)).isColimit.desc
+          (Cocone.whisker F (getColimitCocone G).cocone) =
+        𝟙 (colimitCoconeComp F (getColimitCocone G)).cocone.pt := by
+    exact IsColimit.desc_self _
+  rw [h]
   dsimp
   infer_instance
 
@@ -692,7 +697,12 @@ instance (priority := 100) compCreatesLimit {B : Type u₄} [Category.{v₄} B] 
 
 instance limit_pre_isIso [HasLimit G] : IsIso (limit.pre G F) := by
   rw [limit.pre_eq (limitConeComp F (getLimitCone G)) (getLimitCone G)]
-  erw [IsLimit.lift_self]
+  have h :
+      (limitConeComp F (getLimitCone G)).isLimit.lift
+          (Cone.whisker F (getLimitCone G).cone) =
+        𝟙 (limitConeComp F (getLimitCone G)).cone.pt := by
+    exact IsLimit.lift_self _
+  rw [h]
   dsimp
   infer_instance
 
