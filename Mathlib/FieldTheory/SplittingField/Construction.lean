@@ -196,15 +196,26 @@ theorem adjoin_rootSet (n : ℕ) :
     rw [rootSet_def, aroots_def]
     rw [algebraMap_succ, ← map_map, ← X_sub_C_mul_removeFactor _ hndf, Polynomial.map_mul] at hmf0 ⊢
     rw [roots_mul hmf0, Polynomial.map_sub, map_X, map_C, roots_X_sub_C, Multiset.toFinset_add,
-      Finset.coe_union, Multiset.toFinset_singleton, Finset.coe_singleton,
-      Algebra.adjoin_union_eq_adjoin_adjoin, ← Set.image_singleton]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [Algebra.adjoin_algebraMap K (SplittingFieldAux n f.removeFactor)]
-    rw [AdjoinRoot.adjoinRoot_eq_top, Algebra.map_top]
-    -- Porting note: was `rw`
-    erw [IsScalarTower.adjoin_range_toAlgHom K (AdjoinRoot f.factor)
-        (SplittingFieldAux n f.removeFactor)
-        (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))]
+      Finset.coe_union, Multiset.toFinset_singleton, Finset.coe_singleton, ← Set.image_singleton]
+    have hrootSet :
+        (↑(map (algebraMap (AdjoinRoot f.factor) (SplittingFieldAux n f.removeFactor))
+          f.removeFactor).roots.toFinset : Set (SplittingFieldAux n f.removeFactor)) =
+          f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor) := by
+      rw [rootSet_def, aroots_def]
+    rw [hrootSet]
+    have hadjoin :
+        Algebra.adjoin K
+          (⇑(algebraMap (AdjoinRoot f.factor) (SplittingFieldAux n f.removeFactor)) ''
+            ({AdjoinRoot.root f.factor} : Set (AdjoinRoot f.factor)) ∪
+              f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor)) =
+          (Algebra.adjoin (AdjoinRoot f.factor)
+            (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))).restrictScalars K :=
+      (Algebra.adjoin_eq_adjoin_union (R := K) (A := AdjoinRoot f.factor)
+        (B := SplittingFieldAux n f.removeFactor)
+        ({AdjoinRoot.root f.factor} : Set (AdjoinRoot f.factor))
+        (f.removeFactor.rootSet (SplittingFieldAux n f.removeFactor))
+        AdjoinRoot.adjoinRoot_eq_top).symm
+    refine hadjoin.trans ?_
     rw [ih _ (natDegree_removeFactor' hfn), Subalgebra.restrictScalars_top]
 
 instance (f : K[X]) : IsSplittingField K (SplittingFieldAux f.natDegree f) f :=
