@@ -208,7 +208,8 @@ lemma toAut_surjective_of_isPretransitive [TopologicalSpace G] [IsTopologicalGro
   exact hgi ⟨X, x, inferInstance⟩ x
 
 /-- If `toAut F G` is surjective, then `G` acts transitively on the fibers of connected objects.
-For a converse see `toAut_surjective`. -/
+For the reverse implication under stronger hypotheses, see
+`toAut_surjective_of_isPretransitive`. -/
 lemma isPretransitive_of_surjective (h : Function.Surjective (toAut F G)) (X : C)
     [IsConnected X] : MulAction.IsPretransitive G (F.obj X) where
   exists_smul_eq x y := by
