@@ -62,8 +62,8 @@ variable (f g)
 variable [HasEqualizer f g]
 
 /--
-If `G` preserves equalizers and `C` has them, then the fork constructed of the mapped morphisms of
-a fork is a limit.
+If `G` preserves the equalizer of `(f,g)` and `f` and `g` have an equalizer in `C`, then the fork
+built from `G.map (equalizer.ι f g)` is a limit.
 -/
 def isLimitOfHasEqualizerOfPreservesLimit [PreservesLimit (parallelPair f g) G] :
     IsLimit (Fork.ofι
@@ -145,8 +145,8 @@ variable (f g)
 variable [HasCoequalizer f g]
 
 /--
-If `G` preserves coequalizers and `C` has them, then the cofork constructed of the mapped morphisms
-of a cofork is a colimit.
+If `G` preserves the coequalizer of `(f,g)` and `f` and `g` have a coequalizer in `C`, then the
+cofork built from `G.map (coequalizer.π f g)` is a colimit.
 -/
 def isColimitOfHasCoequalizerOfPreservesColimit [PreservesColimit (parallelPair f g) G] :
     IsColimit (Cofork.ofπ (G.map (coequalizer.π f g)) (by
