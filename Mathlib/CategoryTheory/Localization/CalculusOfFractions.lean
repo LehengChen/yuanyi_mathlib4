@@ -613,13 +613,17 @@ lemma uniq (F₁ F₂ : Localization W ⥤ E) (h : Q W ⋙ F₁ = Q W ⋙ F₂) 
     obtain ⟨f, rfl⟩ := Hom.mk_surjective f
     rw [show Hom.mk f = homMk (mk f.f f.s f.hs) by rfl,
       ← Q_map_comp_Qinv f.f f.s f.hs, F₁.map_comp, F₂.map_comp, assoc]
-    erw [Functor.congr_hom h f.f]
+    have hf := Functor.congr_hom h f.f
+    dsimp at hf
+    rw [hf]
     rw [assoc, assoc]
     congr 2
     have := inverts W _ f.hs
     rw [← cancel_epi (F₂.map ((Q W).map f.s)), ← F₂.map_comp_assoc,
       Qiso_hom_inv_id, Functor.map_id, id_comp]
-    erw [Functor.congr_hom h.symm f.s]
+    have hs := Functor.congr_hom h.symm f.s
+    dsimp at hs
+    rw [hs]
     dsimp
     rw [assoc, assoc, eqToHom_trans_assoc, eqToHom_refl, id_comp, ← F₁.map_comp,
       Qiso_hom_inv_id]
