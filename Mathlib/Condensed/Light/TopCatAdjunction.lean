@@ -179,9 +179,10 @@ noncomputable def sequentialAdjunctionHomeo (X : TopCat.{0}) [SequentialSpace X]
     intro f p h
     let g := (topCatAdjunctionCounitEquiv X).invFun ∘ (OnePoint.continuousMapMkNat f p h)
     change Filter.Tendsto (fun n : ℕ ↦ g n) _ _
-    erw [← OnePoint.continuous_iff_from_nat]
     let x : X.toLightCondSet.obj.obj ⟨(ℕ∪{∞})⟩ := OnePoint.continuousMapMkNat f p h
-    exact continuous_coinducingCoprod X.toLightCondSet x
+    have hg : Continuous g := by
+      simpa [g, x] using (continuous_coinducingCoprod X.toLightCondSet x)
+    simpa [g, x] using (OnePoint.continuous_iff_from_nat g).mp hg
 
 /--
 The counit of the adjunction `lightCondSetToSequential ⊣ sequentialToLightCondSet`
