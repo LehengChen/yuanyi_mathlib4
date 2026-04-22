@@ -55,10 +55,16 @@ run_cmd
       protected theorem toBitVec_intCast (z : ℤ) :
           (z : $typeName).toBitVec = z := by
         obtain ⟨z, rfl | rfl⟩ := z.eq_nat_or_neg
-        · erw [intCast_ofNat]; rfl
+        · have hz : (((z : ℤ) : $typeName)) = (z : $typeName) := intCast_ofNat z
+          rw [hz, Int.cast_natCast]
+          rfl
         · rw [intCast_neg, toBitVec_neg]
-          erw [intCast_ofNat]
-          simp
+          have hz : (((z : ℤ) : $typeName).toBitVec) = (z : ℤ) := by
+            have hz' : (((z : ℤ) : $typeName)) = (z : $typeName) := intCast_ofNat z
+            rw [hz', Int.cast_natCast]
+            rfl
+          rw [Int.cast_neg]
+          exact congrArg Neg.neg hz
 
       open $typeName (toBitVec_mul toBitVec_intCast) in
       @[simp, int_toBitVec]
