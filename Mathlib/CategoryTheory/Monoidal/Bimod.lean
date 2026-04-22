@@ -220,8 +220,26 @@ set_option backward.isDefEq.respectTransparency false in
 theorem whiskerLeft_π_actLeft :
     (R.X ◁ coequalizer.π _ _) ≫ actLeft P Q =
       (α_ _ _ _).inv ≫ (P.actLeft ▷ Q.X) ≫ coequalizer.π _ _ := by
-  erw [map_π_preserves_coequalizer_inv_colimMap (tensorLeft _)]
-  simp only [Category.assoc]
+  simpa only [actLeft, Category.assoc] using
+    (map_π_preserves_coequalizer_inv_colimMap (tensorLeft R.X)
+      (P.actRight ▷ Q.X) ((α_ P.X S.X Q.X).hom ≫ P.X ◁ Q.actLeft)
+      (f' := P.actRight ▷ Q.X)
+      (g' := (α_ P.X S.X Q.X).hom ≫ P.X ◁ Q.actLeft)
+      (p := (α_ R.X (P.X ⊗ S.X) Q.X).inv ≫ (α_ R.X P.X S.X).inv ▷ Q.X ≫
+        P.actLeft ▷ S.X ▷ Q.X)
+      (q := (α_ R.X P.X Q.X).inv ≫ P.actLeft ▷ Q.X)
+      (wf := by
+        dsimp
+        simp only [Category.assoc]
+        slice_lhs 1 2 => rw [associator_inv_naturality_middle]
+        slice_rhs 3 4 => rw [← comp_whiskerRight, middle_assoc, comp_whiskerRight]
+        simp)
+      (wg := by
+        dsimp
+        slice_lhs 1 1 => rw [whiskerLeft_comp]
+        slice_lhs 2 3 => rw [associator_inv_naturality_right]
+        slice_lhs 3 4 => rw [whisker_exchange]
+        simp))
 
 set_option backward.isDefEq.respectTransparency false in
 theorem one_act_left' : (η ▷ _) ≫ actLeft P Q = (λ_ _).hom := by
@@ -280,8 +298,24 @@ set_option backward.isDefEq.respectTransparency false in
 theorem π_tensor_id_actRight :
     (coequalizer.π _ _ ▷ T.X) ≫ actRight P Q =
       (α_ _ _ _).hom ≫ (P.X ◁ Q.actRight) ≫ coequalizer.π _ _ := by
-  erw [map_π_preserves_coequalizer_inv_colimMap (tensorRight _)]
-  simp only [Category.assoc]
+  simpa only [actRight, Category.assoc] using
+    (map_π_preserves_coequalizer_inv_colimMap (tensorRight T.X)
+      (P.actRight ▷ Q.X) ((α_ P.X S.X Q.X).hom ≫ P.X ◁ Q.actLeft)
+      (f' := P.actRight ▷ Q.X)
+      (g' := (α_ P.X S.X Q.X).hom ≫ P.X ◁ Q.actLeft)
+      (p := (α_ (P.X ⊗ S.X) Q.X T.X).hom ≫ (α_ P.X S.X (Q.X ⊗ T.X)).hom ≫
+        P.X ◁ S.X ◁ Q.actRight ≫ (α_ P.X S.X Q.X).inv)
+      (q := (α_ P.X Q.X T.X).hom ≫ P.X ◁ Q.actRight)
+      (wf := by
+        dsimp
+        slice_lhs 1 2 => rw [associator_naturality_left]
+        slice_lhs 2 3 => rw [← whisker_exchange]
+        simp)
+      (wg := by
+        dsimp
+        simp only [comp_whiskerRight, whisker_assoc, Category.assoc, Iso.inv_hom_id_assoc]
+        slice_lhs 3 4 => rw [← whiskerLeft_comp, middle_assoc, whiskerLeft_comp]
+        simp))
 
 set_option backward.isDefEq.respectTransparency false in
 theorem actRight_one' : (_ ◁ η) ≫ actRight P Q = (ρ_ _).hom := by
@@ -491,9 +525,38 @@ theorem hom_left_act_hom' :
   slice_rhs 1 3 =>
     rw [← whiskerLeft_comp, ← whiskerLeft_comp, π_tensor_id_preserves_coequalizer_inv_desc,
       whiskerLeft_comp, whiskerLeft_comp]
-  slice_rhs 3 4 => erw [TensorBimod.whiskerLeft_π_actLeft P (Q.tensorBimod L)]
-  slice_rhs 2 3 => erw [associator_inv_naturality_right]
-  slice_rhs 3 4 => erw [whisker_exchange]
+  have hπ :
+      (R.X ◁
+          coequalizer.π
+            (P.actRight ▷ coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+            ((α_ P.X S.X
+                  (coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))).hom ≫
+              P.X ◁ TensorBimod.actLeft Q L)) ≫
+        TensorBimod.actLeft P (Q.tensorBimod L) =
+      (α_ R.X P.X
+          (coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))).inv ≫
+        (P.actLeft ▷ coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft)) ≫
+          coequalizer.π
+            (P.actRight ▷ coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+            ((α_ P.X S.X
+                  (coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))).hom ≫
+              P.X ◁ TensorBimod.actLeft Q L) := by
+    simpa [Bimod.tensorBimod, Category.assoc] using
+      (TensorBimod.whiskerLeft_π_actLeft P (Q.tensorBimod L))
+  have hα :=
+    associator_inv_naturality_right R.X P.X
+      (coequalizer.π (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+  have hexchange :
+      (R.X ⊗ P.X) ◁ coequalizer.π (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft) ≫
+        P.actLeft ▷ coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft) =
+      P.actLeft ▷ (Q.X ⊗ L.X) ≫
+        P.X ◁ coequalizer.π (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft) := by
+    simpa [Bimod.tensorBimod, Category.assoc] using
+      (whisker_exchange P.actLeft
+        (coequalizer.π (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft)))
+  slice_rhs 3 4 => rw [hπ]
+  slice_rhs 2 3 => rw [hα]
+  slice_rhs 3 4 => rw [hexchange]
   monoidal
 
 set_option backward.isDefEq.respectTransparency false in
@@ -515,9 +578,31 @@ theorem hom_right_act_hom' :
   slice_rhs 1 3 =>
     rw [← comp_whiskerRight, ← comp_whiskerRight, π_tensor_id_preserves_coequalizer_inv_desc,
       comp_whiskerRight, comp_whiskerRight]
-  slice_rhs 3 4 => erw [TensorBimod.π_tensor_id_actRight P (Q.tensorBimod L)]
-  slice_rhs 2 3 => erw [associator_naturality_middle]
-  dsimp
+  have hπ :
+      (coequalizer.π
+          (P.actRight ▷ coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+          ((α_ P.X S.X
+                (coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))).hom ≫
+            P.X ◁ TensorBimod.actLeft Q L) ▷
+        U.X) ≫
+        TensorBimod.actRight P (Q.tensorBimod L) =
+      (α_ P.X
+          (coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+          U.X).hom ≫
+        P.X ◁ TensorBimod.actRight Q L ≫
+          coequalizer.π
+            (P.actRight ▷ coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+            ((α_ P.X S.X
+                  (coequalizer (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))).hom ≫
+              P.X ◁ TensorBimod.actLeft Q L) := by
+    simpa [Bimod.tensorBimod, Category.assoc] using
+      (TensorBimod.π_tensor_id_actRight P (Q.tensorBimod L))
+  have hα :=
+    associator_naturality_middle P.X
+      (coequalizer.π (Q.actRight ▷ L.X) ((α_ Q.X T.X L.X).hom ≫ Q.X ◁ L.actLeft))
+      U.X
+  slice_rhs 3 4 => rw [hπ]
+  slice_rhs 2 3 => rw [hα]
   slice_rhs 3 4 =>
     rw [← whiskerLeft_comp, TensorBimod.π_tensor_id_actRight, whiskerLeft_comp, whiskerLeft_comp]
   monoidal
