@@ -78,7 +78,7 @@ instance Hom.inhabited : Inhabited (Hom (none : WidePullbackShape J) none) :=
 open Lean Elab Tactic
 /- Pointing note: experimenting with manual scoping of aesop tactics. Attempted to define
 aesop rule directing on `WidePushoutOut` and it didn't take for some reason -/
-/-- An aesop tactic for bulk cases on morphisms in `WidePushoutShape` -/
+/-- An aesop tactic for bulk cases on morphisms in `WidePullbackShape` -/
 meta def evalCasesBash : TacticM Unit := do
   evalTactic
     (← `(tactic| casesm* WidePullbackShape _,
@@ -474,7 +474,7 @@ lemma reindex_π {ι : Type*} {X : C} {Y : ι → C} {f : ∀ i, Y i ⟶ X} (s :
     (s.reindex e).π i = s.π (e i) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Reindexing a pullback cone preserves being limiting. -/
+/-- Reindexing a wide pullback cone preserves being limiting. -/
 def reindexIsLimitEquiv {ι : Type*} {X : C} {Y : ι → C} {f : ∀ i, Y i ⟶ X}
     (s : WidePullbackCone f) {ι' : Type*} (e : ι' ≃ ι) :
     IsLimit (s.reindex e) ≃ IsLimit s :=
@@ -556,7 +556,7 @@ end WidePushout
 variable (J)
 
 /-- The action on morphisms of the obvious functor
-  `WidePullbackShape_op : WidePullbackShape J ⥤ (WidePushoutShape J)ᵒᵖ` -/
+  `widePullbackShapeOp : WidePullbackShape J ⥤ (WidePushoutShape J)ᵒᵖ` -/
 def widePullbackShapeOpMap :
     ∀ X Y : WidePullbackShape J,
       (X ⟶ Y) → ((op X : (WidePushoutShape J)ᵒᵖ) ⟶ (op Y : (WidePushoutShape J)ᵒᵖ))
