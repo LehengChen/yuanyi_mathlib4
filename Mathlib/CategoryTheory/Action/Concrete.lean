@@ -81,7 +81,7 @@ def ofMulActionLimitCone {ι : Type v} (G : Type max v u) [Monoid G] (F : ι →
 abbrev leftRegular (G : Type u) [Monoid G] : Action (Type u) G :=
   Action.ofMulAction G G
 
-/-- The `G`-set `Gⁿ`, acting on itself by left multiplication. -/
+/-- The `G`-set `Gⁿ`, with `G` acting coordinatewise by left multiplication. -/
 abbrev diagonal (G : Type u) [Monoid G] (n : ℕ) : Action (Type u) G :=
   Action.ofMulAction G (Fin n → G)
 
