@@ -318,11 +318,23 @@ lemma adjunction_left_triangle [HasExplicitFiniteCoproducts.{u} P]
     (X := ((functor P hs).obj X).obj) (Y := ((functor.{u, w} P hs).obj X).obj)
       (f.map ((unit P hs).app X))
   intro a
-  erw [incl_of_counitAppApp]
+  change ((functor P hs).obj X).obj.map (sigmaIncl (f.map ((unit P hs).app X)) a).op
+      (counitAppApp S ((functor P hs).obj X).obj (f.map ((unit P hs).app X))) =
+    ((functor P hs).obj X).obj.map (sigmaIncl (f.map ((unit P hs).app X)) a).op f
+  apply LocallyConstant.ext
+  intro x
+  have h := LocallyConstant.congr_fun
+    (incl_of_counitAppApp (S := S) (Y := ((functor P hs).obj X).obj)
+      (f := f.map ((unit P hs).app X)) a) x
   simp only [functor_obj_obj, functorToPresheaves_obj_obj, Functor.id_obj,
-    counitAppAppImage, functorToPresheaves_obj_map, Quiver.Hom.unop_op]
-  ext x
-  erw [← map_eq_image _ a x]
+    counitAppAppImage, functorToPresheaves_obj_map, Quiver.Hom.unop_op] at h
+  refine h.trans ?_
+  change
+    (comap (TopCat.Hom.hom (isTerminalPUnit.from (fiber (f.map ((unit P hs).app X)) a)).hom)
+        a.image) x =
+      (comap (TopCat.Hom.hom (sigmaIncl (f.map ((unit P hs).app X)) a).hom) f) x
+  have hx : a.image = (f.map ((unit P hs).app X)) x.1 := (map_eq_image _ a x).symm
+  rw [hx]
   rfl
 
 /--
@@ -345,9 +357,19 @@ noncomputable def adjunction [HasExplicitFiniteCoproducts.{u} P] :
       inferInstanceAs (PreservesFiniteProducts X.obj)
     apply presheaf_ext ((unit P hs).app _ x)
     intro a
-    erw [incl_of_counitAppApp]
+    change X.obj.map
+        (sigmaIncl ((unit P hs).app (X.obj.obj (op (CompHausLike.of P PUnit.{u + 1}))) x) a).op
+        (counitAppApp (CompHausLike.of P PUnit.{u + 1}) X.obj
+          ((unit P hs).app (X.obj.obj (op (CompHausLike.of P PUnit.{u + 1}))) x)) =
+      X.obj.map
+        (sigmaIncl ((unit P hs).app (X.obj.obj (op (CompHausLike.of P PUnit.{u + 1}))) x) a).op
+        x
+    have h := incl_of_counitAppApp (Y := X.obj)
+      (f := (unit P hs).app (X.obj.obj (op (CompHausLike.of P PUnit.{u + 1}))) x) a
+    rw [h]
     simp only [unit_app, counitAppAppImage, coe_const]
-    erw [← map_eq_image _ a ⟨PUnit.unit, by simp [mem_iff_eq_image, ← map_preimage_eq_image]⟩]
+    rw [← map_eq_image (Function.const PUnit.{u + 1} x) a
+      ⟨PUnit.unit, by simp [mem_iff_eq_image, ← map_preimage_eq_image]⟩]
     rfl
 
 instance [HasExplicitFiniteCoproducts.{u} P] : IsIso (adjunction P hs).unit :=
