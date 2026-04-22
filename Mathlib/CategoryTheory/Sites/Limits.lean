@@ -70,12 +70,23 @@ def multiforkEvaluationCone (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPreshe
         Multifork.ofι _ S.pt (fun i => S.ι i ≫ (E.π.app k).app (op i.Y))
           (by
             intro i
-            simp only [Category.assoc]
-            erw [← (E.π.app k).naturality, ← (E.π.app k).naturality]
-            dsimp
-            simp only [← Category.assoc]
-            congr 1
-            apply S.condition)
+            have hfst0 := congrArg (fun t => S.ι i.fst ≫ t) ((E.π.app k).naturality i.r.g₁.op).symm
+            have hfst :
+                S.ι i.fst ≫ (E.π.app k).app (op i.fst.Y) ≫ (F.obj k).obj.map i.r.g₁.op =
+                  S.ι i.fst ≫ E.pt.map i.r.g₁.op ≫ (E.π.app k).app (op i.r.Z) := by
+              simpa [Category.assoc] using hfst0
+            have hsnd0 := congrArg (fun t => S.ι i.snd ≫ t) ((E.π.app k).naturality i.r.g₂.op).symm
+            have hsnd :
+                S.ι i.snd ≫ (E.π.app k).app (op i.snd.Y) ≫ (F.obj k).obj.map i.r.g₂.op =
+                  S.ι i.snd ≫ E.pt.map i.r.g₂.op ≫ (E.π.app k).app (op i.r.Z) := by
+              simpa [Category.assoc] using hsnd0
+            have hmid :
+                S.ι i.fst ≫ E.pt.map i.r.g₁.op ≫ (E.π.app k).app (op i.r.Z) =
+                  S.ι i.snd ≫ E.pt.map i.r.g₂.op ≫ (E.π.app k).app (op i.r.Z) := by
+              simp only [← Category.assoc]
+              congr 1
+              exact S.condition i
+            simpa using hfst.trans (hmid.trans hsnd.symm))
       naturality := by
         intro i j f
         dsimp [Presheaf.isLimitOfIsSheaf]
@@ -84,7 +95,7 @@ def multiforkEvaluationCone (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPreshe
         intro ii
         rw [Presheaf.IsSheaf.amalgamate_map, Category.assoc, ← (F.map f).hom.naturality, ←
           Category.assoc, Presheaf.IsSheaf.amalgamate_map]
-        erw [Category.assoc, ← E.w f]
+        rw [Category.assoc, ← E.w f]
         cat_disch }
 
 variable [HasLimitsOfShape K D]
@@ -106,26 +117,27 @@ def isLimitMultiforkOfIsLimit (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPres
       apply (isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op i.Y)) hE).hom_ext
       intro k
       dsimp [Multifork.ofι]
-      erw [Category.assoc, (E.π.app k).naturality]
-      dsimp
-      rw [← Category.assoc]
-      erw [(isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac
-        (multiforkEvaluationCone F E X W S)]
-      dsimp [multiforkEvaluationCone, Presheaf.isLimitOfIsSheaf]
-      rw [Presheaf.IsSheaf.amalgamate_map])
+      rw [Category.assoc, NatTrans.naturality]
+      have hfac :=
+        (isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac_assoc
+          (multiforkEvaluationCone F E X W S) k ((F.obj k).obj.map i.f.op)
+      simpa [Category.assoc, multiforkEvaluationCone, Presheaf.isLimitOfIsSheaf] using hfac
+      )
     (by
       intro S m hm
       apply (isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).hom_ext
       intro k
       dsimp
-      erw [(isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac]
+      refine Eq.trans ?_ <|
+        ((isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac
+          (multiforkEvaluationCone F E X W S) k).symm
       apply Presheaf.IsSheaf.hom_ext (F.obj k).2 W
       intro i
       dsimp only [multiforkEvaluationCone, Presheaf.isLimitOfIsSheaf]
       rw [(F.obj k).property.amalgamate_map]
       dsimp [Multifork.ofι]
       change _ = S.ι i ≫ _
-      erw [← hm, Category.assoc, ← (E.π.app k).naturality, Category.assoc]
+      rw [← hm, Category.assoc, ← NatTrans.naturality, Category.assoc]
       rfl)
 
 /-- If `E` is a cone which is a limit on the level of presheaves,
