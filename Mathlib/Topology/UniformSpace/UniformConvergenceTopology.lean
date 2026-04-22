@@ -1058,15 +1058,20 @@ protected def uniformEquivProdArrow [UniformSpace γ] :
   ((UniformOnFun.ofFun 𝔖).symm.trans <| (Equiv.arrowProdEquivProdArrow _ _ _).trans <|
     (UniformOnFun.ofFun 𝔖).prodCongr (UniformOnFun.ofFun 𝔖)).toUniformEquivOfIsUniformInducing <| by
       constructor
-      rw [uniformity_prod, comap_inf, comap_comap, comap_comap]
-      have H := @UniformOnFun.inf_eq α (β × γ) 𝔖
-        (UniformSpace.comap Prod.fst ‹_›) (UniformSpace.comap Prod.snd ‹_›)
-      apply_fun (fun u ↦ @uniformity (α →ᵤ[𝔖] β × γ) u) at H
-      convert H.symm using 1
-      rw [UniformOnFun.comap_eq, UniformOnFun.comap_eq]
-      erw [inf_uniformity]
-      rw [uniformity_comap, uniformity_comap]
-      rfl
+      let e : (α →ᵤ[𝔖] (β × γ)) ≃ ((α →ᵤ[𝔖] β) × (α →ᵤ[𝔖] γ)) :=
+        (UniformOnFun.ofFun 𝔖).symm.trans <| (Equiv.arrowProdEquivProdArrow _ _ _).trans <|
+          (UniformOnFun.ofFun 𝔖).prodCongr (UniformOnFun.ofFun 𝔖)
+      change comap (Prod.map e e) _ = _
+      calc
+        comap (Prod.map e e) (𝓤 ((α →ᵤ[𝔖] β) × (α →ᵤ[𝔖] γ)))
+            = 𝓤[UniformSpace.comap e inferInstance] := (uniformity_comap e).symm
+        _ = 𝓤 (α →ᵤ[𝔖] (β × γ)) := by
+          congr
+          unfold instUniformSpaceProd
+          rw [UniformSpace.comap_inf, ← UniformSpace.comap_comap, ← UniformSpace.comap_comap]
+          have := (@UniformOnFun.inf_eq α (β × γ) 𝔖
+            (UniformSpace.comap Prod.fst ‹_›) (UniformSpace.comap Prod.snd ‹_›)).symm
+          rwa [UniformOnFun.comap_eq, UniformOnFun.comap_eq] at this
 -- the relevant diagram commutes by definition
 
 set_option backward.isDefEq.respectTransparency false in
@@ -1085,12 +1090,17 @@ protected def uniformEquivPiComm : (α →ᵤ[𝔖] ((i : ι) → δ i)) ≃ᵤ 
       _ _ (Equiv.piComm _) <| by
     constructor
     change comap (Prod.map Function.swap Function.swap) _ = _
-    erw [← uniformity_comap]
-    congr
-    rw [Pi.uniformSpace, UniformSpace.ofCoreEq_toCore, Pi.uniformSpace,
-      UniformSpace.ofCoreEq_toCore, UniformSpace.comap_iInf, UniformOnFun.iInf_eq]
-    refine iInf_congr fun i => ?_
-    rw [← UniformSpace.comap_comap, UniformOnFun.comap_eq]
+    let u : UniformSpace (α →ᵤ[𝔖] ((i : ι) → δ i)) :=
+      UniformSpace.comap
+        (Function.swap : (α →ᵤ[𝔖] ((i : ι) → δ i)) → (i : ι) → α →ᵤ[𝔖] δ i)
+        (@Pi.uniformSpace ι (fun i => α →ᵤ[𝔖] δ i) fun i => inferInstance)
+    have hu : u = UniformOnFun.uniformSpace α ((i : ι) → δ i) 𝔖 := by
+      dsimp [u]
+      rw [Pi.uniformSpace_eq, UniformSpace.comap_iInf, Pi.uniformSpace_eq, UniformOnFun.iInf_eq]
+      refine iInf_congr fun i => ?_
+      rw [← UniformSpace.comap_comap, UniformOnFun.comap_eq]
+      rfl
+    rw [← hu]
     rfl
 -- Like in the previous lemma, the diagram actually commutes by definition
 
