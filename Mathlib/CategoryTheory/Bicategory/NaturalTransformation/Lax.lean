@@ -42,8 +42,9 @@ transformations respectively.
 We also provide API for going between lax transformations and strong transformations:
 * `LaxTrans.StrongCore η`: a structure on a lax transformation between lax functors that
   promotes it to a strong transformation.
-* `StrongTrans.mkOfLax η η'`: given a lax transformation `η` such that each component
-  2-morphism is an isomorphism, `mkOfLax` gives the corresponding strong transformation.
+* `StrongTrans.mkOfLax η η'`: given a lax transformation `η` together with explicit
+  2-isomorphisms refining its naturality 2-morphisms, `mkOfLax` gives the corresponding strong
+  transformation.
 
 ## References
 * [Niles Johnson, Donald Yau, *2-Dimensional Categories*](https://arxiv.org/abs/2002.06055),
@@ -365,15 +366,15 @@ def toLax {F G : B ⥤ᴸ C} (η : StrongTrans F G) : LaxTrans F G where
   app := η.app
   naturality f := (η.naturality f).hom
 
-/-- Construct a strong natural transformation from a lax natural transformation whose
-naturality 2-morphism is an isomorphism. -/
+/-- Construct a strong natural transformation from a lax natural transformation equipped with
+explicit 2-isomorphisms refining its naturality 2-morphisms. -/
 def mkOfLax {F G : B ⥤ᴸ C} (η : LaxTrans F G) (η' : LaxTrans.StrongCore η) :
     StrongTrans F G where
   app := η.app
   naturality := η'.naturality
 
 /-- Construct a strong natural transformation from a lax natural transformation whose
-naturality 2-morphism is an isomorphism. -/
+naturality 2-morphisms are all isomorphisms. -/
 noncomputable def mkOfLax' {F G : B ⥤ᴸ C} (η : LaxTrans F G)
     [∀ a b (f : a ⟶ b), IsIso (η.naturality f)] : StrongTrans F G where
   app := η.app
