@@ -572,9 +572,10 @@ def regularOfIsPushoutSndOfRegular {P Q R S : C} {f : P ⟶ Q} {g : P ⟶ R} {h 
     have := gr.epi
     apply (PushoutCocone.mk _ _ comm).coequalizer_ext
     · exact z
-    · erw [← cancel_epi g, ← Category.assoc, ← eq_whisker comm]
-      erw [← Category.assoc, ← eq_whisker comm]
-      dsimp at z; simp only [Category.assoc, z]
+    · apply (cancel_epi g).1
+      dsimp at z ⊢
+      rw [← Category.assoc, ← Category.assoc, ← comm, Category.assoc, Category.assoc]
+      exact f ≫= z
 
 /-- The first leg of a pushout cocone is a regular epimorphism if the left component is too.
 
