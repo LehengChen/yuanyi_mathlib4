@@ -78,10 +78,30 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
       intro X Y f
       apply (isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).hom_ext
       intro W
+      have hX :
+          F.map (colimit.ι (J.diagram P X.unop) W) ≫
+              ((isColimitOfPreserves F
+                    (colimit.isColimit (J.diagram P X.unop))).coconePointUniqueUpToIso
+                (colimit.isColimit (J.diagram P X.unop ⋙ F))).hom =
+            colimit.ι (J.diagram P X.unop ⋙ F) W := by
+        simpa using
+          (IsColimit.comp_coconePointUniqueUpToIso_hom
+            (isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop)))
+            (colimit.isColimit (J.diagram P X.unop ⋙ F)) W)
+      have hY :
+          F.map (colimit.ι (J.diagram P Y.unop) (op ((unop W).pullback f.unop))) ≫
+              ((isColimitOfPreserves F
+                    (colimit.isColimit (J.diagram P Y.unop))).coconePointUniqueUpToIso
+                (colimit.isColimit (J.diagram P Y.unop ⋙ F))).hom =
+            colimit.ι (J.diagram P Y.unop ⋙ F) (op ((unop W).pullback f.unop)) := by
+        simpa using
+          (IsColimit.comp_coconePointUniqueUpToIso_hom
+            (isColimitOfPreserves F (colimit.isColimit (J.diagram P Y.unop)))
+            (colimit.isColimit (J.diagram P Y.unop ⋙ F)) (op ((unop W).pullback f.unop)))
       dsimp [plusObj, plusMap]
       simp only [Functor.map_comp, Category.assoc]
       slice_rhs 1 2 =>
-        erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P X.unop))).fac]
+        rw [hX]
       slice_lhs 1 3 =>
         simp only [← F.map_comp]
         dsimp [colimMap, IsColimit.map, colimit.pre]
@@ -92,8 +112,7 @@ def plusCompIso : J.plusObj P ⋙ F ≅ J.plusObj (P ⋙ F) :=
         rw [F.map_comp]
       simp only [Category.assoc]
       slice_lhs 2 3 =>
-        erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P Y.unop))).fac]
-      dsimp
+        rw [hY]
       simp only [HasColimit.isoOfNatIso_ι_hom_assoc, GrothendieckTopology.diagramPullback_app,
         colimit.ι_pre, HasColimit.isoOfNatIso_ι_hom, ι_colimMap_assoc]
       simp only [← Category.assoc]
@@ -110,10 +129,20 @@ set_option backward.isDefEq.respectTransparency false in
 theorem ι_plusCompIso_hom (X) (W) :
     F.map (colimit.ι _ W) ≫ (J.plusCompIso F P).hom.app X =
       (J.diagramCompIso F P X.unop).hom.app W ≫ colimit.ι _ W := by
+  have h :
+      F.map (colimit.ι (J.diagram P (unop X)) W) ≫
+          ((isColimitOfPreserves F
+                (colimit.isColimit (J.diagram P (unop X)))).coconePointUniqueUpToIso
+            (colimit.isColimit (J.diagram P (unop X) ⋙ F))).hom =
+        colimit.ι (J.diagram P (unop X) ⋙ F) W := by
+    simpa using
+      (IsColimit.comp_coconePointUniqueUpToIso_hom
+        (isColimitOfPreserves F (colimit.isColimit (J.diagram P (unop X))))
+        (colimit.isColimit (J.diagram P (unop X) ⋙ F)) W)
   delta diagramCompIso plusCompIso
   simp only [Iso.trans_hom, NatIso.ofComponents_hom_app, ←
     Category.assoc]
-  erw [(isColimitOfPreserves F (colimit.isColimit (J.diagram P (unop X)))).fac]
+  rw [h]
   simp
 
 set_option backward.isDefEq.respectTransparency false in
