@@ -358,7 +358,7 @@ theorem comp_eq_comp {X Y Z : Cat} (F : X ⟶ Y) (G : Y ⟶ Z) :
 
 @[simp] theorem coe_of (C : Cat.{v, u}) : Cat.of C = C := rfl
 
-/-- Functor that gets the set of objects of a category. It is not
+/-- Functor that gets the type of objects of a category. It is not
 called `forget`, because it is not a faithful functor. -/
 def objects : Cat.{v, u} ⥤ Type u where
   obj C := C
