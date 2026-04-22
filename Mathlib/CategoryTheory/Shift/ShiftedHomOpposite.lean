@@ -73,8 +73,23 @@ lemma opEquiv_symm_comp {a b : ℤ}
   rw [← Functor.map_comp_assoc, ← Functor.map_comp_assoc,
     ← Functor.map_comp_assoc]
   rw [← unop_comp_assoc]
-  erw [← NatTrans.naturality]
-  rfl
+  have hnat' :
+      (((opShiftFunctorEquivalence C a).functor ⋙
+          (opShiftFunctorEquivalence C a).inverse).map g ≫
+        (opShiftFunctorEquivalence C a).unitIso.inv.app
+          ((shiftFunctor Cᵒᵖ b).obj (Opposite.op X))).unop =
+      Quiver.Hom.unop g ≫
+        ((opShiftFunctorEquivalence C a).unitIso.inv.app (Opposite.op Y)).unop := by
+    simpa only [Functor.map_comp, unop_comp] using
+      congrArg Quiver.Hom.unop ((opShiftFunctorEquivalence C a).unitIso.inv.naturality g)
+  have hnat'' := congrArg
+    (fun k =>
+      ((opShiftFunctorEquivalence C b).unitIso.inv.app (Opposite.op X)).unop ≫
+        (shiftFunctor C b).map k ≫
+        (shiftFunctor C b).map ((shiftFunctor C a).map (Quiver.Hom.unop f)) ≫
+        (shiftFunctorAdd' C a b c (show a + b = c by lia)).inv.app Z)
+    hnat'
+  simpa only [Functor.map_comp, assoc, unop_comp] using hnat''
 
 /-- The bijection `ShiftedHom X Y a' ≃ (Opposite.op (Y⟦a⟧) ⟶ (Opposite.op X)⟦n⟧)`
 when integers `n`, `a` and `a'` satisfy `n + a = a'`, and `X` and `Y` are objects
@@ -106,7 +121,12 @@ lemma opEquiv'_symm_op_opShiftFunctorEquivalence_counitIso_inv_app_op_shift
   apply Quiver.Hom.op_inj
   simp only [assoc, Functor.map_comp, op_comp, Quiver.Hom.op_unop,
     opShiftFunctorEquivalence_unitIso_inv_naturality]
-  erw [(opShiftFunctorEquivalence C n).inverse_counitInv_comp_assoc (Opposite.op Y)]
+  exact congrArg
+    (fun k =>
+      ((shiftFunctorAdd' C m n q (by lia)).inv.app Z).op ≫
+        ((shiftFunctor C n).map g).op ≫ k)
+    ((opShiftFunctorEquivalence C n).inverse_counitInv_comp_assoc
+      (Opposite.op Y) (Quiver.Hom.op f))
 
 set_option backward.isDefEq.respectTransparency false in
 lemma opEquiv'_symm_comp (f : Y ⟶ X) {n a : ℤ} (x : Opposite.op (Z⟦a⟧) ⟶ (Opposite.op X⟦n⟧))
