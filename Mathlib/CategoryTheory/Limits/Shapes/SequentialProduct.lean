@@ -217,19 +217,24 @@ noncomputable def isLimit : IsLimit (cone f) where
 
 section
 
-variable [HasZeroMorphisms C] [HasFiniteBiproducts C] [∀ n, Epi (f n)]
+variable [HasZeroMorphisms C] [HasFiniteBiproducts C]
 
 attribute [local instance] hasBinaryBiproducts_of_finite_biproducts
 
-lemma functorMap_epi (n : ℕ) : Epi (functorMap f n) := by
+lemma functorMap_epi (n : ℕ) [Epi (f n)] : Epi (functorMap f n) := by
   rw [functorMap, Pi.map_eq_prod_map (P := fun m : ℕ ↦ m < n + 1)]
   apply +allowSynthFailures epi_comp
   apply +allowSynthFailures epi_comp
   apply +allowSynthFailures prod.map_epi
   · apply +allowSynthFailures Pi.map_epi
-    intro ⟨_, _⟩
-    split
-    all_goals infer_instance
+    rintro ⟨m, hm⟩
+    by_cases hmn : m < n
+    · simp [hmn]
+      infer_instance
+    · have hm_eq : m = n := by lia
+      subst hm_eq
+      simp
+      infer_instance
   · apply +allowSynthFailures IsIso.epi_of_iso
     apply +allowSynthFailures Pi.map_isIso
     intro ⟨_, _⟩

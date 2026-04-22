@@ -140,12 +140,14 @@ def actionOfMonoidalFunctorToEndofunctorMop (F : C ⥤ (D ⥤ D)ᴹᵒᵖ) [F.Mo
       ← F.map_comp_assoc, Iso.hom_inv_id, Functor.map_id, Category.id_comp] at e
     simp [e]
 
-/-- If the (left) action of `C` on `D` comes from a monoidal functor
+/-- If the (left) action of `C` on `D` comes from a strong lax monoidal functor
 `C ⥤ (D ⥤ D)ᴹᵒᵖ`, then `curriedActionMop C D` is naturally isomorphic to that
 functor. -/
 @[simps!]
-def curriedActionActionOfMonoidalFunctorToEndofunctorMopIso
-    (F : C ⥤ (D ⥤ D)ᴹᵒᵖ) [F.Monoidal] :
+noncomputable def curriedActionActionOfMonoidalFunctorToEndofunctorMopIso
+    (F : C ⥤ (D ⥤ D)ᴹᵒᵖ) [F.LaxMonoidal]
+    [IsIso (Functor.LaxMonoidal.ε F)] [∀ c c', IsIso (Functor.LaxMonoidal.μ F c c')] :
+    letI : F.Monoidal := Functor.CoreMonoidal.toMonoidal (Functor.CoreMonoidal.ofLaxMonoidal F)
     letI := actionOfMonoidalFunctorToEndofunctorMop F
     curriedActionMop C D ≅ F :=
   .refl _
@@ -197,11 +199,13 @@ def actionOfMonoidalFunctorToEndofunctor (F : C ⥤ D ⥤ D) [F.Monoidal] :
     dsimp at e
     simp [reassoc_of% e]
 
-/-- If the action of `C` on `D` comes from a monoidal functor `C ⥤ (D ⥤ D)`,
-then `curriedActionMop C D` is naturally isomorphic to that functor. -/
+/-- If the action of `C` on `D` comes from a strong lax monoidal functor `C ⥤ (D ⥤ D)`,
+then `curriedAction C D` is naturally isomorphic to that functor. -/
 @[simps!]
-def curriedActionActionOfMonoidalFunctorToEndofunctorIso
-    (F : C ⥤ (D ⥤ D)) [F.Monoidal] :
+noncomputable def curriedActionActionOfMonoidalFunctorToEndofunctorIso
+    (F : C ⥤ (D ⥤ D)) [F.LaxMonoidal]
+    [IsIso (Functor.LaxMonoidal.ε F)] [∀ c c', IsIso (Functor.LaxMonoidal.μ F c c')] :
+    letI : F.Monoidal := Functor.CoreMonoidal.toMonoidal (Functor.CoreMonoidal.ofLaxMonoidal F)
     letI := actionOfMonoidalFunctorToEndofunctor F
     curriedAction C D ≅ F :=
   .refl _

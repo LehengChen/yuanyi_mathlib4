@@ -23,8 +23,20 @@ namespace CategoryTheory.Limits
 
 variable {C : Type u₁} [Category.{v₁} C] {K : Type u₂} [Category.{v₂} K]
 
+instance (priority := 100) [IsEmpty K] : HasFilteredColimitsOfSize.{w', w} (K ⥤ C) where
+  HasColimitsOfShape _ _ _ :=
+    ⟨fun F => HasColimit.mk
+      { cocone := combineCocones F fun k => isEmptyElim k
+        isColimit := combinedIsColimit F fun k => isEmptyElim k }⟩
+
 instance [HasFilteredColimitsOfSize.{w', w} C] : HasFilteredColimitsOfSize.{w', w} (K ⥤ C) :=
   ⟨fun _ => inferInstance⟩
+
+instance (priority := 100) [IsEmpty K] : HasCofilteredLimitsOfSize.{w', w} (K ⥤ C) where
+  HasLimitsOfShape _ _ _ :=
+    ⟨fun F => HasLimit.mk
+      { cone := combineCones F fun k => isEmptyElim k
+        isLimit := combinedIsLimit F fun k => isEmptyElim k }⟩
 
 instance [HasCofilteredLimitsOfSize.{w', w} C] : HasCofilteredLimitsOfSize.{w', w} (K ⥤ C) :=
   ⟨fun _ => inferInstance⟩

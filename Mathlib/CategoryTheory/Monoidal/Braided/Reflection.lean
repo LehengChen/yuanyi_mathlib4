@@ -14,7 +14,7 @@ public import Mathlib.Tactic.TFAE
 
 # Day's reflection theorem
 
-Let `D` be a symmetric monoidal closed category and let `C` be a reflective subcategory. Day's
+Let `D` be a braided monoidal closed category and let `C` be a reflective subcategory. Day's
 reflection theorem proves the equivalence of four conditions, which are all of the form that a
 map obtained by acting on the unit of the reflective adjunction, with the internal hom and
 tensor functors, is an isomorphism.
@@ -36,7 +36,7 @@ open Category MonoidalCategory MonoidalClosed BraidedCategory Functor
 
 variable {C D : Type*} [Category* C] [Category* D]
 
-variable [MonoidalCategory D] [SymmetricCategory D] [MonoidalClosed D]
+variable [MonoidalCategory D] [BraidedCategory D] [MonoidalClosed D]
 
 section
 variable {R : C ⥤ D} [R.Faithful] [R.Full] {L : D ⥤ C} (adj : L ⊣ R)
@@ -47,8 +47,9 @@ private noncomputable def adjRetractionAux
     (c : C) (d : D) [IsIso (L.map (adj.unit.app ((ihom d).obj (R.obj c)) ⊗ₘ adj.unit.app d))] :
     d ⊗ ((L ⋙ R).obj ((ihom d).obj (R.obj c))) ⟶ (R.obj c) :=
   (β_ _ _).hom ≫ (_ ◁ adj.unit.app _) ≫ adj.unit.app _ ≫
-    R.map (inv (L.map (adj.unit.app _ ⊗ₘ adj.unit.app _))) ≫ (L ⋙ R).map (β_ _ _).hom ≫
-      (L ⋙ R).map ((ihom.ev _).app _) ≫ inv (adj.unit.app _)
+    R.map (inv (L.map (adj.unit.app _ ⊗ₘ adj.unit.app _))) ≫
+      (L ⋙ R).map (β_ d ((ihom d).obj (R.obj c))).inv ≫
+        (L ⋙ R).map ((ihom.ev _).app _) ≫ inv (adj.unit.app _)
 
 /-- The retraction of the unit in the proof of `4 → 1` in `isIso_tfae` below. -/
 private noncomputable def adjRetraction (c : C) (d : D)
@@ -78,7 +79,7 @@ set_option backward.isDefEq.respectTransparency false in
 /--
 Day's reflection theorem.
 
-Let `D` be a symmetric monoidal closed category and let `C` be a reflective subcategory. Denote by
+Let `D` be a braided monoidal closed category and let `C` be a reflective subcategory. Denote by
 `R : C ⥤ D` the inclusion functor and by `L : D ⥤ C` the reflector. Let `u` denote the unit of the
 adjunction `L ⊣ R`. Denote the internal hom by `[-,-]`. The following are equivalent:
 
@@ -133,7 +134,7 @@ theorem isIso_tfae : List.TFAE
       EquivLike.comp_bijective, EquivLike.bijective_comp]
     -- We commute the tensor product using the auxiliary commutative square `w₂`.
     have w₂ : ((coyoneda.map (adj.unit.app d ▷ d').op).app (R.obj c)) =
-        ((yoneda.obj (R.obj c)).mapIso (β_ _ _)).hom ∘
+        ((yoneda.obj (R.obj c)).mapIso (β_ _ _)).inv ∘
           ((coyoneda.map (d' ◁ adj.unit.app d).op).app (R.obj c)) ∘
             ((yoneda.obj (R.obj c)).mapIso (β_ _ _)).hom := by ext; simp
     rw [w₂, ← types_comp, ← types_comp, ← isIso_iff_bijective]
@@ -201,13 +202,16 @@ section
 open Functor.OplaxMonoidal Functor.LaxMonoidal Functor.Monoidal
 
 variable [MonoidalCategory C]
-variable {L : D ⥤ C} [L.Monoidal] {R : C ⥤ D} [R.Faithful] [R.Full] (adj : L ⊣ R)
+variable {L : D ⥤ C} [L.Monoidal] {R : C ⥤ D}
 
-instance (d d' : D) : IsIso (L.map ((adj.unit.app d) ⊗ₘ (adj.unit.app d'))) := by
+instance (adj : L ⊣ R) [∀ d : D, IsIso (L.map (adj.unit.app d))] (d d' : D) :
+    IsIso (L.map ((adj.unit.app d) ⊗ₘ (adj.unit.app d'))) := by
   have := δ _ _ _ ≫= μ_natural L (adj.unit.app d) (adj.unit.app d')
   rw [δ_μ_assoc] at this
   rw [← this]
   infer_instance
+
+variable [R.Faithful] [R.Full] (adj : L ⊣ R)
 
 instance (c : C) (d : D) : IsIso (adj.unit.app ((ihom d).obj (R.obj c))) := by
   revert c d
@@ -234,7 +238,7 @@ noncomputable def closed (c : C) : Closed c where
     · exact NatIso.ofComponents (fun _ ↦ asIso (adj.unit.app ((ihom _).obj _)))
 
 /--
-Given a reflective functor `R : C ⥤ D` with a monoidal left adjoint, such that `D` is symmetric
+Given a reflective functor `R : C ⥤ D` with a monoidal left adjoint, such that `D` is braided
 monoidal closed, then `C` is monoidal closed.
 -/
 @[implicit_reducible]

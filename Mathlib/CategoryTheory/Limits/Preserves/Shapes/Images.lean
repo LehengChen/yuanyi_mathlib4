@@ -11,7 +11,8 @@ public import Mathlib.CategoryTheory.Limits.Constructions.EpiMono
 /-!
 # Preserving images
 
-In this file, we show that if a functor preserves spans and cospans, then it preserves images.
+In this file, we show that if the source image factor maps are epimorphisms and a functor
+preserves the relevant pullbacks and pushouts, then it preserves images.
 -/
 
 @[expose] public section
@@ -30,13 +31,17 @@ open CategoryTheory.Limits
 universe u₁ u₂ v₁ v₂
 
 variable {A : Type u₁} {B : Type u₂} [Category.{v₁} A] [Category.{v₂} B]
-variable [HasEqualizers A] [HasImages A]
-variable [StrongEpiCategory B] [HasImages B]
+variable [HasImages A]
+variable [∀ {X Y : A} (f : X ⟶ Y), Epi (factorThruImage f)]
+variable [StrongEpiCategory B]
 variable (L : A ⥤ B)
-variable [∀ {X Y Z : A} (f : X ⟶ Z) (g : Y ⟶ Z), PreservesLimit (cospan f g) L]
-variable [∀ {X Y Z : A} (f : X ⟶ Y) (g : X ⟶ Z), PreservesColimit (span f g) L]
+variable [∀ {X Y : A} (f : X ⟶ Y), HasImage (L.map f)]
+variable [∀ {X Y : A} (f : X ⟶ Y), PreservesLimit (cospan (image.ι f) (image.ι f)) L]
+variable [∀ {X Y : A} (f : X ⟶ Y), PreservesColimit (span (factorThruImage f)
+  (factorThruImage f)) L]
 
-/-- If a functor preserves limit spans and colimit cospans, then it preserves images.
+/-- If the source image factor maps are epimorphisms and a functor preserves the relevant pullbacks
+and pushouts, then it preserves images.
 -/
 @[simps!]
 def iso {X Y : A} (f : X ⟶ Y) : image (L.map f) ≅ L.obj (image f) :=

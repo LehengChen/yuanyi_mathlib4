@@ -84,14 +84,33 @@ lemma ι'_f_zero :
 
 end
 
-variable [Abelian C] {X : C} (R : InjectiveResolution X)
+section
+
+variable [HasZeroObject C] [Preadditive C] {X : C} (R : InjectiveResolution X)
+
+section
+
+variable [∀ i, ((CochainComplex.singleFunctor C 0).obj X).HasHomology i]
+  [∀ i, R.cochainComplex.HasHomology i]
 
 set_option backward.isDefEq.respectTransparency false in
 instance : QuasiIso R.ι' := by dsimp [ι']; infer_instance
 
+end
+
 instance : R.cochainComplex.IsLE 0 := by
+  letI : ∀ i, ((CochainComplex.singleFunctor C 0).obj X).HasHomology i := fun i => by
+    dsimp [CochainComplex.singleFunctor, CochainComplex.singleFunctors]
+    infer_instance
+  letI : ∀ i, R.cochainComplex.HasHomology i := fun i => by
+    dsimp [cochainComplex]
+    infer_instance
   simp only [← HomologicalComplex.isSupported_iff_of_quasiIso R.ι']
   infer_instance
+
+end
+
+variable [Abelian C] {X : C} (R : InjectiveResolution X)
 
 namespace Hom
 

@@ -12,8 +12,8 @@ public import Mathlib.CategoryTheory.Limits.Preorder
 
 In this file, we obtain the following very basic results
 about limits and colimits indexed by a preordered type `J`:
-* a least element in `J` implies the existence of all limits indexed by `J`
-* a greatest element in `J` implies the existence of all colimits indexed by `J`
+* an initial object in `J` implies the existence of all limits indexed by `J`
+* a terminal object in `J` implies the existence of all colimits indexed by `J`
 
 -/
 
@@ -27,20 +27,20 @@ variable (C : Type u) [Category.{v} C] (J : Type w) [Preorder J]
 
 namespace Preorder
 
-section OrderBot
+section HasInitial
 
-variable [OrderBot J]
+variable [HasInitial J]
 
 instance : HasLimitsOfShape J C := ⟨fun _ ↦ by infer_instance⟩
 
-end OrderBot
+end HasInitial
 
-section OrderTop
+section HasTerminal
 
-variable [OrderTop J]
+variable [HasTerminal J]
 
 instance : HasColimitsOfShape J C := ⟨fun _ ↦ by infer_instance⟩
 
-end OrderTop
+end HasTerminal
 
 end Preorder

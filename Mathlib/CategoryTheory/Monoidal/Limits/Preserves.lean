@@ -30,14 +30,13 @@ instance preservesColimit_of_braided_and_preservesColimit_tensor_left
     PreservesColimit F (tensorRight c) :=
   preservesColimit_of_natIso F (BraidedCategory.tensorLeftIsoTensorRight c)
 
-/-- When `C` is braided and `tensorRight c` preserves a colimit, then so does `tensorLeft k`.
-We are not making this an instance to avoid an instance loop with
-`preservesColimit_of_braided_and_preservesColimit_tensor_left`. -/
+/-- When `tensorLeft c` and `tensorRight c` are naturally isomorphic and `tensorRight c`
+preserves a colimit, then so does `tensorLeft c`. -/
 lemma preservesColimit_of_braided_and_preservesColimit_tensor_right
-    [BraidedCategory C] (c : C)
+    (c : C) (e : tensorLeft c ≅ tensorRight c)
     [PreservesColimit F (tensorRight c)] :
     PreservesColimit F (tensorLeft c) :=
-  preservesColimit_of_natIso F (BraidedCategory.tensorLeftIsoTensorRight c).symm
+  preservesColimit_of_natIso F e.symm
 
 lemma preservesCoLimit_curriedTensor [h : ∀ c : C, PreservesColimit F (tensorRight c)] :
     PreservesColimit F (curriedTensor C) :=
@@ -55,14 +54,13 @@ instance preservesLimit_of_braided_and_preservesLimit_tensor_left
     PreservesLimit F (tensorRight c) :=
   preservesLimit_of_natIso F (BraidedCategory.tensorLeftIsoTensorRight c)
 
-/-- When `C` is braided and `tensorRight c` preserves a limit, then so does `tensorLeft k`.
-We are not making this an instance to avoid an instance loop with
-`preservesLimit_of_braided_and_preservesLimit_tensor_left`. -/
+/-- When `tensorLeft c` and `tensorRight c` are naturally isomorphic and `tensorRight c`
+preserves a limit, then so does `tensorLeft c`. -/
 lemma preservesLimit_of_braided_and_preservesLimit_tensor_right
-    [BraidedCategory C] (c : C)
+    (c : C) (e : tensorLeft c ≅ tensorRight c)
     [PreservesLimit F (tensorRight c)] :
     PreservesLimit F (tensorLeft c) :=
-  preservesLimit_of_natIso F (BraidedCategory.tensorLeftIsoTensorRight c).symm
+  preservesLimit_of_natIso F e.symm
 
 lemma preservesLimit_curriedTensor [h : ∀ c : C, PreservesLimit F (tensorRight c)] :
     PreservesLimit F (curriedTensor C) :=

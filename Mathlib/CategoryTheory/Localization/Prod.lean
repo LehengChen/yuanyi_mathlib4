@@ -15,8 +15,8 @@ public import Mathlib.CategoryTheory.MorphismProperty.Composition
 In this file, it is shown that if functors `L₁ : C₁ ⥤ D₁` and `L₂ : C₂ ⥤ D₂`
 are localization functors for morphisms properties `W₁` and `W₂`, then
 the product functor `C₁ × C₂ ⥤ D₁ × D₂` is a localization functor for
-`W₁.prod W₂ : MorphismProperty (C₁ × C₂)`, at least if both `W₁` and `W₂`
-contain identities. This main result is the instance `Functor.IsLocalization.prod`.
+`W₁.prod W₂ : MorphismProperty (C₁ × C₂)`, at least if `W₁.prod W₂`
+contains identities. This main result is the instance `Functor.IsLocalization.prod`.
 
 The proof proceeds by showing first `Localization.Construction.prodIsLocalization`,
 which asserts that this holds for the localization functors `W₁.Q` and `W₂.Q` to
@@ -58,35 +58,35 @@ lemma prod_uniq (F₁ F₂ : (W₁.Localization × W₂.Localization ⥤ E))
   simpa only [Functor.uncurry_obj_curry_obj_flip_flip] using h
 
 /-- Auxiliary definition for `prodLift`. -/
-noncomputable def prodLift₁ [W₂.ContainsIdentities]
+noncomputable def prodLift₁ [(W₁.prod W₂).ContainsIdentities]
     (hF : (W₁.prod W₂).IsInvertedBy F) :
     W₁.Localization ⥤ C₂ ⥤ E :=
-  Construction.lift (curry.obj F) (fun _ _ f₁ hf₁ => by
+  Construction.lift (curry.obj F) (fun X₁ _ f₁ hf₁ => by
     haveI : ∀ (X₂ : C₂), IsIso (((curry.obj F).map f₁).app X₂) :=
-      fun X₂ => hF _ ⟨hf₁, MorphismProperty.id_mem _ _⟩
+      fun X₂ => hF _ ⟨hf₁, ((W₁.prod W₂).id_mem (X₁, X₂)).2⟩
     apply NatIso.isIso_of_isIso_app)
 
 variable (hF : (W₁.prod W₂).IsInvertedBy F)
 
-lemma prod_fac₁ [W₂.ContainsIdentities] :
+lemma prod_fac₁ [(W₁.prod W₂).ContainsIdentities] :
     W₁.Q ⋙ prodLift₁ F hF = curry.obj F :=
   Construction.fac _ _
 
-variable [W₁.ContainsIdentities] [W₂.ContainsIdentities]
+variable [(W₁.prod W₂).ContainsIdentities]
 
 /-- The lifting of a functor `F : C₁ × C₂ ⥤ E` inverting `W₁.prod W₂` to a functor
 `W₁.Localization × W₂.Localization ⥤ E` -/
 noncomputable def prodLift :
     W₁.Localization × W₂.Localization ⥤ E := by
   refine uncurry.obj (Construction.lift (prodLift₁ F hF).flip ?_).flip
-  intro _ _ f₂ hf₂
+  intro X₂ _ f₂ hf₂
   haveI : ∀ (X₁ : W₁.Localization),
       IsIso (((Functor.flip (prodLift₁ F hF)).map f₂).app X₁) := fun X₁ => by
     obtain ⟨X₁, rfl⟩ := (Construction.objEquiv W₁).surjective X₁
     exact ((MorphismProperty.isomorphisms E).arrow_mk_iso_iff
       (((Functor.mapArrowFunctor _ _).mapIso
         (eqToIso (Functor.congr_obj (prod_fac₁ F hF) X₁))).app (Arrow.mk f₂))).2
-          (hF _ ⟨MorphismProperty.id_mem _ _, hf₂⟩)
+          (hF _ ⟨((W₁.prod W₂).id_mem (X₁, X₂)).1, hf₂⟩)
   apply NatIso.isIso_of_isIso_app
 
 lemma prod_fac₂ :
@@ -113,7 +113,7 @@ noncomputable def prod :
 end StrictUniversalPropertyFixedTarget
 
 variable (W₁ W₂)
-variable [W₁.ContainsIdentities] [W₂.ContainsIdentities]
+variable [(W₁.prod W₂).ContainsIdentities]
 
 lemma Construction.prodIsLocalization :
     (W₁.Q.prod W₂.Q).IsLocalization (W₁.prod W₂) :=
@@ -130,11 +130,11 @@ namespace Functor
 namespace IsLocalization
 
 variable (W₁ W₂)
-variable [W₁.ContainsIdentities] [W₂.ContainsIdentities]
+variable [(W₁.prod W₂).ContainsIdentities]
 
 /-- If `L₁ : C₁ ⥤ D₁` and `L₂ : C₂ ⥤ D₂` are localization functors
 for `W₁ : MorphismProperty C₁` and `W₂ : MorphismProperty C₂` respectively,
-and if both `W₁` and `W₂` contain identities, then the product
+and if `W₁.prod W₂` contains identities, then the product
 functor `L₁.prod L₂ : C₁ × C₂ ⥤ D₁ × D₂` is a localization functor for `W₁.prod W₂`. -/
 instance prod [L₁.IsLocalization W₁] [L₂.IsLocalization W₂] :
     (L₁.prod L₂).IsLocalization (W₁.prod W₂) := by

@@ -136,18 +136,21 @@ end
 
 set_option backward.isDefEq.respectTransparency false in
 include adj in
-lemma isLocalization [F.Full] [F.Faithful] :
+lemma isLocalization [IsIso adj.counit] :
     G.IsLocalization ((MorphismProperty.isomorphisms C₂).inverseImage G) := by
   let W := ((MorphismProperty.isomorphisms C₂).inverseImage G)
   have hG : W.IsInvertedBy G := fun _ _ _ hf => hf
+  haveI : ∀ (X : C₁), IsIso (G.map (adj.unit.app X)) := fun X =>
+    isIso_of_comp_hom_eq_id (adj.counit.app (G.obj X)) (adj.left_triangle_components X)
   have : ∀ (X : C₁), IsIso ((whiskerRight adj.unit W.Q).app X) := fun X =>
     Localization.inverts W.Q W _ (by
       change IsIso _
       infer_instance)
   have : IsIso (whiskerRight adj.unit W.Q) := NatIso.isIso_of_isIso_app _
+  let unitIso := asIso (whiskerRight adj.unit W.Q)
   let e : W.Localization ≌ C₂ := Equivalence.mk (Localization.lift G hG W.Q) (F ⋙ W.Q)
     (liftNatIso W.Q W W.Q (G ⋙ F ⋙ W.Q) _ _
-    (W.Q.leftUnitor.symm ≪≫ asIso (whiskerRight adj.unit W.Q)))
+    (W.Q.leftUnitor.symm ≪≫ unitIso))
     (Functor.associator _ _ _ ≪≫ isoWhiskerLeft _ (Localization.fac G hG W.Q) ≪≫
       asIso adj.counit)
   apply Functor.IsLocalization.of_equivalence_target W.Q W G e
@@ -155,10 +158,17 @@ lemma isLocalization [F.Full] [F.Faithful] :
 
 include adj in
 /-- This is the dual statement to `Adjunction.isLocalization`. -/
-lemma isLocalization' [G.Full] [G.Faithful] :
+lemma isLocalization' [IsIso adj.unit] :
     F.IsLocalization ((MorphismProperty.isomorphisms C₁).inverseImage F) := by
   rw [← Functor.IsLocalization.op_iff, MorphismProperty.op_inverseImage,
     MorphismProperty.op_isomorphisms]
+  haveI : IsIso adj.op.counit := by
+    dsimp [Adjunction.op]
+    haveI : ∀ X : C₁ᵒᵖ, IsIso ((NatTrans.op adj.unit).app X) := fun X => by
+      dsimp [NatTrans.op]
+      have h : IsIso (adj.unit.app (Opposite.unop X)) := inferInstance
+      exact @CategoryTheory.isIso_op C₁ _ _ _ (adj.unit.app (Opposite.unop X)) h
+    exact NatIso.isIso_of_isIso_app (NatTrans.op adj.unit)
   exact adj.op.isLocalization
 
 end Adjunction

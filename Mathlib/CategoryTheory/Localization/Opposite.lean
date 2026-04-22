@@ -83,11 +83,19 @@ end Functor
 
 namespace Localization
 
-lemma isoOfHom_unop {X Y : Cᵒᵖ} (w : X ⟶ Y) (hw : W.op w) :
-    (isoOfHom L.op W.op w hw).unop = (isoOfHom L W w.unop hw) := by ext; rfl
+omit [L.IsLocalization W] in
+lemma isoOfHom_unop [h : L.op.IsLocalization W.op] {X Y : Cᵒᵖ} (w : X ⟶ Y)
+    (hw : W.op w) :
+    (isoOfHom L.op W.op w hw).unop =
+      @isoOfHom C D _ _ L W ((Functor.IsLocalization.op_iff L W).mp h) _ _ w.unop hw := by
+  ext
+  rfl
 
-lemma isoOfHom_op_inv {X Y : Cᵒᵖ} (w : X ⟶ Y) (hw : W.op w) :
-    (isoOfHom L.op W.op w hw).inv = (isoOfHom L W w.unop hw).inv.op :=
+omit [L.IsLocalization W] in
+lemma isoOfHom_op_inv [h : L.op.IsLocalization W.op] {X Y : Cᵒᵖ} (w : X ⟶ Y)
+    (hw : W.op w) :
+    (isoOfHom L.op W.op w hw).inv =
+      (@isoOfHom C D _ _ L W ((Functor.IsLocalization.op_iff L W).mp h) _ _ w.unop hw).inv.op :=
   congr_arg Quiver.Hom.op (congr_arg Iso.inv (isoOfHom_unop L W w hw))
 
 end Localization

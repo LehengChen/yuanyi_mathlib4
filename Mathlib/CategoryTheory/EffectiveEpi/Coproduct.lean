@@ -58,12 +58,18 @@ It is the `h` hypothesis of `EffectiveEpi.desc` and `EffectiveEpi.fac`.
 -/
 theorem effectiveEpiFamilyStructOfEffectiveEpiDesc_aux {B : C} {α : Type*} {X : α → C}
     {π : (a : α) → X a ⟶ B} [HasCoproduct X]
-    [∀ {Z : C} (g : Z ⟶ ∐ X) (a : α), HasPullback g (Sigma.ι X a)]
-    [∀ {Z : C} (g : Z ⟶ ∐ X), HasCoproduct fun a ↦ pullback g (Sigma.ι X a)]
-    [∀ {Z : C} (g : Z ⟶ ∐ X), Epi (Sigma.desc fun a ↦ pullback.fst g (Sigma.ι X a))]
     {W : C} {e : (a : α) → X a ⟶ W} (h : ∀ {Z : C} (a₁ a₂ : α) (g₁ : Z ⟶ X a₁) (g₂ : Z ⟶ X a₂),
       g₁ ≫ π a₁ = g₂ ≫ π a₂ → g₁ ≫ e a₁ = g₂ ≫ e a₂) {Z : C}
-    {g₁ g₂ : Z ⟶ ∐ fun b ↦ X b} (hg : g₁ ≫ Sigma.desc π = g₂ ≫ Sigma.desc π) :
+    {g₁ g₂ : Z ⟶ ∐ fun b ↦ X b}
+    [∀ a, HasPullback g₁ (Sigma.ι X a)]
+    [HasCoproduct fun a ↦ pullback g₁ (Sigma.ι X a)]
+    [Epi (Sigma.desc fun a ↦ pullback.fst g₁ (Sigma.ι X a))]
+    [∀ a b, HasPullback (pullback.fst g₁ (Sigma.ι X a) ≫ g₂) (Sigma.ι X b)]
+    [∀ a, HasCoproduct fun b ↦ pullback (pullback.fst g₁ (Sigma.ι X a) ≫ g₂)
+      (Sigma.ι X b)]
+    [∀ a, Epi (Sigma.desc fun b ↦ pullback.fst (pullback.fst g₁ (Sigma.ι X a) ≫ g₂)
+      (Sigma.ι X b))]
+    (hg : g₁ ≫ Sigma.desc π = g₂ ≫ Sigma.desc π) :
     g₁ ≫ Sigma.desc e = g₂ ≫ Sigma.desc e := by
   apply_fun ((Sigma.desc fun a ↦ pullback.fst g₁ (Sigma.ι X a)) ≫ ·) using
     (fun a b ↦ (cancel_epi _).mp)

@@ -105,13 +105,13 @@ lemma HasConicalLimit.of_iso {F G : J ⥤ C} [HasConicalLimit V F] (e : F ≅ G)
   preservesLimit_eCoyoneda X := preservesLimit_of_iso_diagram (eCoyoneda V X) e
 
 instance HasConicalLimit.of_equiv (F : J ⥤ C) [HasConicalLimit V F]
-    (G : J' ⥤ J) [G.IsEquivalence] : HasConicalLimit V (G ⋙ F) where
+    (G : J' ⥤ J) [G.Initial] : HasConicalLimit V (G ⋙ F) where
 
-/-- If a `G ⋙ F` has a limit, and `G` is an equivalence, we can construct a limit of `F`. -/
-lemma HasConicalLimit.of_equiv_comp (F : J ⥤ C) (G : J' ⥤ J) [G.IsEquivalence]
-    [HasConicalLimit V (G ⋙ F)] : HasConicalLimit V F :=
-  have e : G.inv ⋙ G ⋙ F ≅ F := G.asEquivalence.invFunIdAssoc F
-  HasConicalLimit.of_iso V e
+/-- If a `G ⋙ F` has a conical limit, and `G` is initial, so does `F`. -/
+lemma HasConicalLimit.of_equiv_comp (F : J ⥤ C) (G : J' ⥤ J) [G.Initial]
+    [HasConicalLimit V (G ⋙ F)] : HasConicalLimit V F where
+  toHasLimit := Functor.Initial.hasLimit_of_comp G
+  preservesLimit_eCoyoneda _ := Functor.Initial.preservesLimit_of_comp G
 
 variable (C)
 
@@ -120,9 +120,9 @@ variable (J) in
 instance HasConicalLimitsOfShape.hasLimitsOfShape [HasConicalLimitsOfShape J V C] :
     HasLimitsOfShape J C where
 
-/-- We can transport conical limits of shape `J'` along an equivalence `J' ≌ J`. -/
+/-- We can transport conical limits of shape `J'` along an initial functor `J' ⥤ J`. -/
 lemma HasConicalLimitsOfShape.of_equiv [HasConicalLimitsOfShape J' V C]
-    (G : J' ⥤ J) [G.IsEquivalence] : HasConicalLimitsOfShape J V C where
+    (G : J' ⥤ J) [G.Initial] : HasConicalLimitsOfShape J V C where
   hasConicalLimit F := HasConicalLimit.of_equiv_comp V F G
 
 /-- existence of conical limits (of size) implies existence of limits (of size) -/

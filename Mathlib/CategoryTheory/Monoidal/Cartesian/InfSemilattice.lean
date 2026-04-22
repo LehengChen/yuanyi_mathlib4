@@ -37,10 +37,19 @@ noncomputable scoped instance cartesianMonoidalCategory : CartesianMonoidalCateg
 /-- Braided structure for the preorder category of a meet-semilattice with a greatest element. -/
 noncomputable scoped instance braidedCategory : BraidedCategory C := .ofCartesianMonoidalCategory
 
-lemma tensorObj {C : Type u} [SemilatticeInf C] [OrderTop C] {X Y : C} : X ⊗ Y = X ⊓ Y := rfl
+lemma tensorObj {C : Type u} [SemilatticeInf C] [CartesianMonoidalCategory C] {X Y : C} :
+    X ⊗ Y = X ⊓ Y := by
+  apply le_antisymm
+  · exact le_inf (leOfHom (CartesianMonoidalCategory.fst X Y))
+      (leOfHom (CartesianMonoidalCategory.snd X Y))
+  · exact leOfHom ((CartesianMonoidalCategory.tensorProductIsBinaryProduct X Y).lift
+      (Limits.BinaryFan.mk (homOfLE inf_le_left) (homOfLE inf_le_right)))
 
-lemma tensorUnit {C : Type u} [SemilatticeInf C] [OrderTop C] :
-    𝟙_ C = ⊤ := rfl
+lemma tensorUnit {C : Type u} [PartialOrder C] [OrderTop C] [SemiCartesianMonoidalCategory C] :
+    𝟙_ C = ⊤ := by
+  apply le_antisymm
+  · exact le_top
+  · exact leOfHom (SemiCartesianMonoidalCategory.toUnit (⊤ : C))
 
 end SemilatticeInf
 

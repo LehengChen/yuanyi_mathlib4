@@ -19,7 +19,7 @@ Copy-discard categories where deletion is natural for all morphisms.
 
 ## Main results
 
-* `eq_discard` - Any morphism to the unit equals discard
+* `eq_discard` - Any discard-natural morphism to the unit equals discard
 * `isTerminalUnit` - The monoidal unit is terminal
 
 ## Implementation notes
@@ -59,17 +59,18 @@ class MarkovCategory (C : Type u) [Category.{v} C] [MonoidalCategory.{v} C]
 
 namespace MarkovCategory
 
+/-- Any morphism to the unit whose discard is natural equals discard. -/
+theorem eq_discard [CopyDiscardCategory C] (X : C) (f : X ⟶ 𝟙_ C)
+    (hf : f ≫ ε[𝟙_ C] = ε[X]) : f = ε[X] := by
+  rw [← Category.comp_id f, ← discard_unit, hf]
+
 variable [MarkovCategory C]
 
 attribute [reassoc (attr := simp)] discard_natural
 
-/-- Any morphism to the unit equals discard. -/
-theorem eq_discard (X : C) (f : X ⟶ 𝟙_ C) : f = ε[X] := by
-  rw [← Category.comp_id f, ← discard_unit, discard_natural]
-
 /-- The monoidal unit is a terminal object. -/
 def isTerminalUnit : IsTerminal (𝟙_ C) :=
-  IsTerminal.ofUniqueHom _ eq_discard
+  IsTerminal.ofUniqueHom _ fun X f => eq_discard X f (discard_natural f)
 
 /-- There is a unique morphism to the unit (it is terminal). -/
 instance (X : C) : Subsingleton (X ⟶ 𝟙_ C) where

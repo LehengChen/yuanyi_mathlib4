@@ -153,6 +153,15 @@ def isColimitOfHasCoequalizerOfPreservesColimit [PreservesColimit (parallelPair 
       simp only [← G.map_comp]; rw [coequalizer.condition]) : Cofork (G.map f) (G.map g)) :=
   isColimitCoforkMapOfIsColimit G _ (coequalizerIsCoequalizer f g)
 
+section
+
+variable [PreservesColimit (parallelPair f g) G]
+
+instance map_π_epi : Epi (G.map (coequalizer.π f g)) :=
+  Cofork.IsColimit.epi (isColimitOfHasCoequalizerOfPreservesColimit G f g)
+
+end
+
 variable [HasCoequalizer (G.map f) (G.map g)]
 
 /-- If the coequalizer comparison map for `G` at `(f,g)` is an isomorphism, then `G` preserves the
@@ -183,13 +192,6 @@ theorem PreservesCoequalizer.iso_hom :
 instance : IsIso (coequalizerComparison f g G) := by
   rw [← PreservesCoequalizer.iso_hom]
   infer_instance
-
-instance map_π_epi : Epi (G.map (coequalizer.π f g)) :=
-  ⟨fun {W} h k => by
-    rw [← ι_comp_coequalizerComparison]
-    haveI : Epi (coequalizer.π (G.map f) (G.map g) ≫ coequalizerComparison f g G) := by
-      apply epi_comp
-    apply (cancel_epi _).1⟩
 
 @[reassoc]
 theorem map_π_preserves_coequalizer_inv :

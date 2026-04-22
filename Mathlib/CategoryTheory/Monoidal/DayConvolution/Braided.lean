@@ -201,16 +201,26 @@ end
 section
 
 variable {C : Type u₁} [Category.{v₁} C] {V : Type u₂} [Category.{v₂} V]
-  [MonoidalCategory C] [SymmetricCategory C]
-  [MonoidalCategory V] [SymmetricCategory V]
+  [MonoidalCategory C] [BraidedCategory C]
+  [MonoidalCategory V] [BraidedCategory V]
   (F G : C ⥤ V)
 
 set_option backward.isDefEq.respectTransparency false in
-lemma symmetry [DayConvolution F G] [DayConvolution G F] :
+lemma symmetry [DayConvolution F G] [DayConvolution G F]
+    (hC : ∀ x y : C, (β_ x y).hom ≫ (β_ y x).hom = 𝟙 (x ⊗ y))
+    (hV : ∀ x y : C,
+      (β_ (F.obj x) (G.obj y)).hom ≫ (β_ (G.obj y) (F.obj x)).hom =
+        𝟙 (F.obj x ⊗ G.obj y)) :
     (braiding F G).hom ≫ (braiding G F).hom = 𝟙 _ := by
   apply Functor.hom_ext_of_isLeftKanExtension (F ⊛ G) (unit F G)
   ext ⟨x, y⟩
-  simp [← Functor.map_comp]
+  simp only [externalProductBifunctor_obj_obj, Functor.comp_obj, tensor_obj,
+    Functor.whiskerLeft_comp, NatTrans.comp_app, Functor.whiskerLeft_app,
+    unit_app_braiding_hom_app_assoc, NatTrans.naturality,
+    Functor.whiskerLeft_id', Category.comp_id]
+  simp only [← Functor.map_comp, hC, Functor.map_id, Category.comp_id]
+  rw [← Category.assoc, hV x y]
+  simp only [Category.id_comp]
 
 end
 

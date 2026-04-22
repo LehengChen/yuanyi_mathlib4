@@ -108,24 +108,32 @@ noncomputable def prodCoprodDistrib [MonoidalCategory C] [HasBinaryCoproducts C]
     [MonoidalClosed C] (X Y Z : C) : (Z ⊗ X) ⨿ Z ⊗ Y ≅ Z ⊗ (X ⨿ Y) :=
   asIso (coprodComparison (tensorLeft Z) _ _)
 
+omit [Closed A] in
 /-- If an initial object `I` exists in a CCC then it is a strict initial object,
 i.e. any morphism to `I` is an iso.
-This actually shows a slightly stronger version: any morphism to an initial object from an
-exponentiable object is an isomorphism.
+This actually shows a slightly stronger version: it is enough that the second projection
+`A ⊗ I ⟶ I` is an isomorphism. In particular, this applies when `A` is exponentiable.
 -/
-theorem strict_initial {I : C} (t : IsInitial I) (f : A ⟶ I) : IsIso f := by
+theorem strict_initial {I : C} (t : IsInitial I) (f : A ⟶ I) [IsIso (snd A I)] :
+    IsIso f := by
   haveI : Mono f := by
-    rw [← lift_snd (𝟙 A) f, ← zeroMul_hom t]
+    rw [← lift_snd (𝟙 A) f]
     exact mono_comp _ _
   haveI : IsSplitEpi f := IsSplitEpi.mk' ⟨t.to _, t.hom_ext _ _⟩
   apply isIso_of_mono_of_isSplitEpi
 
 instance to_initial_isIso [HasInitial C] (f : A ⟶ ⊥_ C) : IsIso f :=
+  haveI : IsIso (snd A (⊥_ C)) := by
+    rw [← zeroMul_hom initialIsInitial]
+    infer_instance
   strict_initial initialIsInitial _
 
 /-- If an initial object `0` exists in a CCC then every morphism from it is monic. -/
 theorem initial_mono {I : C} (B : C) (t : IsInitial I) [MonoidalClosed C] : Mono (t.to B) :=
-  ⟨fun g h _ => by
+  ⟨fun {Z} g h _ => by
+    haveI : IsIso (snd Z I) := by
+      rw [← zeroMul_hom (A := Z) t]
+      infer_instance
     haveI := strict_initial t g
     haveI := strict_initial t h
     exact eq_of_inv_eq_inv (t.hom_ext _ _)⟩

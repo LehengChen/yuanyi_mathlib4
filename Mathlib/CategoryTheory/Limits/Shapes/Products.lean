@@ -393,9 +393,15 @@ from a family of isomorphisms between the factors.
 abbrev Pi.mapIso {f g : β → C} [HasProductsOfShape β C] (p : ∀ b, f b ≅ g b) : ∏ᶜ f ≅ ∏ᶜ g :=
   lim.mapIso (Discrete.natIso fun X => p X.as)
 
-instance Pi.map_isIso {f g : β → C} [HasProductsOfShape β C] (p : ∀ b, f b ⟶ g b)
+instance Pi.map_isIso {f g : β → C} [HasProduct f] [HasProduct g] (p : ∀ b, f b ⟶ g b)
     [∀ b, IsIso <| p b] : IsIso <| Pi.map p :=
-  inferInstanceAs (IsIso (Pi.mapIso (fun b ↦ asIso (p b))).hom)
+  let α : Discrete.functor f ⟶ Discrete.functor g := Discrete.natTrans fun X ↦ p X.as
+  haveI : ∀ X : Discrete β, IsIso (α.app X) := by
+    intro X
+    dsimp [α]
+    infer_instance
+  haveI : IsIso α := NatIso.isIso_of_isIso_app α
+  inferInstanceAs (IsIso (limMap α))
 
 section
 
@@ -517,9 +523,15 @@ from a family of isomorphisms between the factors.
 abbrev Sigma.mapIso {f g : β → C} [HasCoproductsOfShape β C] (p : ∀ b, f b ≅ g b) : ∐ f ≅ ∐ g :=
   colim.mapIso (Discrete.natIso fun X => p X.as)
 
-instance Sigma.map_isIso {f g : β → C} [HasCoproductsOfShape β C] (p : ∀ b, f b ⟶ g b)
+instance Sigma.map_isIso {f g : β → C} [HasCoproduct f] [HasCoproduct g] (p : ∀ b, f b ⟶ g b)
     [∀ b, IsIso <| p b] : IsIso (Sigma.map p) :=
-  inferInstanceAs (IsIso (Sigma.mapIso (fun b ↦ asIso (p b))).hom)
+  let α : Discrete.functor f ⟶ Discrete.functor g := Discrete.natTrans fun X ↦ p X.as
+  haveI : ∀ X : Discrete β, IsIso (α.app X) := by
+    intro X
+    dsimp [α]
+    infer_instance
+  haveI : IsIso α := NatIso.isIso_of_isIso_app α
+  inferInstanceAs (IsIso (colimMap α))
 
 section
 

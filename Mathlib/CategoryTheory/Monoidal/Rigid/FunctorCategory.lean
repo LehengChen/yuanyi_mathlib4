@@ -25,9 +25,9 @@ open CategoryTheory.MonoidalCategory
 
 namespace CategoryTheory.Monoidal
 
-variable {C D : Type*} [Groupoid C] [Category* D] [MonoidalCategory D]
+variable {C D : Type*} [Category* C] [IsGroupoid C] [Category* D] [MonoidalCategory D]
 
-instance functorHasRightDual [RightRigidCategory D] (F : C ⥤ D) : HasRightDual F where
+instance functorHasRightDual [∀ X : D, HasRightDual X] (F : C ⥤ D) : HasRightDual F where
   rightDual :=
     { obj := fun X => (F.obj X)ᘁ
       map := fun f => (F.map (inv f))ᘁ
@@ -50,9 +50,9 @@ instance functorHasRightDual [RightRigidCategory D] (F : C ⥤ D) : HasRightDual
               coevaluation_comp_rightAdjointMate, Category.assoc, ← comp_whiskerRight,
               IsIso.inv_hom_id, id_whiskerRight, Category.comp_id] } }
 
-instance rightRigidFunctorCategory [RightRigidCategory D] : RightRigidCategory (C ⥤ D) where
+instance rightRigidFunctorCategory [∀ X : D, HasRightDual X] : RightRigidCategory (C ⥤ D) where
 
-instance functorHasLeftDual [LeftRigidCategory D] (F : C ⥤ D) : HasLeftDual F where
+instance functorHasLeftDual [∀ X : D, HasLeftDual X] (F : C ⥤ D) : HasLeftDual F where
   leftDual :=
     { obj := fun X => ᘁ(F.obj X)
       map := fun f => ᘁ(F.map (inv f))
@@ -67,8 +67,9 @@ instance functorHasLeftDual [LeftRigidCategory D] (F : C ⥤ D) : HasLeftDual F 
           naturality := fun X Y f => by
             simp [tensorHom_def, coevaluation_comp_leftAdjointMate_assoc] } }
 
-instance leftRigidFunctorCategory [LeftRigidCategory D] : LeftRigidCategory (C ⥤ D) where
+instance leftRigidFunctorCategory [∀ X : D, HasLeftDual X] : LeftRigidCategory (C ⥤ D) where
 
-instance rigidFunctorCategory [RigidCategory D] : RigidCategory (C ⥤ D) where
+instance rigidFunctorCategory [∀ X : D, HasRightDual X] [∀ X : D, HasLeftDual X] :
+    RigidCategory (C ⥤ D) where
 
 end CategoryTheory.Monoidal

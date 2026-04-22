@@ -16,8 +16,7 @@ A functor `F : C ⥤ D` is dense (`F.IsDense`) if `𝟭 D` is a pointwise
 left Kan extension of `F` along itself, i.e. any `Y : D` is the
 colimit of all `F.obj X` for all morphisms `F.obj X ⟶ Y` (which
 is the condition `F.DenseAt Y`).
-When `F` is full, we show that this
-is equivalent to saying that the restricted Yoneda functor
+We show that this is equivalent to saying that the restricted Yoneda functor
 `D ⥤ Cᵒᵖ ⥤ Type _` is fully faithful (see the lemma
 `Functor.isDense_iff_fullyFaithful_restrictedULiftYoneda`).
 
@@ -70,7 +69,7 @@ lemma IsDense.iff_of_iso {F G : C ⥤ D} (e : F ≅ G) :
 
 variable (F : C ⥤ D)
 
-instance (G : C' ⥤ C) [F.IsDense] [G.IsEquivalence] :
+instance (G : C' ⥤ C) [F.IsDense] [∀ Y, (CostructuredArrow.pre G F Y).Final] :
     (G ⋙ F).IsDense where
   isDenseAt Y := ⟨(F.denseAt Y).precompOfFinal G⟩
 
@@ -117,7 +116,7 @@ instance [F.IsDense] : (restrictedULiftYoneda.{w} F).Full where
     simpa using ULift.down_injective this
 
 variable {F} in
-lemma IsDense.of_fullyFaithful_restrictedULiftYoneda [F.Full]
+lemma IsDense.of_fullyFaithful_restrictedULiftYoneda
     (h : (restrictedULiftYoneda.{w} F).FullyFaithful) :
     F.IsDense where
   isDenseAt Y := by
@@ -130,21 +129,18 @@ lemma IsDense.of_fullyFaithful_restrictedULiftYoneda [F.Full]
           let α : CostructuredArrow.mk (F.map f ≫ x) ⟶ CostructuredArrow.mk x :=
             CostructuredArrow.homMk f
           simp [← s.w α, α] }
-    have hφ (s) (j) : (restrictedULiftYoneda F).map j.hom ≫ φ s =
-        (restrictedULiftYoneda F).map (s.ι.app j) := by
-      ext ⟨X⟩ ⟨x⟩
-      let α : .mk (x ≫ j.hom) ⟶ j := CostructuredArrow.homMk (F.preimage x)
-      have := s.w α
-      dsimp [uliftYoneda, φ, α] at this ⊢
-      rw [← this, map_preimage]
     exact
       ⟨{desc s := (h.preimage (φ s))
-        fac s j := h.map_injective (by simp [hφ])
+        fac s j := by
+          have hj := congr_fun (NatTrans.congr_app (h.map_preimage (φ s)) (op j.left))
+            (ULift.up j.hom)
+          simpa [uliftFunctor, uliftYoneda, restrictedULiftYoneda, φ] using
+            congr_arg ULift.down hj
         uniq s m hm := h.map_injective (by
           ext ⟨X⟩ ⟨x⟩
           simp [φ, ← hm])}⟩
 
-lemma isDense_iff_fullyFaithful_restrictedULiftYoneda [F.Full] :
+lemma isDense_iff_fullyFaithful_restrictedULiftYoneda :
     F.IsDense ↔ Nonempty (restrictedULiftYoneda.{w} F).FullyFaithful :=
   ⟨fun _ ↦ ⟨FullyFaithful.ofFullyFaithful _⟩,
     fun ⟨h⟩ ↦ IsDense.of_fullyFaithful_restrictedULiftYoneda h⟩

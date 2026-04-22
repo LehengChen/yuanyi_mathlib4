@@ -322,7 +322,7 @@ the simpNF linter complains about `monoidal_tensorObj_comon_counit` being `@[sim
 So we spell out all the other ones.
 -/
 /--
-Comonoid objects in a braided category form a monoidal category.
+Comonoid objects form a monoidal category when the opposite category is braided.
 
 This definition is via transporting back and forth to monoids in the opposite category.
 -/
@@ -334,10 +334,12 @@ This definition is via transporting back and forth to monoids in the opposite ca
   associator_hom_hom associator_inv_hom
   leftUnitor_hom_hom leftUnitor_inv_hom
   rightUnitor_hom_hom rightUnitor_inv_hom]
-instance monoidal [BraidedCategory C] : MonoidalCategory (Comon C) :=
+instance monoidal [BraidedCategory Cᵒᵖ] : MonoidalCategory (Comon C) :=
   Monoidal.transport (Comon_EquivMon_OpOp C).symm
 
-variable {C} [BraidedCategory C]
+section OppositeBraided
+
+variable {C} [BraidedCategory Cᵒᵖ]
 
 theorem tensorObj_X (A B : Comon C) : (A ⊗ B).X = A.X ⊗ B.X := rfl
 
@@ -359,6 +361,12 @@ theorem tensorObj_comul' (A B : C) [ComonObj A] [ComonObj B] :
       (Δ[A] ⊗ₘ Δ[B]) ≫ (tensorμ (op A) (op B) (op A) (op B)).unop := by
   rfl
 
+end OppositeBraided
+
+section Braided
+
+variable {C} [BraidedCategory C]
+
 /--
 The comultiplication on the tensor product of two comonoids is
 the tensor product of the comultiplications followed by the tensor strength
@@ -369,8 +377,12 @@ theorem tensorObj_comul (A B : C) [ComonObj A] [ComonObj B] :
     Δ[A ⊗ B] = (Δ[A] ⊗ₘ Δ[B]) ≫ tensorμ A A B B := by
   simp [tensorObj_comul']
 
+end Braided
+
+variable {C} [BraidedCategory Cᵒᵖ]
+
 set_option backward.isDefEq.respectTransparency false in
-/-- The forgetful functor from `Comon C` to `C` is monoidal when `C` is monoidal. -/
+/-- The forgetful functor from `Comon C` to `C` is monoidal for the transported structure. -/
 instance : (forget C).Monoidal :=
   Functor.CoreMonoidal.toMonoidal
     { εIso := Iso.refl _

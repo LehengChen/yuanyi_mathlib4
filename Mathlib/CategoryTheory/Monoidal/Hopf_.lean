@@ -82,8 +82,9 @@ namespace HopfObj
 
 variable {C}
 
-/-- Morphisms of Hopf monoids intertwine the antipodes. -/
-theorem hom_antipode {A B : C} [HopfObj A] [HopfObj B] (f : A ⟶ B) [IsBimonHom f] :
+/-- Maps of Hopf monoids that preserve both structures intertwine the antipodes. -/
+theorem hom_antipode {A B : C} [HopfObj A] [HopfObj B] (f : A ⟶ B) [IsMonHom f]
+    [IsComonHom f] :
     f ≫ 𝒮 = 𝒮 ≫ f := by
   -- We show these elements are equal by exhibiting an element in the convolution algebra
   -- between `A` (as a comonoid) and `B` (as a monoid),
@@ -441,9 +442,10 @@ theorem mul_antipode (A : C) [HopfObj A] :
     exact mul_antipode₂ A
 
 /--
-In a commutative Hopf algebra, the antipode squares to the identity.
+If the antipode preserves multiplication, then it squares to the identity.
 -/
-theorem antipode_antipode (A : C) [HopfObj A] (comm : (β_ _ _).hom ≫ μ[A] = μ[A]) :
+theorem antipode_antipode (A : C) [HopfObj A]
+    (hS_mul : μ[A] ≫ 𝒮[A] = (𝒮[A] ⊗ₘ 𝒮[A]) ≫ μ[A]) :
     𝒮[A] ≫ 𝒮[A] = 𝟙 A := by
   -- Again, it is a "left inverse equals right inverse" argument in the convolution monoid.
   apply left_inv_eq_right_inv
@@ -453,7 +455,7 @@ theorem antipode_antipode (A : C) [HopfObj A] (comm : (β_ _ _).hom ≫ μ[A] = 
     -- then `simp?`.
     rw [Conv.mul_eq, Conv.one_eq]
     simp only [comp_whiskerRight, Category.assoc]
-    rw [← comm, ← tensorHom_def_assoc, ← mul_antipode]
+    rw [← tensorHom_def_assoc, ← hS_mul]
     simp
   · rw [Conv.mul_eq, Conv.one_eq]
     simp

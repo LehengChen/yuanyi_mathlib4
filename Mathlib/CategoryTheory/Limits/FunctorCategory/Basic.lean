@@ -257,12 +257,10 @@ theorem limitObjIsoLimitCompEvaluation_inv_limit_map [HasLimitsOfShape J C] {i j
 
 set_option backward.isDefEq.respectTransparency false in
 @[ext]
-theorem limit_obj_ext {H : J ⥤ K ⥤ C} [HasLimitsOfShape J C] {k : K} {W : C}
+theorem limit_obj_ext {H : J ⥤ K ⥤ C} [∀ x, HasLimit (H.flip.obj x)] {k : K} {W : C}
     {f g : W ⟶ (limit H).obj k}
     (w : ∀ j, f ≫ (Limits.limit.π H j).app k = g ≫ (Limits.limit.π H j).app k) : f = g := by
-  apply (cancel_mono (limitObjIsoLimitCompEvaluation H k).hom).1
-  ext j
-  simpa using w j
+  exact (isLimitOfPreserves ((evaluation K C).obj k) (limit.isLimit H)).hom_ext w
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Taking a limit after whiskering by `G` is the same as using `G` and then taking a limit. -/
@@ -351,12 +349,10 @@ theorem colimit_map_colimitObjIsoColimitCompEvaluation_hom [HasColimitsOfShape J
 
 set_option backward.isDefEq.respectTransparency false in
 @[ext]
-theorem colimit_obj_ext {H : J ⥤ K ⥤ C} [HasColimitsOfShape J C] {k : K} {W : C}
+theorem colimit_obj_ext {H : J ⥤ K ⥤ C} [∀ x, HasColimit (H.flip.obj x)] {k : K} {W : C}
     {f g : (colimit H).obj k ⟶ W} (w : ∀ j, (colimit.ι H j).app k ≫ f = (colimit.ι H j).app k ≫ g) :
     f = g := by
-  apply (cancel_epi (colimitObjIsoColimitCompEvaluation H k).inv).1
-  ext j
-  simpa using w j
+  exact (isColimitOfPreserves ((evaluation K C).obj k) (colimit.isColimit H)).hom_ext w
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Taking a colimit after whiskering by `G` is the same as using `G` and then taking a colimit. -/

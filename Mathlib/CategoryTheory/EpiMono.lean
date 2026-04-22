@@ -275,19 +275,20 @@ lemma epi_comp_iff_of_epi {X Y Z : C} (f : X ⟶ Y) [Epi f] (g : Y ⟶ Z) :
     Epi (f ≫ g) ↔ Epi g :=
   ⟨fun _ ↦ epi_of_epi f _, fun _ ↦ inferInstance⟩
 
-/-- When `g` is an isomorphism, `f ≫ g` is epic iff `f` is. -/
+/-- When `g` is an epimorphic split monomorphism, `f ≫ g` is epic iff `f` is. -/
 @[simp]
-lemma epi_comp_iff_of_isIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [IsIso g] :
+lemma epi_comp_iff_of_isIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [Epi g]
+    [IsSplitMono g] :
     Epi (f ≫ g) ↔ Epi f := by
   refine ⟨fun h ↦ ?_, fun h ↦ inferInstance⟩
-  simpa using (inferInstance : Epi ((f ≫ g) ≫ inv g))
+  simpa using (inferInstance : Epi ((f ≫ g) ≫ retraction g))
 
-/-- When `f` is an isomorphism, `f ≫ g` is monic iff `g` is. -/
+/-- When `f` is a monomorphic split epimorphism, `f ≫ g` is monic iff `g` is. -/
 @[simp]
-lemma mono_comp_iff_of_isIso {X Y Z : C} (f : X ⟶ Y) [IsIso f] (g : Y ⟶ Z) :
+lemma mono_comp_iff_of_isIso {X Y Z : C} (f : X ⟶ Y) [Mono f] [IsSplitEpi f] (g : Y ⟶ Z) :
     Mono (f ≫ g) ↔ Mono g := by
   refine ⟨fun h ↦ ?_, fun h ↦ inferInstance⟩
-  simpa using (inferInstance : Mono (inv f ≫ f ≫ g))
+  simpa using (inferInstance : Mono (section_ f ≫ f ≫ g))
 
 /-- When `g` is a monomorphism, `f ≫ g` is monic iff `f` is. -/
 @[simp]

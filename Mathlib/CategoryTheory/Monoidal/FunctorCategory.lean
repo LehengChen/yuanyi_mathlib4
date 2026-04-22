@@ -231,20 +231,24 @@ instance {C D E : Type*} [Category* C] [Category* D] [Category* E] [MonoidalCate
 
 @[simps!]
 instance Functor.Monoidal.whiskeringLeft
-    (E : Type*) [Category* E] [MonoidalCategory E] (F : C ⥤ D) :
+    {C D E : Type*} [Category* C] [Category* D] [Category* E] [MonoidalCategory E]
+    (F : C ⥤ D) :
     ((whiskeringLeft _ _ E).obj F).Monoidal :=
   CoreMonoidal.toMonoidal { εIso := Iso.refl _, μIso _ _ := Iso.refl _ }
 
-instance (E : Type*) [Category* E] [MonoidalCategory E] (e : C ≌ D) :
+instance {C D E : Type*} [Category* C] [Category* D] [Category* E] [MonoidalCategory E]
+    (e : C ≌ D) :
     (e.congrLeft (E := E)).functor.Monoidal :=
   inferInstanceAs ((Functor.whiskeringLeft _ _ E).obj e.inverse).Monoidal
 
-instance (E : Type*) [Category* E] [MonoidalCategory E] (e : C ≌ D) :
+instance {C D E : Type*} [Category* C] [Category* D] [Category* E] [MonoidalCategory E]
+    (e : C ≌ D) :
     (e.congrLeft (E := E)).inverse.Monoidal :=
   inferInstanceAs ((Functor.whiskeringLeft _ _ E).obj e.functor).Monoidal
 
 set_option backward.isDefEq.respectTransparency false in
-instance (E : Type*) [Category* E] [MonoidalCategory E] (e : C ≌ D) :
+instance {C D E : Type*} [Category* C] [Category* D] [Category* E] [MonoidalCategory E]
+    (e : C ≌ D) :
     (e.congrLeft (E := E)).IsMonoidal where
   leftAdjoint_μ X Y := by
     ext

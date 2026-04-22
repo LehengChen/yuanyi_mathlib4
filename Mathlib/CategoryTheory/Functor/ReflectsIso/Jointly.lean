@@ -50,8 +50,9 @@ structure JointlyFaithful (F : ∀ i, C ⥤ D i) : Prop where
 
 variable {F : ∀ i, C ⥤ D i}
 
-lemma JointlyFaithful.of_jointly_reflects_isIso_of_mono [HasEqualizers C]
-    [∀ i, PreservesLimitsOfShape WalkingParallelPair (F i)]
+lemma JointlyFaithful.of_jointly_reflects_isIso_of_mono
+    [∀ {X Y : C} (f g : X ⟶ Y), HasEqualizer f g]
+    [∀ i {X Y : C} (f g : X ⟶ Y), PreservesLimit (parallelPair f g) (F i)]
     (hF : ∀ ⦃X Y : C⦄ (f : X ⟶ Y) [Mono f],
       (∀ i, IsIso ((F i).map f)) → IsIso f) :
     JointlyFaithful F where
@@ -82,8 +83,8 @@ lemma mono {X Y : C} (f : X ⟶ Y) [hf : ∀ i, Mono ((F i).map f)]
   exact (mono_iff_isIso_fst ((isLimitMapConePullbackConeEquiv (F i) pullback.condition).1
     (isLimitOfPreserves (F i) hc))).1 (hf i)
 
-lemma jointlyReflectMonomorphisms [∀ i, PreservesLimitsOfShape WalkingCospan (F i)]
-    [HasPullbacks C] :
+lemma jointlyReflectMonomorphisms [∀ {X Y : C} (f : X ⟶ Y), HasPullback f f]
+    [∀ i {X Y : C} (f : X ⟶ Y), PreservesLimit (cospan f f) (F i)] :
     JointlyReflectMonomorphisms F where
   mono f _ := h.mono f
 
@@ -95,12 +96,13 @@ lemma epi {X Y : C} (f : X ⟶ Y) [hf : ∀ i, Epi ((F i).map f)]
   exact (epi_iff_isIso_inl ((isColimitMapCoconePushoutCoconeEquiv (F i) pushout.condition).1
     (isColimitOfPreserves (F i) hc))).1 (hf i)
 
-lemma jointlyReflectEpimorphisms [∀ i, PreservesColimitsOfShape WalkingSpan (F i)]
-    [HasPushouts C] :
+lemma jointlyReflectEpimorphisms [∀ {X Y : C} (f : X ⟶ Y), HasPushout f f]
+    [∀ i {X Y : C} (f : X ⟶ Y), PreservesColimit (span f f) (F i)] :
     JointlyReflectEpimorphisms F where
   epi f _ := h.epi f
 
-lemma jointlyFaithful [∀ i, PreservesLimitsOfShape WalkingParallelPair (F i)] [HasEqualizers C] :
+lemma jointlyFaithful [∀ {X Y : C} (f g : X ⟶ Y), HasEqualizer f g]
+    [∀ i {X Y : C} (f g : X ⟶ Y), PreservesLimit (parallelPair f g) (F i)] :
     JointlyFaithful F :=
   .of_jointly_reflects_isIso_of_mono (fun _ _ _ _ _ ↦ h.isIso _)
 

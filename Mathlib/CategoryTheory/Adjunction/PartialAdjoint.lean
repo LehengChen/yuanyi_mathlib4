@@ -185,15 +185,15 @@ noncomputable def corepresentableByCompCoyonedaObjOfIsColimit {J : Type*} [Categ
       F.map_comp, assoc])
 
 lemma leftAdjointObjIsDefined_of_isColimit {J : Type*} [Category* J] {R : J ⥤ C} {c : Cocone R}
-    (hc : IsColimit c) [HasColimitsOfShape J D]
-    (h : ∀ (j : J), F.leftAdjointObjIsDefined (R.obj j)) :
+    (hc : IsColimit c) (h : ∀ (j : J), F.leftAdjointObjIsDefined (R.obj j))
+    [HasColimit (ObjectProperty.lift _ R h ⋙ F.partialLeftAdjoint)] :
     F.leftAdjointObjIsDefined c.pt :=
   (corepresentableByCompCoyonedaObjOfIsColimit
     (R := ObjectProperty.lift _ R h) hc (colimit.isColimit _)).isCorepresentable
 
 lemma leftAdjointObjIsDefined_colimit {J : Type*} [Category* J] (R : J ⥤ C)
-    [HasColimit R] [HasColimitsOfShape J D]
-    (h : ∀ (j : J), F.leftAdjointObjIsDefined (R.obj j)) :
+    [HasColimit R] (h : ∀ (j : J), F.leftAdjointObjIsDefined (R.obj j))
+    [HasColimit (ObjectProperty.lift _ R h ⋙ F.partialLeftAdjoint)] :
     F.leftAdjointObjIsDefined (colimit R) :=
   leftAdjointObjIsDefined_of_isColimit (colimit.isColimit R) h
 
@@ -341,15 +341,15 @@ noncomputable def representableByCompYonedaObjOfIsLimit {J : Type*} [Category* J
     simp only [IsLimit.fac, partialRightAdjointHomEquiv_comp, assoc])
 
 lemma rightAdjointObjIsDefined_of_isLimit {J : Type*} [Category* J] {R : J ⥤ D} {c : Cone R}
-    (hc : IsLimit c) [HasLimitsOfShape J C]
-    (h : ∀ (j : J), F.rightAdjointObjIsDefined (R.obj j)) :
+    (hc : IsLimit c) (h : ∀ (j : J), F.rightAdjointObjIsDefined (R.obj j))
+    [HasLimit (ObjectProperty.lift _ R h ⋙ F.partialRightAdjoint)] :
     F.rightAdjointObjIsDefined c.pt :=
   (representableByCompYonedaObjOfIsLimit
     (R := ObjectProperty.lift _ R h) hc (limit.isLimit _)).isRepresentable
 
 lemma rightAdjointObjIsDefined_limit {J : Type*} [Category* J] (R : J ⥤ D)
-    [HasLimit R] [HasLimitsOfShape J C]
-    (h : ∀ (j : J), F.rightAdjointObjIsDefined (R.obj j)) :
+    [HasLimit R] (h : ∀ (j : J), F.rightAdjointObjIsDefined (R.obj j))
+    [HasLimit (ObjectProperty.lift _ R h ⋙ F.partialRightAdjoint)] :
     F.rightAdjointObjIsDefined (limit R) :=
   rightAdjointObjIsDefined_of_isLimit (limit.isLimit R) h
 
