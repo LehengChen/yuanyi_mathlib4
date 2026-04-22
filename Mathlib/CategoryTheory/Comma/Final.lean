@@ -174,7 +174,7 @@ lemma isCofiltered_of_initial [IsCofiltered A] [IsCofiltered B] [L.Initial] :
   IsCofiltered.of_equivalence (Comma.opEquiv _ _).symm
 
 attribute [local instance] final_of_isFiltered_of_pUnit in
-/-- Let `A` and `B` be filtered categories, `R : B ⥤ T` be final and `R : A ⥤ T`. Then, the
+/-- Let `A` and `B` be filtered categories, `R : B ⥤ T` be final and `L : A ⥤ T`. Then, the
 projection `snd L R : Comma L R ⥤ B` is final. -/
 instance final_snd [IsFiltered A] [IsFiltered B] [R.Final] : (snd L R).Final := by
   let iL : star.{1} A ⋙ 𝟭 _ ≅ L ⋙ star _ := Iso.refl _
