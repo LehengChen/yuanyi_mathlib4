@@ -515,7 +515,8 @@ lemma repr_CotangentSpaceMap (f : Hom P P') (i j) :
   rw [cotangentSpaceBasis_apply]
   simp only [toExtension]
   rw [CotangentSpace.map_tmul, map_one]
-  erw [cotangentSpaceBasis_repr_one_tmul, Hom.toAlgHom_X]
+  rw [← Hom.toAlgHom_X]
+  exact cotangentSpaceBasis_repr_one_tmul P' _ _
 
 set_option backward.isDefEq.respectTransparency false in
 lemma toKaehler_tmul_D (i) :
