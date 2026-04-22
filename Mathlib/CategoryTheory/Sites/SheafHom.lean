@@ -143,10 +143,10 @@ lemma exists_app (hx : x.Compatible) (g : Y ⟶ X) :
             have H := hx f.left (𝟙 _) hZ₁ hZ₂ (by simp)
             simp only [presheafHom_obj, unop_op, Functor.id_obj, op_id,
               FunctorToTypes.map_id_apply] at H
-            let φ : Over.mk f.left ⟶ Over.mk (𝟙 Z₁.left) := Over.homMk f.left
-            have H' := (x (Z₁.hom ≫ g) hZ₁).naturality φ.op
+            have H' := (x (Z₁.hom ≫ g) hZ₁).naturality
+              ((Over.homMk f.left : Over.mk f.left ⟶ Over.mk (𝟙 Z₁.left)).op)
             dsimp at H H' ⊢
-            erw [← H, ← H', presheafHom_map_app_op_mk_id, ← F.map_comp_assoc,
+            rw [← H, presheafHom_map_app_op_mk_id, ← H', ← F.map_comp_assoc,
               ← op_comp, Over.w f] } }
   use (hG g).lift c
   intro Z p hp
