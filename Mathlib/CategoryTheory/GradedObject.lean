@@ -6,6 +6,7 @@ Authors: Kim Morrison, Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Shift.Basic
+public import Mathlib.CategoryTheory.Limits.MonoCoprod
 public import Mathlib.Data.Set.Subsingleton
 public import Mathlib.Algebra.Group.Int.Defs
 
@@ -257,12 +258,11 @@ noncomputable def total : GradedObject β C ⥤ C where
 
 end
 
-variable [HasZeroMorphisms C]
+variable [MonoCoprod C]
 
 /--
 The `total` functor taking a graded object to the coproduct of its graded components is faithful.
-To prove this, we need to know that the coprojections into the coproduct are monomorphisms,
-which follows from the fact we have zero morphisms and decidable equality for the grading.
+To prove this, we need to know that the coprojections into the coproduct are monomorphisms.
 -/
 instance : (total β C).Faithful where
   map_injective {X Y} f g w := by
@@ -389,9 +389,10 @@ lemma ι_mapMap (i : I) (j : J) (hij : p i = j) :
     X.ιMapObj p i j hij ≫ mapMap φ p j = φ i ≫ Y.ιMapObj p i j hij := by
   simp only [mapMap, ι_descMapObj]
 
-lemma congr_mapMap (φ₁ φ₂ : X ⟶ Y) (h : φ₁ = φ₂) : mapMap φ₁ p = mapMap φ₂ p := by
-  subst h
-  rfl
+lemma congr_mapMap (φ₁ φ₂ : X ⟶ Y) (h : ∀ i, φ₁ i = φ₂ i) :
+    mapMap φ₁ p = mapMap φ₂ p := by
+  ext j i hij
+  simp only [ι_mapMap, h]
 
 variable (X)
 

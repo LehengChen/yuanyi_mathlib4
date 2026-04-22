@@ -108,12 +108,13 @@ instance : CreatesLimitsOfShape J (forget C) := ⟨inferInstance⟩
 instance : CreatesLimitsOfSize.{w} (forget C) := ⟨inferInstance⟩
 instance : CreatesLimits (forget C) := ⟨inferInstance⟩
 
-instance [HasLimitsOfShape J C] : HasLimitsOfShape J (Mon C) :=
-  hasLimitsOfShape_of_hasLimitsOfShape_createsLimitsOfShape (forget C)
+instance [∀ F : J ⥤ Mon C, HasLimit (F ⋙ Mon.forget C)] :
+    HasLimitsOfShape J (Mon C) where
+  has_limit F := hasLimit_of_created F (forget C)
 
-instance [HasLimitsOfShape J C] :
-    PreservesLimitsOfShape J (Mon.forget C) :=
-  CategoryTheory.preservesLimitOfShape_of_createsLimitsOfShape_and_hasLimitsOfShape _
+instance [∀ F : J ⥤ Mon C, HasLimit (F ⋙ Mon.forget C)] :
+    PreservesLimitsOfShape J (Mon.forget C) where
+  preservesLimit {F} := preservesLimit_of_createsLimit_and_hasLimit F (Mon.forget C)
 
 end Mon
 end CategoryTheory

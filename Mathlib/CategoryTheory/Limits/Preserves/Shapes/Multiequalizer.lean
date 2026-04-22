@@ -16,9 +16,10 @@ an isomorphism of functors `(d.map F).multispan ≅ d.multispan ⋙ F`
 (see `MultispanIndex.multispanMapIso`).
 If `c : Multicofork d`, we define `c.map F : Multicofork (d.map F)` and
 obtain a bijection `IsColimit (F.mapCocone c) ≃ IsColimit (c.map F)`
-(see `Multicofork.isColimitMapEquiv`). As a result, if `F` preserves
-the colimit of `d.multispan`, we deduce that if `c` is a colimit,
-then `c.map F` also is (see `Multicofork.isColimitMapOfPreserves`).
+(see `Multicofork.isColimitMapEquiv`). As a result, if `F.mapCocone c`
+is a colimit, then `c.map F` also is (see
+`Multicofork.isColimitMapOfPreserves`); this applies in particular when
+`F` preserves the colimit of `d.multispan` and `c` is a colimit.
 
 -/
 
@@ -71,12 +72,12 @@ def Multicofork.isColimitMapEquiv :
     (IsColimit.equivIsoColimit
       (Multicofork.ext (Iso.refl _) (fun i ↦ by dsimp only [Multicofork.π]; simp)))
 
-/-- If `d : MultispanIndex J C`, `c : Multicofork d` is a colimit multicofork,
-and `F : C ⥤ D` is a functor which preserves the colimit of `d.multispan`,
-then the multicofork `c.map F` is colimit. -/
+/-- If `d : MultispanIndex J C`, `c : Multicofork d`, `F : C ⥤ D`,
+and the mapped cocone `F.mapCocone c` is colimit, then the multicofork
+`c.map F` is colimit. -/
 noncomputable def Multicofork.isColimitMapOfPreserves
-    [PreservesColimit d.multispan F] (hc : IsColimit c) : IsColimit (c.map F) :=
-  (isColimitMapEquiv c F) (isColimitOfPreserves F hc)
+    (hc : IsColimit (F.mapCocone c)) : IsColimit (c.map F) :=
+  (isColimitMapEquiv c F) hc
 
 end Limits
 

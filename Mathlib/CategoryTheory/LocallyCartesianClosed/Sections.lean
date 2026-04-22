@@ -32,7 +32,11 @@ open Category Limits MonoidalCategory CartesianMonoidalCategory MonoidalClosed
 
 section Sections
 
-variable {C : Type u₁} [Category.{v₁} C] [CartesianMonoidalCategory C]
+variable {C : Type u₁} [Category.{v₁} C]
+
+section CurryRightUnitorHom
+
+variable [SemiCartesianMonoidalCategory C]
 
 variable (I : C) [Closed I]
 
@@ -47,11 +51,15 @@ theorem toUnit_comp_curryRightUnitorHom {A : C} :
   apply uncurry_injective
   simp [uncurry_natural_left, curryRightUnitorHom, fst_def, toUnit]
 
+end CurryRightUnitorHom
+
 namespace Over
 
 open ChosenPullbacksAlong
 
-variable (I) [ChosenPullbacksAlong (curryRightUnitorHom I)]
+variable [CartesianMonoidalCategory C]
+
+variable (I : C) [Closed I] [ChosenPullbacksAlong (curryRightUnitorHom I)]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor mapping an object `X : Over I` to the object of sections of `X` over `I`, defined

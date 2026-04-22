@@ -37,7 +37,7 @@ universe v u
 
 namespace CategoryTheory.Abelian
 
-variable {C : Type u} [Category.{v} C] [Abelian C]
+variable {C : Type u} [Category.{v} C]
 
 variable (C) in
 /-- A preradical on an abelian category `C` is a monomorphism in `C ⥤ C` with codomain `𝟭 C`. -/
@@ -55,7 +55,8 @@ abbrev ι : Φ.r ⟶ 𝟭 C := Φ.obj.hom
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
-lemma r_map_ι_app (X : C) : Φ.r.map (Φ.ι.app X) = Φ.ι.app (Φ.r.obj X) := by
+lemma r_map_ι_app [Limits.HasPullbacks C] (X : C) :
+    Φ.r.map (Φ.ι.app X) = Φ.ι.app (Φ.r.obj X) := by
   rw [← cancel_mono (Φ.ι.app X)]
   exact Φ.ι.naturality (Φ.ι.app X)
 
@@ -70,13 +71,13 @@ instance [Φ.IsIdempotent] (X : C) :
   inferInstanceAs (IsIso ((Functor.whiskerLeft Φ.r Φ.ι).app X))
 
 set_option backward.isDefEq.respectTransparency false in
-instance [Φ.IsIdempotent] (X : C) :
+instance [Limits.HasPullbacks C] [Φ.IsIdempotent] (X : C) :
     IsIso (Φ.r.map (Φ.ι.app X)) := by
   rw [r_map_ι_app]
-  infer_instance
+  exact inferInstanceAs (IsIso (Φ.ι.app (Φ.r.obj X)))
 
 set_option backward.isDefEq.respectTransparency false in
-instance {D : Type*} [Category* D] (F : D ⥤ C) :
+instance [Limits.HasPullbacks C] {D : Type*} [Category* D] (F : D ⥤ C) :
     Mono (Functor.whiskerLeft F Φ.ι) := by
   rw [NatTrans.mono_iff_mono_app]
   intro

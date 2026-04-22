@@ -225,12 +225,13 @@ theorem baseChange_obj {S S' : C} (f : S' ⟶ S)
   pullback_snd X.hom f H
 
 set_option backward.isDefEq.respectTransparency false in
-theorem pullbackLift_fst_snd [IsStableUnderBaseChange P] {S S' X Y : C} (f : S' ⟶ S)
+theorem pullbackLift_fst_snd {S S' X Y : C} (f : S' ⟶ S)
     {v₁₂ : X ⟶ S} {v₂₂ : Y ⟶ S} {g : X ⟶ Y} (hv₁₂ : v₁₂ = g ≫ v₂₂) [HasPullback v₁₂ f]
-    [HasPullback v₂₂ f] (H : P g) : P (pullback.lift (f := v₂₂) (g := f) (pullback.fst v₁₂ f ≫ g)
+    [HasPullback v₂₂ f] [P.IsStableUnderBaseChangeAlong (pullback.fst v₂₂ f)]
+    (H : P g) : P (pullback.lift (f := v₂₂) (g := f) (pullback.fst v₁₂ f ≫ g)
     (pullback.snd v₁₂ f) (by simp [pullback.condition, ← hv₁₂])) := by
   subst hv₁₂
-  refine of_isPullback (f' := pullback.fst (g ≫ v₂₂) f)
+  refine IsStableUnderBaseChangeAlong.of_isPullback (f' := pullback.fst (g ≫ v₂₂) f)
     (f := pullback.fst v₂₂ f) ?_ H
   refine IsPullback.of_bot ?_ (by simp) (IsPullback.of_hasPullback v₂₂ f)
   simpa using IsPullback.of_hasPullback (g ≫ v₂₂) f
@@ -346,9 +347,9 @@ theorem pushout_inr {A B A' : C} (f : A ⟶ A') (g : A ⟶ B) [HasPushout f g]
   IsStableUnderCobaseChangeAlong.of_isPushout (IsPushout.of_hasPushout f g).flip H
 
 set_option backward.isDefEq.respectTransparency false in
-theorem pushoutDesc_inl_inr [IsStableUnderCobaseChange P] {S S' X Y : C} (f : S ⟶ S')
+theorem pushoutDesc_inl_inr {S S' X Y : C} (f : S ⟶ S')
     {v₁₂ : S ⟶ X} {v₂₂ : S ⟶ Y} {g : Y ⟶ X} (hv₁₂ : v₁₂ = v₂₂ ≫ g) [HasPushout v₁₂ f]
-    [HasPushout v₂₂ f] (H : P g) :
+    [HasPushout v₂₂ f] [P.IsStableUnderCobaseChangeAlong (pushout.inl v₂₂ f)] (H : P g) :
     P (pushout.desc (f := v₂₂) (g := f) (g ≫ pushout.inl v₁₂ f)
       (pushout.inr v₁₂ f) (by simp [pushout.condition, ← reassoc_of% hv₁₂])) := by
   subst hv₁₂

@@ -433,28 +433,21 @@ lemma equiv_smallShiftedHomMap (G : D₁ ⥤ D₂) [G.CommShift M]
   nth_rw 2 [← Functor.map_comp_assoc]
   simp
 
-variable [W₁.IsCompatibleWithShift M] [W₂.IsCompatibleWithShift M]
-
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma smallShiftedHomMap_mk {m : M} (f : ShiftedHom X₁ Y₁ m) :
     Φ.smallShiftedHomMap eX eY (.mk _ f) =
       .mk _ ((ShiftedHom.mk₀ _ rfl eX.inv).comp
         ((f.map Φ.functor).comp (.mk₀ _ rfl eY.hom) (zero_add m)) (add_zero _)) := by
-  apply (SmallShiftedHom.equiv W₂ W₂.Q).injective
-  let e := CatCommSq.iso Φ.functor W₁.Q W₂.Q (Φ.localizedFunctor W₁.Q W₂.Q)
-  simp only [Φ.equiv_smallShiftedHomMap W₁.Q W₂.Q _ _ (Φ.localizedFunctor W₁.Q W₂.Q) e,
-    Functor.comp_obj, ShiftedHom.map, SmallShiftedHom.equiv_mk, Functor.map_comp, assoc,
-    ShiftedHom.comp_mk₀, NatTrans.shift_app, Functor.commShiftIso_comp_inv_app,
-    Functor.commShiftIso_comp_hom_app, Iso.hom_inv_id_app_assoc, ShiftedHom.mk₀_comp,
-    Functor.commShiftIso_hom_naturality]
-  nth_rw 2 [← Functor.map_comp_assoc]
-  simp [reassoc_of% (NatIso.naturality_2 e f)]
+  simp [smallShiftedHomMap, SmallShiftedHom.mk, ShiftedHom.mk₀_comp,
+    ShiftedHom.comp_mk₀, ShiftedHom.map]
 
 lemma smallShiftedHomMap_mk₀ (m₀ : M) (hm₀ : m₀ = 0) (f : X₁ ⟶ Y₁) :
     Φ.smallShiftedHomMap eX eY (.mk₀ _ _ hm₀ f) =
       .mk₀ _ _ hm₀ (eX.inv ≫ Φ.functor.map f ≫ eY.hom) := by
   simp [SmallShiftedHom.mk₀]
+
+variable [W₁.IsCompatibleWithShift M] [W₂.IsCompatibleWithShift M]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma smallShiftedHomMap_comp

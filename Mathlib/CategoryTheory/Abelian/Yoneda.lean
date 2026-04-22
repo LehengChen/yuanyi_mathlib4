@@ -15,8 +15,9 @@ public import Mathlib.CategoryTheory.Limits.Preserves.Opposites
 # Fullness of restrictions of `preadditiveCoyonedaObj`
 
 In this file we give a sufficient criterion for a restriction of the functor
-`preadditiveCoyonedaObj G` to be full: this is the case if `C` is an abelian category and `G : C`
-is a projective separator such that every object in the relevant subcategory is a quotient of `G`.
+`preadditiveCoyonedaObj G` to be full: this is the case if `C` is an abelian category, `G : C`
+is a separator, `preadditiveCoyonedaObj G` preserves epimorphisms, and every object in the relevant
+subcategory is a quotient of `G`.
 -/
 
 public section
@@ -34,8 +35,8 @@ section
 attribute [local instance] preservesFiniteLimits_op
 
 set_option backward.isDefEq.respectTransparency false in
-theorem preadditiveCoyonedaObj_map_surjective {G : C} [Projective G] (hG : IsSeparator G) {X : C}
-    (p : G ⟶ X) [Epi p] {Y : C} :
+theorem preadditiveCoyonedaObj_map_surjective {G : C} (hG : IsSeparator G) {X : C}
+    (p : G ⟶ X) [Epi p] [Epi ((preadditiveCoyonedaObj G).map p)] {Y : C} :
     Function.Surjective ((preadditiveCoyonedaObj G).map : (X ⟶ Y) → _) := by
   rw [← Functor.coe_mapAddHom, ← AddCommGrpCat.hom_ofHom (preadditiveCoyonedaObj G).mapAddHom,
     ← AddCommGrpCat.epi_iff_surjective]
@@ -47,7 +48,11 @@ theorem preadditiveCoyonedaObj_map_surjective {G : C} [Projective G] (hG : IsSep
   apply ShortComplex.epi_of_mono_of_epi_of_mono (cm.op.mapNatTrans (preadditiveYonedaMap _ _))
   · exact exact.op.map_of_mono_of_preservesKernel _ mono inferInstance
   · simp only [ShortComplex.map_f]
-    infer_instance
+    dsimp [cm]
+    rw [AddCommGrpCat.mono_iff_injective]
+    intro a b h
+    apply (cancel_epi (φ.map p)).1
+    simpa using h
   · suffices φ.map.Surjective by simpa [AddCommGrpCat.epi_iff_surjective, Functor.coe_mapAddHom]
     exact fun f => ⟨f (𝟙 G), by cat_disch⟩
   · simp [AddCommGrpCat.mono_iff_injective, Functor.coe_mapAddHom, Functor.map_injective]
@@ -56,7 +61,8 @@ end
 
 variable {D : Type u'} [Category.{v'} D] (F : D ⥤ C)
 
-theorem full_comp_preadditiveCoyonedaObj [F.Full] {G : C} [Projective G] (hG : IsSeparator G)
+theorem full_comp_preadditiveCoyonedaObj [F.Full] {G : C}
+    [(preadditiveCoyonedaObj G).PreservesEpimorphisms] (hG : IsSeparator G)
     (hG₂ : ∀ X, ∃ (p : G ⟶ F.obj X), Epi p) : (F ⋙ preadditiveCoyonedaObj G).Full where
   map_surjective {X Y} f := by
     obtain ⟨p, _⟩ := hG₂ X

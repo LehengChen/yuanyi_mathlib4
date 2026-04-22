@@ -22,9 +22,9 @@ about `colimit F` when objects and morphisms in `C` have some algebraic structur
 
 - `CategoryTheory.Limits.Concrete.colimit_no_zero_smul_divisor`: Let `C` be a category where its
   objects are `R`-modules and morphisms `R`-linear maps. Let `r : R` be an element without zero
-  smul divisors for all small sections, i.e. there exists some `j : J` such that for all `j ⟶ i`
-  and `x : Fᵢ` we have `r • x = 0` implies `x = 0`, then if `r • x = 0` for `x : colimit F`, then
-  `x = 0`.
+  smul divisors cofinally among the sections, i.e. for every `j : J` there exists some `j ⟶ i`
+  such that for all `x : Fᵢ` we have `r • x = 0` implies `x = 0`, then if `r • x = 0` for
+  `x : colimit F`, then `x = 0`.
 
 ## Implementation details
 
@@ -58,25 +58,24 @@ end zero
 section module
 
 /--
-If `r` has no zero smul divisors for all small-enough sections, then `r` has no zero smul divisors
+If `r` has no zero smul divisors cofinally among the sections, then `r` has no zero smul divisors
 in the colimit.
 -/
 lemma colimit_no_zero_smul_divisor
     (F : J ⥤ ModuleCat.{max t w} R) [PreservesColimit F (forget (ModuleCat R))]
     [IsFiltered J] [HasColimit F]
-    (r : R) (H : ∃ (j' : J), ∀ (j : J) (_ : j' ⟶ j), ∀ (c : F.obj j), r • c = 0 → c = 0)
+    (r : R) (H : ∀ (j : J), ∃ (j' : J) (_ : j ⟶ j'),
+      ∀ (c : F.obj j'), r • c = 0 → c = 0)
     (x : ToType (colimit F)) (hx : r • x = 0) : x = 0 := by
   classical
   obtain ⟨j, x, rfl⟩ := Concrete.colimit_exists_rep F x
   rw [← map_smul (colimit.ι F j).hom] at hx
   obtain ⟨j', i, h⟩ := Concrete.colimit_rep_eq_zero (hx := hx)
-  obtain ⟨j'', H⟩ := H
-  simpa [elementwise_of% (colimit.w F), map_zero] using congr(colimit.ι F _
-    $(H (IsFiltered.sup {j, j', j''} { ⟨j, j', by simp, by simp, i⟩ })
-      (IsFiltered.toSup _ _ <| by simp)
-      (F.map (IsFiltered.toSup _ _ <| by simp) x)
-      (by rw [← IsFiltered.toSup_commutes (f := i) (mY := by simp) (mf := by simp), F.map_comp,
-        ModuleCat.comp_apply, ← map_smul, ← map_smul, h, map_zero])))
+  obtain ⟨k, f, Hk⟩ := H j'
+  have hxk : (F.map (i ≫ f)).hom x = 0 := by
+    apply Hk
+    rw [F.map_comp, ModuleCat.comp_apply, ← map_smul, ← map_smul, h, map_zero]
+  simpa [elementwise_of% (colimit.w F), hxk, map_zero] using congr(colimit.ι F k $(hxk))
 
 end module
 

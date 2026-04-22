@@ -232,12 +232,14 @@ section PartialOrder
 
 namespace CategoryTheory
 
-variable {X : Type u} {Y : Type v} [PartialOrder X] [PartialOrder Y]
+variable {X : Type u} {Y : Type v} [Preorder X] [Preorder Y]
+    [Std.Antisymm ((· ≤ ·) : X → X → Prop)]
+    [Std.Antisymm ((· ≤ ·) : Y → Y → Prop)]
 
 theorem Iso.to_eq {x y : X} (f : x ≅ y) : x = y :=
-  le_antisymm f.hom.le f.inv.le
+  Std.Antisymm.antisymm x y f.hom.le f.inv.le
 
-/-- A categorical equivalence between partial orders is just an order isomorphism. -/
+/-- A categorical equivalence between antisymmetric preorders is just an order isomorphism. -/
 def Equivalence.toOrderIso (e : X ≌ Y) : X ≃o Y where
   toFun := e.functor.obj
   invFun := e.inverse.obj
@@ -265,7 +267,8 @@ end PartialOrder
 
 open CategoryTheory
 
-lemma PartialOrder.isIso_iff_eq {X : Type u} [PartialOrder X]
+lemma PartialOrder.isIso_iff_eq {X : Type u} [Preorder X]
+    [Std.Antisymm ((· ≤ ·) : X → X → Prop)]
     {a b : X} (f : a ⟶ b) : IsIso f ↔ a = b := by
   constructor
   · intro _

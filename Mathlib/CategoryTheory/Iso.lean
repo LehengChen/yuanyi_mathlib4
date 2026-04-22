@@ -356,13 +356,15 @@ theorem eq_inv_comp (α : X ⟶ Y) [IsIso α] {f : X ⟶ Z} {g : Y ⟶ Z} : g = 
   (asIso α).eq_inv_comp
 
 @[to_dual (reorder := f g) of_isIso_comp_right]
-theorem of_isIso_comp_left {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [IsIso f] [IsIso (f ≫ g)] :
+theorem of_isIso_comp_left {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [Epi f] [IsIso (f ≫ g)] :
     IsIso g := by
-  rw [← id_comp g, ← inv_hom_id f, assoc]
-  infer_instance
+  refine ⟨⟨inv (f ≫ g) ≫ f, ?_, ?_⟩⟩
+  · rw [← cancel_epi f]
+    rw [← assoc, IsIso.hom_inv_id_assoc, comp_id]
+  · rw [assoc, IsIso.inv_hom_id]
 
 @[to_dual of_isIso_fac_right]
-theorem of_isIso_fac_left {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} {h : X ⟶ Z} [IsIso f]
+theorem of_isIso_fac_left {X Y Z : C} {f : X ⟶ Y} {g : Y ⟶ Z} {h : X ⟶ Z} [Epi f]
     [hh : IsIso h] (w : f ≫ g = h) : IsIso g := by
   rw [← w] at hh
   exact of_isIso_comp_left f g
@@ -394,9 +396,10 @@ theorem inv_comp_eq_id (g : X ⟶ Y) [IsIso g] {f : X ⟶ Y} : inv g ≫ f = �
   (asIso g).inv_comp_eq_id
 
 @[to_dual isIso_of_comp_hom_eq_id]
-theorem isIso_of_hom_comp_eq_id (g : X ⟶ Y) [IsIso g] {f : Y ⟶ X} (h : g ≫ f = 𝟙 X) : IsIso f := by
-  rw [(hom_comp_eq_id _).mp h]
-  infer_instance
+theorem isIso_of_hom_comp_eq_id (g : X ⟶ Y) [Epi g] {f : Y ⟶ X} (h : g ≫ f = 𝟙 X) : IsIso f := by
+  refine ⟨⟨g, ?_, h⟩⟩
+  rw [← cancel_epi g]
+  rw [← assoc, h, id_comp, comp_id]
 
 namespace Iso
 

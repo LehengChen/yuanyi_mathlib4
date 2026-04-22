@@ -30,14 +30,14 @@ def fromSum : C ⊕ D ⥤ C ⋆ D := (inclLeft C D).sum' <| inclRight C D
 
 variable {C} in
 @[simp]
-lemma fromSum_map_inl {c c' : C} (f : c ⟶ c') :
-    (fromSum C D).map ((Sum.inl_ C D).map f) = (inclLeft C D).map f :=
+lemma fromSum_map_inl {c c' : C} (f : Sum.inl c ⟶ Sum.inl c') :
+    (fromSum C D).map f = (inclLeft C D).map f.down :=
   rfl
 
 variable {D} in
 @[simp]
-lemma fromSum_map_inr {d d' : D} (f : d ⟶ d') :
-    (fromSum C D).map ((Sum.inr_ C D).map f) = (inclRight C D).map f :=
+lemma fromSum_map_inr {d d' : D} (f : Sum.inr d ⟶ Sum.inr d') :
+    (fromSum C D).map f = (inclRight C D).map f.down :=
   rfl
 
 /-- Characterization of `fromSum` with respect to the left inclusion. -/
@@ -59,6 +59,7 @@ instance : (fromSum C D).Faithful where
     cases h <;> cases h'
     all_goals
       simp only [fromSum_obj, Sum.inl__obj, fromSum_map_inl, Sum.inr__obj, fromSum_map_inr] at heq
-      simp [Functor.map_injective _ heq]
+      cases Functor.map_injective _ heq
+      rfl
 
 end CategoryTheory.Join

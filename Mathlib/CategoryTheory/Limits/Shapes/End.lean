@@ -83,9 +83,9 @@ variable {F}
 /-- A variant of `CategoryTheory.Limits.Cone.ext` specialized to produce
 isomorphisms of wedges. -/
 @[simps!]
-def ext {W₁ W₂ : Wedge F} (e : W₁.pt ≅ W₂.pt)
-    (he : ∀ j : J, W₁.ι j = e.hom ≫ W₂.ι j := by cat_disch) : W₁ ≅ W₂ :=
-  Cone.ext e (fun j =>
+noncomputable def ext {W₁ W₂ : Wedge F} (e : W₁.pt ⟶ W₂.pt) [IsIso e]
+    (he : ∀ j : J, W₁.ι j = e ≫ W₂.ι j := by cat_disch) : W₁ ≅ W₂ :=
+  Cone.ext (asIso e) (fun j =>
     match j with
     | .left _ => he _
     | .right f => by simpa using (he f.left) =≫ _)
@@ -147,9 +147,9 @@ variable {F}
 /-- A variant of `CategoryTheory.Limits.Cocone.ext` specialized to produce
 isomorphisms of cowedges. -/
 @[simps!]
-def ext {W₁ W₂ : Cowedge F} (e : W₁.pt ≅ W₂.pt)
-    (he : ∀ j : J, W₁.π j ≫ e.hom = W₂.π j := by cat_disch) : W₁ ≅ W₂ :=
-  Cocone.ext e (fun j =>
+noncomputable def ext {W₁ W₂ : Cowedge F} (e : W₁.pt ⟶ W₂.pt) [IsIso e]
+    (he : ∀ j : J, W₁.π j ≫ e = W₂.π j := by cat_disch) : W₁ ≅ W₂ :=
+  Cocone.ext (asIso e) (fun j =>
     match j with
     | .right _ => he _
     | .left f => by simpa using _ ≫= (he f.left))

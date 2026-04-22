@@ -32,19 +32,22 @@ open Limits
 variable {C : Type u} [Category.{v} C]
 
 /--
-If `C` has (small) products and a small weakly initial set of objects, then it has a weakly initial
+If `C` has the product of a small weakly initial set of objects, then it has a weakly initial
 object.
 -/
-theorem has_weakly_initial_of_weakly_initial_set_and_hasProducts [HasProducts.{v} C] {ι : Type v}
-    {B : ι → C} (hB : ∀ A : C, ∃ i, Nonempty (B i ⟶ A)) : ∃ T : C, ∀ X, Nonempty (T ⟶ X) :=
+theorem has_weakly_initial_of_weakly_initial_set_and_hasProducts {ι : Type v} {B : ι → C}
+    [HasProduct B] (hB : ∀ A : C, ∃ i, Nonempty (B i ⟶ A)) :
+    ∃ T : C, ∀ X, Nonempty (T ⟶ X) :=
   ⟨∏ᶜ B, fun X => ⟨Pi.π _ _ ≫ (hB X).choose_spec.some⟩⟩
 
-/-- If `C` has (small) wide equalizers and a weakly initial object, then it has an initial object.
+/-- If `C` has equalizers and the wide equalizer of all endomorphisms on a weakly initial object,
+then it has an initial object.
 
 The initial object is constructed as the wide equalizer of all endomorphisms on the given weakly
 initial object.
 -/
-theorem hasInitial_of_weakly_initial_and_hasWideEqualizers [HasWideEqualizers.{v} C] {T : C}
+theorem hasInitial_of_weakly_initial_and_hasWideEqualizers {T : C}
+    [HasWideEqualizer (id : (T ⟶ T) → (T ⟶ T))] [HasEqualizers C]
     (hT : ∀ X, Nonempty (T ⟶ X)) : HasInitial C := by
   let endos := T ⟶ T
   let i := wideEqualizer.ι (id : endos → endos)

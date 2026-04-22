@@ -5,6 +5,7 @@ Authors: Kim Morrison
 -/
 module
 
+public import Mathlib.Algebra.Group.Basic
 public import Mathlib.Algebra.Group.Hom.Defs
 public import Mathlib.CategoryTheory.Discrete.Basic
 public import Mathlib.CategoryTheory.Monoidal.NaturalTransformation
@@ -23,9 +24,13 @@ universe u u'
 
 open CategoryTheory Discrete MonoidalCategory
 
-variable (M : Type u) [Monoid M]
+variable (M : Type u)
 
 namespace CategoryTheory
+
+section Monoidal
+
+variable [MulOneClass M] [Std.Associative (α := M) (· * ·)]
 
 @[to_additive (attr := simps tensorObj_as leftUnitor rightUnitor associator) Discrete.addMonoidal]
 instance Discrete.monoidal : MonoidalCategory (Discrete M) where
@@ -36,12 +41,14 @@ instance Discrete.monoidal : MonoidalCategory (Discrete M) where
   tensorHom f g := eqToHom (by rw [eq_of_hom f, eq_of_hom g])
   leftUnitor X := Discrete.eqToIso (one_mul X.as)
   rightUnitor X := Discrete.eqToIso (mul_one X.as)
-  associator _ _ _ := Discrete.eqToIso (mul_assoc _ _ _)
+  associator _ _ _ := Discrete.eqToIso (Std.Associative.assoc (op := (· * ·)) _ _ _)
 
 @[to_additive (attr := simp) Discrete.addMonoidal_tensorUnit_as]
 lemma Discrete.monoidal_tensorUnit_as : (𝟙_ (Discrete M)).as = 1 := rfl
 
-variable {M} {N : Type u'} [Monoid N]
+end Monoidal
+
+variable {M} [Monoid M] {N : Type u'} [Monoid N]
 
 /-- A multiplicative morphism between monoids gives a monoidal functor between the corresponding
 discrete monoidal categories.

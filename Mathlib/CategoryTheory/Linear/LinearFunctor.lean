@@ -71,19 +71,18 @@ variable {E : Type*} [Category* E] [Preadditive E] [CategoryTheory.Linear R E] (
 instance [Linear R G] : Linear R (F ⋙ G) where
 
 set_option backward.isDefEq.respectTransparency false in
-lemma linear_of_full_essSurj_comp [F.Full] [F.EssSurj] [Functor.Linear R (F ⋙ G)] :
+lemma linear_of_full_essSurj_comp [F.EssSurj] [Functor.Linear R (F ⋙ G)] :
     Functor.Linear R G := by
-  refine ⟨fun {X Y} f r ↦ ?_⟩
-  obtain ⟨X', Y', eX, eY, f', rfl⟩ :
-      ∃ (X' Y' : C) (eX : F.obj X' ≅ X) (eY : F.obj Y' ≅ Y)
-        (f' : X' ⟶ Y'), f = eX.inv ≫ F.map f' ≫ eY.hom := by
-    obtain ⟨f', hf'⟩ :=
-      F.map_surjective ((F.objObjPreimageIso X).hom ≫ f ≫ (F.objObjPreimageIso Y).inv)
-    exact ⟨_, _, F.objObjPreimageIso X, F.objObjPreimageIso Y, f', by cat_disch⟩
-  simpa only [comp_map, map_smul, Linear.smul_comp, Linear.comp_smul, ← G.map_comp]
-    using G.map eX.inv ≫= ((F ⋙ G).map_smul r f') =≫ G.map eY.hom
+  rw [Functor.linear_iff]
+  intro X r
+  have e := F.objObjPreimageIso X
+  have : r • 𝟙 X = e.inv ≫ (r • 𝟙 _) ≫ e.hom := by simp
+  rw [this, G.map_comp, G.map_comp, ← F.map_id, ← F.map_smul, ← Functor.comp_map,
+    (F ⋙ G).map_smul, Functor.map_id, Linear.smul_comp, Linear.comp_smul]
+  dsimp
+  rw [Category.id_comp, ← G.map_comp, e.inv_hom_id, G.map_id]
 
-lemma linear_comp_iff_of_full_of_essSurj [F.Full] [F.EssSurj] :
+lemma linear_comp_iff_of_full_of_essSurj [F.EssSurj] :
     Functor.Linear R (F ⋙ G) ↔ Functor.Linear R G :=
   ⟨fun _ ↦ linear_of_full_essSurj_comp F G, fun _ ↦ inferInstance⟩
 

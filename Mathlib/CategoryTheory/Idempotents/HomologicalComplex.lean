@@ -27,9 +27,13 @@ namespace CategoryTheory
 
 open Category
 
-variable {C : Type*} [Category* C] [Preadditive C] {ι : Type*} {c : ComplexShape ι}
+variable {C : Type*} [Category* C]
 
 namespace Idempotents
+
+section HasZeroMorphisms
+
+variable [Limits.HasZeroMorphisms C] {ι : Type*} {c : ComplexShape ι}
 
 namespace Karoubi
 
@@ -58,6 +62,12 @@ theorem p_idem : P.p.f n ≫ P.p.f n = P.p.f n :=
 end HomologicalComplex
 
 end Karoubi
+
+end HasZeroMorphisms
+
+section Preadditive
+
+variable [Preadditive C] {ι : Type*} {c : ComplexShape ι}
 
 open Karoubi
 
@@ -203,6 +213,8 @@ instance [IsIdempotentComplete C] : IsIdempotentComplete (HomologicalComplex C c
       ((toKaroubiEquivalence C).mapHomologicalComplex c),
     ← isIdempotentComplete_iff_of_equivalence (karoubiHomologicalComplexEquivalence C c)]
   infer_instance
+
+end Preadditive
 
 end Idempotents
 

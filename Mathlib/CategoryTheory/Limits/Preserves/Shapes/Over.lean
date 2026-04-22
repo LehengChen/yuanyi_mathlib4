@@ -36,7 +36,8 @@ instance PreservesLimitsOfShape.ofWidePullbacks {J : Type*}
   preservesLimitsOfShape_of_equiv WithTerminal.widePullbackShapeEquiv F
 
 open WithTerminal in
-instance PreservesLimitsOfShape.overPost [PreservesLimitsOfShape (WithTerminal J) F] :
+instance PreservesLimitsOfShape.overPost
+    [∀ K : J ⥤ Over X, PreservesLimit (liftFromOver.obj K) F] :
     PreservesLimitsOfShape J (Over.post F (X := X)) where
   preservesLimit.preserves {coneK} isLimitConeK :=
     have isLimitConeD := (IsLimit.postcomposeHomEquiv liftFromOverComp.symm _).symm <|
@@ -47,11 +48,15 @@ instance PreservesFiniteLimits.overPost [PreservesFiniteLimits F] :
     PreservesFiniteLimits (Over.post F (X := X)) where
   preservesFiniteLimits _ := inferInstance
 
-instance PreservesLimitsOfSize.overPost [PreservesLimitsOfSize.{w', w} F] :
+open WithTerminal in
+instance PreservesLimitsOfSize.overPost
+    [∀ {J : Type w} [Category.{w'} J] (K : J ⥤ Over X),
+      PreservesLimit (liftFromOver.obj K) F] :
     PreservesLimitsOfSize.{w', w} (Over.post F (X := X)) where
 
 open WithInitial in
-instance PreservesColimitsOfShape.underPost [PreservesColimitsOfShape (WithInitial J) F] :
+instance PreservesColimitsOfShape.underPost
+    [∀ K : J ⥤ Under X, PreservesColimit (liftFromUnder.obj K) F] :
     PreservesColimitsOfShape J (Under.post F (X := X)) where
   preservesColimit.preserves {coconeK} isColimitCoconeK :=
     have isColimitCoconeD := (IsColimit.precomposeHomEquiv liftFromUnderComp _).symm <|
@@ -63,7 +68,10 @@ instance PreservesFiniteColimits.underPost [PreservesFiniteColimits F] :
     PreservesFiniteColimits (Under.post F (X := X)) where
   preservesFiniteColimits _ := inferInstance
 
-instance PreservesColimitsOfSize.underPost [PreservesColimitsOfSize.{w', w} F] :
+open WithInitial in
+instance PreservesColimitsOfSize.underPost
+    [∀ {J : Type w} [Category.{w'} J] (K : J ⥤ Under X),
+      PreservesColimit (liftFromUnder.obj K) F] :
     PreservesColimitsOfSize.{w', w} (Under.post F (X := X)) where
 
 end CategoryTheory.Limits

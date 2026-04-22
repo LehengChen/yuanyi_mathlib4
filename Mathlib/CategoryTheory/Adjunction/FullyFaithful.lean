@@ -168,7 +168,7 @@ noncomputable def fullyFaithfulROfIsIsoCounit [IsIso h.counit] : R.FullyFaithful
   preimage {X Y} f := inv (h.counit.app X) ≫ (h.homEquiv (R.obj X) Y).symm f
 
 set_option backward.isDefEq.respectTransparency false in
-instance whiskerLeft_counit_iso_of_L_fully_faithful [L.Full] [L.Faithful] :
+instance whiskerLeft_counit_iso_of_L_fully_faithful [IsIso h.unit] :
     IsIso (whiskerLeft L h.counit) := by
   have := h.left_triangle
   rw [← IsIso.eq_inv_comp] at this
@@ -176,7 +176,7 @@ instance whiskerLeft_counit_iso_of_L_fully_faithful [L.Full] [L.Faithful] :
   infer_instance
 
 set_option backward.isDefEq.respectTransparency false in
-instance whiskerRight_counit_iso_of_L_fully_faithful [L.Full] [L.Faithful] :
+instance whiskerRight_counit_iso_of_L_fully_faithful [IsIso h.unit] :
     IsIso (whiskerRight h.counit R) := by
   have := h.right_triangle
   rw [← IsIso.eq_inv_comp] at this
@@ -184,7 +184,7 @@ instance whiskerRight_counit_iso_of_L_fully_faithful [L.Full] [L.Faithful] :
   infer_instance
 
 set_option backward.isDefEq.respectTransparency false in
-instance whiskerLeft_unit_iso_of_R_fully_faithful [R.Full] [R.Faithful] :
+instance whiskerLeft_unit_iso_of_R_fully_faithful [IsIso h.counit] :
     IsIso (whiskerLeft R h.unit) := by
   have := h.right_triangle
   rw [← IsIso.eq_comp_inv] at this
@@ -192,7 +192,7 @@ instance whiskerLeft_unit_iso_of_R_fully_faithful [R.Full] [R.Faithful] :
   infer_instance
 
 set_option backward.isDefEq.respectTransparency false in
-instance whiskerRight_unit_iso_of_R_fully_faithful [R.Full] [R.Faithful] :
+instance whiskerRight_unit_iso_of_R_fully_faithful [IsIso h.counit] :
     IsIso (whiskerRight h.unit L) := by
   have := h.left_triangle
   rw [← IsIso.eq_comp_inv] at this
@@ -208,7 +208,8 @@ instance [L.Faithful] [L.Full] {Y : D} : IsIso (R.map (h.counit.app Y)) :=
   isIso_of_hom_comp_eq_id _ (h.right_triangle_components Y)
 
 set_option backward.isDefEq.respectTransparency false in
-lemma isIso_counit_app_iff_mem_essImage [L.Faithful] [L.Full] {X : D} :
+lemma isIso_counit_app_iff_mem_essImage [∀ Y : C, IsIso (h.counit.app (L.obj Y))]
+    {X : D} :
     IsIso (h.counit.app X) ↔ L.essImage X := by
   constructor
   · intro
@@ -222,9 +223,10 @@ lemma mem_essImage_of_counit_isIso (A : D)
     [IsIso (h.counit.app A)] : L.essImage A :=
   ⟨R.obj A, ⟨asIso (h.counit.app A)⟩⟩
 
-lemma isIso_counit_app_of_iso [L.Faithful] [L.Full] {X : D} {Y : C} (e : X ≅ L.obj Y) :
+lemma isIso_counit_app_of_iso {X : D} {Y : C} (e : X ≅ L.obj Y)
+    [IsIso (h.counit.app (L.obj Y))] :
     IsIso (h.counit.app X) :=
-  (isIso_counit_app_iff_mem_essImage h).mpr ⟨Y, ⟨e.symm⟩⟩
+  (NatTrans.isIso_app_iff_of_iso _ e).mpr inferInstance
 
 set_option backward.isDefEq.respectTransparency false in
 instance [R.Faithful] [R.Full] {Y : D} : IsIso (h.unit.app (R.obj Y)) :=
@@ -234,7 +236,7 @@ set_option backward.isDefEq.respectTransparency false in
 instance [R.Faithful] [R.Full] {X : C} : IsIso (L.map (h.unit.app X)) :=
   isIso_of_comp_hom_eq_id _ (h.left_triangle_components X)
 
-lemma isIso_unit_app_iff_mem_essImage [R.Faithful] [R.Full] {Y : C} :
+lemma isIso_unit_app_iff_mem_essImage [∀ X : D, IsIso (h.unit.app (R.obj X))] {Y : C} :
     IsIso (h.unit.app Y) ↔ R.essImage Y := by
   constructor
   · intro
@@ -248,9 +250,10 @@ theorem mem_essImage_of_unit_isIso (A : C)
     [IsIso (h.unit.app A)] : R.essImage A :=
   ⟨L.obj A, ⟨(asIso (h.unit.app A)).symm⟩⟩
 
-lemma isIso_unit_app_of_iso [R.Faithful] [R.Full] {X : D} {Y : C} (e : Y ≅ R.obj X) :
+lemma isIso_unit_app_of_iso {X : D} {Y : C} (e : Y ≅ R.obj X)
+    [IsIso (h.unit.app (R.obj X))] :
     IsIso (h.unit.app Y) :=
-  (isIso_unit_app_iff_mem_essImage h).mpr ⟨X, ⟨e.symm⟩⟩
+  (NatTrans.isIso_app_iff_of_iso _ e).mpr inferInstance
 
 instance [R.IsEquivalence] : IsIso h.unit := by
   have := fun Y => isIso_unit_app_of_iso h (R.objObjPreimageIso Y).symm

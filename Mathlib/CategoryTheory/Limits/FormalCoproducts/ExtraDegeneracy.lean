@@ -30,10 +30,10 @@ open Simplicial
 
 namespace CategoryTheory.Limits.FormalCoproduct
 
-variable {C : Type u} [Category.{v} C] [HasFiniteProducts C]
+variable {C : Type u} [Category.{v} C]
   (U : FormalCoproduct.{w} C) {T : C} (hT : IsTerminal T)
 
-instance (n : ℕ) :
+instance (n : ℕ) [HasProductsOfShape (Fin (n + 1)) C] :
     HasWidePullback (Arrow.mk ((isTerminalIncl T hT).from U)).right
       (fun (_ : Fin (n + 1)) ↦ (Arrow.mk ((isTerminalIncl T hT).from U)).left)
       fun _ ↦ (Arrow.mk ((isTerminalIncl T hT).from U)).hom := by
@@ -41,11 +41,21 @@ instance (n : ℕ) :
   have : HasProduct fun (x : Fin (n + 1)) ↦ U := ⟨⟨_, U.isLimitPowerFan (Fin (n + 1))⟩⟩
   exact hasWidePullback_of_isTerminal _ (isTerminalIncl _ hT)
 
-instance (n : SimplexCategory) :
+instance (n : SimplexCategory) [HasProductsOfShape (ToType n) C] :
     HasLimit (WidePullbackShape.wideCospan ((incl C).obj T) _
       fun (_ : ToType n) ↦ (isTerminalIncl T hT).from U) :=
   ⟨⟨_, WidePullbackCone.isLimitOfFan  _ (U.isLimitPowerFan _)
     (isTerminalIncl T hT)⟩⟩
+
+variable [HasTerminal C] [∀ n : ℕ, HasProductsOfShape (Fin (n + 1)) C]
+
+local instance : HasFiniteProducts C := by
+  refine ⟨fun n ↦ ?_⟩
+  cases n with
+  | zero =>
+      exact hasLimitsOfShape_of_equivalence (Discrete.equivalence.{0} finZeroEquiv'.symm)
+  | succ n =>
+      infer_instance
 
 /-- Auxiliary definition for `cechIsoCechNerve`. -/
 noncomputable def cechIsoCechNerveApp (n : SimplexCategoryᵒᵖ) :

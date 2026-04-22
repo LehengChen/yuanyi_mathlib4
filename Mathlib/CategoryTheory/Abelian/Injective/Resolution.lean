@@ -64,9 +64,16 @@ section Abelian
 
 variable [Abelian C]
 
-lemma exact₀ {Z : C} (I : InjectiveResolution Z) :
-    (ShortComplex.mk _ _ I.ι_f_zero_comp_complex_d).Exact :=
-  ShortComplex.exact_of_f_is_kernel _ I.isLimitKernelFork
+omit [Abelian C] in
+lemma exact₀ [Preadditive C] [HasZeroObject C] {Z : C} (I : InjectiveResolution Z)
+    [(ShortComplex.mk (I.ι.f 0) (I.cocomplex.d 0 1)
+      I.ι_f_zero_comp_complex_d).HasHomology] :
+    (ShortComplex.mk (I.ι.f 0) (I.cocomplex.d 0 1)
+      I.ι_f_zero_comp_complex_d).Exact := by
+  simpa [InjectiveResolution.kernelFork] using
+    ShortComplex.exact_of_f_is_kernel
+      (S := ShortComplex.mk (I.ι.f 0) (I.cocomplex.d 0 1) I.ι_f_zero_comp_complex_d)
+      I.isLimitKernelFork
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Auxiliary construction for `desc`. -/
@@ -267,7 +274,9 @@ section
 variable [Abelian C] [EnoughInjectives C]
 
 set_option backward.isDefEq.respectTransparency false in
-theorem exact_f_d {X Y : C} (f : X ⟶ Y) :
+omit [Abelian C] in
+theorem exact_f_d [Preadditive C] {X Y : C} (f : X ⟶ Y) [HasCokernel f]
+    [(ShortComplex.mk f (cokernel.π f) (by simp)).HasHomology] :
     (ShortComplex.mk f (d f) (by simp)).Exact := by
   let α : ShortComplex.mk f (cokernel.π f) (by simp) ⟶ ShortComplex.mk f (d f) (by simp) :=
     { τ₁ := 𝟙 _

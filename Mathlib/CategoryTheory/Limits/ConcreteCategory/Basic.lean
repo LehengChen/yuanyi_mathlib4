@@ -59,13 +59,13 @@ namespace CategoryTheory.Limits.Concrete
 
 section Limits
 
-/-- If a functor `G : J ⥤ C` to a concrete category has a limit and that `forget C`
-is corepresentable, then `(G ⋙ forget C).sections` is small. -/
+/-- If a functor `G : J ⥤ C` to a concrete category has a limit preserved by `forget C`,
+then `(G ⋙ forget C).sections` is small. -/
 lemma small_sections_of_hasLimit
-    {C : Type u} [Category.{v} C] {FC : outParam <| C → C → Type*} {CC : outParam <| C → Type v}
-    [outParam <| ∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory.{v} C FC]
-    [(forget C).IsCorepresentable] {J : Type w} [Category.{t} J] (G : J ⥤ C) [HasLimit G] :
-    Small.{v} (G ⋙ forget C).sections := by
+    {C : Type u} [Category.{v} C] {FC : outParam <| C → C → Type*} {CC : outParam <| C → Type r}
+    [outParam <| ∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory.{r} C FC]
+    {J : Type w} [Category.{t} J] (G : J ⥤ C) [PreservesLimit G (forget C)] [HasLimit G] :
+    Small.{r} (G ⋙ forget C).sections := by
   rw [← Types.hasLimit_iff_small_sections]
   infer_instance
 
@@ -94,11 +94,11 @@ section Surjective
 
 /--
 Given surjections `⋯ ⟶ Xₙ₊₁ ⟶ Xₙ ⟶ ⋯ ⟶ X₀` in a concrete category whose forgetful functor
-preserves sequential limits, the projection map `lim Xₙ ⟶ X₀` is surjective.
+preserves the limit of the given diagram, the projection map `lim Xₙ ⟶ X₀` is surjective.
 -/
 lemma surjective_π_app_zero_of_surjective_map {C : Type u} [Category.{v} C] {FC : C → C → Type*}
-    {CC : C → Type v} [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory.{v} C FC]
-    [PreservesLimitsOfShape ℕᵒᵖ (forget C)] {F : ℕᵒᵖ ⥤ C} {c : Cone F}
+    {CC : C → Type r} [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory.{r} C FC]
+    {F : ℕᵒᵖ ⥤ C} [PreservesLimit F (forget C)] {c : Cone F}
     (hc : IsLimit c) (hF : ∀ n, Function.Surjective (F.map (homOfLE (Nat.le_succ n)).op)) :
     Function.Surjective (c.π.app ⟨0⟩) :=
   Types.surjective_π_app_zero_of_surjective_map (isLimitOfPreserves (forget C) hc) hF
@@ -162,7 +162,8 @@ section FilteredColimits
 
 variable {C : Type u} [Category.{v} C] {FC : C → C → Type*} {CC : C → Type s}
 variable [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC]
-variable {J : Type w} [Category.{r} J] (F : J ⥤ C) [PreservesColimit F (forget C)] [IsFiltered J]
+variable {J : Type w} [Category.{r} J] (F : J ⥤ C) [PreservesColimit F (forget C)]
+  [IsFilteredOrEmpty J]
 
 theorem isColimit_exists_of_rep_eq {D : Cocone F} {i j : J} (hD : IsColimit D)
     (x : ToType (F.obj i)) (y : ToType (F.obj j)) (h : D.ι.app _ x = D.ι.app _ y) :

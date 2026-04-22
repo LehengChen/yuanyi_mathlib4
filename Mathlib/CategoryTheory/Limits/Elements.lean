@@ -40,22 +40,23 @@ variable {C : Type u} [Category.{v} C]
 
 namespace CategoryOfElements
 
-variable {A : C ⥤ Type w} {I : Type u₁} [Category.{v₁} I] [Small.{w} I]
+variable {A : C ⥤ Type w} {I : Type u₁} [Category.{v₁} I]
 
 namespace CreatesLimitsAux
 
 variable (F : I ⥤ A.Elements)
 
 /-- (implementation) A system `(Fi, fi)_i` of elements induces an element in `lim_i A(Fi)`. -/
-noncomputable def liftedConeElement' : limit ((F ⋙ π A) ⋙ A) :=
+noncomputable def liftedConeElement' [HasLimit ((F ⋙ π A) ⋙ A)] :
+    limit ((F ⋙ π A) ⋙ A) :=
   Types.Limit.mk _ (fun i => (F.obj i).2) (by simp)
 
 @[simp]
-lemma π_liftedConeElement' (i : I) :
+lemma π_liftedConeElement' [HasLimit ((F ⋙ π A) ⋙ A)] (i : I) :
     limit.π ((F ⋙ π A) ⋙ A) i (liftedConeElement' F) = (F.obj i).2 :=
   Types.Limit.π_mk _ _ _ _
 
-variable [HasLimitsOfShape I C] [PreservesLimitsOfShape I A]
+variable [HasLimit (F ⋙ π A)] [PreservesLimit (F ⋙ π A) A]
 
 /-- (implementation) A system `(Fi, fi)_i` of elements induces an element in `A(lim_i Fi)`. -/
 noncomputable def liftedConeElement : A.obj (limit (F ⋙ π A)) :=
@@ -101,16 +102,17 @@ noncomputable def isLimit : IsLimit (liftedCone F) where
 
 end CreatesLimitsAux
 
-variable [HasLimitsOfShape I C] [PreservesLimitsOfShape I A]
-
 section
 
 open CreatesLimitsAux
 
-noncomputable instance (F : I ⥤ A.Elements) : CreatesLimit F (π A) :=
+noncomputable instance (F : I ⥤ A.Elements) [HasLimit (F ⋙ π A)]
+    [PreservesLimit (F ⋙ π A) A] : CreatesLimit F (π A) :=
   createsLimitOfReflectsIso' (limit.isLimit _) ⟨⟨liftedCone F, isValidLift F⟩, isLimit F⟩
 
 end
+
+variable [HasLimitsOfShape I C] [PreservesLimitsOfShape I A]
 
 noncomputable instance : CreatesLimitsOfShape I (π A) where
 

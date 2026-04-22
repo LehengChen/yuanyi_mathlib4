@@ -52,10 +52,13 @@ class MonoCoprod : Prop where
 
 variable {C}
 
-instance (priority := 100) monoCoprodOfHasZeroMorphisms [HasZeroMorphisms C] : MonoCoprod C :=
+instance (priority := 100) monoCoprodOfHasZeroMorphisms [∀ A B : C, Nonempty (A ⟶ B)] :
+    MonoCoprod C :=
   ⟨fun A B c hc => by
+    let f : B ⟶ A := Classical.choice inferInstance
     haveI : IsSplitMono c.inl :=
-      IsSplitMono.mk' (SplitMono.mk (hc.desc (BinaryCofan.mk (𝟙 A) 0)) (IsColimit.fac _ _ _))
+      IsSplitMono.mk' (SplitMono.mk (hc.desc (BinaryCofan.mk (𝟙 A) f))
+        (IsColimit.fac _ _ _))
     infer_instance⟩
 
 namespace MonoCoprod
@@ -232,7 +235,7 @@ variable {D : Type*} [Category* D] (F : C ⥤ D)
 
 set_option backward.isDefEq.respectTransparency false in
 theorem monoCoprod_of_preservesCoprod_of_reflectsMono [MonoCoprod D]
-    [PreservesColimitsOfShape (Discrete WalkingPair) F]
+    [∀ A B : C, PreservesColimit (pair A B) F]
     [ReflectsMonomorphisms F] : MonoCoprod C where
   binaryCofan_inl {A B} c h := by
     let c' := BinaryCofan.mk (F.map c.inl) (F.map c.inr)
@@ -251,7 +254,7 @@ section Concrete
 
 instance {FC : outParam <| C → C → Type*} {CC : outParam <| C → Type*}
     [outParam <| ∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory C FC]
-    [PreservesColimitsOfShape (Discrete WalkingPair) (forget C)]
+    [∀ A B : C, PreservesColimit (pair A B) (forget C)]
     [ReflectsMonomorphisms (forget C)] : MonoCoprod C :=
   monoCoprod_of_preservesCoprod_of_reflectsMono (forget C)
 

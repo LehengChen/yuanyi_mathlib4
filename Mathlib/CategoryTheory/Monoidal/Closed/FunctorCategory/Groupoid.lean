@@ -25,6 +25,8 @@ open CategoryTheory CategoryTheory.MonoidalCategory CategoryTheory.MonoidalClose
 
 namespace CategoryTheory.Functor
 
+section Groupoid
+
 variable {D : Type u} {C : Type*} [Groupoid.{v} D] [Category* C]
   [MonoidalCategory C] [MonoidalClosed C]
 
@@ -78,6 +80,15 @@ with the pointwise monoidal structure, is monoidal closed. -/
 @[simps! closed_adj]
 instance monoidalClosed : MonoidalClosed (D ⥤ C) where
 
+end Groupoid
+
+section IsGroupoid
+
+variable {D : Type u} {C : Type*} [Category.{v} D] [IsGroupoid D] [Category* C]
+  [MonoidalCategory C] [MonoidalClosed C]
+
+attribute [local instance] Groupoid.ofIsGroupoid
+
 theorem ihom_map (F : D ⥤ C) {G H : D ⥤ C} (f : G ⟶ H) : (ihom F).map f = (closedIhom F).map f :=
   rfl
 
@@ -86,5 +97,7 @@ theorem ihom_ev_app (F G : D ⥤ C) : (ihom.ev F).app G = (closedCounit F).app G
 
 theorem ihom_coev_app (F G : D ⥤ C) : (ihom.coev F).app G = (closedUnit F).app G :=
   rfl
+
+end IsGroupoid
 
 end CategoryTheory.Functor

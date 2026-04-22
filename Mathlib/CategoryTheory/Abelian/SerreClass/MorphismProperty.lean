@@ -129,8 +129,8 @@ lemma isoModSerre_zero_iff (X Y : C) :
 lemma isomorphisms_le_isoModSerre : isomorphisms C ≤ P.isoModSerre :=
   fun _ _ f (_ : IsIso f) ↦ ⟨P.monoModSerre_of_mono f, P.epiModSerre_of_epi f⟩
 
-lemma isoModSerre_of_isIso {X Y : C} (f : X ⟶ Y) [IsIso f] : P.isoModSerre f :=
-  P.isomorphisms_le_isoModSerre f (isomorphisms.infer_property f)
+lemma isoModSerre_of_isIso {X Y : C} (f : X ⟶ Y) [Mono f] [Epi f] : P.isoModSerre f :=
+  ⟨P.monoModSerre_of_mono f, P.epiModSerre_of_epi f⟩
 
 instance : P.monoModSerre.IsMultiplicative where
   id_mem _ := P.monoModSerre_of_mono _
@@ -168,19 +168,21 @@ instance : P.isoModSerre.HasTwoOutOfThreeProperty where
     ⟨P.prop_X₂_of_exact ((kernelCokernelCompSequence_exact f g).exact 1) hfg.1 hf.2,
       P.prop_of_epi (cokernel.map (f ≫ g) g f (𝟙 _) (by simp)) hfg.2⟩
 
-lemma le_kernel_of_isoModSerre_isInvertedBy (F : C ⥤ D) [F.PreservesZeroMorphisms]
+omit [Abelian D] in
+lemma le_kernel_of_isoModSerre_isInvertedBy (F : C ⥤ D) (hF₀ : IsZero (F.obj 0))
     (hF : P.isoModSerre.IsInvertedBy F) :
     P ≤ F.kernel := by
   intro X hX
   let f : 0 ⟶ X := 0
   have := hF _ ((P.isoModSerre_iff_of_mono f).2
     ((P.prop_iff_of_iso cokernelZeroIsoTarget).2 hX))
-  exact (asIso (F.map f)).isZero_iff.1 (F.map_isZero (isZero_zero C))
+  exact (asIso (F.map f)).isZero_iff.1 hF₀
 
 lemma isoModSerre_isInvertedBy_iff (F : C ⥤ D)
-    [PreservesFiniteLimits F] [PreservesFiniteColimits F] :
+    [F.PreservesZeroMorphisms] [F.PreservesHomology] :
     P.isoModSerre.IsInvertedBy F ↔ P ≤ F.kernel := by
-  refine ⟨P.le_kernel_of_isoModSerre_isInvertedBy F, fun hF X Y f ⟨h₁, h₂⟩ ↦ ?_⟩
+  refine ⟨P.le_kernel_of_isoModSerre_isInvertedBy F (F.map_isZero (isZero_zero C)),
+    fun hF X Y f ⟨h₁, h₂⟩ ↦ ?_⟩
   have : Mono (F.map f) :=
     (((ShortComplex.mk _ _ (kernel.condition f)).exact_of_f_is_kernel
       (kernelIsKernel f)).map F).mono_g (((hF _ h₁).eq_of_src _ _))

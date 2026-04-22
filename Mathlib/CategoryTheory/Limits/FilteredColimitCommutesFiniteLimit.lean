@@ -144,7 +144,7 @@ section
 
 variable {J : Type u₁} {K : Type u₂} [SmallCategory J] [Category.{v₂} K] [Small.{v} K]
 
-variable [FinCategory J]
+variable [Finite J] [∀ j j' : J, Finite (j ⟶ j')]
 
 variable (F : J × K ⥤ Type v)
 
@@ -158,6 +158,9 @@ although with different names.
 theorem colimitLimitToLimitColimit_surjective :
     Function.Surjective (colimitLimitToLimitColimit F) := by
   classical
+    letI : Fintype J := Fintype.ofFinite J
+    letI : ∀ j j' : J, Fintype (j ⟶ j') := fun j j' =>
+      Fintype.ofFinite (j ⟶ j')
     -- We begin with some element `x` in the limit (over J) over the colimits (over K),
     intro x
     -- This consists of some coherent family of elements in the various colimits,
@@ -344,10 +347,14 @@ variable [ReflectsLimitsOfShape J (forget C)] [PreservesColimitsOfShape K (forge
 variable [PreservesLimitsOfShape J (forget C)]
 
 noncomputable instance filtered_colim_preservesFiniteLimits :
-    PreservesLimitsOfShape J (colim : (K ⥤ C) ⥤ _) :=
+    PreservesLimitsOfShape J (colim : (K ⥤ C) ⥤ _) := by
+  classical
+  letI : FinCategory J :=
+    { fintypeObj := Fintype.ofFinite J
+      fintypeHom := fun j j' => Fintype.ofFinite (j ⟶ j') }
   haveI : PreservesLimitsOfShape J ((colim : (K ⥤ C) ⥤ _) ⋙ forget C) :=
     preservesLimitsOfShape_of_natIso (preservesColimitNatIso _).symm
-  preservesLimitsOfShape_of_reflects_of_preserves _ (forget C)
+  exact preservesLimitsOfShape_of_reflects_of_preserves _ (forget C)
 
 end
 

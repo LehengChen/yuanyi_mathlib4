@@ -20,7 +20,9 @@ target satisfies `Q`.
 
 namespace CategoryTheory.MorphismProperty
 
-variable {C : Type*} [Category* C]
+section CategoryStruct
+
+variable {C : Type*} [CategoryStruct C]
 
 /-- Given two object properties `P` and `Q`, the property of morphisms whose source
 satisfies `P` and target satisfies `Q`. -/
@@ -43,6 +45,13 @@ lemma monotone_ofObjectProperty_right {Q' : ObjectProperty C} (h : Q ≤ Q') :
   intro _ _ _ ⟨hX, hY⟩
   exact ⟨hX, h _ hY⟩
 
+end CategoryStruct
+
+section Category
+
+variable {C : Type*} [Category* C]
+variable (P Q : ObjectProperty C)
+
 lemma ofObjectProperty_inverseImage {D : Type*} [Category* D] (F : D ⥤ C) :
     ofObjectProperty (P.inverseImage F) (Q.inverseImage F) =
     (ofObjectProperty P Q).inverseImage F := by
@@ -64,5 +73,7 @@ instance [Q.IsClosedUnderIsomorphisms] : (ofObjectProperty P Q).RespectsRight (i
     intro X Y Z i hi f ⟨hY, hZ⟩
     rw [isomorphisms.iff] at hi
     exact ⟨hY, (Q.prop_iff_of_isIso i).mp hZ⟩
+
+end Category
 
 end CategoryTheory.MorphismProperty

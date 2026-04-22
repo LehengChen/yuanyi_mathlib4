@@ -58,13 +58,19 @@ def liftFZero {Y Z : C} (f : Y ⟶ Z) (P : ProjectiveResolution Y) (Q : Projecti
 
 end
 
-section Abelian
+section CategoryWithHomology
 
-variable [Abelian C]
+variable [HasZeroObject C] [Preadditive C] [CategoryWithHomology C]
 
 lemma exact₀ {Z : C} (P : ProjectiveResolution Z) :
     (ShortComplex.mk _ _ P.complex_d_comp_π_f_zero).Exact :=
   ShortComplex.exact_of_g_is_cokernel _ P.isColimitCokernelCofork
+
+end CategoryWithHomology
+
+section Abelian
+
+variable [Abelian C]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Auxiliary construction for `lift`. -/
@@ -203,6 +209,8 @@ abbrev projectiveResolution (Z : C) [HasZeroObject C]
     ProjectiveResolution Z :=
   (HasProjectiveResolution.out (Z := Z)).some
 
+section Abelian
+
 variable (C)
 variable [Abelian C]
 
@@ -257,11 +265,11 @@ lemma ProjectiveResolution.iso_hom_naturality {X Y : C} (f : X ⟶ Y)
 
 end
 
-variable [EnoughProjectives C]
+end Abelian
 
 set_option backward.isDefEq.respectTransparency false in
-variable {C} in
-theorem exact_d_f {X Y : C} (f : X ⟶ Y) :
+theorem exact_d_f [Preadditive C] [CategoryWithHomology C] [EnoughProjectives C]
+    {X Y : C} (f : X ⟶ Y) [HasKernel f] :
     (ShortComplex.mk (d f) f (by simp)).Exact := by
   let α : ShortComplex.mk (d f) f (by simp) ⟶ ShortComplex.mk (kernel.ι f) f (by simp) :=
     { τ₁ := Projective.π _
@@ -270,6 +278,8 @@ theorem exact_d_f {X Y : C} (f : X ⟶ Y) :
   rw [ShortComplex.exact_iff_of_epi_of_isIso_of_mono α]
   apply ShortComplex.exact_of_f_is_kernel
   apply kernelIsKernel
+
+variable [Abelian C] [EnoughProjectives C]
 
 namespace ProjectiveResolution
 
@@ -282,7 +292,6 @@ applied to the previously constructed morphism,
 and the map from the `n`-th object as `Projective.d`.
 -/
 
-variable {C}
 variable (Z : C)
 
 -- The construction of the projective resolution `of` would be very, very slow

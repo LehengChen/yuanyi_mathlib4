@@ -32,15 +32,23 @@ namespace CategoryTheory.Limits
 variable {C : Type u₁} [Category.{v₁} C]
 variable {J : Type u₂} [Category.{v₂} J]
 
-instance hasPullbacks_opposite [HasPushouts C] : HasPullbacks Cᵒᵖ := by
+instance hasPullbacks_opposite [HasColimitsOfShape WalkingCospanᵒᵖ C] : HasPullbacks Cᵒᵖ :=
+  hasLimitsOfShape_op_of_hasColimitsOfShape
+
+instance (priority := 100) hasPullbacks_opposite_of_hasPushouts [HasPushouts C] :
+    HasPullbacks Cᵒᵖ := by
   haveI : HasColimitsOfShape WalkingCospanᵒᵖ C :=
     hasColimitsOfShape_of_equivalence walkingCospanOpEquiv.symm
-  apply hasLimitsOfShape_op_of_hasColimitsOfShape
+  exact hasLimitsOfShape_op_of_hasColimitsOfShape
 
-instance hasPushouts_opposite [HasPullbacks C] : HasPushouts Cᵒᵖ := by
+instance hasPushouts_opposite [HasLimitsOfShape WalkingSpanᵒᵖ C] : HasPushouts Cᵒᵖ :=
+  hasColimitsOfShape_op_of_hasLimitsOfShape
+
+instance (priority := 100) hasPushouts_opposite_of_hasPullbacks [HasPullbacks C] :
+    HasPushouts Cᵒᵖ := by
   haveI : HasLimitsOfShape WalkingSpanᵒᵖ C :=
     hasLimitsOfShape_of_equivalence walkingSpanOpEquiv.symm
-  infer_instance
+  exact hasColimitsOfShape_op_of_hasLimitsOfShape
 
 /-- The canonical isomorphism relating `Span f.op g.op` and `(Cospan f g).op` -/
 @[simps!]

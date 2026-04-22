@@ -69,6 +69,12 @@ def evaluationAdjunctionRight (c : C) : evaluationLeftAdjoint D c ⊣ (evaluatio
 instance evaluationIsRightAdjoint (c : C) : ((evaluation _ D).obj c).IsRightAdjoint :=
   ⟨_, ⟨evaluationAdjunctionRight _ _⟩⟩
 
+end
+
+section
+
+variable [∀ c : C, ((evaluation C D).obj c).PreservesMonomorphisms]
+
 /-- See also the file `Mathlib/CategoryTheory/Limits/FunctorCategory/EpiMono.lean`
 for a similar result under a `HasPullbacks` assumption. -/
 theorem NatTrans.mono_iff_mono_app' {F G : C ⥤ D} (η : F ⟶ G) : Mono η ↔ ∀ c, Mono (η.app c) := by
@@ -113,6 +119,12 @@ def evaluationAdjunctionLeft (c : C) : (evaluation _ _).obj c ⊣ evaluationRigh
 
 instance evaluationIsLeftAdjoint (c : C) : ((evaluation _ D).obj c).IsLeftAdjoint :=
   ⟨_, ⟨evaluationAdjunctionLeft _ _⟩⟩
+
+end
+
+section
+
+variable [∀ c : C, ((evaluation C D).obj c).PreservesEpimorphisms]
 
 /-- See also the file `Mathlib/CategoryTheory/Limits/FunctorCategory/EpiMono.lean`
 for a similar result under a `HasPushouts` assumption. -/

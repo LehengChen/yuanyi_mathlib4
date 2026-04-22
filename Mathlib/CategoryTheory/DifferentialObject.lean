@@ -162,12 +162,15 @@ variable (D : Type u') [Category.{v'} D]
 variable [HasZeroMorphisms D] [HasShift D S]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A functor `F : C ⥤ D` which commutes with shift functors on `C` and `D` and preserves zero
-morphisms can be lifted to a functor `DifferentialObject S C ⥤ DifferentialObject S D`. -/
+/-- A functor `F : C ⥤ D` which commutes with shift functors on `C` and `D`, and maps
+`0 : X.obj ⟶ X.obj⟦1⟧⟦1⟧` to zero for each differential object `X`, can be lifted to a functor
+`DifferentialObject S C ⥤ DifferentialObject S D`. -/
 @[simps]
 def mapDifferentialObject (F : C ⥤ D)
     (η : (shiftFunctor C (1 : S)).comp F ⟶ F.comp (shiftFunctor D (1 : S)))
-    (hF : ∀ c c', F.map (0 : c ⟶ c') = 0) : DifferentialObject S C ⥤ DifferentialObject S D where
+    (hF : ∀ X : DifferentialObject S C,
+      F.map (0 : X.obj ⟶ (X.obj⟦(1 : S)⟧)⟦(1 : S)⟧) = 0) :
+    DifferentialObject S C ⥤ DifferentialObject S D where
   obj X :=
     { obj := F.obj X.obj
       d := F.map X.d ≫ η.app X.obj
@@ -175,7 +178,7 @@ def mapDifferentialObject (F : C ⥤ D)
         rw [Functor.map_comp, ← Functor.comp_map F (shiftFunctor D (1 : S))]
         slice_lhs 2 3 => rw [← η.naturality X.d]
         rw [Functor.comp_map]
-        slice_lhs 1 2 => rw [← F.map_comp, X.d_squared, hF]
+        slice_lhs 1 2 => rw [← F.map_comp, X.d_squared, hF X]
         rw [zero_comp, zero_comp] }
   map f :=
     { f := F.map f.f

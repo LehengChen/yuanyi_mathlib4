@@ -116,21 +116,24 @@ end CoproductsFromFiniteFiltered
 open CoproductsFromFiniteFiltered
 
 theorem hasCoproducts_of_finite_and_filtered [HasFiniteCoproducts C]
-    [HasFilteredColimitsOfSize.{w, w} C] : HasCoproducts.{w} C := fun α => by
+    [∀ α : Type w, HasColimitsOfShape (Finset (Discrete α)) C] : HasCoproducts.{w} C :=
+    fun α => by
   classical exact ⟨fun F => HasColimit.mk (liftToFinsetColimitCocone F)⟩
 
-theorem has_colimits_of_finite_and_filtered [HasFiniteColimits C]
-    [HasFilteredColimitsOfSize.{w, w} C] : HasColimitsOfSize.{w, w} C :=
+theorem has_colimits_of_finite_and_filtered [HasFiniteCoproducts C] [HasCoequalizers C]
+    [∀ α : Type w, HasColimitsOfShape (Finset (Discrete α)) C] :
+    HasColimitsOfSize.{w, w} C :=
   have : HasCoproducts.{w} C := hasCoproducts_of_finite_and_filtered
   has_colimits_of_hasCoequalizers_and_coproducts
 
 theorem hasProducts_of_finite_and_cofiltered [HasFiniteProducts C]
-    [HasCofilteredLimitsOfSize.{w, w} C] : HasProducts.{w} C :=
+    [∀ α : Type w, HasLimitsOfShape (Finset (Discrete α))ᵒᵖ C] : HasProducts.{w} C :=
   have : HasCoproducts.{w} Cᵒᵖ := hasCoproducts_of_finite_and_filtered
   hasProducts_of_opposite
 
-theorem has_limits_of_finite_and_cofiltered [HasFiniteLimits C]
-    [HasCofilteredLimitsOfSize.{w, w} C] : HasLimitsOfSize.{w, w} C :=
+theorem has_limits_of_finite_and_cofiltered [HasFiniteProducts C] [HasEqualizers C]
+    [∀ α : Type w, HasLimitsOfShape (Finset (Discrete α))ᵒᵖ C] :
+    HasLimitsOfSize.{w, w} C :=
   have : HasProducts.{w} C := hasProducts_of_finite_and_cofiltered
   has_limits_of_hasEqualizers_and_products
 
@@ -139,16 +142,18 @@ namespace CoproductsFromFiniteFiltered
 section
 
 variable [HasFiniteCoproducts C] [HasColimitsOfShape (Finset (Discrete α)) C]
-    [HasColimitsOfShape (Discrete α) C]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Helper construction for `liftToFinsetColimIso`. -/
 @[reassoc]
-theorem liftToFinsetColimIso_aux (F : Discrete α ⥤ C) {J : Finset (Discrete α)} (j : J) :
+theorem liftToFinsetColimIso_aux (F : Discrete α ⥤ C) [HasColimit F]
+    {J : Finset (Discrete α)} (j : J) :
     Sigma.ι (F.obj ·.val) j ≫ colimit.ι (liftToFinsetObj F) J ≫
       (colimit.isoColimitCocone (liftToFinsetColimitCocone F)).inv
     = colimit.ι F j := by
   simp [colimit.isoColimitCocone, IsColimit.coconePointUniqueUpToIso]
+
+variable [HasColimitsOfShape (Discrete α) C]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The `liftToFinset` functor, precomposed with forming a colimit, is a coproduct on the original

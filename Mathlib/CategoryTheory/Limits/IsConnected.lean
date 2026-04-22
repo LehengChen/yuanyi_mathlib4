@@ -58,9 +58,10 @@ def pUnitCocone : Cocone (constPUnitFunctor.{w} C) where
   pt := PUnit
   ι := { app := fun _ => id }
 
-/-- If `C` is connected, the cocone on `constPUnitFunctor` with cone point `PUnit` is a colimit
-cocone. -/
-noncomputable def isColimitPUnitCocone [IsConnected C] : IsColimit (pUnitCocone.{w} C) where
+/-- If `C` is nonempty and preconnected, the cocone on `constPUnitFunctor` with cone point
+`PUnit` is a colimit cocone. -/
+noncomputable def isColimitPUnitCocone [Nonempty C] [IsPreconnected C] :
+    IsColimit (pUnitCocone.{w} C) where
   desc s := s.ι.app Classical.ofNonempty
   fac s j := by
     ext ⟨⟩
@@ -71,7 +72,8 @@ noncomputable def isColimitPUnitCocone [IsConnected C] : IsColimit (pUnitCocone.
     ext ⟨⟩
     simp [← h Classical.ofNonempty]
 
-instance instHasColimitConstPUnitFunctor [IsConnected C] : HasColimit (constPUnitFunctor.{w} C) :=
+instance instHasColimitConstPUnitFunctor [Nonempty C] [IsPreconnected C] :
+    HasColimit (constPUnitFunctor.{w} C) :=
   ⟨_, isColimitPUnitCocone _⟩
 
 instance instSubsingletonColimitPUnit
@@ -83,8 +85,9 @@ instance instSubsingletonColimitPUnit
     apply constant_of_preserves_morphisms (colimit.ι (constPUnitFunctor C) · PUnit.unit)
     exact fun c d f => colimit_sound f rfl
 
-/-- Given a connected index category, the colimit of the constant unit-valued functor is `PUnit`. -/
-noncomputable def colimitConstPUnitIsoPUnit [IsConnected C] :
+/-- Given a nonempty preconnected index category, the colimit of the constant unit-valued functor is
+`PUnit`. -/
+noncomputable def colimitConstPUnitIsoPUnit [Nonempty C] [IsPreconnected C] :
     colimit (constPUnitFunctor.{w} C) ≅ PUnit.{w + 1} :=
   IsColimit.coconePointUniqueUpToIso (colimit.isColimit _) (isColimitPUnitCocone.{w} C)
 

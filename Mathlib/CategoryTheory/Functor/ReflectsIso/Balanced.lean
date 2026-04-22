@@ -14,8 +14,8 @@ public import Mathlib.CategoryTheory.Functor.EpiMono
 
 If a category is `C`, and a functor out of `C` reflects epimorphisms and monomorphisms,
 then the functor reflects isomorphisms.
-Furthermore, categories that admit a functor that `ReflectsIsomorphisms`, `PreservesEpimorphisms`
-and `PreservesMonomorphisms` are balanced.
+Furthermore, categories that admit a functor that `ReflectsIsomorphisms` and maps every morphism
+that is both monic and epic to an isomorphism are balanced.
 
 -/
 
@@ -37,10 +37,11 @@ instance (priority := 100) reflectsIsomorphisms_of_reflectsMonomorphisms_of_refl
     exact isIso_of_mono_of_epi f
 
 lemma Functor.balanced_of_preserves (F : C ⥤ D)
-    [F.ReflectsIsomorphisms] [F.PreservesEpimorphisms] [F.PreservesMonomorphisms] [Balanced D] :
+    [F.ReflectsIsomorphisms]
+    (hF : ∀ {X Y : C} (f : X ⟶ Y) [Mono f] [Epi f], IsIso (F.map f)) :
     Balanced C where
   isIso_of_mono_of_epi f _ _ := by
-    rw [← isIso_iff_of_reflects_iso (F := F)]
-    exact isIso_of_mono_of_epi _
+    haveI : IsIso (F.map f) := hF f
+    exact isIso_of_reflects_iso f F
 
 end CategoryTheory

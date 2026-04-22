@@ -252,11 +252,12 @@ noncomputable instance forgetCreatesColimitsOfShape [PreservesColimitsOfShape J 
 noncomputable instance forgetCreatesColimits [PreservesColimitsOfSize.{v, u} (T : C ⥤ C)] :
     CreatesColimitsOfSize.{v, u} (forget T) where CreatesColimitsOfShape := by infer_instance
 
-/-- For `D : J ⥤ Algebra T`, `D ⋙ forget T` has a colimit, then `D` has a colimit provided colimits
-of shape `J` are preserved by `T`.
+/-- For `D : J ⥤ Algebra T`, if `D ⋙ forget T` has a colimit, then `D` has a colimit provided
+that colimit and the corresponding colimit for its image under `T` are preserved by `T`.
 -/
-theorem forget_creates_colimits_of_monad_preserves [PreservesColimitsOfShape J (T : C ⥤ C)]
-    (D : J ⥤ Algebra T) [HasColimit (D ⋙ forget T)] : HasColimit D :=
+theorem forget_creates_colimits_of_monad_preserves (D : J ⥤ Algebra T)
+    [HasColimit (D ⋙ forget T)] [PreservesColimit (D ⋙ forget T) (T : C ⥤ C)]
+    [PreservesColimit ((D ⋙ forget T) ⋙ ↑T) (T : C ⥤ C)] : HasColimit D :=
   hasColimit_of_created D (forget T)
 
 end Monad
@@ -586,11 +587,12 @@ noncomputable instance forgetCreatesLimitsOfShape [PreservesLimitsOfShape J (T :
 noncomputable instance forgetCreatesLimits [PreservesLimitsOfSize.{v, u} (T : C ⥤ C)] :
     CreatesLimitsOfSize.{v, u} (forget T) where CreatesLimitsOfShape := by infer_instance
 
-/-- For `D : J ⥤ Coalgebra T`, `D ⋙ forget T` has a limit, then `D` has a limit provided limits
-of shape `J` are preserved by `T`.
+/-- For `D : J ⥤ Coalgebra T`, if `D ⋙ forget T` has a limit, then `D` has a limit provided
+that limit and the corresponding limit for its image under `T` are preserved by `T`.
 -/
-theorem forget_creates_limits_of_comonad_preserves [PreservesLimitsOfShape J (T : C ⥤ C)]
-    (D : J ⥤ Coalgebra T) [HasLimit (D ⋙ forget T)] : HasLimit D :=
+theorem forget_creates_limits_of_comonad_preserves (D : J ⥤ Coalgebra T)
+    [HasLimit (D ⋙ forget T)] [PreservesLimit (D ⋙ forget T) (T : C ⥤ C)]
+    [PreservesLimit ((D ⋙ forget T) ⋙ ↑T) (T : C ⥤ C)] : HasLimit D :=
   hasLimit_of_created D (forget T)
 
 end Comonad

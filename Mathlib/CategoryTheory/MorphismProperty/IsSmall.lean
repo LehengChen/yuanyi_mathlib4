@@ -6,7 +6,7 @@ Authors: Joël Riou
 module
 
 public import Mathlib.CategoryTheory.MorphismProperty.Basic
-public import Mathlib.Logic.Small.Basic
+public import Mathlib.Logic.Small.Set
 
 /-!
 # Small classes of morphisms
@@ -36,12 +36,16 @@ class IsSmall : Prop where
 
 attribute [instance] IsSmall.small_toSet
 
-instance isSmall_ofHoms {ι : Type t} [Small.{w} ι] {A B : ι → C} (f : ∀ i, A i ⟶ B i) :
+instance isSmall_ofHoms {ι : Type t} {A B : ι → C} (f : ∀ i, A i ⟶ B i)
+    [Small.{w} (Set.range fun i ↦ Arrow.mk (f i))] :
     IsSmall.{w} (ofHoms f) := by
-  let φ (i : ι) : (ofHoms f).toSet := ⟨Arrow.mk (f i), ⟨i⟩⟩
+  let φ (g : Set.range fun i ↦ Arrow.mk (f i)) : (ofHoms f).toSet := ⟨g.1, by
+    rw [mem_toSet_iff, ofHoms_iff]
+    obtain ⟨i, hi⟩ := g.2
+    exact ⟨i, by simp [hi]⟩⟩
   have hφ : Function.Surjective φ := by
     rintro ⟨⟨_, _, f⟩, ⟨i⟩⟩
-    exact ⟨i, rfl⟩
+    exact ⟨⟨Arrow.mk (f i), ⟨i, rfl⟩⟩, rfl⟩
   exact ⟨small_of_surjective hφ⟩
 
 set_option backward.isDefEq.respectTransparency false in

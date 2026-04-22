@@ -215,8 +215,10 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
 
 set_option backward.isDefEq.respectTransparency false in
 theorem IsPushout.isVanKampen_inl {W E X Z : C} (c : BinaryCofan W E) [FinitaryExtensive C]
-    [HasPullbacks C] (hc : IsColimit c) (f : W ⟶ X) (h : X ⟶ Z) (i : c.pt ⟶ Z)
-    (H : IsPushout f c.inl h i) : H.IsVanKampen := by
+    (hc : IsColimit c) (f : W ⟶ X) (h : X ⟶ Z) (i : c.pt ⟶ Z)
+    [∀ {Y' : C} (αY : Y' ⟶ c.pt), HasPullback αY c.inr]
+    [∀ {Z' : C} (αZ : Z' ⟶ Z), HasPullback αZ i] (H : IsPushout f c.inl h i) :
+    H.IsVanKampen := by
   obtain ⟨hc₁⟩ := (is_coprod_iff_isPushout c hc H.1).mpr H
   introv W' hf hg hh hi w
   obtain ⟨hc₂⟩ := ((BinaryCofan.isVanKampen_iff _).mp (FinitaryExtensive.vanKampen c hc)
@@ -484,14 +486,16 @@ theorem adhesive_of_preserves_and_reflects_isomorphism (F : C ⥤ D)
     reflectsColimitsOfShape_of_reflectsIsomorphisms
   exact adhesive_of_preserves_and_reflects F
 
-theorem adhesive_of_reflective [HasPullbacks D] [Adhesive C] [HasPullbacks C] [HasPushouts C]
+theorem adhesive_of_reflective
+    [H₁ : ∀ {X Y S : D} (f : X ⟶ S) (g : Y ⟶ S) [Mono f], HasPullback f g]
+    [Adhesive C] [HasPullbacks C] [HasPushouts C]
     [H₂ : ∀ {X Y S : D} (f : S ⟶ X) (g : S ⟶ Y) [Mono f], HasPushout f g]
     {Gl : C ⥤ D} {Gr : D ⥤ C} (adj : Gl ⊣ Gr) [Gr.Full] [Gr.Faithful]
     [PreservesLimitsOfShape WalkingCospan Gl] :
     Adhesive D := by
   have := adj.leftAdjoint_preservesColimits
   have := adj.rightAdjoint_preservesLimits
-  apply Adhesive.mk (hasPushout_of_mono_left := H₂)
+  apply Adhesive.mk (hasPullback_of_mono_left := H₁) (hasPushout_of_mono_left := H₂)
   intro W X Y Z f g h i _ H
   have := Adhesive.van_kampen (IsPushout.of_hasPushout (Gr.map f) (Gr.map g))
   rw [IsPushout.isVanKampen_iff] at this ⊢

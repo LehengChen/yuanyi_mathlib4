@@ -53,11 +53,13 @@ section
 
 attribute [local instance] hasLimit_cospan_of_hasLimit_pair_of_hasLimit_parallelPair
 
-/-- If a category has all binary products and all equalizers, then it also has all pullbacks.
-As usual, this is not an instance, since there may be a more direct way to construct
-pullbacks. -/
+/-- If a category has all binary products and all the equalizers needed for the usual construction,
+then it also has all pullbacks. As usual, this is not an instance, since there may be a more direct
+way to construct pullbacks. -/
 theorem hasPullbacks_of_hasBinaryProducts_of_hasEqualizers (C : Type u) [Category.{v} C]
-    [HasBinaryProducts C] [HasEqualizers C] : HasPullbacks C :=
+    [HasBinaryProducts C]
+    [∀ ⦃X Y Z : C⦄ (f : X ⟶ Z) (g : Y ⟶ Z),
+      HasEqualizer (prod.fst ≫ f) (prod.snd ≫ g)] : HasPullbacks C :=
   { has_limit := fun F => hasLimit_of_iso (diagramIsoCospan F).symm }
 
 end
@@ -90,10 +92,13 @@ section
 
 attribute [local instance] hasColimit_span_of_hasColimit_pair_of_hasColimit_parallelPair
 
-/-- If a category has all binary coproducts and all coequalizers, then it also has all pushouts.
-As usual, this is not an instance, since there may be a more direct way to construct pushouts. -/
+/-- If a category has all binary coproducts and all the coequalizers needed for the usual
+construction, then it also has all pushouts. As usual, this is not an instance, since there may be a
+more direct way to construct pushouts. -/
 theorem hasPushouts_of_hasBinaryCoproducts_of_hasCoequalizers (C : Type u) [Category.{v} C]
-    [HasBinaryCoproducts C] [HasCoequalizers C] : HasPushouts C :=
+    [HasBinaryCoproducts C]
+    [∀ ⦃X Y Z : C⦄ (f : X ⟶ Y) (g : X ⟶ Z),
+      HasCoequalizer (f ≫ coprod.inl) (g ≫ coprod.inr)] : HasPushouts C :=
   hasPushouts_of_hasColimit_span C
 
 end

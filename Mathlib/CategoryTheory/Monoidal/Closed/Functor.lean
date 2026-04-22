@@ -63,11 +63,11 @@ def frobeniusMorphism (h : L ⊣ F) (A : C) : TwoSquare (tensorLeft (F.obj A)) L
     Functor.whiskerLeft _ ((curriedTensor C).map (h.counit.app _))
 
 set_option backward.isDefEq.respectTransparency false in
-/-- If `F` is full and faithful and has a left adjoint `L` which preserves binary products, then the
-Frobenius morphism is an isomorphism.
+/-- If the counit is an isomorphism at `A` and `L` preserves binary products, then the Frobenius
+morphism is an isomorphism at `A`.
 -/
 instance frobeniusMorphism_iso_of_preserves_binary_products (h : L ⊣ F) (A : C)
-    [Limits.PreservesLimitsOfShape (Discrete Limits.WalkingPair) L] [F.Full] [F.Faithful] :
+    [Limits.PreservesLimitsOfShape (Discrete Limits.WalkingPair) L] [IsIso (h.counit.app A)] :
     IsIso (frobeniusMorphism F h A).natTrans :=
   suffices ∀ (X : D), IsIso ((frobeniusMorphism F h A).natTrans.app X) from
     NatIso.isIso_of_isIso_app _
@@ -182,13 +182,14 @@ theorem expComparison_iso_of_frobeniusMorphism_iso (h : L ⊣ F) (A : C)
   rw [← frobeniusMorphism_mate F h]; infer_instance
 
 open Limits in
-/-- If `F` is full and faithful, and has a left adjoint which preserves binary products, then it is
-Cartesian closed.
+/-- If `F` has a left adjoint whose counit is pointwise an isomorphism and which preserves binary
+products, then it is Cartesian closed.
 
 TODO: Show the converse, that if `F` is Cartesian closed and its left adjoint preserves binary
 products, then it is full and faithful.
 -/
-theorem cartesianClosedFunctorOfLeftAdjointPreservesBinaryProducts (h : L ⊣ F) [F.Full] [F.Faithful]
+theorem cartesianClosedFunctorOfLeftAdjointPreservesBinaryProducts (h : L ⊣ F)
+    [∀ A, IsIso (h.counit.app A)]
     [PreservesLimitsOfShape (Discrete WalkingPair) L] : MonoidalClosedFunctor F where
   comparison_iso _ := expComparison_iso_of_frobeniusMorphism_iso F h _
 

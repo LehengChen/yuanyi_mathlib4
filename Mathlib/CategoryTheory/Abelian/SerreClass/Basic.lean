@@ -48,28 +48,32 @@ class IsSerreClass : Prop extends P.ContainsZero,
     P.IsClosedUnderSubobjects, P.IsClosedUnderQuotients,
     P.IsClosedUnderExtensions where
 
-variable [P.IsSerreClass]
-
-example : P.IsClosedUnderIsomorphisms := inferInstance
+example [P.IsSerreClass] : P.IsClosedUnderIsomorphisms := inferInstance
 
 instance : (⊤ : ObjectProperty C).IsSerreClass where
 
 instance : IsSerreClass (IsZero (C := C)) where
 
-lemma prop_iff_of_shortExact {S : ShortComplex C} (hS : S.ShortExact) :
+omit [Abelian C] in
+lemma prop_iff_of_shortExact [HasZeroMorphisms C] [P.IsClosedUnderSubobjects]
+    [P.IsClosedUnderQuotients] [P.IsClosedUnderExtensions]
+    {S : ShortComplex C} (hS : S.ShortExact) :
     P S.X₂ ↔ P S.X₁ ∧ P S.X₃ :=
   ⟨fun h ↦ ⟨P.prop_X₁_of_shortExact hS h, P.prop_X₃_of_shortExact hS h⟩,
     fun h ↦ P.prop_X₂_of_shortExact hS h.1 h.2⟩
 
-lemma prop_X₂_of_exact {S : ShortComplex C} (hS : S.Exact)
+omit [Abelian C] in
+lemma prop_X₂_of_exact [Preadditive C] [P.IsClosedUnderSubobjects]
+    [P.IsClosedUnderQuotients] [P.IsClosedUnderExtensions]
+    {S : ShortComplex C} (hS : S.Exact)
     (h₁ : P S.X₁) (h₃ : P S.X₃) : P S.X₂ := by
-  let d := S.homologyData
+  let d := hS.condition.choose
   have := hS.epi_f' d.left
   have := hS.mono_g' d.right
   exact (P.prop_X₂_of_shortExact (hS.shortExact d)
     (P.prop_of_epi d.left.f' h₁) (P.prop_of_mono d.right.g' h₃) :)
 
-instance (F : D ⥤ C) [PreservesFiniteLimits F]
+instance [P.IsSerreClass] (F : D ⥤ C) [PreservesFiniteLimits F]
     [PreservesFiniteColimits F] :
     (P.inverseImage F).IsSerreClass where
 

@@ -120,8 +120,8 @@ lemma FunctorsInverting.comp_hom
 
 @[ext]
 lemma FunctorsInverting.hom_ext {W : MorphismProperty C} {F₁ F₂ : FunctorsInverting W D}
-    {α β : F₁ ⟶ F₂} (h : α.hom.app = β.hom.app) : α = β :=
-  ObjectProperty.hom_ext _ (NatTrans.ext h)
+    {α β : F₁ ⟶ F₂} (h : ∀ X, α.hom.app X = β.hom.app X) : α = β :=
+  ObjectProperty.hom_ext _ (NatTrans.ext (funext h))
 
 /-- A constructor for `W.FunctorsInverting D` -/
 def FunctorsInverting.mk {W : MorphismProperty C} {D : Type*} [Category* D] (F : C ⥤ D)
@@ -147,12 +147,14 @@ lemma IsInvertedBy.isoClosure_iff (W : MorphismProperty C) (F : C ⥤ D) :
 
 @[simp]
 lemma IsInvertedBy.iff_comp {C₁ C₂ C₃ : Type*} [Category* C₁] [Category* C₂] [Category* C₃]
-    (W : MorphismProperty C₁) (F : C₁ ⥤ C₂) (G : C₂ ⥤ C₃) [G.ReflectsIsomorphisms] :
+    (W : MorphismProperty C₁) (F : C₁ ⥤ C₂) (G : C₂ ⥤ C₃)
+    (hG : ∀ ⦃X Y : C₂⦄ (g : X ⟶ Y), IsIso (G.map g) → IsIso g := by
+      intro X Y g h
+      exact @isIso_of_reflects_iso _ _ _ _ _ _ _ _ h (by infer_instance)) :
     W.IsInvertedBy (F ⋙ G) ↔ W.IsInvertedBy F := by
   constructor
   · intro h X Y f hf
-    have : IsIso (G.map (F.map f)) := h _ hf
-    exact isIso_of_reflects_iso (F.map f) G
+    exact hG (F.map f) (h _ hf)
   · intro hF
     exact IsInvertedBy.of_comp W F hF G
 

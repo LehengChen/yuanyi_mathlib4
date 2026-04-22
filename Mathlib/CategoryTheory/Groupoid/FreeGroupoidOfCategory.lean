@@ -160,14 +160,18 @@ def liftNatIso (F₁ F₂ : FreeGroupoid C ⥤ G) (τ : of C ⋙ F₁ ≅ of C �
   Localization.liftNatIso (of C) ⊤ (of C ⋙ F₁) (of C ⋙ F₂) _ _ τ
 
 @[simp]
-lemma liftNatIso_hom_app (F₁ F₂ : FreeGroupoid C ⥤ G) (τ : of C ⋙ F₁ ≅ of C ⋙ F₂) (X) :
-    (liftNatIso F₁ F₂ τ).hom.app (mk X) = τ.hom.app X := by
-  simp [liftNatIso]
+lemma liftNatIso_hom_app {E : Type u₂} [Category.{v₂} E]
+    (F₁ F₂ : FreeGroupoid C ⥤ E) (τ : of C ⋙ F₁ ≅ of C ⋙ F₂) (X) :
+    (Localization.liftNatIso (of C) ⊤ (of C ⋙ F₁) (of C ⋙ F₂) F₁ F₂ τ).hom.app
+      (mk X) = τ.hom.app X := by
+  simp
 
 @[simp]
-lemma liftNatIso_inv_app (F₁ F₂ : FreeGroupoid C ⥤ G) (τ : of C ⋙ F₁ ≅ of C ⋙ F₂) (X) :
-    (liftNatIso F₁ F₂ τ).inv.app (mk X) = τ.inv.app X := by
-  simp [liftNatIso]
+lemma liftNatIso_inv_app {E : Type u₂} [Category.{v₂} E]
+    (F₁ F₂ : FreeGroupoid C ⥤ E) (τ : of C ⋙ F₁ ≅ of C ⋙ F₂) (X) :
+    (Localization.liftNatIso (of C) ⊤ (of C ⋙ F₁) (of C ⋙ F₂) F₁ F₂ τ).inv.app
+      (mk X) = τ.inv.app X := by
+  simp
 
 end UniversalProperty
 

@@ -141,9 +141,15 @@ lemma eHom_whisker_cancel {X Y Y₁ Z : C} (α : Y ≅ Y₁) :
   simp [← eHomWhiskerLeft_comp]
 
 @[reassoc]
-lemma eHom_whisker_cancel_inv {X Y Y₁ Z : C} (α : Y ≅ Y₁) :
-    eHomWhiskerLeft V X α.inv ▷ _ ≫ _ ◁ eHomWhiskerRight V α.hom Z ≫
-      eComp V X Y Z = eComp V X Y₁ Z := eHom_whisker_cancel V α.symm
+lemma eHom_whisker_cancel_inv {X Y Y₁ Z : C} {f : Y ⟶ Y₁} (s : SplitEpi f) :
+    eHomWhiskerLeft V X s.section_ ▷ _ ≫ _ ◁ eHomWhiskerRight V f Z ≫
+      eComp V X Y Z = eComp V X Y₁ Z := by
+  dsimp [eHomWhiskerLeft, eHomWhiskerRight]
+  simp only [MonoidalCategory.whiskerLeft_comp_assoc, whisker_assoc_symm,
+    triangle_assoc_comp_left_inv_assoc, e_assoc', assoc]
+  simp only [← comp_whiskerRight_assoc]
+  change (eHomWhiskerLeft V X s.section_ ≫ eHomWhiskerLeft V X f) ▷ _ ≫ _ = _
+  simp [← eHomWhiskerLeft_comp]
 
 @[reassoc]
 lemma eHom_whisker_exchange {X X' Y Y' : C} (f : X ⟶ X') (g : Y ⟶ Y') :

@@ -160,7 +160,7 @@ def toSet : Set (Arrow C) := setOf (fun f ↦ P f.hom)
 
 lemma mem_toSet_iff (f : Arrow C) : f ∈ P.toSet ↔ P f.hom := Iff.rfl
 
-lemma toSet_iSup {ι : Type*} (W : ι → MorphismProperty C) :
+lemma toSet_iSup {ι : Sort*} (W : ι → MorphismProperty C) :
     (⨆ i, W i).toSet = ⋃ i, (W i).toSet := by
   ext
   simp [mem_toSet_iff]
@@ -289,7 +289,8 @@ lemma RespectsIso.mk (P : MorphismProperty C)
   precomp e (_ : IsIso e) f hf := hprecomp (asIso e) f hf
   postcomp e (_ : IsIso e) f hf := hpostcomp (asIso e) f hf
 
-lemma RespectsIso.precomp (P : MorphismProperty C) [P.RespectsIso] {X Y Z : C} (e : X ⟶ Y)
+lemma RespectsIso.precomp (P : MorphismProperty C) [P.RespectsLeft (isomorphisms C)]
+    {X Y Z : C} (e : X ⟶ Y)
     [IsIso e] (f : Y ⟶ Z) (hf : P f) : P (e ≫ f) :=
   RespectsLeft.precomp (Q := isomorphisms C) e ‹IsIso e› f hf
 
@@ -297,7 +298,8 @@ instance : RespectsIso (⊤ : MorphismProperty C) where
   precomp _ _ _ _ := trivial
   postcomp _ _ _ _ := trivial
 
-lemma RespectsIso.postcomp (P : MorphismProperty C) [P.RespectsIso] {X Y Z : C} (e : Y ⟶ Z)
+lemma RespectsIso.postcomp (P : MorphismProperty C) [P.RespectsRight (isomorphisms C)]
+    {X Y Z : C} (e : Y ⟶ Z)
     [IsIso e] (f : X ⟶ Y) (hf : P f) : P (f ≫ e) :=
   RespectsRight.postcomp (Q := isomorphisms C) e ‹IsIso e› f hf
 
@@ -328,11 +330,13 @@ lemma monotone_isoClosure : Monotone (isoClosure (C := C)) := by
   intro P Q h X Y f ⟨X', Y', f', hf', ⟨e⟩⟩
   exact ⟨X', Y', f', h _ hf', ⟨e⟩⟩
 
-theorem cancel_left_of_respectsIso (P : MorphismProperty C) [hP : RespectsIso P] {X Y Z : C}
+theorem cancel_left_of_respectsIso (P : MorphismProperty C)
+    [P.RespectsLeft (isomorphisms C)] {X Y Z : C}
     (f : X ⟶ Y) (g : Y ⟶ Z) [IsIso f] : P (f ≫ g) ↔ P g :=
   ⟨fun h => by simpa using RespectsIso.precomp P (inv f) (f ≫ g) h, RespectsIso.precomp P f g⟩
 
-theorem cancel_right_of_respectsIso (P : MorphismProperty C) [hP : RespectsIso P] {X Y Z : C}
+theorem cancel_right_of_respectsIso (P : MorphismProperty C)
+    [P.RespectsRight (isomorphisms C)] {X Y Z : C}
     (f : X ⟶ Y) (g : Y ⟶ Z) [IsIso g] : P (f ≫ g) ↔ P f :=
   ⟨fun h => by simpa using RespectsIso.postcomp P (inv g) (f ≫ g) h, RespectsIso.postcomp P g f⟩
 

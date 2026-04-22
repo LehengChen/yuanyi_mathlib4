@@ -27,7 +27,8 @@ We show:
   then `γ` is a monomorphism,
 - the "epi" version of the four lemma: if `β` and `δ` are epimorphisms and `ε` is a monomorphism,
   then `γ` is an epimorphism,
-- the five lemma: if `α`, `β`, `δ` and `ε` are isomorphisms, then `γ` is an isomorphism.
+- the five lemma: if `α` is an epimorphism, `β` and `δ` are both monomorphisms
+  and epimorphisms, and `ε` is a monomorphism, then `γ` is an isomorphism.
 
 ## Implementation details
 
@@ -135,15 +136,16 @@ variable {R₁ R₂ : ComposableArrows C 4} (hR₁ : R₁.Exact) (hR₂ : R₂.E
 include hR₁ hR₂
 
 /-- The five lemma. -/
-theorem isIso_of_epi_of_isIso_of_isIso_of_mono (h₀ : Epi (app' φ 0)) (h₁ : IsIso (app' φ 1))
-    (h₂ : IsIso (app' φ 3)) (h₃ : Mono (app' φ 4)) : IsIso (app' φ 2) := by
-  dsimp at h₀ h₁ h₂ h₃
+theorem isIso_of_epi_of_isIso_of_isIso_of_mono (h₀ : Epi (app' φ 0)) (h₁ : Mono (app' φ 1))
+    (h₂ : Epi (app' φ 1)) (h₃ : Mono (app' φ 3)) (h₄ : Epi (app' φ 3))
+    (h₅ : Mono (app' φ 4)) : IsIso (app' φ 2) := by
+  dsimp at h₀ h₁ h₂ h₃ h₄ h₅
   have : Mono (app' φ 2) := by
     apply mono_of_epi_of_mono_of_mono (δlastFunctor.map φ) (R₁.exact_iff_δlast.1 hR₁).1
-      (R₂.exact_iff_δlast.1 hR₂).1 <;> dsimp <;> infer_instance
+      (R₂.exact_iff_δlast.1 hR₂).1 <;> assumption
   have : Epi (app' φ 2) := by
     apply epi_of_epi_of_epi_of_mono (δ₀Functor.map φ) (R₁.exact_iff_δ₀.1 hR₁).2
-      (R₂.exact_iff_δ₀.1 hR₂).2 <;> dsimp <;> infer_instance
+      (R₂.exact_iff_δ₀.1 hR₂).2 <;> assumption
   apply isIso_of_mono_of_epi
 
 end Five
@@ -238,7 +240,10 @@ lemma isIso_of_epi_of_isIso (hR₁ : R₁.Exact) (hR₂ : R₂.Exact) (hR₁' : 
       mk₄ (R₂.map' 0 1) (R₂.map' 1 2) (0 : _ ⟶ (0 : C)) (0 : _ ⟶ (0 : C)) :=
     homMk₄ (app' φ 0) (app' φ 1) (app' φ 2) 0 0 (naturality' φ 0 1)
       (naturality' φ 1 2) (by simp) (by simp)
-  refine isIso_of_epi_of_isIso_of_isIso_of_mono ?_ ?_ ψ h₀ h₁ inferInstance inferInstance
+  obtain ⟨h₁m, h₁e⟩ := (isIso_iff_mono_and_epi (app' φ 1)).1 h₁
+  refine isIso_of_epi_of_isIso_of_isIso_of_mono ?_ ?_ ψ h₀
+    (by simpa [ψ] using h₁m) (by simpa [ψ] using h₁e) inferInstance inferInstance
+    inferInstance
   · refine exact_of_δ₀ (hR₁.exact 0).exact_toComposableArrows (exact_of_δ₀ ?_ ?_)
     · refine exact₂_mk _ (by simp) ?_
       rwa [ShortComplex.exact_iff_epi _ (by simp)]
@@ -260,7 +265,9 @@ lemma isIso_of_isIso_of_mono (hR₁ : R₁.Exact) (hR₂ : R₂.Exact) (hR₁' :
       mk₄ (0 : (0 : C) ⟶ (0 : C)) (0 : _ ⟶ _) (R₂.map' 0 1) (R₂.map' 1 2) :=
     homMk₄ 0 0 (app' φ 0) (app' φ 1) (app' φ 2) (by simp) (by simp) (naturality' φ 0 1)
       (naturality' φ 1 2)
-  refine isIso_of_epi_of_isIso_of_isIso_of_mono ?_ ?_ ψ inferInstance inferInstance h₁ h₂
+  obtain ⟨h₁m, h₁e⟩ := (isIso_iff_mono_and_epi (app' φ 1)).1 h₁
+  refine isIso_of_epi_of_isIso_of_isIso_of_mono ?_ ?_ ψ inferInstance inferInstance inferInstance
+    (by simpa [ψ] using h₁m) (by simpa [ψ] using h₁e) h₂
   · refine exact_of_δ₀ (exact₂_mk _ (by simp) ?_) (exact_of_δ₀ ?_ (exact₂_mk _ _ (hR₁.exact 0)))
     · rw [ShortComplex.exact_iff_mono _ (by simp)]
       infer_instance

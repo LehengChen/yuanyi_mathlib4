@@ -20,8 +20,8 @@ defined in the file `Mathlib/CategoryTheory/Functor/Flat.lean`, see also
 https://golem.ph.utexas.edu/category/2011/06/flat_functors_and_morphisms_of.html
 for a clarification about the differences between these notions.)
 
-In this file, we show that if finite limits exist in `C` and are preserved by `F`,
-then `F.Elements` is cofiltered.
+In this file, we show that if `F.Elements` is nonempty, and binary products and equalizers
+exist in `C` and are preserved by `F`, then `F.Elements` is cofiltered.
 
 -/
 
@@ -36,9 +36,11 @@ open Limits
 variable {C : Type u} [Category.{v} C]
 
 lemma Functor.isCofiltered_elements
-    (F : C ⥤ Type w) [HasFiniteLimits C] [PreservesFiniteLimits F] :
+    (F : C ⥤ Type w) [Nonempty F.Elements] [HasBinaryProducts C] [HasEqualizers C]
+    [PreservesLimitsOfShape (Discrete WalkingPair) F]
+    [PreservesLimitsOfShape WalkingParallelPair F] :
     IsCofiltered F.Elements where
-  nonempty := ⟨⊤_ C, (terminalIsTerminal.isTerminalObj F).from PUnit .unit⟩
+  nonempty := inferInstance
   cone_objs := by
     rintro ⟨X, x⟩ ⟨Y, y⟩
     let h := mapIsLimitOfPreservesOfIsLimit F _ _ (prodIsProd X Y)
@@ -100,7 +102,7 @@ def fromOverFunctorElementsEquivalence :
   -- `cat_disch` can fill in this proof, but is unfortunately quite slow.
   functor_unitIso_comp X := by simp_all; rfl
 
-instance [IsCofiltered F.Elements] : IsCofiltered (fromOverFunctor F x).Elements :=
+instance [IsCofilteredOrEmpty F.Elements] : IsCofiltered (fromOverFunctor F x).Elements :=
   .of_equivalence (fromOverFunctorElementsEquivalence F x).symm
 
 end FunctorToTypes

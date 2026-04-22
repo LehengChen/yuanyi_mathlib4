@@ -419,15 +419,18 @@ namespace Adjunction
 
 variable {F : C ⥤ C} {G : C ⥤ C}
 
-theorem Algebra.homEquiv_naturality_str (adj : F ⊣ G) (A₁ A₂ : Algebra F) (f : A₁ ⟶ A₂) :
-    (adj.homEquiv A₁.a A₁.a) A₁.str ≫ G.map f.f = f.f ≫ (adj.homEquiv A₂.a A₂.a) A₂.str := by
-  rw [← Adjunction.homEquiv_naturality_right, ← Adjunction.homEquiv_naturality_left, f.h]
+theorem Algebra.homEquiv_naturality_str (adj : F ⊣ G) (A₁ A₂ : Algebra F)
+    (f : A₁.a ⟶ A₂.a) (hf : F.map f ≫ A₂.str = A₁.str ≫ f) :
+    (adj.homEquiv A₁.a A₁.a) A₁.str ≫ G.map f =
+    f ≫ (adj.homEquiv A₂.a A₂.a) A₂.str := by
+  rw [← Adjunction.homEquiv_naturality_right, ← Adjunction.homEquiv_naturality_left, hf]
 
-theorem Coalgebra.homEquiv_naturality_str_symm (adj : F ⊣ G) (V₁ V₂ : Coalgebra G) (f : V₁ ⟶ V₂) :
-    F.map f.f ≫ (adj.homEquiv V₂.V V₂.V).symm V₂.str =
-    (adj.homEquiv V₁.V V₁.V).symm V₁.str ≫ f.f := by
+theorem Coalgebra.homEquiv_naturality_str_symm (adj : F ⊣ G) (V₁ V₂ : Coalgebra G)
+    (f : V₁.V ⟶ V₂.V) (hf : V₁.str ≫ G.map f = f ≫ V₂.str) :
+    F.map f ≫ (adj.homEquiv V₂.V V₂.V).symm V₂.str =
+    (adj.homEquiv V₁.V V₁.V).symm V₁.str ≫ f := by
   rw [← Adjunction.homEquiv_naturality_left_symm, ← Adjunction.homEquiv_naturality_right_symm,
-    f.h]
+    hf]
 
 /-- Given an adjunction `F ⊣ G`, the functor that associates to an algebra over `F` a
 coalgebra over `G` defined via adjunction applied to the structure map. -/
@@ -438,7 +441,7 @@ def Algebra.toCoalgebraOf (adj : F ⊣ G) : Algebra F ⥤ Coalgebra G where
       str := (adj.homEquiv A.1 A.1).toFun A.2 }
   map f :=
     { f := f.1
-      h := Algebra.homEquiv_naturality_str adj _ _ f }
+      h := Algebra.homEquiv_naturality_str adj _ _ f.1 f.h }
 
 /-- Given an adjunction `F ⊣ G`, the functor that associates to a coalgebra over `G` an algebra over
 `F` defined via adjunction applied to the structure map. -/
@@ -449,7 +452,7 @@ def Coalgebra.toAlgebraOf (adj : F ⊣ G) : Coalgebra G ⥤ Algebra F where
       str := (adj.homEquiv V.1 V.1).invFun V.2 }
   map f :=
     { f := f.1
-      h := Coalgebra.homEquiv_naturality_str_symm adj _ _ f }
+      h := Coalgebra.homEquiv_naturality_str_symm adj _ _ f.1 f.h }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Given an adjunction, assigning to an algebra over the left adjoint a coalgebra over its right

@@ -119,12 +119,11 @@ include h
 
 lemma flip : sq.flip.IsPullback := CategoryTheory.IsPullback.flip h
 
-lemma mono_f₁₃ [Mono sq.f₂₄] : Mono sq.f₁₃ :=
-  (MorphismProperty.monomorphisms C).of_isPullback h (by assumption)
+lemma mono_f₁₃ (inst : Mono sq.f₂₄ := by infer_instance) : Mono sq.f₁₃ :=
+  CategoryTheory.IsPullback.mono_snd_of_mono h inst
 
-lemma mono_f₁₂ [Mono sq.f₃₄] : Mono sq.f₁₂ := by
-  have : Mono sq.flip.f₂₄ := by dsimp; infer_instance
-  exact h.flip.mono_f₁₃
+lemma mono_f₁₂ (inst : Mono sq.f₃₄ := by infer_instance) : Mono sq.f₁₂ :=
+  CategoryTheory.IsPullback.mono_fst_of_mono h inst
 
 end IsPullback
 
@@ -136,12 +135,11 @@ include h
 
 lemma flip : sq.flip.IsPushout := CategoryTheory.IsPushout.flip h
 
-lemma epi_f₂₄ [Epi sq.f₁₃] : Epi sq.f₂₄ :=
-  (MorphismProperty.epimorphisms C).of_isPushout h (by assumption)
+lemma epi_f₂₄ (inst : Epi sq.f₁₃ := by infer_instance) : Epi sq.f₂₄ :=
+  CategoryTheory.IsPushout.epi_inl_of_epi h inst
 
-lemma epi_f₃₄ [Epi sq.f₁₂] : Epi sq.f₃₄ := by
-  have : Epi sq.flip.f₁₃ := by dsimp; infer_instance
-  exact h.flip.epi_f₂₄
+lemma epi_f₃₄ (inst : Epi sq.f₁₂ := by infer_instance) : Epi sq.f₃₄ :=
+  CategoryTheory.IsPushout.epi_inr_of_epi h inst
 
 end IsPushout
 

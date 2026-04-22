@@ -16,8 +16,9 @@ public import Mathlib.CategoryTheory.Subobject.Comma
 # Adjoint functor theorem
 
 This file proves the (general) adjoint functor theorem, in the form:
-* If `G : D ⥤ C` preserves limits and `D` has limits, and satisfies the solution set condition,
-  then it has a left adjoint: `isRightAdjoint_of_preservesLimits_of_solutionSetCondition`.
+* If `G : D ⥤ C` preserves small products and wide equalizers, and `D` has them,
+  and satisfies the solution set condition, then it has a left adjoint:
+  `isRightAdjoint_of_preservesLimits_of_solutionSetCondition`.
 
 We show that the converse holds, i.e. that if `G` has a left adjoint then it satisfies the solution
 set condition, see `solutionSetCondition_of_isRightAdjoint`
@@ -79,11 +80,14 @@ theorem solutionSetCondition_of_isRightAdjoint [G.IsRightAdjoint] : SolutionSetC
   refine ⟨PUnit.unit, ((Adjunction.ofIsRightAdjoint G).homEquiv _ _).symm h, ?_⟩
   rw [← Adjunction.homEquiv_unit, Equiv.apply_symm_apply]
 
-/-- The general adjoint functor theorem says that if `G : D ⥤ C` preserves limits and `D` has them,
-if `G` satisfies the solution set condition then `G` is a right adjoint.
+/-- The general adjoint functor theorem says that if `D` has small products and wide equalizers,
+if `G : D ⥤ C` preserves them, and if `G` satisfies the solution set condition then `G` is a
+right adjoint.
 -/
-lemma isRightAdjoint_of_preservesLimits_of_solutionSetCondition [HasLimits D]
-    [PreservesLimitsOfSize.{v₁, v₁} G] (hG : SolutionSetCondition.{v₁} G) : G.IsRightAdjoint := by
+lemma isRightAdjoint_of_preservesLimits_of_solutionSetCondition [HasProducts.{v₁} D]
+    [HasWideEqualizers.{v₁} D] [∀ J : Type v₁, PreservesLimitsOfShape (Discrete J) G]
+    [∀ J : Type v₁, PreservesLimitsOfShape (WalkingParallelFamily J) G]
+    (hG : SolutionSetCondition.{v₁} G) : G.IsRightAdjoint := by
   refine @isRightAdjointOfStructuredArrowInitials _ _ _ _ G ?_
   intro A
   specialize hG A

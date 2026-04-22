@@ -185,15 +185,26 @@ theorem mapCommMon_id_mul (A : CommMon C) :
     μ[((𝟭 C).mapCommMon.obj A).X] = 𝟙 _ ≫ μ[A.X] :=
   rfl
 
+end LaxBraided
+
+section CompositeLaxBraided
+
+omit [MonoidalCategory D] [BraidedCategory D] in
 @[simp]
-theorem comp_mapCommMon_one (A : CommMon C) :
+theorem comp_mapCommMon_one [(F ⋙ G).LaxBraided] (A : CommMon C) :
     η[((F ⋙ G).mapCommMon.obj A).X] = LaxMonoidal.ε (F ⋙ G) ≫ (F ⋙ G).map η[A.X] :=
   rfl
 
+omit [MonoidalCategory D] [BraidedCategory D] in
 @[simp]
-theorem comp_mapCommMon_mul (A : CommMon C) :
+theorem comp_mapCommMon_mul [(F ⋙ G).LaxBraided] (A : CommMon C) :
     μ[((F ⋙ G).mapCommMon.obj A).X] = LaxMonoidal.μ (F ⋙ G) _ _ ≫ (F ⋙ G).map μ[A.X] :=
   rfl
+
+end CompositeLaxBraided
+
+section LaxBraided
+variable [F.LaxBraided] [F'.LaxBraided] [G.LaxBraided]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The identity functor is also the identity on commutative monoid objects. -/

@@ -75,7 +75,7 @@ structure Hom (P Q : Karoubi C) where
   /-- compatibility of the given morphism with the given idempotents -/
   comm : P.p ≫ f ≫ Q.p = f := by cat_disch
 
-instance [Preadditive C] (P Q : Karoubi C) : Inhabited (Hom P Q) :=
+instance [HasZeroMorphisms C] (P Q : Karoubi C) : Inhabited (Hom P Q) :=
   ⟨⟨0, by rw [zero_comp, comp_zero]⟩⟩
 
 @[reassoc (attr := simp)]
@@ -156,7 +156,7 @@ instance instNeg [Preadditive C] {P Q : Karoubi C} : Neg (P ⟶ Q) where
   neg f := ⟨-f.f, by simpa only [neg_comp, comp_neg, neg_inj] using f.comm⟩
 
 @[simps zero]
-instance instZero [Preadditive C] {P Q : Karoubi C} : Zero (P ⟶ Q) where
+instance instZero [HasZeroMorphisms C] {P Q : Karoubi C} : Zero (P ⟶ Q) where
   zero := ⟨0, by simp only [comp_zero, zero_comp]⟩
 
 instance instAddCommGroupHom [Preadditive C] {P Q : Karoubi C} : AddCommGroup (P ⟶ Q) where
@@ -180,7 +180,8 @@ instance instAddCommGroupHom [Preadditive C] {P Q : Karoubi C} : AddCommGroup (P
 
 namespace Karoubi
 
-theorem hom_eq_zero_iff [Preadditive C] {P Q : Karoubi C} {f : P ⟶ Q} : f = 0 ↔ f.f = 0 :=
+theorem hom_eq_zero_iff [HasZeroMorphisms C] {P Q : Karoubi C} {f : P ⟶ Q} :
+    f = 0 ↔ f.f = 0 :=
   hom_ext_iff
 
 /-- The map sending `f : P ⟶ Q` to `f.f : P.X ⟶ Q.X` is additive. -/
@@ -225,8 +226,8 @@ instance [IsIdempotentComplete C] : (toKaroubi C).EssSurj :=
         { hom := ⟨i, by simp [← Category.assoc, h₁, ← h₂]⟩
           inv := ⟨e, by simp [Category.assoc, h₁, ← h₂]⟩ }⟩
 
-/-- If `C` is idempotent complete, the functor `toKaroubi : C ⥤ Karoubi C` is an equivalence. -/
-instance toKaroubi_isEquivalence [IsIdempotentComplete C] : (toKaroubi C).IsEquivalence where
+/-- If `toKaroubi : C ⥤ Karoubi C` is essentially surjective, it is an equivalence. -/
+instance toKaroubi_isEquivalence [(toKaroubi C).EssSurj] : (toKaroubi C).IsEquivalence where
 
 /-- The equivalence `C ≅ Karoubi C` when `C` is idempotent complete. -/
 def toKaroubiEquivalence [IsIdempotentComplete C] : C ≌ Karoubi C :=
