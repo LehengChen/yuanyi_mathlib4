@@ -117,7 +117,8 @@ noncomputable def powerFunctor (α : Type t) [HasProductsOfShape α C] :
   obj U := U.power α
   map f := powerMap f α
 
-/-- The functoriality of `FormalCoproduct.power` with respect to the index type. -/
+/-- The contravariant functoriality of `FormalCoproduct.power` with respect to the
+index type: a map `f : α → β` induces `U.power β ⟶ U.power α`. -/
 @[simps -fullyApplied]
 noncomputable def mapPower (U : FormalCoproduct.{w} C) {α β : Type t}
     [HasProductsOfShape α C] [HasProductsOfShape β C] (f : α → β) :
