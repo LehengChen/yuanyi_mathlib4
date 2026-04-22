@@ -197,9 +197,24 @@ lemma baseChange (p : Ideal S) [p.IsPrime] [WeaklyQuasiFiniteAt R p]
     (Ideal.quotientKerAlgEquivOfSurjective hφ₁)
   refine .of_surjectiveOnStalks (q.map φ.toRingHom) e.symm.toAlgHom
     e.symm.toRingEquiv.surjectiveOnStalks _ ?_
-  erw [Ideal.comap_symm] -- This should be fixed once `Ideal.map` does not take homclasses.
-  rw [← Ideal.map_coe e.toRingEquiv, Ideal.map_map]
-  rfl
+  have hcomap :
+      Ideal.comap ((e.symm : _ →ₐ[A] _).toRingHom)
+          (Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap A (A ⊗[R] S)))) q) =
+        Ideal.map e.toRingEquiv
+          (Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap A (A ⊗[R] S)))) q) := by
+    exact
+      Ideal.comap_symm
+        (I := Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap A (A ⊗[R] S)))) q)
+        e.toRingEquiv
+  calc
+    Ideal.map φ.toRingHom q
+        = Ideal.map e.toRingEquiv
+            (Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap A (A ⊗[R] S)))) q) := by
+          rw [← Ideal.map_coe e.toRingEquiv, Ideal.map_map]
+          rfl
+    _ = Ideal.comap ((e.symm : _ →ₐ[A] _).toRingHom)
+          (Ideal.map (Ideal.Quotient.mk ((q.under A).map (algebraMap A (A ⊗[R] S)))) q) :=
+      hcomap.symm
 
 open _root_.TensorProduct in
 variable (R S) in
