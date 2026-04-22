@@ -195,7 +195,7 @@ instance hasFiniteBiproducts : HasFiniteBiproducts (Mat_ C) where
               simp_rw [dite_comp, comp_dite]
               simp only [ite_self, dite_eq_ite, Limits.comp_zero, Limits.zero_comp,
                 eqToHom_trans]
-              erw [Finset.sum_sigma]
+              rw [Fintype.sum_sigma]
               dsimp +instances
               simp only [if_true, Finset.sum_dite_irrel, Finset.mem_univ,
                 Finset.sum_const_zero, Finset.sum_dite_eq']
@@ -358,10 +358,39 @@ def additiveObjIsoBiproduct (F : Mat_ C ⥤ D) [Functor.Additive F] (M : Mat_ C)
 lemma additiveObjIsoBiproduct_hom_π (F : Mat_ C ⥤ D) [Functor.Additive F] (M : Mat_ C) (i : M.ι) :
     (additiveObjIsoBiproduct F M).hom ≫ biproduct.π _ i =
       F.map (M.isoBiproductEmbedding.hom ≫ biproduct.π _ i) := by
-  dsimp [additiveObjIsoBiproduct]
-  rw [biproduct.lift_π, Category.assoc]
-  erw [biproduct.lift_π, ← F.map_comp]
-  simp
+  have h :
+      (F.map M.isoBiproductEmbedding.hom ≫
+          (F.mapBiproduct fun i => (embedding C).obj (M.X i)).hom) ≫
+        biproduct.π (fun i => F.obj ((embedding C).obj (M.X i))) i =
+      F.map (M.isoBiproductEmbedding.hom ≫ biproduct.π (fun i => (embedding C).obj (M.X i)) i) := by
+    have hlift :
+        biproduct.lift
+            (fun j => M.isoBiproductEmbedding.hom ≫
+              biproduct.π (fun i => (embedding C).obj (M.X i)) j) =
+          M.isoBiproductEmbedding.hom := by
+      apply biproduct.hom_ext
+      intro j
+      rw [biproduct.lift_π]
+    have hmap :
+        (F.map
+                (biproduct.lift
+                  (fun j => M.isoBiproductEmbedding.hom ≫
+                    biproduct.π (fun i => (embedding C).obj (M.X i)) j)) ≫
+              (F.mapBiproduct fun i => (embedding C).obj (M.X i)).hom) ≫
+            biproduct.π (fun i => F.obj ((embedding C).obj (M.X i))) i =
+          biproduct.lift
+              (fun j => F.map (M.isoBiproductEmbedding.hom ≫
+                biproduct.π (fun i => (embedding C).obj (M.X i)) j)) ≫
+            biproduct.π (fun i => F.obj ((embedding C).obj (M.X i))) i :=
+      congrArg
+        (fun k => k ≫ biproduct.π (fun i => F.obj ((embedding C).obj (M.X i))) i)
+        (biproduct.map_lift_mapBiprod (F := F)
+          (f := fun i => (embedding C).obj (M.X i))
+          (g := fun j => M.isoBiproductEmbedding.hom ≫
+            biproduct.π (fun i => (embedding C).obj (M.X i)) j))
+    rw [hlift, biproduct.lift_π] at hmap
+    exact hmap
+  simpa only [additiveObjIsoBiproduct, Iso.trans_hom, Functor.mapIso_hom] using h
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
