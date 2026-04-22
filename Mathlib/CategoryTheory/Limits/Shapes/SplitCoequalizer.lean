@@ -138,11 +138,11 @@ coequalizer in `D`.
 abbrev Functor.IsSplitPair : Prop :=
   HasSplitCoequalizer (G.map f) (G.map g)
 
-/-- Get the coequalizer object from the typeclass `IsSplitPair`. -/
+/-- Get the coequalizer object from the typeclass `HasSplitCoequalizer`. -/
 noncomputable def HasSplitCoequalizer.coequalizerOfSplit [HasSplitCoequalizer f g] : C :=
   (splittable (f := f) (g := g)).choose
 
-/-- Get the coequalizer morphism from the typeclass `IsSplitPair`. -/
+/-- Get the coequalizer morphism from the typeclass `HasSplitCoequalizer`. -/
 noncomputable def HasSplitCoequalizer.coequalizerπ [HasSplitCoequalizer f g] :
     Y ⟶ HasSplitCoequalizer.coequalizerOfSplit f g :=
   (splittable (f := f) (g := g)).choose_spec.choose
