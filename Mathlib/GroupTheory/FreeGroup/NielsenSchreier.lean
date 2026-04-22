@@ -236,9 +236,10 @@ lemma endIsFree : IsFreeGroup (End (root' T)) :=
       · suffices ∀ {x y} (q : x ⟶ y), F'.map (loopOfHom T q) = (F'.map q : X) by
           rintro ⟨⟨a, b, e⟩, h⟩
           -- Work around the defeq `X = End (F'.obj (IsFreeGroupoid.SpanningTree.root' T))`
-          erw [Functor.mapEnd_apply]
-          rw [this, hF']
-          exact dif_neg h
+          convert this (q := of e) using 1
+          · symm
+            rw [hF']
+            exact dif_neg h
         intro x y q
         suffices ∀ {a} (p : Path (root T) a), F'.map (homOfPath T p) = 1 by
           simp only [this, treeHom, comp_as_mul, inv_as_inv, loopOfHom, inv_one, mul_one,
