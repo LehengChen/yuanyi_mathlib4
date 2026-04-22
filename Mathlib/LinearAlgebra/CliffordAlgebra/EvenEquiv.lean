@@ -107,22 +107,23 @@ open EquivEven
 
 /-- The embedding from the smaller algebra into the new larger one. -/
 def toEven : CliffordAlgebra Q →ₐ[R] CliffordAlgebra.even (Q' Q) := by
-  refine CliffordAlgebra.lift Q ⟨?_, fun m => ?_⟩
-  · refine LinearMap.codRestrict _ ?_ fun m => Submodule.mem_iSup_of_mem ⟨2, rfl⟩ ?_
-    · exact (LinearMap.mulLeft R <| e0 Q).comp (v Q)
-    rw [Subtype.coe_mk, pow_two]
-    exact Submodule.mul_mem_mul (LinearMap.mem_range_self _ _) (LinearMap.mem_range_self _ _)
-  · ext1
-    rw [Subalgebra.coe_mul] -- Porting note: was part of the `dsimp only` below
-    erw [LinearMap.codRestrict_apply] -- Porting note: was part of the `dsimp only` below
-    dsimp only [LinearMap.comp_apply, LinearMap.mulLeft_apply, Subalgebra.coe_algebraMap]
-    rw [← mul_assoc, e0_mul_v_mul_e0, v_sq_scalar]
+  let f : M →ₗ[R] CliffordAlgebra.even (Q' Q) :=
+    LinearMap.codRestrict _ ((LinearMap.mulLeft R <| e0 Q).comp (v Q)) fun m =>
+      Submodule.mem_iSup_of_mem ⟨2, rfl⟩ <| by
+        rw [Subtype.coe_mk, pow_two]
+        exact Submodule.mul_mem_mul (LinearMap.mem_range_self _ _) (LinearMap.mem_range_self _ _)
+  refine CliffordAlgebra.lift Q ⟨f, fun m => ?_⟩
+  ext1
+  rw [Subalgebra.coe_mul, Subalgebra.coe_algebraMap]
+  calc
+    ↑(f m) * ↑(f m) = (e0 Q * v Q m) * (e0 Q * v Q m) := by
+      rfl
+    _ = algebraMap R _ (Q m) := by
+      rw [← mul_assoc, e0_mul_v_mul_e0, v_sq_scalar]
 
 theorem toEven_ι (m : M) : (toEven Q (ι Q m) : CliffordAlgebra (Q' Q)) = e0 Q * v Q m := by
   rw [toEven, CliffordAlgebra.lift_ι_apply]
-  -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): was `rw`
-  erw [LinearMap.codRestrict_apply]
-  rw [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulLeft_apply]
+  rfl
 
 /-- The embedding from the even subalgebra with an extra dimension into the original algebra. -/
 def ofEven : CliffordAlgebra.even (Q' Q) →ₐ[R] CliffordAlgebra Q := by
