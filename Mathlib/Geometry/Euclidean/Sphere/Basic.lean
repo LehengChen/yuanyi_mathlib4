@@ -415,8 +415,17 @@ theorem Cospherical.affineIndependent_of_mem_of_ne {s : Set P} (hs : Cospherical
     AffineIndependent ℝ ![p₁, p₂, p₃] := by
   refine hs.affineIndependent ?_ ?_
   · simp [h₁, h₂, h₃, Set.insert_subset_iff]
-  · erw [Fin.cons_injective_iff, Fin.cons_injective_iff]
-    simp [h₁₂, h₁₃, h₂₃, Function.Injective, eq_iff_true_of_subsingleton]
+  · intro i j hij
+    fin_cases i <;> fin_cases j
+    · rfl
+    · exact False.elim (h₁₂ hij)
+    · exact False.elim (h₁₃ hij)
+    · exact False.elim (h₁₂ hij.symm)
+    · rfl
+    · exact False.elim (h₂₃ hij)
+    · exact False.elim (h₁₃ hij.symm)
+    · exact False.elim (h₂₃ hij.symm)
+    · rfl
 
 /-- The three points of a cospherical set are affinely independent. -/
 theorem Cospherical.affineIndependent_of_ne {p₁ p₂ p₃ : P} (hs : Cospherical ({p₁, p₂, p₃} : Set P))
