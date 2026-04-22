@@ -44,7 +44,7 @@ instance : R.cochainComplex.IsStrictlyGE 0 := by
   dsimp [cochainComplex]
   infer_instance
 
-/-- If `R : InjectiveResolution X`, then `R.cochainComplex.X n` (with `n : ℕ`)
+/-- If `R : InjectiveResolution X`, then `R.cochainComplex.X n` (with `n : ℤ`)
 is isomorphic to `R.cocomplex.X k` (with `k : ℕ`) when `k = n`. -/
 noncomputable def cochainComplexXIso (n : ℤ) (k : ℕ) (h : k = n) :
     R.cochainComplex.X n ≅ R.cocomplex.X k :=
