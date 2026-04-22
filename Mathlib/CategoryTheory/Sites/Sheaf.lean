@@ -148,7 +148,7 @@ theorem isLimit_iff_isSheafFor :
   · rintro h ⟨E, π⟩
     let eqv := conesEquivSieveCompatibleFamily P S (op E)
     rw [← eqv.left_inv π]
-    erw [(homEquivAmalgamation (eqv π).2).uniqueCongr.nonempty_congr]
+    refine ((homEquivAmalgamation (eqv π).2).uniqueCongr.nonempty_congr).2 ?_
     rw [unique_subtype_iff_existsUnique]
     exact h _ _ (eqv π).2
 
@@ -529,9 +529,11 @@ def isLimitOfIsSheaf {X : C} (S : J.Cover X) (hP : IsSheaf J P) : IsLimit (S.mul
     rintro (E : Multifork _) m hm
     apply hP.hom_ext S
     intro I
-    erw [hm (WalkingMulticospan.left I)]
-    symm
-    apply hP.amalgamate_map
+    have hI : m ≫ P.map I.f.op = E.ι I := by
+      simpa using hm (WalkingMulticospan.left I)
+    exact hI.trans <| by
+      symm
+      exact hP.amalgamate_map S (fun x ↦ E.ι x) (fun _ _ r ↦ E.condition ⟨r⟩) I
 
 theorem isSheaf_iff_multifork :
     IsSheaf J P ↔ ∀ (X : C) (S : J.Cover X), Nonempty (IsLimit (S.multifork P)) := by
