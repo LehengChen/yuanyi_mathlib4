@@ -124,22 +124,29 @@ noncomputable def isLimitCone : IsLimit h.cone where
       isoMap_hom_inv_id_assoc]
   uniq s m hm := by simp only [← hm i₀, cone_π_app, coneπApp_eq_id, cone_pt, comp_id]
 
-lemma hasLimit : HasLimit F := ⟨_, h.isLimitCone⟩
+omit [IsCofiltered J]
+lemma hasLimit [IsCofilteredOrEmpty J] : HasLimit F := by
+  have : IsCofiltered J := { nonempty := ⟨i₀⟩ }
+  exact ⟨_, h.isLimitCone⟩
 
-lemma isIso_π_of_isLimit {c : Cone F} (hc : IsLimit c) :
+lemma isIso_π_of_isLimit [IsCofilteredOrEmpty J] {c : Cone F} (hc : IsLimit c) :
     IsIso (c.π.app i₀) := by
+  have : IsCofiltered J := { nonempty := ⟨i₀⟩ }
   simp only [← IsLimit.conePointUniqueUpToIso_hom_comp hc h.isLimitCone i₀,
     cone_π_app, coneπApp_eq_id, cone_pt, comp_id]
   infer_instance
 
 /-- More general version of `isIso_π_of_isLimit`. -/
-lemma isIso_π_of_isLimit' {c : Cone F} (hc : IsLimit c) (j : J) (π : j ⟶ i₀) :
+lemma isIso_π_of_isLimit' [IsCofilteredOrEmpty J] {c : Cone F} (hc : IsLimit c) (j : J)
+    (π : j ⟶ i₀) :
     IsIso (c.π.app j) :=
   (h.precomp π).isIso_π_of_isLimit hc
 
 /-- Given a cone `c` on a cofiltered diagram `F` which `IsEventuallyConstantTo i₀`, such that
 `c.π.app i₀` is an isomorphism, `c` a limit cone. -/
-noncomputable def isLimitOfIsIso (c : Cone F) [IsIso (c.π.app i₀)] : IsLimit c :=
+noncomputable def isLimitOfIsIso [IsCofilteredOrEmpty J] (c : Cone F) [IsIso (c.π.app i₀)] :
+    IsLimit c :=
+  have : IsCofiltered J := { nonempty := ⟨i₀⟩ }
   IsLimit.ofIsoLimit h.isLimitCone (by
     refine Cone.ext (asIso (c.π.app i₀)).symm (fun j ↦ ?_)
     let i := IsCofiltered.min i₀ j
@@ -230,24 +237,31 @@ noncomputable def isColimitCocone : IsColimit h.cocone where
       isoMap_inv_hom_id_assoc]
   uniq s m hm := by simp only [← hm i₀, cocone_ι_app, coconeιApp_eq_id, id_comp]
 
-lemma hasColimit : HasColimit F := ⟨_, h.isColimitCocone⟩
+omit [IsFiltered J]
+lemma hasColimit [IsFilteredOrEmpty J] : HasColimit F := by
+  have : IsFiltered J := { nonempty := ⟨i₀⟩ }
+  exact ⟨_, h.isColimitCocone⟩
 
 set_option backward.isDefEq.respectTransparency false in
-lemma isIso_ι_of_isColimit {c : Cocone F} (hc : IsColimit c) :
+lemma isIso_ι_of_isColimit [IsFilteredOrEmpty J] {c : Cocone F} (hc : IsColimit c) :
     IsIso (c.ι.app i₀) := by
+  have : IsFiltered J := { nonempty := ⟨i₀⟩ }
   simp only [← IsColimit.comp_coconePointUniqueUpToIso_inv hc h.isColimitCocone i₀,
     cocone_ι_app, coconeιApp_eq_id, id_comp]
   infer_instance
 
 /-- More general version of `isIso_ι_of_isColimit`. -/
-lemma isIso_ι_of_isColimit' {c : Cocone F} (hc : IsColimit c) (j : J) (ι : i₀ ⟶ j) :
+lemma isIso_ι_of_isColimit' [IsFilteredOrEmpty J] {c : Cocone F} (hc : IsColimit c)
+    (j : J) (ι : i₀ ⟶ j) :
     IsIso (c.ι.app j) :=
   (h.postcomp ι).isIso_ι_of_isColimit hc
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Given a cocone `c` on a filtered diagram `F` which `IsEventuallyConstantFrom i₀`, such that
 `c.π.app i₀` is an isomorphism, `c` a colimit cocone. -/
-noncomputable def isColimitOfIsIso (c : Cocone F) [IsIso (c.ι.app i₀)] : IsColimit c :=
+noncomputable def isColimitOfIsIso [IsFilteredOrEmpty J] (c : Cocone F)
+    [IsIso (c.ι.app i₀)] : IsColimit c :=
+  have : IsFiltered J := { nonempty := ⟨i₀⟩ }
   IsColimit.ofIsoColimit h.isColimitCocone (by
     refine Cocone.ext (asIso (c.ι.app i₀)) (fun j ↦ ?_)
     let i := IsFiltered.max i₀ j
@@ -267,7 +281,7 @@ exists `j : J`, such that for any `f : i ⟶ j`, the induced map `F.map f` is an
 class IsEventuallyConstant : Prop where
   exists_isEventuallyConstantTo : ∃ (j : J), F.IsEventuallyConstantTo j
 
-instance [hF : IsEventuallyConstant F] [IsCofiltered J] : HasLimit F := by
+instance [hF : IsEventuallyConstant F] [IsCofilteredOrEmpty J] : HasLimit F := by
   obtain ⟨j, h⟩ := hF.exists_isEventuallyConstantTo
   exact h.hasLimit
 
@@ -280,7 +294,7 @@ exists `i : J`, such that for any `f : i ⟶ j`, the induced map `F.map f` is an
 class IsEventuallyConstant : Prop where
   exists_isEventuallyConstantFrom : ∃ (i : J), F.IsEventuallyConstantFrom i
 
-instance [hF : IsEventuallyConstant F] [IsFiltered J] : HasColimit F := by
+instance [hF : IsEventuallyConstant F] [IsFilteredOrEmpty J] : HasColimit F := by
   obtain ⟨j, h⟩ := hF.exists_isEventuallyConstantFrom
   exact h.hasColimit
 

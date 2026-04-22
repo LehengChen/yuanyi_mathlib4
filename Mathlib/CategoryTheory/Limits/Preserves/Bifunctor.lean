@@ -205,12 +205,21 @@ lemma map_ι_comp_isoColimitUncurryWhiskeringLeft₂_inv (j : J₁ × J₂) :
 end
 
 set_option backward.isDefEq.respectTransparency false in
-/-- If a bifunctor preserves separately colimits of `K₁` in the first variable and colimits
-of `K₂` in the second variable, then it preserves colimit of the pair `K₁, K₂`. -/
+/-- If a bifunctor preserves colimits of `K₁` in the first variable at colimit points of `K₂`,
+and colimits of `K₂` in the second variable at the objects in the image of `K₁`, then it
+preserves colimit of the pair `K₁, K₂`. -/
 instance of_preservesColimits_in_each_variable
-    [∀ x : C₂, PreservesColimit K₁ (G.flip.obj x)] [∀ x : C₁, PreservesColimit K₂ (G.obj x)] :
+    [∀ x : { x : C₂ // Nonempty (Σ c₂ : Cocone K₂,
+        Subtype (fun _ : IsColimit c₂ => c₂.pt = x)) },
+      PreservesColimit K₁ (G.flip.obj x.1)]
+    [∀ j₁ : J₁, PreservesColimit K₂ (G.obj (K₁.obj j₁))] :
     PreservesColimit₂ K₁ K₂ G where
   nonempty_isColimit_mapCocone₂ {c₁} hc₁ {c₂} hc₂ :=
+    haveI : PreservesColimit K₁ (G.flip.obj c₂.pt) :=
+      (inferInstance :
+        ∀ x : { x : C₂ // Nonempty (Σ c₂ : Cocone K₂,
+          Subtype (fun _ : IsColimit c₂ => c₂.pt = x)) },
+          PreservesColimit K₁ (G.flip.obj x.1)) ⟨c₂.pt, ⟨⟨c₂, hc₂, rfl⟩⟩⟩
     let Q₀ : DiagramOfCocones (whiskeringLeft₂ C |>.obj K₁ |>.obj K₂ |>.obj G) :=
       { obj j₁ := G.obj (K₁.obj j₁) |>.mapCocone c₂
         map f := { hom := G.map (K₁.map f) |>.app c₂.pt } }
@@ -334,12 +343,21 @@ lemma isoLimitUncurryWhiskeringLeft₂_hom_comp_map_π (j : J₁ × J₂) :
 
 end
 
-/-- If a bifunctor preserves separately limits of `K₁` in the first variable and limits
-of `K₂` in the second variable, then it preserves colimit of the pair of cones `K₁, K₂`. -/
+/-- If a bifunctor preserves limits of `K₁` in the first variable at limit points of `K₂`,
+and limits of `K₂` in the second variable at the objects in the image of `K₁`, then it
+preserves limit of the pair `K₁, K₂`. -/
 instance of_preservesLimits_in_each_variable
-    [∀ x : C₂, PreservesLimit K₁ (G.flip.obj x)] [∀ x : C₁, PreservesLimit K₂ (G.obj x)] :
+    [∀ x : { x : C₂ // Nonempty (Σ c₂ : Cone K₂,
+        Subtype (fun _ : IsLimit c₂ => c₂.pt = x)) },
+      PreservesLimit K₁ (G.flip.obj x.1)]
+    [∀ j₁ : J₁, PreservesLimit K₂ (G.obj (K₁.obj j₁))] :
     PreservesLimit₂ K₁ K₂ G where
   nonempty_isLimit_mapCone₂ {c₁} hc₁ {c₂} hc₂ :=
+    haveI : PreservesLimit K₁ (G.flip.obj c₂.pt) :=
+      (inferInstance :
+        ∀ x : { x : C₂ // Nonempty (Σ c₂ : Cone K₂,
+          Subtype (fun _ : IsLimit c₂ => c₂.pt = x)) },
+          PreservesLimit K₁ (G.flip.obj x.1)) ⟨c₂.pt, ⟨⟨c₂, hc₂, rfl⟩⟩⟩
     let Q₀ : DiagramOfCones (whiskeringLeft₂ C |>.obj K₁ |>.obj K₂ |>.obj G) :=
       { obj j₁ := G.obj (K₁.obj j₁) |>.mapCone c₂
         map f := { hom := G.map (K₁.map f) |>.app c₂.pt } }

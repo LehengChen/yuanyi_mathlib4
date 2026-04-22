@@ -75,16 +75,17 @@ theorem ι_d {G A : C} {M : ModuleCat (End G)ᵐᵒᵖ} (g : M ⟶ ModuleCat.of 
 
 attribute [local instance] IsFiltered.isConnected in
 /-- This is the "Lemma" in [mitchell1981]. -/
-theorem kernel_ι_d_comp_d {G : C} (hG : IsSeparator G) {A B : C} {M : ModuleCat (End G)ᵐᵒᵖ}
+theorem kernel_ι_d_comp_d {G : C} {A B : C} {M : ModuleCat (End G)ᵐᵒᵖ}
     (g : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ A)) (hg : Mono g)
-    (f : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ B)) :
+    (f : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ B))
+    (hG : ∀ ⦃X : C⦄ (u : X ⟶ B), (∀ h : G ⟶ X, h ≫ u = 0) → u = 0) :
     kernel.ι (d g) ≫ d f = 0 := by
   refine (isColimitFiniteSubproductsCocone (fun (_ : M) => G)).pullback_zero_ext (fun F => ?_)
   dsimp only [liftToFinsetObj_obj, Discrete.functor_obj_eq_as, finiteSubcoproductsCocone_pt,
     Functor.const_obj_obj]
   classical
   rw [finiteSubcoproductsCocone_ι_app_eq_sum, ← pullback.condition_assoc]
-  refine (Preadditive.isSeparator_iff G).1 hG _ (fun h => ?_)
+  refine hG _ (fun h => ?_)
   rw [Preadditive.comp_sum_assoc, Preadditive.comp_sum_assoc, Preadditive.sum_comp]
   simp only [Category.assoc, ι_d]
   let r (x : F) : (End G)ᵐᵒᵖ := MulOpposite.op (h ≫ pullback.fst _ _ ≫ Sigma.π _ x)
@@ -95,11 +96,13 @@ theorem kernel_ι_d_comp_d {G : C} (hG : IsSeparator G) {A B : C} {M : ModuleCat
   simp only [← ι_d g, End.smul_left, MulOpposite.unop_op, Category.assoc, r]
   simp [← Preadditive.comp_sum, ← Preadditive.sum_comp', pullback.condition_assoc]
 
-theorem exists_d_comp_eq_d {G : C} (hG : IsSeparator G) {A} (B : C) [Injective B]
+theorem exists_d_comp_eq_d {G : C} {A} (B : C)
+    (hG : ∀ ⦃X : C⦄ (u : X ⟶ B), (∀ h : G ⟶ X, h ≫ u = 0) → u = 0) [Injective B]
     {M : ModuleCat (End G)ᵐᵒᵖ} (g : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ A)) (hg : Mono g)
     (f : M ⟶ ModuleCat.of (End G)ᵐᵒᵖ (G ⟶ B)) : ∃ (l : A ⟶ B), d g ≫ l = d f := by
   let l₁ : image (d g) ⟶ B := epiDesc (factorThruImage (d g)) (d f) (by
-    rw [← kernelFactorThruImage_hom_comp_ι, Category.assoc, kernel_ι_d_comp_d hG _ hg, comp_zero])
+    rw [← kernelFactorThruImage_hom_comp_ι, Category.assoc, kernel_ι_d_comp_d _ hg _ hG,
+      comp_zero])
   let l₂ : A ⟶ B := Injective.factorThru l₁ (Limits.image.ι (d g))
   refine ⟨l₂, ?_⟩
   simp only [l₂, l₁]
@@ -116,20 +119,23 @@ set_option backward.isDefEq.respectTransparency false in
 theorem GabrielPopescu.full (G : C) (hG : IsSeparator G) : (preadditiveCoyonedaObj G).Full where
   map_surjective {A B} f := by
     have := (isSeparator_iff_epi G).1 hG A
-    have h := kernel_ι_d_comp_d hG (𝟙 _) inferInstance f
+    have h := kernel_ι_d_comp_d (𝟙 _) inferInstance f
+      (fun {X} u hu => (Preadditive.isSeparator_iff G).1 hG (X := X) u hu)
     simp only [ModuleCat.hom_id, LinearMap.id_coe, id_eq, d] at h
     refine ⟨epiDesc _ _ h, ?_⟩
     ext q
     simpa [-comp_epiDesc] using Sigma.ι _ q ≫= comp_epiDesc _ _ h
 
 set_option backward.isDefEq.respectTransparency false in
-theorem GabrielPopescu.preservesInjectiveObjects (G : C) (hG : IsSeparator G) :
+theorem GabrielPopescu.preservesInjectiveObjects (G : C)
+    (hG : ∀ ⦃X B : C⦄, Injective B → (u : X ⟶ B) →
+      (∀ h : G ⟶ X, h ≫ u = 0) → u = 0) :
     (preadditiveCoyonedaObj G).PreservesInjectiveObjects where
   injective_obj {B} hB := by
     rw [← Module.injective_iff_injective_object]
     simp only [preadditiveCoyonedaObj_obj_carrier]
     refine Module.Baer.injective (fun M g => ?_)
-    have h := exists_d_comp_eq_d hG B (ModuleCat.ofHom
+    have h := exists_d_comp_eq_d B (fun {X} u hu => hG (X := X) hB u hu) (ModuleCat.ofHom
       ⟨⟨fun i => i.1.unop, by cat_disch⟩, by cat_disch⟩) ?_ (ModuleCat.ofHom g)
     · obtain ⟨l, hl⟩ := h
       refine ⟨((preadditiveCoyonedaObj G).map l).hom ∘ₗ
@@ -137,11 +143,15 @@ theorem GabrielPopescu.preservesInjectiveObjects (G : C) (hG : IsSeparator G) :
       intro f hf
       simpa [d] using Sigma.ι _ ⟨f, hf⟩ ≫= hl
     · rw [ModuleCat.mono_iff_injective]
-      cat_disch
+      intro x y hxy
+      ext
+      exact MulOpposite.unop_injective hxy
 
 /-- `tensorObj G` is left exact: it is additive and preserves monomorphisms and cokernels,
 so it preserves homology and therefore finite limits. -/
-theorem GabrielPopescu.preservesFiniteLimits (G : C) (hG : IsSeparator G) :
+theorem GabrielPopescu.preservesFiniteLimits (G : C)
+    (hG : ∀ ⦃X B : C⦄, Injective B → (u : X ⟶ B) →
+      (∀ h : G ⟶ X, h ≫ u = 0) → u = 0) :
     PreservesFiniteLimits (tensorObj G) := by
   have := preservesInjectiveObjects G hG
   have : (tensorObj G).PreservesMonomorphisms :=

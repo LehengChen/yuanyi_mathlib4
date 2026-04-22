@@ -10,6 +10,7 @@ public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Equifibered
 public import Mathlib.CategoryTheory.ObjectProperty.ColimitsOfShape
 
 import Mathlib.CategoryTheory.Adjunction.Evaluation
+import Mathlib.CategoryTheory.Adjunction.Opposites
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Connected
 import Mathlib.CategoryTheory.Limits.Shapes.Opposites.Products
 import Mathlib.CategoryTheory.WithTerminal.Cone
@@ -25,7 +26,7 @@ open Limits Functor ObjectProperty
 variable {J K C D ι : Type*} [Category* J] [Category* C] [Category* K] [Category* D]
 
 set_option backward.isDefEq.respectTransparency false in
-instance (F : C ⥤ D) [∀ a b : C, HasCoproductsOfShape (a ⟶ b) D] :
+instance (F : C ⥤ D) [∀ i : C, ((evaluation C D).obj i).IsRightAdjoint] :
     IsClosedUnderLimitsOfShape (fun f : Over F ↦ f.hom.Equifibered) J := by
   wlog hJ : IsConnected J generalizing J
   · refine ⟨fun G ⟨⟨c, α, hc⟩, H⟩ U V f ↦ ?_⟩
@@ -60,12 +61,16 @@ instance (F : C ⥤ D) [∀ a b : C, HasCoproductsOfShape (a ⟶ b) D] :
 
 set_option backward.isDefEq.respectTransparency false in
 open Over in
-instance (F : C ⥤ D) [∀ a b : C, HasProductsOfShape (a ⟶ b) D] :
+instance (F : C ⥤ D) [∀ i : C, ((evaluation C D).obj i).IsLeftAdjoint] :
     IsClosedUnderColimitsOfShape (fun f : Under F ↦ f.hom.Coequifibered) J := by
   have : IsClosedUnderIsomorphisms fun f : Under F ↦ f.hom.Coequifibered :=
     ⟨fun {X Y} e ↦ by rw [← Under.w e.hom, Coequifibered.cancel_right_of_respectsIso]; simp⟩
-  have (a b : Cᵒᵖ) : HasCoproductsOfShape (a ⟶ b) Dᵒᵖ :=
-    hasColimitsOfShape_of_equivalence (Discrete.equivalence Quiver.Hom.opEquiv)
+  haveI (i : Cᵒᵖ) : ((evaluation Cᵒᵖ Dᵒᵖ).obj i).IsRightAdjoint := by
+    let E := (opUnopEquiv C D).inverse ⋙ ((evaluation C D).obj i.unop).op
+    haveI : (opUnopEquiv C D).inverse.IsRightAdjoint :=
+      (opUnopEquiv C D).isRightAdjoint_inverse
+    have hE : E.IsRightAdjoint := by infer_instance
+    exact Functor.isRightAdjoint_of_iso (F := E) (G := (evaluation Cᵒᵖ Dᵒᵖ).obj i) (Iso.refl _)
   let e : Over F.op ≌ (Under F)ᵒᵖ := (postEquiv _ (opUnopEquiv _ _)).symm.trans (opEquivOpUnder F)
   rw [isClosedUnderColimitsOfShape_iff_op, ← isClosedUnderLimitsOfShape_inverseImage_iff _ _ e]
   convert (inferInstance : IsClosedUnderLimitsOfShape

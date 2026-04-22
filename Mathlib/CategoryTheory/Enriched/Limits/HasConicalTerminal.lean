@@ -28,8 +28,12 @@ variable (C : Type u) [Category.{v} C] [EnrichedOrdinaryCategory V C]
 
 example [HasConicalTerminal V C] : HasTerminal C := inferInstance
 
-instance HasConicalProducts.hasConicalTerminal [HasConicalProducts.{w} V C] :
+instance HasConicalProducts.hasConicalTerminal [HasConicalLimit V (Functor.empty.{w} C)] :
     HasConicalTerminal V C :=
-  HasConicalLimitsOfShape.of_equiv V C emptyEquivalence.functor
+  { hasConicalLimit F := by
+      let G : Discrete.{w} PEmpty ⥤ Discrete.{0} PEmpty := emptyEquivalence.functor
+      haveI : HasConicalLimit V (G ⋙ F) :=
+        HasConicalLimit.of_iso V (Functor.uniqueFromEmpty (G ⋙ F)).symm
+      exact HasConicalLimit.of_equiv_comp V F G }
 
 end CategoryTheory.Enriched

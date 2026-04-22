@@ -340,7 +340,7 @@ def chosenPullbacksAlongFst : ChosenPullbacksAlong (fst f g) where
 
 instance hasPullbackAlong : HasPullbacksAlong g := fun f => (isPullback f g).hasPullback
 
-instance hasPullbacks [ChosenPullbacks C] : HasPullbacks C :=
+instance hasPullbacks [∀ {X Y : C} (f : Y ⟶ X), HasPullbacksAlong f] : HasPullbacks C :=
   hasPullbacks_of_hasLimit_cospan _
 
 /-- The computable `ChosenPullbacksAlong.pullback g` is naturally isomorphic to the noncomputable

@@ -33,7 +33,7 @@ open Category MonoidalCategory
 
 namespace MonoidalClosed
 
-variable (C : Type u) [Category.{v} C] [MonoidalCategory C] [MonoidalClosed C]
+variable (C : Type u) [Category.{v} C] [MonoidalCategory C] [∀ X : C, Closed X]
 
 /-- For `C` closed monoidal, build an instance of `C` as a `C`-category -/
 scoped instance enrichedCategorySelf : EnrichedCategory C C where

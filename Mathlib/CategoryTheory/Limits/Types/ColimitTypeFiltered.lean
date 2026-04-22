@@ -30,7 +30,7 @@ namespace CategoryTheory
 
 open IsFiltered
 
-variable {J : Type u} [Category.{v} J] [IsFiltered J]
+variable {J : Type u} [Category.{v} J] [IsFilteredOrEmpty J]
 
 namespace Functor
 

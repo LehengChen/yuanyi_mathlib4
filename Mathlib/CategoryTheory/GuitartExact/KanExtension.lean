@@ -87,12 +87,12 @@ noncomputable def IsPointwiseLeftKanExtension.compTwoSquare
     (E.compTwoSquare w).IsPointwiseLeftKanExtension :=
   fun X₃ ↦ (E.isPointwiseLeftKanExtensionAtCompTwoSquareEquiv w X₃).symm (h _)
 
-/-- If `w : TwoSquare T L R B` is a Guitart exact square, with `B` essentially surjective,
-and `E` is a left extension of `F` along `R`, then `E` is a pointwise
-left Kan extension of `F` along `R` provided `E.compTwoSquare w` is a pointwise left
-Kan extension of `T ⋙ F` along `L`. -/
+/-- If `B` is essentially surjective, and `w : TwoSquare T L R B` satisfies the
+Guitart exactness condition at the chosen preimages of objects of `C₄`, then a left
+extension `E` of `F` along `R` is pointwise provided `E.compTwoSquare w` is pointwise. -/
 noncomputable def isPointwiseLeftKanExtensionOfCompTwoSquare
-    (w : TwoSquare T L R B) [w.GuitartExact] [B.EssSurj]
+    (w : TwoSquare T L R B) [B.EssSurj]
+    [∀ X₄, Final (w.costructuredArrowRightwards (B.objPreimage X₄))]
     (h : (E.compTwoSquare w).IsPointwiseLeftKanExtension) :
     E.IsPointwiseLeftKanExtension :=
   fun X₄ ↦ E.isPointwiseLeftKanExtensionAtOfIso'

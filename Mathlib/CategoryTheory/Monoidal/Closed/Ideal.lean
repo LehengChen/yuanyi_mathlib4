@@ -160,7 +160,10 @@ abbrev CartesianMonoidalCategory.ofReflective [CartesianMonoidalCategory C] [Ref
           simp [← Functor.comp_map, ← NatTrans.naturality_assoc] }
 
 variable [CartesianMonoidalCategory C] [Reflective i] [MonoidalClosed C]
-  [CartesianMonoidalCategory D]
+
+section CartesianD
+
+variable [CartesianMonoidalCategory D]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- If the reflector preserves binary products, the subcategory is an exponential ideal.
@@ -231,6 +234,8 @@ def cartesianClosedOfReflective : MonoidalClosed D :=
     (NatIso.ofComponents (fun X ↦
       have := Functor.essImage.unit_isIso X.2
       (asIso ((reflectorAdjunction i).unit.app X.obj)).symm))
+
+section BraidedC
 
 variable [BraidedCategory C]
 
@@ -303,19 +308,22 @@ theorem bijection_natural (A B : C) (X X' : D) (f : (reflector i).obj (A ⊗ B) 
     unitCompPartialBijective_natural, uncurry_natural_right, ← Category.assoc, curry_natural_right,
     unitCompPartialBijective_natural, uncurry_natural_right, Category.assoc]
 
+end BraidedC
+
 /--
 The bijection allows us to show that `prodComparison L A B` is an isomorphism, where the inverse
 is the forward map of the identity morphism.
 -/
 theorem prodComparison_iso (A B : C) : IsIso
-    (prodComparison (reflector i) A B) :=
-  ⟨⟨bijection i _ _ _ (𝟙 _), by
+    (prodComparison (reflector i) A B) := by
+  letI : BraidedCategory C := BraidedCategory.ofCartesianMonoidalCategory
+  exact ⟨⟨bijection i _ _ _ (𝟙 _), by
       rw [← (bijection i _ _ _).injective.eq_iff, bijection_natural, ← bijection_symm_apply_id,
         Equiv.apply_symm_apply, Category.id_comp],
       by rw [← bijection_natural, Category.id_comp, ← bijection_symm_apply_id,
         Equiv.apply_symm_apply]⟩⟩
 
-attribute [local instance] prodComparison_iso
+end CartesianD
 
 open Limits
 
@@ -323,9 +331,12 @@ open Limits
 If a reflective subcategory is an exponential ideal, then the reflector preserves binary products.
 This is the converse of `exponentialIdeal_of_preserves_binary_products`.
 -/
-lemma preservesBinaryProducts_of_exponentialIdeal :
+lemma preservesBinaryProducts_of_exponentialIdeal [ExponentialIdeal i] :
     PreservesLimitsOfShape (Discrete WalkingPair) (reflector i) where
   preservesLimit {K} :=
+    letI : CartesianMonoidalCategory D := CartesianMonoidalCategory.ofReflective i
+    letI : IsIso (CartesianMonoidalCategory.prodComparison (reflector i) (K.obj ⟨WalkingPair.left⟩)
+        (K.obj ⟨WalkingPair.right⟩)) := prodComparison_iso i _ _
     letI := preservesLimit_pair_of_isIso_prodComparison
       (reflector i) (K.obj ⟨WalkingPair.left⟩) (K.obj ⟨WalkingPair.right⟩)
     Limits.preservesLimit_of_iso_diagram _ (diagramIsoPair K).symm
@@ -333,7 +344,8 @@ lemma preservesBinaryProducts_of_exponentialIdeal :
 /--
 If a reflective subcategory is an exponential ideal, then the reflector preserves finite products.
 -/
-lemma Limits.PreservesFiniteProducts.of_exponentialIdeal : PreservesFiniteProducts (reflector i) :=
+lemma Limits.PreservesFiniteProducts.of_exponentialIdeal [ExponentialIdeal i] :
+    PreservesFiniteProducts (reflector i) :=
   have := preservesBinaryProducts_of_exponentialIdeal i
   have : PreservesLimitsOfShape _ (reflector i) := leftAdjoint_preservesTerminal_of_reflective.{0} i
   .of_preserves_binary_and_terminal _

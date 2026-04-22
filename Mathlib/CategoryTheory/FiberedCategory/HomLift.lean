@@ -246,8 +246,9 @@ lemma isoOfIsoLift_hom_inv_id (f : R ⟶ S) (φ : a ≅ b) [p.IsHomLift f φ.hom
     f ≫ (isoOfIsoLift p f φ).inv = 𝟙 R :=
   (isoOfIsoLift p f φ).hom_inv_id
 
-/-- If `φ : a ⟶ b` lifts `f : R ⟶ S` and `φ` is an isomorphism, then so is `f`. -/
-lemma isIso_of_lift_isIso (f : R ⟶ S) (φ : a ⟶ b) [p.IsHomLift f φ] [IsIso φ] : IsIso f :=
+/-- If `φ : a ⟶ b` lifts `f : R ⟶ S` and `p.map φ` is an isomorphism, then so is `f`. -/
+lemma isIso_of_lift_isIso (f : R ⟶ S) (φ : a ⟶ b) [p.IsHomLift f φ] [IsIso (p.map φ)] :
+    IsIso f :=
   (fac p f φ) ▸ inferInstance
 
 /-- Given `φ : a ≅ b` and `f : R ≅ S`, such that `φ.hom` lifts `f.hom`, then `φ.inv` lifts

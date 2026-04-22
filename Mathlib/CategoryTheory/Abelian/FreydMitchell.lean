@@ -165,9 +165,11 @@ end FreydMitchell
 /-- The Freyd-Mitchell embedding theorem. See also `FreydMitchell.functor` for a functor which
 has the relevant instances. -/
 @[stacks 05PP]
-theorem freyd_mitchell (C : Type u) [Category.{v} C] [Abelian C] :
+theorem freyd_mitchell (C : Type u) [Category.{v} C] [NonPreadditiveAbelian C] :
     ∃ (R : Type (max u v)) (_ : Ring R) (F : C ⥤ ModuleCat.{max u v} R),
       F.Full ∧ F.Faithful ∧ PreservesFiniteLimits F ∧ PreservesFiniteColimits F :=
+  letI : Preadditive C := NonPreadditiveAbelian.preadditive
+  letI : Abelian C := Abelian.mk
   ⟨_, _, FreydMitchell.functor C, inferInstance, inferInstance, inferInstance, inferInstance⟩
 
 end CategoryTheory.Abelian

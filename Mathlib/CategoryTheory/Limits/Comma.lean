@@ -244,12 +244,24 @@ noncomputable instance createsLimitsOfShape [PreservesLimitsOfShape J G] :
 noncomputable instance createsLimitsOfSize [PreservesLimitsOfSize.{w, w'} G] :
     CreatesLimitsOfSize.{w, w'} (proj X G :) where
 
-instance mono_right_of_mono [HasPullbacks A] [PreservesLimitsOfShape WalkingCospan G]
-    {Y Z : StructuredArrow X G} (f : Y ⟶ Z) [Mono f] : Mono f.right :=
-  show Mono ((proj X G).map f) from inferInstance
+instance mono_right_of_mono {Y Z : StructuredArrow X G} (f : Y ⟶ Z)
+    [HasPullback f.right f.right] [PreservesLimit (cospan f.right f.right) G] [Mono f] :
+    Mono f.right := by
+  haveI : HasLimit (cospan ((proj X G).map f) ((proj X G).map f)) := by
+    change HasLimit (cospan f.right f.right)
+    infer_instance
+  haveI : HasLimit ((cospan f f) ⋙ proj X G) :=
+    hasLimit_of_iso (cospanCompIso (proj X G) f f).symm
+  haveI : PreservesLimit (cospan ((proj X G).map f) ((proj X G).map f)) G := by
+    change PreservesLimit (cospan f.right f.right) G
+    infer_instance
+  haveI : PreservesLimit ((cospan f f) ⋙ proj X G) G :=
+    preservesLimit_of_iso_diagram G (cospanCompIso (proj X G) f f).symm
+  exact preserves_mono_of_preservesLimit (proj X G) f
 
-theorem mono_iff_mono_right [HasPullbacks A] [PreservesLimitsOfShape WalkingCospan G]
-    {Y Z : StructuredArrow X G} (f : Y ⟶ Z) : Mono f ↔ Mono f.right :=
+theorem mono_iff_mono_right {Y Z : StructuredArrow X G} (f : Y ⟶ Z)
+    [HasPullback f.right f.right] [PreservesLimit (cospan f.right f.right) G] :
+    Mono f ↔ Mono f.right :=
   ⟨fun _ => inferInstance, fun _ => mono_of_mono_right f⟩
 
 end StructuredArrow
@@ -291,12 +303,24 @@ noncomputable instance createsColimitsOfShape [PreservesColimitsOfShape J G] :
 noncomputable instance createsColimitsOfSize [PreservesColimitsOfSize.{w, w'} G] :
     CreatesColimitsOfSize.{w, w'} (proj G X :) where
 
-instance epi_left_of_epi [HasPushouts A] [PreservesColimitsOfShape WalkingSpan G]
-    {Y Z : CostructuredArrow G X} (f : Y ⟶ Z) [Epi f] : Epi f.left :=
-  show Epi ((proj G X).map f) from inferInstance
+instance epi_left_of_epi {Y Z : CostructuredArrow G X} (f : Y ⟶ Z)
+    [HasPushout f.left f.left] [PreservesColimit (span f.left f.left) G] [Epi f] :
+    Epi f.left := by
+  haveI : HasColimit (span ((proj G X).map f) ((proj G X).map f)) := by
+    change HasColimit (span f.left f.left)
+    infer_instance
+  haveI : HasColimit ((span f f) ⋙ proj G X) :=
+    hasColimit_of_iso (spanCompIso (proj G X) f f)
+  haveI : PreservesColimit (span ((proj G X).map f) ((proj G X).map f)) G := by
+    change PreservesColimit (span f.left f.left) G
+    infer_instance
+  haveI : PreservesColimit ((span f f) ⋙ proj G X) G :=
+    preservesColimit_of_iso_diagram G (spanCompIso (proj G X) f f).symm
+  exact preserves_epi_of_preservesColimit (proj G X) f
 
-theorem epi_iff_epi_left [HasPushouts A] [PreservesColimitsOfShape WalkingSpan G]
-    {Y Z : CostructuredArrow G X} (f : Y ⟶ Z) : Epi f ↔ Epi f.left :=
+theorem epi_iff_epi_left {Y Z : CostructuredArrow G X} (f : Y ⟶ Z)
+    [HasPushout f.left f.left] [PreservesColimit (span f.left f.left) G] :
+    Epi f ↔ Epi f.left :=
   ⟨fun _ => inferInstance, fun _ => epi_of_epi_left f⟩
 
 end CostructuredArrow

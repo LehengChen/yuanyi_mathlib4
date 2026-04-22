@@ -144,7 +144,7 @@ the subcategory of `Over X` defined by `P` is closed under pullbacks.
 
 Without the cancellation property, this does not in general. Consider for example
 `P = Function.Surjective` on `Type`. -/
-instance Over.closedUnderLimitsOfShape_pullback [HasPullbacks T]
+instance Over.closedUnderLimitsOfShape_pullback
     [P.IsStableUnderComposition] [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P] :
     (P.overObj (X := X)).IsClosedUnderLimitsOfShape WalkingCospan where
   limitsOfShape_le := by
@@ -163,11 +163,16 @@ namespace MorphismProperty.Over
 
 variable (X : T)
 
-noncomputable instance [P.ContainsIdentities] [P.RespectsIso] :
+noncomputable instance [P.ContainsIdentities] :
     CreatesLimitsOfShape (Discrete PEmpty.{1}) (Over.forget P ⊤ X) := by
-  apply +allowSynthFailures forgetCreatesLimitsOfShapeOfClosed
-  · exact inferInstanceAs (HasLimitsOfShape _ (Over X))
-  · apply Over.closedUnderLimitsOfShape_discrete_empty _
+  constructor
+  intro D
+  exact createsLimitOfFullyFaithfulOfIso
+    (Over.mk ⊤ (𝟙 X) (P.id_mem X))
+    (IsTerminal.uniqueUpToIso CategoryTheory.Over.mkIdTerminal
+      ((isLimitEquivIsTerminalOfIsEmpty (CategoryTheory.Over X)
+          (limit.cone (D ⋙ Over.forget P ⊤ X))).1
+        (limit.isLimit _)))
 
 variable {X} in
 instance [P.ContainsIdentities] (Y : P.Over ⊤ X) :
@@ -188,36 +193,48 @@ instance [P.ContainsIdentities] : HasTerminal (P.Over ⊤ X) :=
   let h : IsTerminal (Over.mk ⊤ (𝟙 X) (P.id_mem X)) := Over.mkIdTerminal P X
   h.hasTerminal
 
-/-- If `P` is stable under composition, base change and satisfies post-cancellation,
+/-- If `Over X` has pullbacks and `P` is stable under composition, base change and
+satisfies post-cancellation,
 `Over.forget P ⊤ X` creates pullbacks. -/
-noncomputable instance createsLimitsOfShape_walkingCospan [HasPullbacks T]
+noncomputable instance createsLimitsOfShape_walkingCospan
+    [HasPullbacks (CategoryTheory.Over X)]
     [P.IsStableUnderComposition] [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P] :
     CreatesLimitsOfShape WalkingCospan (Over.forget P ⊤ X) := by
   apply +allowSynthFailures forgetCreatesLimitsOfShapeOfClosed
-  · exact inferInstanceAs (HasLimitsOfShape WalkingCospan (Over X))
+  · exact inferInstanceAs (HasLimitsOfShape WalkingCospan (CategoryTheory.Over X))
   · apply Over.closedUnderLimitsOfShape_pullback
 
-/-- If `P` is stable under composition, base change and satisfies post-cancellation,
+/-- If `Over X` has pullbacks and `P` is stable under composition, base change and
+satisfies post-cancellation,
 `P.Over ⊤ X` has pullbacks -/
-instance (priority := 900) hasPullbacks [HasPullbacks T] [P.IsStableUnderComposition]
+instance (priority := 900) hasPullbacks
+    [HasPullbacks (CategoryTheory.Over X)] [P.IsStableUnderComposition]
     [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P] : HasPullbacks (P.Over ⊤ X) := by
   apply +allowSynthFailures hasLimitsOfShape_of_closedUnderLimitsOfShape
-  · exact inferInstanceAs (HasLimitsOfShape WalkingCospan (Over X))
+  · exact inferInstanceAs (HasLimitsOfShape WalkingCospan (CategoryTheory.Over X))
   · apply Over.closedUnderLimitsOfShape_pullback
 
-variable [HasPullbacks T] [P.IsStableUnderComposition] [P.ContainsIdentities]
+section
+
+variable [P.IsStableUnderComposition] [P.ContainsIdentities]
   [P.IsStableUnderBaseChange] [P.HasOfPostcompProperty P]
 
-noncomputable instance : CreatesFiniteLimits (Over.forget P ⊤ X) :=
+noncomputable instance [HasPullbacks (CategoryTheory.Over X)] :
+    CreatesFiniteLimits (Over.forget P ⊤ X) :=
   createsFiniteLimitsOfCreatesTerminalAndPullbacks _
 
-instance [HasFiniteWidePullbacks T] : HasFiniteLimits (P.Over ⊤ X) :=
-  hasFiniteLimits_of_hasLimitsLimits_of_createsFiniteLimits (Over.forget P ⊤ X)
+instance [HasPullbacks (CategoryTheory.Over X)] : HasFiniteLimits (P.Over ⊤ X) :=
+  hasFiniteLimits_of_hasTerminal_and_pullbacks
 
-instance : PreservesFiniteLimits (Over.forget P ⊤ X) :=
+instance [HasPullbacks (CategoryTheory.Over X)] :
+    PreservesFiniteLimits (Over.forget P ⊤ X) :=
   preservesFiniteLimits_of_preservesTerminal_and_pullbacks (Over.forget P ⊤ X)
 
-instance {X Y : T} (f : X ⟶ Y) : PreservesFiniteLimits (pullback P ⊤ f) where
+end
+
+instance {X Y : T} (f : X ⟶ Y) [HasPullbacksAlong f] [P.HasPullbacksAlong f]
+    [P.IsStableUnderBaseChangeAlong f] [PreservesFiniteLimits (Over.forget P ⊤ Y)] :
+    PreservesFiniteLimits (pullback P ⊤ f) where
   preservesFiniteLimits J _ _ := by
     have : PreservesLimitsOfShape J
         (MorphismProperty.Over.pullback P ⊤ f ⋙ MorphismProperty.Over.forget _ _ _) :=

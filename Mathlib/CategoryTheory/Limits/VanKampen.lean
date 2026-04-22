@@ -78,12 +78,13 @@ noncomputable def IsVanKampenColimit.isColimit {F : J ⥤ C} {c : Cocone F}
   h.isUniversal.isColimit
 
 set_option backward.isDefEq.respectTransparency false in
-theorem IsInitial.isVanKampenColimit [HasStrictInitialObjects C] {X : C} (h : IsInitial X) :
+theorem IsInitial.isVanKampenColimit {X : C} (h : IsInitial X)
+    (hX : ∀ ⦃A : C⦄ (f : A ⟶ X), IsIso f) :
     IsVanKampenColimit (asEmptyCocone X) := by
   intro F' c' α f hf hα
   have : F' = Functor.empty C := by apply Functor.hext <;> rintro ⟨⟨⟩⟩
   subst this
-  haveI := h.isIso_to f
+  haveI := hX f
   refine ⟨by rintro _ ⟨⟨⟩⟩,
     fun _ => ⟨IsColimit.ofIsoColimit h (Cocone.ext (asIso f).symm <| by rintro ⟨⟨⟩⟩)⟩⟩
 
@@ -146,7 +147,9 @@ theorem IsVanKampenColimit.precompose_isIso_iff {F G : J ⥤ C} (α : F ⟶ G) [
     IsVanKampenColimit.precompose_isIso α⟩
 
 theorem IsUniversalColimit.of_mapCocone (G : C ⥤ D) {F : J ⥤ C} {c : Cocone F}
-    [PreservesLimitsOfShape WalkingCospan G] [ReflectsColimitsOfShape J G]
+    [∀ (i j : J) (X : C) (f : X ⟶ F.obj j) (g : i ⟶ j), PreservesLimit (cospan f (F.map g)) G]
+    [∀ (i : J) (X : C) (f : X ⟶ c.pt), PreservesLimit (cospan f (c.ι.app i)) G]
+    [ReflectsColimitsOfShape J G]
     (hc : IsUniversalColimit (G.mapCocone c)) : IsUniversalColimit c :=
   fun F' c' α f h hα H ↦
     ⟨isColimitOfReflects _ (hc (G.mapCocone c') (whiskerRight α G) (G.map f)
@@ -156,7 +159,7 @@ theorem IsUniversalColimit.of_mapCocone (G : C ⥤ D) {F : J ⥤ C} {c : Cocone 
 theorem IsVanKampenColimit.of_mapCocone (G : C ⥤ D) {F : J ⥤ C} {c : Cocone F}
     [∀ (i j : J) (X : C) (f : X ⟶ F.obj j) (g : i ⟶ j), PreservesLimit (cospan f (F.map g)) G]
     [∀ (i : J) (X : C) (f : X ⟶ c.pt), PreservesLimit (cospan f (c.ι.app i)) G]
-    [ReflectsLimitsOfShape WalkingCospan G]
+    [∀ (i : J) (X : C) (f : X ⟶ c.pt), ReflectsLimit (cospan f (c.ι.app i)) G]
     [PreservesColimitsOfShape J G]
     [ReflectsColimitsOfShape J G]
     (H : IsVanKampenColimit (G.mapCocone c)) : IsVanKampenColimit c := by
@@ -432,10 +435,10 @@ theorem isVanKampenColimit_of_isEmpty [HasStrictInitialObjects C] [IsEmpty J] {F
     have := (IsColimit.precomposeInvEquiv (Functor.uniqueFromEmpty _) _).symm
       (hc.whiskerEquivalence (equivalenceOfIsEmpty (Discrete PEmpty.{1}) J))
     exact IsColimit.ofIsoColimit this (Cocone.ext (Iso.refl c.pt) (fun {X} ↦ isEmptyElim X))
-  replace this := IsInitial.isVanKampenColimit this
+  have hVK := IsInitial.isVanKampenColimit this (fun {A} f ↦ this.isIso_to f)
   apply (IsVanKampenColimit.whiskerEquivalence_iff
     (equivalenceOfIsEmpty (Discrete PEmpty.{1}) J)).mp
-  exact (this.precompose_isIso (Functor.uniqueFromEmpty
+  exact (hVK.precompose_isIso (Functor.uniqueFromEmpty
     ((equivalenceOfIsEmpty (Discrete PEmpty.{1}) J).functor ⋙ F)).hom).of_iso
     (Cocone.ext (Iso.refl _) (by simp))
 
@@ -603,7 +606,7 @@ theorem isVanKampenColimit_extendCofan {n : ℕ} (f : Fin (n + 1) → C)
     {c₁ : Cofan fun i : Fin n ↦ f i.succ} {c₂ : BinaryCofan (f 0) c₁.pt}
     (t₁ : IsVanKampenColimit c₁) (t₂ : IsVanKampenColimit c₂)
     [∀ {Z} (i : Z ⟶ c₂.pt), HasPullback c₂.inr i]
-    [HasFiniteCoproducts C] :
+    [HasCoproductsOfShape (Fin n) C] :
     IsVanKampenColimit (extendCofan c₁ c₂) := by
   intro F c α i e hα
   refine ⟨?_, isUniversalColimit_extendCofan f t₁.isUniversal t₂.isUniversal c α i e hα⟩

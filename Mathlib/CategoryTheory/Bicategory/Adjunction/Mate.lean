@@ -6,6 +6,7 @@ Authors: Yuma Mizuno, Joël Riou
 module
 
 public import Mathlib.CategoryTheory.Bicategory.Adjunction.Basic
+public import Mathlib.CategoryTheory.EpiMono
 public import Mathlib.CategoryTheory.HomCongr
 
 /-!
@@ -566,37 +567,56 @@ variable {c d : B}
 variable {l₁ l₂ : c ⟶ d} {r₁ r₂ : d ⟶ c}
 variable (adj₁ : l₁ ⊣ r₁) (adj₂ : l₂ ⊣ r₂)
 
-/-- If `α` is an isomorphism between left adjoints, then its conjugate 2-morphism is an
-isomorphism. The converse is given in `conjugateEquiv_of_iso`.
+/-- If `α` is both a split monomorphism and a split epimorphism between left adjoints, then its
+conjugate 2-morphism is an isomorphism. The converse is given in `conjugateEquiv_of_iso`.
 -/
-instance conjugateEquiv_iso (α : l₂ ⟶ l₁) [IsIso α] :
-    IsIso (conjugateEquiv adj₁ adj₂ α) :=
-  ⟨⟨conjugateEquiv adj₂ adj₁ (inv α),
-      ⟨conjugateEquiv_comm _ _ (by simp), conjugateEquiv_comm _ _ (by simp)⟩⟩⟩
+instance conjugateEquiv_iso (α : l₂ ⟶ l₁) [IsSplitMono α] [IsSplitEpi α] :
+    IsIso (conjugateEquiv adj₁ adj₂ α) := by
+  haveI : IsSplitMono (conjugateEquiv adj₁ adj₂ α) :=
+    IsSplitMono.mk'
+      { retraction := conjugateEquiv adj₂ adj₁ (section_ α)
+        id := conjugateEquiv_comm adj₁ adj₂ (IsSplitEpi.id α) }
+  haveI : IsSplitEpi (conjugateEquiv adj₁ adj₂ α) :=
+    IsSplitEpi.mk'
+      { section_ := conjugateEquiv adj₂ adj₁ (retraction α)
+        id := conjugateEquiv_comm adj₂ adj₁ (IsSplitMono.id α) }
+  exact isIso_of_mono_of_isSplitEpi _
 
-/-- If `α` is an isomorphism between right adjoints, then its conjugate 2-morphism is an
-isomorphism. The converse is given in `conjugateEquiv_symm_of_iso`.
+/-- If `α` is both a split monomorphism and a split epimorphism between right adjoints, then its
+conjugate 2-morphism is an isomorphism. The converse is given in `conjugateEquiv_symm_of_iso`.
 -/
-instance conjugateEquiv_symm_iso (α : r₁ ⟶ r₂) [IsIso α] :
-    IsIso ((conjugateEquiv adj₁ adj₂).symm α) :=
-  ⟨⟨(conjugateEquiv adj₂ adj₁).symm (inv α),
-      ⟨conjugateEquiv_symm_comm _ _ (by simp), conjugateEquiv_symm_comm _ _ (by simp)⟩⟩⟩
+instance conjugateEquiv_symm_iso (α : r₁ ⟶ r₂) [IsSplitMono α] [IsSplitEpi α] :
+    IsIso ((conjugateEquiv adj₁ adj₂).symm α) := by
+  haveI : IsSplitMono ((conjugateEquiv adj₁ adj₂).symm α) :=
+    IsSplitMono.mk'
+      { retraction := (conjugateEquiv adj₂ adj₁).symm (section_ α)
+        id := conjugateEquiv_symm_comm adj₂ adj₁ (IsSplitEpi.id α) }
+  haveI : IsSplitEpi ((conjugateEquiv adj₁ adj₂).symm α) :=
+    IsSplitEpi.mk'
+      { section_ := (conjugateEquiv adj₂ adj₁).symm (retraction α)
+        id := conjugateEquiv_symm_comm adj₁ adj₂ (IsSplitMono.id α) }
+  exact isIso_of_mono_of_isSplitEpi _
 
 /-- If `α` is a 2-morphism between left adjoints whose conjugate 2-morphism
-is an isomorphism, then `α` is an isomorphism. The converse is given in `conjugateEquiv_iso`.
+is both a split monomorphism and a split epimorphism, then `α` is an isomorphism. The converse is
+given in `conjugateEquiv_iso`.
 -/
-theorem conjugateEquiv_of_iso (α : l₂ ⟶ l₁) [IsIso (conjugateEquiv adj₁ adj₂ α)] :
+theorem conjugateEquiv_of_iso (α : l₂ ⟶ l₁)
+    [IsSplitMono (conjugateEquiv adj₁ adj₂ α)]
+    [IsSplitEpi (conjugateEquiv adj₁ adj₂ α)] :
     IsIso α := by
   suffices IsIso ((conjugateEquiv adj₁ adj₂).symm (conjugateEquiv adj₁ adj₂ α))
     by simpa only [Equiv.symm_apply_apply] using this
   infer_instance
 
 /--
-If `α` is a 2-morphism between right adjoints whose conjugate 2-morphism is
-an isomorphism, then `α` is an isomorphism. The converse is given in `conjugateEquiv_symm_iso`.
+If `α` is a 2-morphism between right adjoints whose conjugate 2-morphism is both a split
+monomorphism and a split epimorphism, then `α` is an isomorphism. The converse is given in
+`conjugateEquiv_symm_iso`.
 -/
 theorem conjugateEquiv_symm_of_iso (α : r₁ ⟶ r₂)
-    [IsIso ((conjugateEquiv adj₁ adj₂).symm α)] : IsIso α := by
+    [IsSplitMono ((conjugateEquiv adj₁ adj₂).symm α)]
+    [IsSplitEpi ((conjugateEquiv adj₁ adj₂).symm α)] : IsIso α := by
   suffices IsIso ((conjugateEquiv adj₁ adj₂) ((conjugateEquiv adj₁ adj₂).symm α))
     by simpa only [Equiv.apply_symm_apply] using this
   infer_instance

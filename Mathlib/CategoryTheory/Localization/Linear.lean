@@ -71,7 +71,7 @@ section
 
 variable {E : Type*} [Category* E]
   (L : C ⥤ D) (W : MorphismProperty C) [L.IsLocalization W] [Preadditive E]
-  (R : Type*) [Ring R]
+  (R : Type*) [Semiring R]
   [Linear R C] [Linear R D] [Linear R E] [L.Linear R]
 
 set_option backward.isDefEq.respectTransparency false in

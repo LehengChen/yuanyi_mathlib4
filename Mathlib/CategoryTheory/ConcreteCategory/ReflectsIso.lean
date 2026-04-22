@@ -10,24 +10,24 @@ public import Mathlib.CategoryTheory.Functor.ReflectsIso.Basic
 
 /-!
 A `forget₂ C D` forgetful functor between concrete categories `C` and `D`
-whose forgetful functors both reflect isomorphisms, itself reflects isomorphisms.
+reflects isomorphisms when the forgetful functor from `C` to types does.
 -/
 
 @[expose] public section
 
 
-universe u
+universe w u
 
 namespace CategoryTheory
 
 instance : (forget (Type u)).ReflectsIsomorphisms where reflects _ _ _ {i} := i
 
-variable (C : Type (u + 1)) [Category* C]
-    {FC : outParam <| C → C → Type u} {CC : outParam <| C → Type u}
-    [outParam <| ∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory.{u} C FC]
-variable (D : Type (u + 1)) [Category* D]
-    {FD : outParam <| D → D → Type u} {CD : outParam <| D → Type u}
-    [outParam <| ∀ X Y, FunLike (FD X Y) (CD X) (CD Y)] [ConcreteCategory.{u} D FD]
+variable (C : Type*) [Category* C]
+    {FC : outParam <| C → C → Type*} {CC : outParam <| C → Type w}
+    [outParam <| ∀ X Y, FunLike (FC X Y) (CC X) (CC Y)] [ConcreteCategory.{w} C FC]
+variable (D : Type*) [Category* D]
+    {FD : outParam <| D → D → Type*} {CD : outParam <| D → Type w}
+    [outParam <| ∀ X Y, FunLike (FD X Y) (CD X) (CD Y)] [ConcreteCategory.{w} D FD]
 
 -- This should not be an instance, as it causes a typeclass loop
 -- with `CategoryTheory.hasForgetToType`.

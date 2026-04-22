@@ -199,25 +199,46 @@ def functorToCoreCompLeftIso {G' : Type u₃} [Groupoid.{v₃} G'] (H : G ⥤ C)
     functorToCore (F ⋙ H) ≅ F ⋙ functorToCore H :=
   NatIso.ofComponents (fun _ ↦ Iso.refl _)
 
-lemma functorToCore_comp_left {G' : Type u₃} [Groupoid.{v₃} G'] (H : G ⥤ C) (F : G' ⥤ G) :
+section
+
+attribute [local instance] Groupoid.ofIsGroupoid
+
+lemma functorToCore_comp_left {G : Type u₂} [Category.{v₂} G] [IsGroupoid G]
+    {G' : Type u₃} [Category.{v₃} G'] [IsGroupoid G'] (H : G ⥤ C) (F : G' ⥤ G) :
     functorToCore (F ⋙ H) = F ⋙ functorToCore H :=
   Functor.ext_of_iso (functorToCoreCompLeftIso H F) (by cat_disch)
+
+end
 
 /-- The functor `functorToCore (H ⋙ F)` factors through `functorToCore H`. -/
 def functorToCoreCompRightIso {C' : Type u₄} [Category.{v₄} C'] (H : G ⥤ C) (F : C ⥤ C') :
     functorToCore (H ⋙ F) ≅ functorToCore H ⋙ F.core :=
   Iso.refl _
 
-lemma functorToCore_comp_right {C' : Type u₄} [Category.{v₄} C'] (H : G ⥤ C) (F : C ⥤ C') :
+section
+
+attribute [local instance] Groupoid.ofIsGroupoid
+
+lemma functorToCore_comp_right {G : Type u₂} [Category.{v₂} G] [IsGroupoid G]
+    {C' : Type u₄} [Category.{v₄} C'] (H : G ⥤ C) (F : C ⥤ C') :
     functorToCore (H ⋙ F) = functorToCore H ⋙ F.core :=
   Functor.ext_of_iso (functorToCoreCompRightIso H F) (by cat_disch)
+
+end
 
 /-- The functor `functorToCore (𝟭 G)` is a section of `inclusion G`. -/
 def inclusionCompFunctorToCoreIso : inclusion G ⋙ functorToCore (𝟭 G) ≅ 𝟭 (Core G) :=
   NatIso.ofComponents (fun _ ↦ Iso.refl _)
 
-theorem inclusion_comp_functorToCore : inclusion G ⋙ functorToCore (𝟭 G) = 𝟭 (Core G) :=
+section
+
+attribute [local instance] Groupoid.ofIsGroupoid
+
+theorem inclusion_comp_functorToCore {G : Type u₂} [Category.{v₂} G] [IsGroupoid G] :
+    inclusion G ⋙ functorToCore (𝟭 G) = 𝟭 (Core G) :=
   Functor.ext_of_iso inclusionCompFunctorToCoreIso (by cat_disch)
+
+end
 
 /-- The functor `functorToCore (inclusion C)` is isomorphic to the identity on `Core C`. -/
 def functorToCoreInclusionIso : functorToCore (inclusion C) ≅ 𝟭 (Core C) :=

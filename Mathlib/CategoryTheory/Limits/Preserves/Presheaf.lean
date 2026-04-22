@@ -51,10 +51,10 @@ namespace CategoryTheory.Limits
 
 section LargeCategory
 
-variable {C : Type u} [Category.{v} C] [HasFiniteColimits C] (A : Cᵒᵖ ⥤ Type v)
+variable {C : Type u} [Category.{v} C] [HasFiniteLimits Cᵒᵖ] (A : Cᵒᵖ ⥤ Type v)
 
-/-- If `C` is a finitely cocomplete category and `A : Cᵒᵖ ⥤ Type u` is a presheaf that preserves
-finite limits, then `CostructuredArrow yoneda A` is filtered.
+/-- If `Cᵒᵖ` has finite limits and `A : Cᵒᵖ ⥤ Type v` is a presheaf that preserves finite
+limits, then `CostructuredArrow yoneda A` is filtered.
 
 One direction of Proposition 3.3.13 of [Kashiwara2006].
 -/

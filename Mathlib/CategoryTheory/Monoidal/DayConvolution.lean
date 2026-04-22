@@ -1111,6 +1111,18 @@ def convolutions (d d' : D) :
 
 attribute [local instance] convolutions
 
+set_option backward.isDefEq.respectTransparency false in
+lemma ι_map_tensorHom_eq {d₁ d₁' d₂ d₂' : D} (f : d₁ ⟶ d₂) (f' : d₁' ⟶ d₂') :
+    (ι C V D).map (tensorHom f f') =
+    DayConvolution.map ((ι C V D).map f) ((ι C V D).map f') := by
+  rw [tensorHom_eq]
+  apply (convolutions C V d₁ d₁').corepresentableBy.homEquiv.injective
+  dsimp
+  ext ⟨u₁, u₂⟩
+  dsimp
+  simp only [DayConvolution.unit_app_map_app, Functor.comp_obj, tensor_obj]
+  simp +instances [convolutions, convolutionUnitApp_eq]
+
 variable
     [∀ (v : V) (d : C), Limits.PreservesColimitsOfShape
       (CostructuredArrow (tensor C) d) (tensorLeft v)]
@@ -1165,20 +1177,6 @@ lemma tensorHom_id {x x' : D} (f : x ⟶ x') (y : D) :
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma ι_map_tensorHom_eq {d₁ d₁' d₂ d₂' : D} (f : d₁ ⟶ d₂) (f' : d₁' ⟶ d₂') :
-    letI := mkMonoidalCategoryStruct C V D
-    (ι C V D).map (f ⊗ₘ f') =
-    DayConvolution.map ((ι C V D).map f) ((ι C V D).map f') := by
-  dsimp +instances [mkMonoidalCategoryStruct]
-  rw [tensorHom_eq]
-  apply (convolutions C V d₁ d₁').corepresentableBy.homEquiv.injective
-  dsimp
-  ext ⟨u₁, u₂⟩
-  dsimp
-  simp only [DayConvolution.unit_app_map_app, Functor.comp_obj, tensor_obj]
-  simp +instances [convolutions, convolutionUnitApp_eq]
-
-set_option backward.isDefEq.respectTransparency false in
 /-- The monoidal category struct constructed in `DayConvolution.mkMonoidalCategoryStruct` extends
 to a `LawfulDayConvolutionMonoidalCategoryStruct`. -/
 @[implicit_reducible]
@@ -1197,13 +1195,16 @@ def mkLawfulDayConvolutionMonoidalCategoryStruct :
       tensorUnitConvolutionUnit.isPointwiseLeftKanExtensionCan
     convolutionExtensionUnit_comp_ι_map_tensorHom_app := by
       intros d₁ d₁' d₂ d₂' f f' x y
+      dsimp +instances [mkMonoidalCategoryStruct]
       simp [ι_map_tensorHom_eq C V D f f']
     convolutionExtensionUnit_comp_ι_map_whiskerLeft_app := by
       intros d₁ d₂ d₂' f x y
-      simp [← id_tensorHom, ι_map_tensorHom_eq C V D]
+      dsimp +instances [mkMonoidalCategoryStruct]
+      simp [ι_map_tensorHom_eq C V D]
     convolutionExtensionUnit_comp_ι_map_whiskerRight_app := by
       intros
-      simp [← tensorHom_id, ι_map_tensorHom_eq C V D]
+      dsimp +instances [mkMonoidalCategoryStruct]
+      simp [ι_map_tensorHom_eq C V D]
     associator_hom_unit_unit d₁ d₂ d₃ x₁ x₂ x₃ := by
       simp only [externalProductBifunctor_obj_obj, Functor.comp_obj, tensor_obj, associator,
         Functor.FullyFaithful.preimageIso_hom, Functor.FullyFaithful.map_preimage]

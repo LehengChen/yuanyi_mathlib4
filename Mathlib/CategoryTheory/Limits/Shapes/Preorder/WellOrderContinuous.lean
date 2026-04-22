@@ -84,7 +84,7 @@ instance (F : J ⥤ C) {J' : Type w'} [PartialOrder J'] (e : J' ≃o J)
   inferInstanceAs (e.toInitialSeg.monotone.functor ⋙ F).IsWellOrderContinuous
 
 instance IsWellOrderContinuous.restriction_setIci
-    {J : Type w} [LinearOrder J]
+    {J : Type w} [PartialOrder J] [Std.Total (α := J) (· ≤ ·)]
     {F : J ⥤ C} [F.IsWellOrderContinuous] (j : J) :
     ((Subtype.mono_coe (· ∈ Set.Ici j)).functor ⋙ F).IsWellOrderContinuous where
   nonempty_isColimit m hm := ⟨by
@@ -95,15 +95,23 @@ instance IsWellOrderContinuous.restriction_setIci
       rintro ⟨j', hj'⟩
       push _ ∈ _ at hj'
       dsimp only [f]
-      by_cases! h : j' ≤ j
+      by_cases h : j' ≤ j
       · refine ⟨⟨⟨j, le_refl j⟩, ?_⟩, h⟩
-        by_contra h'
-        simp only [Set.mem_Iio, not_lt] at h'
-        apply hm.1
-        rintro ⟨k, hk⟩ hkm
-        exact h'.trans hk
-      · exact ⟨⟨⟨j', h.le⟩, hj'⟩, by rfl⟩
+        exact lt_iff_le_not_ge.2 ⟨m.2, fun hmj ↦ hm.1 (by
+          rintro ⟨k, hk⟩ _
+          exact (show m.1 ≤ j by simpa using hmj).trans hk)⟩
+      · have hj_le : j ≤ j' := (total_of (· ≤ ·) j' j).resolve_left h
+        exact ⟨⟨⟨j', hj_le⟩, hj'⟩, by rfl⟩
     exact (Functor.Final.isColimitWhiskerEquiv (F := hf.functor) _).2
-      (F.isColimitOfIsWellOrderContinuous m.1 (Set.Ici.isSuccLimit_coe m hm))⟩
+      (F.isColimitOfIsWellOrderContinuous m.1
+        ⟨Set.not_isMin_coe _ hm.1, fun b hb ↦ by
+          by_cases hb' : j ≤ b
+          · exact hm.2 ⟨b, hb'⟩ ⟨by simpa using hb.1, fun {c} h₁ h₂ ↦
+              hb.2 (by simpa using h₁) (by simpa using h₂)⟩
+          · apply hb.2
+            · exact lt_iff_le_not_ge.2 ⟨(total_of (· ≤ ·) j b).resolve_left hb', hb'⟩
+            · exact lt_iff_le_not_ge.2 ⟨m.2, fun hmj ↦ hm.1 (by
+                rintro ⟨k, hk⟩ _
+                exact hmj.trans hk)⟩⟩)⟩
 
 end CategoryTheory.Functor

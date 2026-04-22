@@ -176,16 +176,18 @@ theorem FinallySmall.exists_small_weakly_terminal_set [FinallySmall.{w} J] :
   exact ⟨(fromFinalModel J).obj f.right, Set.mem_range_self _, ⟨f.hom⟩⟩
 
 variable {J} in
-theorem finallySmall_of_small_weakly_terminal_set [IsFilteredOrEmpty J] (s : Set J) [Small.{v} s]
-    (hs : ∀ i, ∃ j ∈ s, Nonempty (i ⟶ j)) : FinallySmall.{v} J := by
+theorem finallySmall_of_small_weakly_terminal_set [IsFilteredOrEmpty J] [LocallySmall.{w} J]
+    (s : Set J) [Small.{w} s]
+    (hs : ∀ i, ∃ j ∈ s, Nonempty (i ⟶ j)) : FinallySmall.{w} J := by
   suffices Functor.Final (ObjectProperty.ι (· ∈ s)) from
     finallySmall_of_final_of_essentiallySmall (ObjectProperty.ι (· ∈ s))
   refine Functor.final_of_exists_of_isFiltered_of_fullyFaithful _ (fun i => ?_)
   obtain ⟨j, hj₁, hj₂⟩ := hs i
   exact ⟨⟨j, hj₁⟩, hj₂⟩
 
-theorem finallySmall_iff_exists_small_weakly_terminal_set [IsFilteredOrEmpty J] :
-    FinallySmall.{v} J ↔ ∃ (s : Set J) (_ : Small.{v} s), ∀ i, ∃ j ∈ s, Nonempty (i ⟶ j) := by
+theorem finallySmall_iff_exists_small_weakly_terminal_set [IsFilteredOrEmpty J]
+    [LocallySmall.{w} J] :
+    FinallySmall.{w} J ↔ ∃ (s : Set J) (_ : Small.{w} s), ∀ i, ∃ j ∈ s, Nonempty (i ⟶ j) := by
   refine ⟨fun _ => FinallySmall.exists_small_weakly_terminal_set _, fun h => ?_⟩
   rcases h with ⟨s, hs, hs'⟩
   exact finallySmall_of_small_weakly_terminal_set s hs'
@@ -204,16 +206,18 @@ theorem InitiallySmall.exists_small_weakly_initial_set [InitiallySmall.{w} J] :
   exact ⟨(fromInitialModel J).obj f.left, Set.mem_range_self _, ⟨f.hom⟩⟩
 
 variable {J} in
-theorem initiallySmall_of_small_weakly_initial_set [IsCofilteredOrEmpty J] (s : Set J) [Small.{v} s]
-    (hs : ∀ i, ∃ j ∈ s, Nonempty (j ⟶ i)) : InitiallySmall.{v} J := by
+theorem initiallySmall_of_small_weakly_initial_set [IsCofilteredOrEmpty J] [LocallySmall.{w} J]
+    (s : Set J) [Small.{w} s]
+    (hs : ∀ i, ∃ j ∈ s, Nonempty (j ⟶ i)) : InitiallySmall.{w} J := by
   suffices Functor.Initial (ObjectProperty.ι (· ∈ s)) from
     initiallySmall_of_initial_of_essentiallySmall (ObjectProperty.ι (· ∈ s))
   refine Functor.initial_of_exists_of_isCofiltered_of_fullyFaithful _ (fun i => ?_)
   obtain ⟨j, hj₁, hj₂⟩ := hs i
   exact ⟨⟨j, hj₁⟩, hj₂⟩
 
-theorem initiallySmall_iff_exists_small_weakly_initial_set [IsCofilteredOrEmpty J] :
-    InitiallySmall.{v} J ↔ ∃ (s : Set J) (_ : Small.{v} s), ∀ i, ∃ j ∈ s, Nonempty (j ⟶ i) := by
+theorem initiallySmall_iff_exists_small_weakly_initial_set [IsCofilteredOrEmpty J]
+    [LocallySmall.{w} J] :
+    InitiallySmall.{w} J ↔ ∃ (s : Set J) (_ : Small.{w} s), ∀ i, ∃ j ∈ s, Nonempty (j ⟶ i) := by
   refine ⟨fun _ => InitiallySmall.exists_small_weakly_initial_set _, fun h => ?_⟩
   rcases h with ⟨s, hs, hs'⟩
   exact initiallySmall_of_small_weakly_initial_set s hs'
@@ -223,11 +227,13 @@ end WeaklyInitial
 namespace Limits
 
 theorem hasColimitsOfShape_of_finallySmall (J : Type u) [Category.{v} J] [FinallySmall.{w} J]
-    (C : Type u₁) [Category.{v₁} C] [HasColimitsOfSize.{w, w} C] : HasColimitsOfShape J C :=
+    (C : Type u₁) [Category.{v₁} C] [HasColimitsOfShape (FinalModel J) C] :
+    HasColimitsOfShape J C :=
   Final.hasColimitsOfShape_of_final (fromFinalModel J)
 
 theorem hasLimitsOfShape_of_initiallySmall (J : Type u) [Category.{v} J] [InitiallySmall.{w} J]
-    (C : Type u₁) [Category.{v₁} C] [HasLimitsOfSize.{w, w} C] : HasLimitsOfShape J C :=
+    (C : Type u₁) [Category.{v₁} C] [HasLimitsOfShape (InitialModel J) C] :
+    HasLimitsOfShape J C :=
   Initial.hasLimitsOfShape_of_initial (fromInitialModel J)
 
 end Limits

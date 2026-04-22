@@ -74,8 +74,9 @@ instance {C : Type u₁} [Category.{v₁} C] : MonoidalClosed (C ⥤ Type (max u
 
 -- TODO: once we have `MonoidalClosed` instances for functor categories into general monoidal
 -- closed categories, replace this with that, as it will be a more explicit construction.
-instance {C : Type u₁} [Category.{v₁} C] [EssentiallySmall.{v₁} C] :
+instance {C : Type u₁} [Category.{v₁} C] [Small.{v₁} (Skeleton C)] :
     MonoidalClosed (C ⥤ Type v₁) :=
+  letI : EssentiallySmall.{v₁} C := (essentiallySmall_iff C).2 ⟨inferInstance, inferInstance⟩
   let e : (SmallModel C) ⥤ Type v₁ ≌ C ⥤ Type v₁ :=
     Functor.asEquivalence ((Functor.whiskeringLeft _ _ _).obj (equivSmallModel _).functor)
   cartesianClosedOfEquiv e

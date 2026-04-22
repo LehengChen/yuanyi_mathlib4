@@ -234,14 +234,23 @@ set_option backward.isDefEq.respectTransparency false in
 variable {R} in
 lemma extMk_comp_mk₀ {n : ℕ} (f : X ⟶ R.cocomplex.X n) (m : ℕ) (hm : n + 1 = m)
     (hf : f ≫ R.cocomplex.d n m = 0)
-    {Y' : C} {R' : InjectiveResolution Y'} {g : Y ⟶ Y'} (φ : Hom R R' g) :
+    {Y' : C} {R' : InjectiveResolution Y'} {g : Y ⟶ Y'}
+    (φ : R.cochainComplex ⟶ R'.cochainComplex)
+    (hφ : R.ι' ≫ φ = (CochainComplex.singleFunctor C 0).map g ≫ R'.ι') :
     (R.extMk f m hm hf).comp (Ext.mk₀ g) (add_zero _) =
-      R'.extMk (f ≫ φ.hom.f n) m hm (by simp [reassoc_of% hf]) := by
-  have := HasDerivedCategory.standard C
+      R'.extMk
+        (f ≫ (R.cochainComplexXIso n n rfl).inv ≫ φ.f n ≫
+          (R'.cochainComplexXIso n n rfl).hom) m hm (by
+            rw [← cancel_mono (R'.cochainComplexXIso m m rfl).inv]
+            simp [Category.assoc, ← R'.cochainComplex_d n m n m rfl rfl, φ.comm,
+              R.cochainComplex_d n m n m rfl rfl, reassoc_of% hf]) := by
+  letI := HasDerivedCategory.standard C
   ext
-  have : (f ≫ φ.hom.f n) ≫ (R'.cochainComplexXIso n n (by lia)).inv =
-      (f ≫ (R.cochainComplexXIso n n (by lia)).inv) ≫ φ.hom'.f n := by
-    simp [φ.hom'_f n n rfl]
+  have : (f ≫ (R.cochainComplexXIso n n rfl).inv ≫ φ.f n ≫
+        (R'.cochainComplexXIso n n rfl).hom) ≫
+      (R'.cochainComplexXIso n n (by lia)).inv =
+      (f ≫ (R.cochainComplexXIso n n (by lia)).inv) ≫ φ.f n := by
+    simp
   simp only [Ext.comp_hom, extMk_hom, Ext.mk₀_hom, this]
   rw [Cocycle.fromSingleMk_postcomp _ (zero_add _) _ (by lia)
       (by simp [R.cochainComplex_d _ _ _ _ rfl rfl, reassoc_of% hf]),
@@ -255,6 +264,6 @@ lemma extMk_comp_mk₀ {n : ℕ} (f : X ⟶ R.cocomplex.X n) (m : ℕ) (hm : n +
   rw [Category.assoc, ← NatTrans.naturality, ← Category.assoc, ← Category.assoc]
   congr 1
   simpa only [IsIso.eq_comp_inv, Category.assoc, IsIso.inv_comp_eq,
-    Functor.map_comp] using DerivedCategory.Q.congr_map φ.ι'_comp_hom'.symm
+    Functor.map_comp] using DerivedCategory.Q.congr_map hφ.symm
 
 end CategoryTheory.InjectiveResolution

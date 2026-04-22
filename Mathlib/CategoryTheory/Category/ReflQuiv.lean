@@ -299,12 +299,14 @@ instance (V : Type*) [ReflQuiver V] [Unique V] : Unique (FreeRefl V) :=
   inferInstanceAs (Unique (Quotient _))
 
 instance (V : Type*) [ReflQuiver V] [Unique V]
-    [∀ (x y : V), Unique (x ⟶ y)] (x y : FreeRefl V) :
+    [∀ (x y : V), Subsingleton (x ⟶ y)] (x y : FreeRefl V) :
     Unique (x ⟶ y) where
-  default := homMk default
+  default := by
+    obtain rfl : x = y := by subsingleton
+    exact 𝟙 x
   uniq f := by
     induction f using hom_induction with
-    | id => congr; subsingleton
+    | id => simp
     | @comp_homMk x y z _ g h =>
       obtain rfl := Subsingleton.elim y z
       obtain rfl := Subsingleton.elim g (𝟙rq _)

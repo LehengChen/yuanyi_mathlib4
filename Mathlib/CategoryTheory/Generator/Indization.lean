@@ -38,7 +38,8 @@ end
 
 section
 
-variable {C : Type u} [SmallCategory C] [Preadditive C] [HasFiniteColimits C]
+variable {C : Type u} [Category.{v} C] [HasZeroMorphisms (Ind C)]
+  [HasCoproduct (Ind.yoneda : C ⥤ _).obj]
 
 theorem Ind.isSeparator_range_yoneda : IsSeparator (∐ (Ind.yoneda : C ⥤ _).obj) :=
   Ind.isSeparating_range_yoneda.isSeparator_coproduct

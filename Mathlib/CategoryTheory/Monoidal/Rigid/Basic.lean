@@ -422,12 +422,12 @@ theorem tensorRightHomEquiv_symm_coevaluation_comp_whiskerRight {Y Y' Z : C} [Ex
       rw [evaluation_coevaluation'']; monoidal
 
 @[simp]
-theorem tensorLeftHomEquiv_whiskerLeft_comp_evaluation {Y Z : C} [HasLeftDual Z] (f : Y ⟶ ᘁZ) :
-    (tensorLeftHomEquiv _ _ _ _) (Z ◁ f ≫ ε_ _ _) = f ≫ (ρ_ _).inv :=
+theorem tensorLeftHomEquiv_whiskerLeft_comp_evaluation {X Y Z : C} [ExactPairing X Z]
+    (f : Y ⟶ X) : (tensorLeftHomEquiv _ X Z _) (Z ◁ f ≫ ε_ X Z) = f ≫ (ρ_ X).inv :=
   calc
-    _ = 𝟙 _ ⊗≫ (η_ (ᘁZ : C) Z ▷ Y ≫ ((ᘁZ) ⊗ Z) ◁ f) ⊗≫ (ᘁZ) ◁ ε_ (ᘁZ) Z := by
+    _ = 𝟙 _ ⊗≫ (η_ X Z ▷ Y ≫ (X ⊗ Z) ◁ f) ⊗≫ X ◁ ε_ X Z := by
       dsimp [tensorLeftHomEquiv]; monoidal
-    _ = f ⊗≫ (η_ (ᘁZ) Z ▷ (ᘁZ) ⊗≫ (ᘁZ) ◁ ε_ (ᘁZ) Z) := by
+    _ = f ⊗≫ (η_ X Z ▷ X ⊗≫ X ◁ ε_ X Z) := by
       rw [← whisker_exchange]; monoidal
     _ = _ := by
       rw [evaluation_coevaluation'']; monoidal
@@ -445,12 +445,13 @@ theorem tensorRightHomEquiv_whiskerLeft_comp_evaluation {X Y : C} [HasRightDual 
   simp
 
 @[simp]
-theorem tensorRightHomEquiv_whiskerRight_comp_evaluation {X Y : C} [HasRightDual X] (f : Y ⟶ Xᘁ) :
-    (tensorRightHomEquiv _ _ _ _) (f ▷ X ≫ ε_ X (Xᘁ)) = f ≫ (λ_ _).inv :=
+theorem tensorRightHomEquiv_whiskerRight_comp_evaluation {X Y Z : C} [ExactPairing X Z]
+    (f : Y ⟶ Z) :
+    (tensorRightHomEquiv Y X Z (𝟙_ C)) (f ▷ X ≫ ε_ X Z) = f ≫ (λ_ Z).inv :=
   calc
-    _ = 𝟙 _ ⊗≫ (Y ◁ η_ X Xᘁ ≫ f ▷ (X ⊗ Xᘁ)) ⊗≫ ε_ X Xᘁ ▷ Xᘁ := by
+    _ = 𝟙 _ ⊗≫ (Y ◁ η_ X Z ≫ f ▷ (X ⊗ Z)) ⊗≫ ε_ X Z ▷ Z := by
       dsimp [tensorRightHomEquiv]; monoidal
-    _ = f ⊗≫ (Xᘁ ◁ η_ X Xᘁ ⊗≫ ε_ X Xᘁ ▷ Xᘁ) := by
+    _ = f ⊗≫ (Z ◁ η_ X Z ⊗≫ ε_ X Z ▷ Z) := by
       rw [whisker_exchange]; monoidal
     _ = _ := by
       rw [coevaluation_evaluation'']; monoidal
