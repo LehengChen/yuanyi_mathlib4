@@ -84,10 +84,21 @@ theorem effectiveEpiFamily_tfae
     simpa [← effectiveEpi_desc_iff_effectiveEpiFamily, (effectiveEpi_tfae (Sigma.desc π)).out 0 1]
   tfae_have 1 → 2 := fun _ ↦ inferInstance
   tfae_have 3 ↔ 1 := by
-    erw [((CompHaus.effectiveEpiFamily_tfae
-      (fun a ↦ Stonean.toCompHaus.obj (X a)) (fun a ↦ Stonean.toCompHaus.map (π a))).out 2 0 :)]
-    exact ⟨fun h ↦ Stonean.toCompHaus.finite_effectiveEpiFamily_of_map _ _ h,
-      fun _ ↦ inferInstance⟩
+    let hComp := CompHaus.effectiveEpiFamily_tfae
+      (fun a ↦ Stonean.toCompHaus.obj (X a)) (fun a ↦ Stonean.toCompHaus.map (π a))
+    constructor
+    · intro h
+      have h' :
+          ∀ b : Stonean.toCompHaus.obj B,
+            ∃ (a : α) (x : Stonean.toCompHaus.obj (X a)), Stonean.toCompHaus.map (π a) x = b :=
+        h
+      exact Stonean.toCompHaus.finite_effectiveEpiFamily_of_map _ _ ((hComp.out 2 0).mp h')
+    · intro h
+      have h' :
+          EffectiveEpiFamily (fun a ↦ Stonean.toCompHaus.obj (X a))
+            (fun a ↦ Stonean.toCompHaus.map (π a)) := by
+        infer_instance
+      exact (hComp.out 0 2).mp h'
   tfae_finish
 
 theorem effectiveEpiFamily_of_jointly_surjective
