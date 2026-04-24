@@ -46,6 +46,14 @@ instance categoryPaths : Category.{max u₁ v₁} (Paths V) where
   id _ := Quiver.Path.nil
   comp f g := Quiver.Path.comp f g
 
+private lemma nil_eq_id (X : V) : (Quiver.Path.nil : Quiver.Path X X) =
+    (@CategoryStruct.id (Paths V) (categoryPaths V).toCategoryStruct (X : Paths V) :
+      Quiver.Path X X) := rfl
+
+private lemma cons_eq_comp_toPath {X Y Z : V} (p : Quiver.Path X Y) (e : Quiver.Hom Y Z) :
+    p.cons e = (@CategoryStruct.comp (Paths V) (categoryPaths V).toCategoryStruct
+      (X : Paths V) (Y : Paths V) (Z : Paths V) p e.toPath : Quiver.Path X Z) := rfl
+
 /-- The inclusion of a quiver `V` into its path category, as a prefunctor.
 -/
 @[simps]
@@ -179,12 +187,14 @@ theorem ext_functor {C} [Category* C] {F G : Paths V ⥤ C} (h_obj : F.obj = G.o
   fapply Functor.ext
   · intro X
     rw [h_obj]
-  · intro X Y f
+  · intro (X : V) (Y : V) f
     induction f with
-    | nil => erw [F.map_id, G.map_id, Category.id_comp, eqToHom_trans, eqToHom_refl]
+    | nil =>
+      simp only [nil_eq_id, F.map_id, G.map_id, Category.id_comp, eqToHom_trans,
+        eqToHom_refl]
     | cons g e ih =>
-      erw [F.map_comp g (Quiver.Hom.toPath e), G.map_comp g (Quiver.Hom.toPath e), ih, h]
-      simp only [Category.id_comp, eqToHom_refl, eqToHom_trans_assoc, Category.assoc]
+      simp only [cons_eq_comp_toPath, F.map_comp, G.map_comp, ih, h, Category.id_comp,
+        eqToHom_refl, eqToHom_trans_assoc, Category.assoc]
 
 end Paths
 
