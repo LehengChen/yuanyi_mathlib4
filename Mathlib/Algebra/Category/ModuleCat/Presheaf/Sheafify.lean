@@ -32,6 +32,14 @@ open CategoryTheory Functor
 
 variable {C : Type u₁} [Category.{v₁} C] {J : GrothendieckTopology C}
 
+namespace PresheafOfModules
+
+@[simp] private lemma presheaf_map_apply {R : Cᵒᵖ ⥤ RingCat.{u}} (M : PresheafOfModules.{v} R)
+    {X Y : Cᵒᵖ} (f : X ⟶ Y) (x : M.obj X) :
+    (ConcreteCategory.hom (M.presheaf.map f)) x = M.map f x := rfl
+
+end PresheafOfModules
+
 namespace CategoryTheory
 
 namespace Presieve.FamilyOfElements
@@ -70,8 +78,9 @@ lemma _root_.PresheafOfModules.Sheafify.app_eq_of_isLocallyInjective
     · exact Presheaf.equalizerSieve_mem J φ _ _ hm₀
   · intro Z g hg
     rw [← NatTrans.naturality_apply (D := Ab), ← NatTrans.naturality_apply (D := Ab)]
-    erw [M₀.map_smul, M₀.map_smul, hg.1, hg.2]
-    rfl
+    simp only [PresheafOfModules.presheaf_map_apply, M₀.map_smul]
+    rw [hg.1, ← PresheafOfModules.presheaf_map_apply M₀ g.op, hg.2,
+      PresheafOfModules.presheaf_map_apply]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma isCompatible_map_smul_aux {Y Z : C} (f : Y ⟶ X) (g : Z ⟶ Y)
@@ -85,7 +94,7 @@ lemma isCompatible_map_smul_aux {Y Z : C} (f : Y ⟶ X) (g : Z ⟶ Y)
   · rw [hr₀', R.map_comp, RingCat.comp_apply, ← hr₀, ← RingCat.comp_apply, NatTrans.naturality,
       RingCat.comp_apply]
   · rw [hm₀', A.map_comp, AddCommGrpCat.coe_comp, Function.comp_apply, ← hm₀]
-    erw [NatTrans.naturality_apply φ]
+    rw [← PresheafOfModules.presheaf_map_apply M₀ g.op, NatTrans.naturality_apply φ]
 
 variable (hr₀ : (r₀.map (whiskerRight α (forget _))).IsAmalgamation r)
   (hm₀ : (m₀.map (whiskerRight φ (forget _))).IsAmalgamation m)
@@ -164,12 +173,12 @@ def SMulCandidate.mk' (S : Sieve X.unop) (hS : S ∈ J X.unop)
     rintro Z g hg
     dsimp at hg
     rw [← ConcreteCategory.comp_apply, ← A.obj.map_comp, ← NatTrans.naturality_apply (D := Ab)]
-    erw [M₀.map_smul] -- Mismatch between `M₀.map` and `M₀.presheaf.map`
+    simp only [PresheafOfModules.presheaf_map_apply, M₀.map_smul]
     refine (ha _ hg).trans (app_eq_of_isLocallyInjective α φ A.isSeparated _ _ _ _ ?_ ?_)
     · rw [← RingCat.comp_apply, NatTrans.naturality, RingCat.comp_apply, ha₀]
       apply (hr₀ _ hg).symm.trans
       simp
-    · erw [NatTrans.naturality_apply φ, hb₀]
+    · rw [← PresheafOfModules.presheaf_map_apply M₀ g.op, NatTrans.naturality_apply φ, hb₀]
       apply (hm₀ _ hg).symm.trans
       dsimp
       rw [Functor.map_comp]
