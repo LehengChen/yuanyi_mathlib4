@@ -152,11 +152,13 @@ lemma isSimple_of_isAtom (I : LieIdeal R L) (hI : IsAtom I) : IsSimple R I where
         apply add_mem
         -- Now `⁅a, y⁆ ∈ J` since `a ∈ I`, `y ∈ J`, and `J` is an ideal of `I`.
         · simp only [Submodule.mem_map, LieSubmodule.mem_toSubmodule, Subtype.exists]
-          erw [Submodule.coe_subtype]
+          simp only [LieHom.coe_toLinearMap, LieIdeal.incl_apply]
           simp only [exists_and_right, exists_eq_right, ha, lie_mem_left, exists_true_left]
           exact lie_mem_right R I J ⟨a, ha⟩ y hy
         -- Finally `⁅b, y⁆ = 0`, by the independence of the atoms.
-        · suffices ⁅b, y.val⁆ = 0 by erw [this]; simp only [zero_mem]
+        · suffices ⁅b, y.val⁆ = 0 by
+            rw [LieHom.coe_toLinearMap, LieIdeal.incl_apply, this]
+            simp only [zero_mem]
           rw [← LieSubmodule.mem_bot (R := R) (L := L),
               ← (IsSemisimple.sSupIndep_isAtom hI).eq_bot]
           exact ⟨lie_mem_right R L I b y y.2, lie_mem_left _ _ _ _ _ hb⟩ }
