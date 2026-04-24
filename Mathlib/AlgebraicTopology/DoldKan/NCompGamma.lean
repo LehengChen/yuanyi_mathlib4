@@ -37,6 +37,14 @@ namespace DoldKan
 
 variable {C : Type*} [Category* C] [Preadditive C]
 
+private lemma P_f_comp (X : SimplicialObject C) (q n : ℕ) {Y : C} (f : X _⦋n⦌ ⟶ Y) :
+    (P q : K[X] ⟶ K[X]).f n ≫ f =
+      @CategoryStruct.comp C _ (K[X].X n) (X _⦋n⦌) Y ((P q : K[X] ⟶ K[X]).f n) f := rfl
+
+private lemma IndexSet_pull_fst_unop {Δ Δ' : SimplexCategoryᵒᵖ} (A : Splitting.IndexSet Δ)
+    (θ : Δ ⟶ Δ') :
+    unop (A.pull θ).fst = image (θ.unop ≫ A.e) := rfl
+
 theorem PInfty_comp_map_mono_eq_zero (X : SimplicialObject C) {n : ℕ} {Δ' : SimplexCategory}
     (i : Δ' ⟶ ⦋n⦌) [hi : Mono i] (h₁ : Δ'.len ≠ n) (h₂ : ¬Isδ₀ i) :
     PInfty.f n ≫ X.map i.op = 0 := by
@@ -68,11 +76,15 @@ theorem PInfty_comp_map_mono_eq_zero (X : SimplicialObject C) {n : ℕ} {Δ' : S
     · subst hj₁
       rw [assoc, ← SimplexCategory.δ_comp_δ'' (Fin.zero_le _)]
       simp only [op_comp, X.map_comp, assoc, PInfty_f]
-      erw [(HigherFacesVanish.of_P _ _).comp_δ_eq_zero_assoc _ j₂.succ_ne_zero, zero_comp]
+      simp only [← SimplicialObject.δ_def]
+      rw [P_f_comp]
+      rw [(HigherFacesVanish.of_P _ _).comp_δ_eq_zero_assoc _ j₂.succ_ne_zero, zero_comp]
       simp only [Fin.succ]
       lia
     · simp only [op_comp, X.map_comp, assoc, PInfty_f]
-      erw [(HigherFacesVanish.of_P _ _).comp_δ_eq_zero_assoc _ hj₁, zero_comp]
+      simp only [← SimplicialObject.δ_def]
+      rw [P_f_comp]
+      rw [(HigherFacesVanish.of_P _ _).comp_δ_eq_zero_assoc _ hj₁, zero_comp]
       by_contra
       exact hj₁ (by simp only [Fin.ext_iff, Fin.val_zero]; lia)
 
@@ -136,7 +148,8 @@ def natTrans : (N₁ : SimplicialObject C ⥤ _) ⋙ Γ₂ ⟶ toKaroubi _ where
             change _ ≫ (Γ₀.obj K[X]).map θ ≫ _ = _
             simp only [Splitting.ι_desc_assoc, assoc, Γ₀.Obj.map_on_summand'_assoc,
               Splitting.ι_desc]
-            erw [Γ₀_obj_termwise_mapMono_comp_PInfty_assoc X (image.ι (θ.unop ≫ A.e))]
+            simp only [IndexSet_pull_fst_unop]
+            rw [Γ₀_obj_termwise_mapMono_comp_PInfty_assoc X (image.ι (θ.unop ≫ A.e))]
             dsimp only [toKaroubi]
             simp only [← X.map_comp]
             congr 2
@@ -191,7 +204,7 @@ theorem compatibility_Γ₂N₁_Γ₂N₂_natTrans (X : SimplicialObject C) :
     NatTrans.comp_app]
   rw [N₂.map_id, Γ₂.map_id, Iso.app_inv]
   dsimp only [toKaroubi]
-  erw [id_comp]
+  simp only [Functor.comp_obj, id_comp]
   rw [comp_id, Iso.inv_hom_id_app_assoc]
 
 set_option backward.isDefEq.respectTransparency false in
