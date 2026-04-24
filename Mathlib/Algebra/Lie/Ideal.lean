@@ -72,6 +72,10 @@ theorem LieIdeal.toLieSubalgebra_toSubmodule (I : LieIdeal R L) :
     ((I : LieSubalgebra R L) : Submodule R L) = LieSubmodule.toSubmodule I :=
   rfl
 
+@[simp]
+theorem LieIdeal.coe_toLieSubalgebra_toSubmodule (I : LieIdeal R L) :
+    (↑((I : LieSubalgebra R L).toSubmodule) : Set L) = I := rfl
+
 /-- An ideal of `L` is a Lie subalgebra of `L`, so it is a Lie ring. -/
 instance LieIdeal.lieRing (I : LieIdeal R L) : LieRing I :=
   inferInstanceAs <| LieRing I.toLieSubalgebra
@@ -217,16 +221,11 @@ theorem comap_mono : Monotone (comap f) := fun J₁ J₂ h ↦ by
 theorem map_of_image (h : f '' I = J) : I.map f = J := by
   apply le_antisymm
   · rw [map, LieSubmodule.lieSpan_le, Submodule.map_coe]
-    /- I'm uncertain how to best resolve this `erw`.
-    ```
-    have : (↑(toLieSubalgebra R L I).toSubmodule : Set L) = I := rfl
-    rw [this]
-    simp [h]
-    ```
-    works, but still feels awkward. There are missing `simp` lemmas here.`
-    -/
-    erw [h]
-  · rw [← SetLike.coe_subset_coe, ← h]; exact LieSubmodule.subset_lieSpan
+    rw [← h]
+    rw [LieIdeal.coe_toLieSubalgebra_toSubmodule]
+    rfl
+  · rw [← SetLike.coe_subset_coe, ← h]
+    apply LieSubmodule.subset_lieSpan
 
 /-- Note that this is not a special case of `LieSubmodule.subsingleton_of_bot`. Indeed, given
 `I : LieIdeal R L`, in general the two lattices `LieIdeal R I` and `LieSubmodule R L I` are
@@ -398,14 +397,22 @@ theorem inclusion_injective {I₁ I₂ : LieIdeal R L} (h : I₁ ≤ I₂) :
   simp only [inclusion_apply, imp_self, Subtype.mk_eq_mk, SetLike.coe_eq_coe]
 
 theorem map_sup_ker_eq_map : LieIdeal.map f (I ⊔ f.ker) = LieIdeal.map f I := by
-  refine le_antisymm ?_ (LieIdeal.map_mono le_sup_left)
-  apply LieSubmodule.lieSpan_mono
-  rintro x ⟨y, hy₁, hy₂⟩
-  rw [← hy₂]
-  erw [LieSubmodule.mem_sup] at hy₁
-  obtain ⟨z₁, hz₁, z₂, hz₂, hy⟩ := hy₁
-  rw [← hy]
-  rw [map_add, f.coe_toLinearMap, LieHom.mem_ker.mp hz₂, add_zero]; exact ⟨z₁, hz₁, rfl⟩
+  apply le_antisymm
+  · apply LieSubmodule.lieSpan_mono
+    rintro x ⟨y, hy₁, hy₂⟩
+    rw [← hy₂]
+    rw [LieIdeal.coe_toLieSubalgebra_toSubmodule, LieSubmodule.mem_coe,
+      LieSubmodule.mem_sup] at hy₁
+    obtain ⟨z₁, hz₁, z₂, hz₂, hy⟩ := hy₁
+    rw [← hy]
+    rw [map_add, f.coe_toLinearMap, LieHom.mem_ker.mp hz₂, add_zero]
+    use z₁
+    constructor
+    · rw [LieIdeal.coe_toLieSubalgebra_toSubmodule, LieSubmodule.mem_coe]
+      assumption
+    · rfl
+  · apply LieIdeal.map_mono
+    apply le_sup_left
 
 @[simp]
 theorem map_sup_ker_eq_map' :
