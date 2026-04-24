@@ -94,6 +94,29 @@ scoped instance Algebra_of_Mon_ (A : ModuleCat.{u} R) [MonObj A] : Algebra R A w
 theorem algebraMap (A : ModuleCat.{u} R) [MonObj A] (r : R) : algebraMap R A r = η[A] r :=
   rfl
 
+private theorem alg_tensorUnit_mk_left_apply (A : AlgCat.{u} R) (r : R) (a : ModuleCat.of R A) :
+    ((TensorProduct.mk R (MonoidalCategoryStruct.tensorUnit (ModuleCat R)) A) r) a =
+      r ⊗ₜ[R] a := rfl
+
+private theorem alg_tensorUnit_mk_right_apply (A : AlgCat.{u} R) (a : ModuleCat.of R A) (r : R) :
+    ((TensorProduct.mk R A (MonoidalCategoryStruct.tensorUnit (ModuleCat R))) a) r =
+      a ⊗ₜ[R] r := rfl
+
+private theorem alg_tensorObj_mk_apply (A : AlgCat.{u} R) (x y z : of R A) :
+    ((TensorProduct.mk R
+        (MonoidalCategoryStruct.tensorObj (C := ModuleCat R) (of R A) (of R A)) A)
+      (x ⊗ₜ[R] y)) z = (x ⊗ₜ[R] y) ⊗ₜ[R] z := rfl
+
+private theorem alg_hom_algebraLinearMap_apply (A : AlgCat.{u} R) (r : R) :
+    (ConcreteCategory.hom (↟(Algebra.linearMap R A))) r =
+      _root_.algebraMap R A r := rfl
+
+private theorem alg_concrete_hom_mul'_tmul (A : AlgCat.{u} R) (x y : ModuleCat.of R A) :
+    (ConcreteCategory.hom (↟(LinearMap.mul' R A))) (x ⊗ₜ[R] y) = x * y := rfl
+
+private theorem alg_hom_mul'_tmul (A : AlgCat.{u} R) (x y : ModuleCat.of R A) :
+    (Hom.hom (↟(LinearMap.mul' R A))) (x ⊗ₜ[R] y) = x * y := rfl
+
 /-- Converting a monoid object in `ModuleCat R` to a bundled algebra.
 -/
 @[simps!]
@@ -124,10 +147,10 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     --    LinearMap.compr₂_apply, Function.comp_apply, RingHom.map_one,
     --    ModuleCat.MonoidalCategory.tensorHom_tmul, AlgCat.hom_comp,
     --    ModuleCat.MonoidalCategory.leftUnitor_hom_apply]
-    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
     dsimp
-    erw [LinearMap.mul'_apply, MonoidalCategory.leftUnitor_hom_apply, ← Algebra.smul_def]
-    dsimp
+    rw [alg_tensorUnit_mk_left_apply, ModuleCat.MonoidalCategory.whiskerRight_apply,
+      LinearMap.mul'_apply, ModuleCat.MonoidalCategory.leftUnitor_hom_apply,
+      alg_hom_algebraLinearMap_apply, ← Algebra.smul_def]
   mul_one := by
     ext : 1
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
@@ -136,12 +159,11 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     -- dsimp only [AlgCat.id_apply, TensorProduct.mk_apply, Algebra.linearMap_apply,
     --   LinearMap.compr₂_apply, Function.comp_apply, ModuleCat.MonoidalCategory.hom_apply,
     --   AlgCat.coe_comp]
-    -- Porting note: because `dsimp` is not effective, `rw` needs to be changed to `erw`
-    erw [compr₂_apply, compr₂ₛₗ_apply]
-    simp only [hom_comp, hom_ofHom, id_coe, id_eq, LinearMap.comp_apply]
-    erw [LinearMap.mul'_apply, ModuleCat.MonoidalCategory.rightUnitor_hom_apply, ← Algebra.commutes,
-      ← Algebra.smul_def]
-    dsimp
+    simp only [compr₂ₛₗ_apply]
+    simp only [hom_comp, hom_ofHom, LinearMap.comp_apply]
+    rw [alg_tensorUnit_mk_right_apply, ModuleCat.MonoidalCategory.whiskerLeft_apply,
+      LinearMap.mul'_apply, ModuleCat.MonoidalCategory.rightUnitor_hom_apply,
+      alg_hom_algebraLinearMap_apply, ← Algebra.commutes, ← Algebra.smul_def]
   mul_assoc := by
     ext : 1
     -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11041): `ext` did not pick up `TensorProduct.ext`
@@ -150,9 +172,10 @@ def inverseObj (A : AlgCat.{u} R) : MonObj (ModuleCat.of R A) where
     dsimp only [compr₂ₛₗ_apply, TensorProduct.mk_apply]
     rw [hom_comp, LinearMap.comp_apply, hom_comp, LinearMap.comp_apply, hom_comp,
         LinearMap.comp_apply]
-    erw [LinearMap.mul'_apply, LinearMap.mul'_apply]
-    dsimp only [id_coe, id_eq]
-    erw [TensorProduct.mk_apply, TensorProduct.mk_apply, mul'_apply, LinearMap.id_apply, mul'_apply]
+    rw [alg_tensorObj_mk_apply, ModuleCat.MonoidalCategory.whiskerRight_apply,
+      ModuleCat.MonoidalCategory.associator_hom_apply,
+      ModuleCat.MonoidalCategory.whiskerLeft_apply, alg_concrete_hom_mul'_tmul,
+      alg_hom_mul'_tmul, alg_concrete_hom_mul'_tmul, alg_hom_mul'_tmul]
     simp only [_root_.mul_assoc]
 
 attribute [local instance] inverseObj
