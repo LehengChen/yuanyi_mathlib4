@@ -35,7 +35,9 @@ noncomputable instance :
     (colim (J := J) (C := AddCommGrpCat.{u})).PreservesHomology :=
   Functor.preservesHomology_of_map_exact _ (fun S hS ↦ by
     replace hS := fun j => hS.map ((evaluation _ _).obj j)
-    simp only [ShortComplex.ab_exact_iff_ker_le_range] at hS ⊢
+    simp only [ShortComplex.ab_exact_iff_ker_le_range, ShortComplex.map_X₁, ShortComplex.map_X₂,
+      ShortComplex.map_X₃, ShortComplex.map_f, ShortComplex.map_g, evaluation_obj_obj,
+      evaluation_obj_map] at hS ⊢
     intro x (hx : _ = _)
     dsimp at hx
     rcases Concrete.colimit_exists_rep S.X₂ x with ⟨j, y, rfl⟩
@@ -46,8 +48,9 @@ noncomputable instance :
       at hk
     rcases hS k hk with ⟨t, ht⟩
     use colimit.ι S.X₁ k t
-    erw [← ConcreteCategory.comp_apply, colimit.ι_map, ConcreteCategory.comp_apply, ht]
-    exact colimit.w_apply S.X₂ e₁ y)
+    simp only [AddCommGrpCat.Hom.hom, colim_obj]
+    rw [← ConcreteCategory.comp_apply, colimit.ι_map, ConcreteCategory.comp_apply, ht]
+    rw [colimit.w_apply S.X₂ e₁ y])
 
 noncomputable instance :
     PreservesFiniteLimits <| colim (J := J) (C := AddCommGrpCat.{u}) := by
