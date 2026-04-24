@@ -226,8 +226,11 @@ lemma prod_preservesConnectedLimits [IsConnected J] (X : C) :
             prod.lift (s.π.app (Classical.arbitrary _) ≫ Limits.prod.fst) (l.lift (forgetCone s))
           fac := fun s j => by
             apply Limits.prod.hom_ext
-            · erw [assoc, limMap_π, comp_id, limit.lift_π]
-              exact (nat_trans_from_is_connected (s.π ≫ γ₁ X) j (Classical.arbitrary _)).symm
+            · simp only [Functor.mapCone_π_app, assoc, prod.functor_obj_map, prod.map_fst,
+                comp_id, prod.lift_fst]
+              rw [← γ₁_app X (Classical.arbitrary J), ← γ₁_app X j]
+              rw [← NatTrans.comp_app, ← NatTrans.comp_app]
+              rw [nat_trans_from_is_connected (s.π ≫ γ₁ X) (Classical.arbitrary _) j]
             · simp
           uniq := fun s m L => by
             apply Limits.prod.hom_ext
