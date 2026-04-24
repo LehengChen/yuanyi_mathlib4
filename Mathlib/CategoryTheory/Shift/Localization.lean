@@ -203,7 +203,7 @@ noncomputable def commShiftOfLocalization : F'.CommShift A where
     rw [← cancel_epi (F'.map ((shiftFunctor D b).map ((L.commShiftIso a).hom.app X))),
       ← F'.map_comp_assoc, ← map_comp, Iso.hom_inv_id_app, map_id, map_id, Category.id_comp]
     conv_lhs =>
-      erw [← NatTrans.naturality_assoc]
+      rw [← NatTrans.naturality_assoc]
       dsimp
       rw [← Functor.map_comp_assoc, ← map_comp_assoc, Category.assoc,
         ← map_comp, Iso.inv_hom_id_app]
@@ -211,7 +211,8 @@ noncomputable def commShiftOfLocalization : F'.CommShift A where
       rw [map_id, Category.comp_id, ← NatTrans.naturality]
       dsimp
     conv_rhs =>
-      erw [← NatTrans.naturality_assoc]
+      rw (occs := .pos [2]) [← Functor.comp_map]
+      rw [← NatTrans.naturality_assoc]
       dsimp
       rw [← Functor.map_comp_assoc, ← map_comp, Iso.hom_inv_id_app]
       dsimp
