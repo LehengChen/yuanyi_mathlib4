@@ -65,15 +65,14 @@ noncomputable def colimitCocone : Cocone F where
   pt := mkOfSMul (coconePointSMul F)
   ι :=
     { app := fun j => homMk (colimit.ι (F ⋙ forget₂ _ AddCommGrpCat) j) (fun r => by
-        dsimp
-        -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-        erw [mkOfSMul_smul]
+        simp only [Functor.const_obj_obj]
+        rw [mkOfSMul_smul]
         simp)
       naturality := fun i j f => by
         apply (forget₂ _ AddCommGrpCat).map_injective
-        simp only [Functor.map_comp, forget₂_map_homMk]
-        dsimp
-        erw [colimit.w (F ⋙ forget₂ _ AddCommGrpCat), comp_id] }
+        simp only [Functor.map_comp, forget₂_map_homMk, Functor.const_obj_map]
+        rw [← colimit.w (F ⋙ forget₂ _ AddCommGrpCat) f]
+        rfl }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The cocone for `F` constructed from the colimit of
@@ -82,22 +81,24 @@ noncomputable def isColimitColimitCocone : IsColimit (colimitCocone F) where
   desc s := homMk (colimit.desc _ ((forget₂ _ AddCommGrpCat).mapCocone s)) (fun r => by
     apply colimit.hom_ext
     intro j
-    dsimp
     rw [colimit.ι_desc_assoc]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [mkOfSMul_smul]
+    simp only [colimitCocone]
+    rw [mkOfSMul_smul]
     dsimp
     simp only [ι_colimMap_assoc, Functor.comp_obj, forget₂_obj, colimit.ι_desc,
-      Functor.mapCocone_pt, Functor.mapCocone_ι_app, forget₂_map]
-    exact smul_naturality (s.ι.app j) r)
+      Functor.mapCocone_pt, Functor.mapCocone_ι_app]
+    rw [← forget₂_map]
+    apply smul_naturality (s.ι.app j) r)
   fac s j := by
     apply (forget₂ _ AddCommGrpCat).map_injective
-    exact colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j
+    simp only [colimitCocone_ι_app, Functor.map_comp, forget₂_map_homMk, colimit.ι_desc]
+    rfl
   uniq s m hm := by
     apply (forget₂ _ AddCommGrpCat).map_injective
     apply colimit.hom_ext
     intro j
-    erw [colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j]
+    rw [forget₂_map_homMk]
+    rw [colimit.ι_desc ((forget₂ _ AddCommGrpCat).mapCocone s) j]
     dsimp
     rw [← hm]
     rfl
