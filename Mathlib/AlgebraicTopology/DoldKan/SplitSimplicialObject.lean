@@ -35,6 +35,9 @@ namespace Splitting
 variable {C : Type*} [Category* C] {X : SimplicialObject C}
   (s : Splitting X)
 
+@[simp]
+theorem cofan_pt {Δ : SimplexCategoryᵒᵖ} : (s.cofan Δ).pt = X.obj Δ := rfl
+
 /-- The projection on a summand of the coproduct decomposition given
 by a splitting of a simplicial object. -/
 noncomputable def πSummand [HasZeroMorphisms C] {Δ : SimplexCategoryᵒᵖ} (A : IndexSet Δ) :
@@ -65,7 +68,8 @@ theorem decomposition_id (Δ : SimplexCategoryᵒᵖ) :
   apply s.hom_ext'
   intro A
   dsimp
-  erw [comp_id, comp_sum, Finset.sum_eq_single A, cofan_inj_πSummand_eq_id_assoc]
+  rw [comp_sum, Finset.sum_eq_single A, cofan_inj_πSummand_eq_id_assoc]
+  · simp only [← cofan_pt, comp_id]
   · intro B _ h₂
     rw [s.cofan_inj_πSummand_eq_zero_assoc _ _ h₂, zero_comp]
   · simp
@@ -230,6 +234,11 @@ namespace Split
 
 variable {C : Type*} [Category* C] [Preadditive C] [HasFiniteCoproducts C]
 
+omit [HasFiniteCoproducts C] in
+@[simp]
+theorem alternatingFaceMapComplex_obj_eq (X : SimplicialObject C) :
+    (alternatingFaceMapComplex C).obj X = K[X] := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The functor which sends a split simplicial object in a preadditive category to
 the chain complex which consists of nondegenerate simplices. -/
@@ -240,8 +249,11 @@ noncomputable def nondegComplexFunctor : Split C ⥤ ChainComplex C ℕ where
     { f := Φ.f
       comm' := fun i j _ => by
         dsimp
-        erw [← cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋i⦌)),
-          ((alternatingFaceMapComplex C).map Φ.F).comm_assoc i j]
+        simp only [Splitting.cofan_inj_id]
+        rw [← Φ.comm_assoc i]
+        rw [← alternatingFaceMapComplex_map_f Φ.F i]
+        simp only [← alternatingFaceMapComplex_obj_eq]
+        rw [((alternatingFaceMapComplex C).map Φ.F).comm_assoc i j]
         simp only [assoc]
         congr 2
         apply S₁.s.hom_ext'
@@ -268,7 +280,8 @@ noncomputable def toKaroubiNondegComplexFunctorIsoN₁ :
     ext n
     dsimp
     simp only [assoc, PInfty_f_idem_assoc]
-    erw [← Split.cofan_inj_naturality_symm_assoc Φ (Splitting.IndexSet.id (op ⦋n⦌))]
+    simp only [Splitting.cofan_inj_id]
+    rw [← Φ.comm_assoc n]
     rw [PInfty_f_naturality]
 
 end Split
