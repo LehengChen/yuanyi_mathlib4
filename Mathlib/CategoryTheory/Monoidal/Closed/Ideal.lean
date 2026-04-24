@@ -273,8 +273,8 @@ theorem bijection_symm_apply_id (A B : C) :
     Equiv.symm_symm, Functor.FullyFaithful.homEquiv_apply, Functor.map_id, Iso.homCongr_symm,
     Iso.symm_symm_eq, Iso.refl_symm, Iso.homCongr_apply, Iso.refl_hom, Category.comp_id,
     unitCompPartialBijective_symm_apply, Functor.id_obj, Functor.comp_obj, Iso.symm_inv]
-  -- Porting note: added
-  erw [homEquiv_symm_apply_eq, homEquiv_symm_apply_eq, homEquiv_apply_eq, homEquiv_apply_eq]
+  rw [dsimp% homEquiv_symm_apply_eq, dsimp% homEquiv_symm_apply_eq,
+    dsimp% homEquiv_apply_eq, dsimp% homEquiv_apply_eq]
   rw [uncurry_natural_left, uncurry_curry, uncurry_natural_left, uncurry_curry,
     ← BraidedCategory.braiding_naturality_left_assoc, SymmetricCategory.symmetry_assoc,
     ← MonoidalCategory.whisker_exchange_assoc, ← tensorHom_def'_assoc,
@@ -292,9 +292,10 @@ set_option backward.isDefEq.respectTransparency false in
 theorem bijection_natural (A B : C) (X X' : D) (f : (reflector i).obj (A ⊗ B) ⟶ X) (g : X ⟶ X') :
     bijection i _ _ _ (f ≫ g) = bijection i _ _ _ f ≫ g := by
   dsimp [bijection]
-  -- Porting note: added
-  erw [homEquiv_symm_apply_eq, homEquiv_symm_apply_eq, homEquiv_apply_eq, homEquiv_apply_eq,
-    homEquiv_symm_apply_eq, homEquiv_symm_apply_eq, homEquiv_apply_eq, homEquiv_apply_eq]
+  rw [dsimp% homEquiv_symm_apply_eq, dsimp% homEquiv_symm_apply_eq,
+    dsimp% homEquiv_apply_eq, dsimp% homEquiv_apply_eq,
+    dsimp% homEquiv_symm_apply_eq, dsimp% homEquiv_symm_apply_eq,
+    dsimp% homEquiv_apply_eq, dsimp% homEquiv_apply_eq]
   apply i.map_injective
   rw [Functor.FullyFaithful.map_preimage, i.map_comp,
     Adjunction.homEquiv_unit, Adjunction.homEquiv_unit]
