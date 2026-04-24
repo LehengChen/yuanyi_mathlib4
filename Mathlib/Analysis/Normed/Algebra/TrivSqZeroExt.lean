@@ -208,8 +208,11 @@ example :
     (TrivSqZeroExt.instUniformSpace : UniformSpace (tsze R M)) =
     PseudoMetricSpace.toUniformSpace := rfl
 
+private lemma norm_eq_withLp_toLp (x : tsze R M) :
+    ‖x‖ = @Norm.norm (WithLp 1 (R × M)) (WithLp.instProdNorm 1 R M) (WithLp.toLp 1 x) := rfl
+
 theorem norm_def (x : tsze R M) : ‖x‖ = ‖fst x‖ + ‖snd x‖ := by
-  erw [WithLp.norm_seminormedAddCommGroupToProd]
+  rw [norm_eq_withLp_toLp]
   rw [WithLp.prod_norm_eq_add (by norm_num)]
   simp only [WithLp.toLp_fst, ENNReal.toReal_one, Real.rpow_one, WithLp.toLp_snd, ne_eq,
     one_ne_zero, not_false_eq_true, div_self, fst, snd]
