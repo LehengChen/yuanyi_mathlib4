@@ -250,7 +250,12 @@ end DifferentialObject
 namespace DifferentialObject
 
 variable {S : Type*} [AddCommGroupWithOne S] (C : Type u) [Category.{v} C]
-variable [HasZeroMorphisms C] [HasShift C S]
+variable [HasShift C S]
+
+private lemma shiftFunctorComm_hom_app_eq_shiftComm_hom (X : C) (i j : S) :
+    (shiftFunctorComm C i j).hom.app X = (shiftComm X i j).hom := rfl
+
+variable [HasZeroMorphisms C]
 
 noncomputable section
 
@@ -268,9 +273,9 @@ def shiftFunctor (n : S) : DifferentialObject S C ⥤ DifferentialObject S C whe
       comm := by
         dsimp
         rw [Category.assoc]
-        erw [shiftComm_hom_comp]
-        rw [← Functor.map_comp_assoc, f.comm, Functor.map_comp_assoc]
-        rfl }
+        simp only [shiftFunctorComm_hom_app_eq_shiftComm_hom]
+        rw [shiftComm_hom_comp]
+        rw [← Functor.map_comp_assoc, f.comm, Functor.map_comp_assoc] }
   map_id X := by ext1; dsimp; rw [Functor.map_id]
   map_comp f g := by ext1; dsimp; rw [Functor.map_comp]
 
@@ -297,9 +302,9 @@ set_option backward.isDefEq.respectTransparency false in
 @[simps!]
 def shiftZero : shiftFunctor C (0 : S) ≅ 𝟭 (DifferentialObject S C) := by
   refine NatIso.ofComponents (fun X => mkIso ((shiftFunctorZero C S).app X.obj) ?_) (fun f => ?_)
-  · erw [← NatTrans.naturality]
-    dsimp
-    simp only [shiftFunctorZero_hom_app_shift, Category.assoc]
+  · dsimp
+    rw [← Functor.id_map X.d, ← NatTrans.naturality]
+    simp only [Functor.id_map, shiftFunctorZero_hom_app_shift, Category.assoc]
   · cat_disch
 
 end
