@@ -61,12 +61,13 @@ noncomputable def freeDesc {X : Type u} {M : ModuleCat.{u} R} (f : X ⟶ M) :
     (free R).obj X ⟶ M :=
   ofHom <| Finsupp.lift M R X f
 
+lemma freeDesc_apply_sum {X : Type u} {M : ModuleCat.{u} R} (f : X ⟶ M)
+    (g : (free R).obj X) : freeDesc f g = g.sum fun x r => r • f x := rfl
+
 @[simp]
 lemma freeDesc_apply {X : Type u} {M : ModuleCat.{u} R} (f : X ⟶ M) (x : X) :
     freeDesc f (freeMk x) = f x := by
-  dsimp [freeDesc]
-  erw [Finsupp.lift_apply, Finsupp.sum_single_index]
-  all_goals simp
+  simp [freeDesc_apply_sum, freeMk, Finsupp.sum_single_index]
 
 @[simp]
 lemma free_map_apply {X Y : Type u} (f : X → Y) (x : X) :
