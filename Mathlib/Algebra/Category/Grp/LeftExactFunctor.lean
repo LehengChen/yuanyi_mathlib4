@@ -63,7 +63,7 @@ noncomputable def inverseAux : (C ⥤ₗ Type v) ⥤ C ⥤ AddCommGrpCat.{v} :=
 
 instance (F : C ⥤ₗ Type v) : PreservesFiniteLimits (inverseAux.obj F) where
   preservesFiniteLimits J _ _ :=
-    have : PreservesLimitsOfShape J (inverseAux.obj F ⋙ forget AddCommGrpCat) :=
+    letI : PreservesLimitsOfShape J (inverseAux.obj F ⋙ forget AddCommGrpCat) :=
       inferInstanceAs (PreservesLimitsOfShape J F.1)
     preservesLimitsOfShape_of_reflects_of_preserves _ (forget AddCommGrpCat)
 
@@ -81,20 +81,26 @@ This is the complicated bit, where we show that forgetting the group structure i
 noncomputable def unitIsoAux (F : C ⥤ AddCommGrpCat.{v}) [PreservesFiniteLimits F] (X : C) :
     letI : (F ⋙ forget AddCommGrpCat).Braided := .ofChosenFiniteProducts _
     commGrpTypeEquivalenceCommGrp.inverse.obj (AddCommGrpCat.toCommGrp.obj (F.obj X)) ≅
-      (F ⋙ forget AddCommGrpCat).mapCommGrp.obj (Preadditive.commGrpEquivalence.functor.obj X) := by
+      (F ⋙ forget AddCommGrpCat).mapCommGrp.obj (Preadditive.commGrpEquivalence.functor.obj X) :=
   letI : (F ⋙ forget AddCommGrpCat).Braided := .ofChosenFiniteProducts _
   letI : F.Monoidal := .ofChosenFiniteProducts _
-  refine CommGrp.mkIso Multiplicative.toAdd.toIso (by
-    erw [Functor.mapCommGrp_obj_grp_one]
-    cat_disch) ?_
-  dsimp [-Functor.comp_map, -ConcreteCategory.forget_map_eq_coe, -forget_map]
-  have : F.Additive := Functor.additive_of_preserves_binary_products _
-  simp only [Category.id_comp]
-  erw [Functor.mapCommGrp_obj_grp_mul]
-  erw [Functor.comp_map, F.map_add, Functor.Monoidal.μ_comp F (forget AddCommGrpCat) X X,
-    Category.assoc, ← Functor.map_comp, Preadditive.comp_add, Functor.Monoidal.μ_fst,
-    Functor.Monoidal.μ_snd]
-  cat_disch
+  CommGrp.mkIso Multiplicative.toAdd.toIso
+    (by
+      rw [Functor.mapCommGrp_obj_grp_one (F := F ⋙ forget AddCommGrpCat)
+        (A := Preadditive.commGrpEquivalence.functor.obj X)]
+      cat_disch)
+    (by
+      dsimp [-Functor.comp_map, -ConcreteCategory.forget_map_eq_coe, -forget_map]
+      letI : F.Additive := Functor.additive_of_preserves_binary_products _
+      simp only [Category.id_comp]
+      rw [Functor.mapCommGrp_obj_grp_mul (F := F ⋙ forget AddCommGrpCat)
+        (A := Preadditive.commGrpEquivalence.functor.obj X)]
+      simp only [Preadditive.commGrpEquivalence_functor_obj_X]
+      rw [Functor.comp_map, Preadditive.mul_def (X := X), F.map_add,
+        Functor.Monoidal.μ_comp F (forget AddCommGrpCat) X X, Category.assoc,
+        ← Functor.map_comp, Preadditive.comp_add, Functor.Monoidal.μ_fst,
+        Functor.Monoidal.μ_snd]
+      cat_disch)
 
 /-- Implementation, see `leftExactFunctorForgetEquivalence`. -/
 noncomputable def unitIso : 𝟭 (C ⥤ₗ AddCommGrpCat) ≅
