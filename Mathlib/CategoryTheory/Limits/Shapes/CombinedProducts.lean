@@ -29,6 +29,14 @@ namespace Limits
 
 variable {C : Type u₁} [Category.{u₂} C]
 
+private theorem binaryFan_isLimit_lift {X Y A : C} {bc : BinaryFan X Y} (h : IsLimit bc)
+    (f : ∀ i, A ⟶ WalkingPair.rec X Y i) :
+    Fan.IsLimit.lift h f = h.lift (Fan.mk A f) := rfl
+
+private theorem binaryCofan_isColimit_desc {X Y A : C} {bc : BinaryCofan X Y}
+    (h : IsColimit bc) (f : ∀ i, WalkingPair.rec X Y i ⟶ A) :
+    Cofan.IsColimit.desc h f = h.desc (Cofan.mk A f) := rfl
+
 namespace Fan
 
 variable {ι₁ ι₂ : Type*} {X : C} {f₁ : ι₁ → C} {f₂ : ι₂ → C}
@@ -56,8 +64,8 @@ def combPairIsLimit : IsLimit (Fan.mk bc.pt (combPairHoms c₁ c₂ bc)) :=
     (fun s w ↦ by
       cases w <;>
       · simp only [fan_mk_proj, combPairHoms]
-        erw [← Category.assoc, h.fac]
-        simp only [pair_obj_left, mk_pt, mk_π_app, IsLimit.fac])
+        simp only [binaryFan_isLimit_lift, ← Category.assoc, ← BinaryFan.π_app_left,
+          ← BinaryFan.π_app_right, h.fac, pair_obj_left, mk_pt, mk_π_app, IsLimit.fac])
     (fun s m hm ↦ Fan.IsLimit.hom_ext h _ _ <| fun w ↦ by
       cases w
       · refine Fan.IsLimit.hom_ext h₁ _ _ (fun a ↦ by aesop)
@@ -92,8 +100,8 @@ def combPairIsColimit : IsColimit (Cofan.mk bc.pt (combPairHoms c₁ c₂ bc)) :
     (fun s w ↦ by
       cases w <;>
       · simp only [cofan_mk_inj, combPairHoms, Category.assoc]
-        erw [h.fac]
-        simp only [Cofan.mk_ι_app, Cofan.IsColimit.fac])
+        simp only [binaryCofan_isColimit_desc, ← BinaryCofan.ι_app_left,
+          ← BinaryCofan.ι_app_right, h.fac, Cofan.mk_ι_app, Cofan.IsColimit.fac])
     (fun s m hm ↦ Cofan.IsColimit.hom_ext h _ _ <| fun w ↦ by
       cases w
       · refine Cofan.IsColimit.hom_ext h₁ _ _ (fun a ↦ by aesop)
