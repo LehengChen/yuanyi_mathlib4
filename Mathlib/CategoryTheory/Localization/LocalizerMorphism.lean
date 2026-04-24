@@ -182,16 +182,16 @@ lemma IsLocalizedEquivalence.of_isLocalization_of_isLocalization
 an equivalence of categories and that `W₁` and `W₂` essentially correspond to each
 other via this equivalence, then `Φ` is a localized equivalence. -/
 lemma IsLocalizedEquivalence.of_equivalence [Φ.functor.IsEquivalence]
-    (h : W₂ ≤ W₁.map Φ.functor) : IsLocalizedEquivalence Φ := by
-  haveI : Functor.IsLocalization (Φ.functor ⋙ MorphismProperty.Q W₂) W₁ := by
-    refine Functor.IsLocalization.of_equivalence_source W₂.Q W₂ (Φ.functor ⋙ W₂.Q) W₁
-      (asEquivalence Φ.functor).symm ?_ (Φ.inverts W₂.Q)
+    (h : W₂ ≤ W₁.map Φ.functor) : IsLocalizedEquivalence Φ :=
+  letI : Functor.IsLocalization (Φ.functor ⋙ MorphismProperty.Q W₂) W₁ :=
+    Functor.IsLocalization.of_equivalence_source W₂.Q W₂ (Φ.functor ⋙ W₂.Q) W₁
+      (asEquivalence Φ.functor).symm (by
+        rw [Equivalence.symm_functor, W₁.isoClosure.inverseImage_equivalence_functor_eq_map_inverse,
+          MorphismProperty.map_isoClosure]
+        simp [asEquivalence_functor, h]) (Φ.inverts W₂.Q)
       ((associator _ _ _).symm ≪≫ isoWhiskerRight ((Equivalence.unitIso _).symm) _ ≪≫
         leftUnitor _)
-    erw [W₁.isoClosure.inverseImage_equivalence_functor_eq_map_inverse]
-    rw [MorphismProperty.map_isoClosure]
-    exact h
-  exact IsLocalizedEquivalence.of_isLocalization_of_isLocalization Φ W₂.Q
+  IsLocalizedEquivalence.of_isLocalization_of_isLocalization Φ W₂.Q
 
 instance IsLocalizedEquivalence.isLocalization [Φ.IsLocalizedEquivalence] :
     (Φ.functor ⋙ L₂).IsLocalization W₁ :=
