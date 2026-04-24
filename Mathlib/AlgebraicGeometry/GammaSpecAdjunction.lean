@@ -206,7 +206,9 @@ theorem toStalk_stalkMap_toΓSpec (x : X) :
     ← algebraMap_germ (basicOpen (1 : Γ.obj (op X))) _ (by rw [basicOpen_one]; trivial),
     ← Category.assoc, Category.assoc (CommRingCat.ofHom _), stalkFunctor_map_germ, ← Category.assoc,
     X.toΓSpecSheafedSpace_app_eq, X.toΓSpecCApp_spec, Γgerm]
-  erw [← stalkPushforward_germ _ _ X.presheaf ⊤]
+  simp only [← Opens.map_top X.toΓSpecSheafedSpace.hom.base]
+  rw [← stalkPushforward_germ CommRingCat X.toΓSpecSheafedSpace.hom.base X.presheaf ⊤ x
+    True.intro]
   congr 1
   exact (X.toΓSpecBase _* X.presheaf).germ_res le_top.hom _ _
 
@@ -233,6 +235,9 @@ def toΓSpec : X ⟶ Spec.locallyRingedSpaceObj (Γ.obj (op X)) :=
     rw [map_mul]
     exact ht.mul <| (IsLocalization.map_units (R := Γ.obj (op X)) S s).map _)
 
+lemma toΓSpec_base_preimage (s : Set (PrimeSpectrum (Γ.obj (op X)))) :
+    X.toΓSpec.base ⁻¹' s = X.toΓSpecFun ⁻¹' s := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- On a locally ringed space `X`, the preimage of the zero locus of the prime spectrum
 of `Γ(X, ⊤)` under `toΓSpec` agrees with the associated zero locus on `X`. -/
@@ -240,13 +245,13 @@ lemma toΓSpec_preimage_zeroLocus_eq {X : LocallyRingedSpace.{u}}
     (s : Set (X.presheaf.obj (op ⊤))) :
     X.toΓSpec.base ⁻¹' PrimeSpectrum.zeroLocus s = X.toRingedSpace.zeroLocus s := by
   simp only [RingedSpace.zeroLocus]
-  have (i : LocallyRingedSpace.Γ.obj (op X)) (_ : i ∈ s) :
+  have (i : X.presheaf.obj (op ⊤)) (_ : i ∈ s) :
       (SetLike.coe (X.toRingedSpace.basicOpen i))ᶜ =
         X.toΓSpec.base ⁻¹' ((PrimeSpectrum.basicOpen i).carrier)ᶜ := by
     symm
     rw [Set.preimage_compl, Opens.carrier_eq_coe]
-    erw [X.toΓSpec_preimage_basicOpen_eq i]
-  erw [Set.iInter₂_congr this]
+    rw [toΓSpec_base_preimage, X.toΓSpec_preimage_basicOpen_eq i]
+  rw [Set.iInter₂_congr this]
   simp_rw [← Set.preimage_iInter₂, Opens.carrier_eq_coe, PrimeSpectrum.basicOpen_eq_zeroLocus_compl,
     compl_compl]
   rw [← PrimeSpectrum.zeroLocus_iUnion₂]
@@ -299,7 +304,11 @@ def identityToΓSpec : 𝟭 LocallyRingedSpace.{u} ⟶ Γ.rightOp ⋙ Spec.toLoc
       exact (PresheafedSpace.stalkMap_germ f.1 ⊤ x trivial).symm
     · intro r
       rw [LocallyRingedSpace.comp_c_app, ← Category.assoc]
-      erw [Y.toΓSpecSheafedSpace_app_spec, f.c.naturality]
+      dsimp [toΓSpec]
+      simp only [← Γ_obj_op Y]
+      rw [Y.toΓSpecSheafedSpace_app_spec]
+      dsimp [toToΓSpecMapBasicOpen, toΓSpecMapBasicOpen, toΓSpecSheafedSpace]
+      rw [f.c.naturality]
       rfl
 
 namespace ΓSpec
@@ -387,7 +396,9 @@ lemma toOpen_comp_locallyRingedSpaceAdjunction_homEquiv_app
     ← unop_locallyRingedSpaceAdjunction_counit_app']
   simp_rw [← Γ_map_op]
   rw [← Γ.rightOp_map_unop, ← Category.assoc, ← unop_comp]
-  erw [← Adjunction.homEquiv_counit, Equiv.symm_apply_apply]
+  simp only [Functor.id_obj]
+  rw [← locallyRingedSpaceAdjunction.homEquiv_counit]
+  simp
   rfl
 
 /-- The adjunction `Γ ⊣ Spec` from `CommRingᵒᵖ` to `Scheme`. -/
