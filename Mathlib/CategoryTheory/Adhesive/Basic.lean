@@ -174,6 +174,9 @@ lemma IsPushout.isVanKampen_isPullback_isPullback_hom_ext
   obtain ⟨W', f', g', αW, _, _, H''⟩ := H'.exists_cube_filling hh hi
   exact H''.hom_ext h'_w i'_w
 
+private theorem binaryCofan_mk_ι_app_right_assoc {A B P Q : C} (i₁ : A ⟶ P) (i₂ : B ⟶ P)
+    (k : P ⟶ Q) : (BinaryCofan.mk i₁ i₂).ι.app ⟨WalkingPair.right⟩ ≫ k = i₂ ≫ k := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsColimit c) {f : X ⟶ Y}
     {iY : Y ⟶ YE} {fE : c.pt ⟶ YE} (H : CommSq f c.inl iY fE) :
@@ -185,7 +188,10 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
     dsimp
     refine ⟨h.desc (BinaryCofan.mk (c.inr ≫ s.inr) s.inl), h.fac _ ⟨WalkingPair.right⟩, ?_, ?_⟩
     · apply BinaryCofan.IsColimit.hom_ext hc
-      · rw [← H.w_assoc]; erw [h.fac _ ⟨WalkingPair.right⟩]; exact s.condition
+      · rw [← H.w_assoc]
+        rw [← binaryCofan_mk_ι_app_right_assoc (c.inr ≫ fE) iY
+          (h.desc (BinaryCofan.mk (c.inr ≫ s.inr) s.inl)), h.fac _ ⟨WalkingPair.right⟩]
+        simp only [BinaryCofan.ι_app_right, BinaryCofan.mk_inr, s.condition]
       · rw [← Category.assoc]; exact h.fac _ ⟨WalkingPair.left⟩
     · intro m e₁ e₂
       apply BinaryCofan.IsColimit.hom_ext h
@@ -194,24 +200,26 @@ theorem is_coprod_iff_isPushout {X E Y YE : C} (c : BinaryCofan X E) (hc : IsCol
       · refine e₁.trans (Eq.symm ?_); exact h.fac _ _
   · refine fun H => ⟨?_⟩
     fapply Limits.BinaryCofan.isColimitMk
-    · exact fun s => H.isColimit.desc (PushoutCocone.mk s.inr _ <|
-        (hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩).symm)
+    · intro s
+      apply H.desc s.inr (hc.desc (BinaryCofan.mk (f ≫ s.inr) s.inl))
+      rw [← BinaryCofan.ι_app_left c,
+        hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.left⟩]
+      simp only [BinaryCofan.ι_app_left, BinaryCofan.mk_inl]
     · intro s
       rw [Category.assoc]
-      erw [H.isColimit.fac _ WalkingSpan.right]
-      erw [hc.fac]
-      rfl
-    · intro s; exact H.isColimit.fac _ WalkingSpan.left
+      rw [H.inr_desc]
+      rw [hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.right⟩]
+      simp only [BinaryCofan.ι_app_right, BinaryCofan.mk_inr]
+    · intro s; rw [H.inl_desc]
     · intro s m e₁ e₂
-      apply PushoutCocone.IsColimit.hom_ext H.isColimit
-      · symm; exact (H.isColimit.fac _ WalkingSpan.left).trans e₂.symm
-      · rw [H.isColimit.fac _ WalkingSpan.right]
-        apply BinaryCofan.IsColimit.hom_ext hc
-        · erw [hc.fac]
-          erw [← H.w_assoc]
-          rw [e₂]
-          rfl
-        · refine ((Category.assoc _ _ _).symm.trans e₁).trans ?_; symm; exact hc.fac _ _
+      apply H.hom_ext
+      · rw [e₂, H.inl_desc]
+      · apply BinaryCofan.IsColimit.hom_ext hc
+        · rw [← H.w_assoc, ← H.w_assoc, e₂, H.inl_desc]
+        · rw [← Category.assoc, e₁]
+          rw [H.inr_desc]
+          rw [hc.fac (BinaryCofan.mk (f ≫ s.inr) s.inl) ⟨WalkingPair.right⟩]
+          simp only [BinaryCofan.ι_app_right, BinaryCofan.mk_inr]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem IsPushout.isVanKampen_inl {W E X Z : C} (c : BinaryCofan W E) [FinitaryExtensive C]
