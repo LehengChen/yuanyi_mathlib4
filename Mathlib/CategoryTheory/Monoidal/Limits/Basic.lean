@@ -36,6 +36,9 @@ variable {J : Type w} [SmallCategory J] {C : Type u} [Category.{v} C] [HasLimits
 
 open Functor.LaxMonoidal
 
+omit [HasLimitsOfShape J C] in
+lemma functorCategory_tensorUnit : (𝟙_ (J ⥤ C)) = (Functor.const J).obj (𝟙_ C) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 instance : (lim (J := J) (C := C)).LaxMonoidal :=
   Functor.LaxMonoidal.ofTensorHom
@@ -79,16 +82,14 @@ instance : (lim (J := J) (C := C)).LaxMonoidal :=
       dsimp
       simp only [tensorHom_def, id_whiskerLeft, Category.assoc,
         Iso.inv_hom_id, Category.comp_id, ← comp_whiskerRight_assoc]
-      erw [limit.lift_π]
-      rw [id_whiskerRight, Category.id_comp]))
+      simp [functorCategory_tensorUnit, limit.lift_π]))
     (right_unitality := fun F ↦ limit.hom_ext (fun j ↦ by
       dsimp
       simp only [id_tensorHom, limit.lift_map, Category.assoc, limit.lift_π]
       dsimp
       simp only [tensorHom_def, ← whisker_exchange, whiskerRight_id, Category.assoc, Iso.inv_hom_id,
         Category.comp_id, ← whiskerLeft_comp_assoc]
-      erw [limit.lift_π]
-      rw [whiskerLeft_id, Category.id_comp]))
+      simp [functorCategory_tensorUnit, limit.lift_π]))
 
 @[reassoc (attr := simp)]
 lemma lim_ε_π (j : J) : ε (lim (J := J) (C := C)) ≫ limit.π _ j = 𝟙 _ :=
