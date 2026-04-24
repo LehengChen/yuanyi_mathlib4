@@ -31,6 +31,9 @@ universe u
 
 variable {X Y : Scheme.{u}} (f : X ⟶ Y) {U V : X.Opens} (hU : IsAffineOpen U) (hV : IsAffineOpen V)
 
+private lemma Opens.ι_germ {X : Scheme} (U : X.Opens) (x : X) (hx : x ∈ U) :
+    X.presheaf.germ U (U.ι ⟨x, hx⟩) hx = X.presheaf.germ U x hx := rfl
+
 section fromSpecStalk
 
 /--
@@ -54,12 +57,16 @@ theorem IsAffineOpen.fromSpecStalk_eq (x : X) (hxU : x ∈ U) (hxV : x ∈ V) :
   transitivity fromSpecStalk h₁ h₂
   · delta fromSpecStalk
     rw [← hU.map_fromSpec h₁ (homOfLE <| h₃.trans inf_le_left).op]
-    erw [← Scheme.Spec_map (X.presheaf.map _).op, ← Scheme.Spec_map (X.presheaf.germ _ x h₂).op]
+    rw [← Quiver.Hom.unop_op (X.presheaf.germ U' x h₂),
+      ← Quiver.Hom.unop_op (X.presheaf.map (homOfLE <| h₃.trans inf_le_left).op),
+      ← Scheme.Spec_map, ← Scheme.Spec_map]
     rw [← Functor.map_comp_assoc, ← op_comp, TopCat.Presheaf.germ_res, Scheme.Spec_map,
       Quiver.Hom.unop_op]
   · delta fromSpecStalk
     rw [← hV.map_fromSpec h₁ (homOfLE <| h₃.trans inf_le_right).op]
-    erw [← Scheme.Spec_map (X.presheaf.map _).op, ← Scheme.Spec_map (X.presheaf.germ _ x h₂).op]
+    rw [← Quiver.Hom.unop_op (X.presheaf.germ U' x h₂),
+      ← Quiver.Hom.unop_op (X.presheaf.map (homOfLE <| h₃.trans inf_le_right).op),
+      ← Scheme.Spec_map, ← Scheme.Spec_map]
     rw [← Functor.map_comp_assoc, ← op_comp, TopCat.Presheaf.germ_res, Scheme.Spec_map,
       Quiver.Hom.unop_op]
 
@@ -208,9 +215,10 @@ lemma Opens.fromSpecStalkOfMem_toSpecΓ {X : Scheme.{u}} (U : X.Opens) (x : X) (
     ← Spec.map_comp, ← Spec.map_comp]
   congr 1
   rw [IsIso.comp_inv_eq, Iso.inv_comp_eq]
-  erw [Hom.germ_stalkMap U.ι U ⟨x, hxU⟩]
+  rw [← Opens.ι_germ U x hxU, Hom.germ_stalkMap U.ι U ⟨x, hxU⟩]
   rw [Opens.ι_app, Opens.topIso_hom, ← Functor.map_comp_assoc]
-  exact (U.toScheme.presheaf.germ_res (homOfLE le_top) ⟨x, hxU⟩ (U := U.ι ⁻¹ᵁ U) hxU).symm
+  rw [← U.toScheme.presheaf.germ_res (homOfLE le_top) ⟨x, hxU⟩ (U := U.ι ⁻¹ᵁ U) hxU]
+  simp
 
 end Scheme
 
