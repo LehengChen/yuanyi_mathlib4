@@ -267,11 +267,10 @@ which follows from the fact we have zero morphisms and decidable equality for th
 instance : (total β C).Faithful where
   map_injective {X Y} f g w := by
     ext i
-    replace w := Sigma.ι (fun i : β => X i) i ≫= w
-    erw [colimit.ι_map, colimit.ι_map] at w
-    replace w : f i ≫ colimit.ι (Discrete.functor Y) ⟨i⟩ =
-      g i ≫ colimit.ι (Discrete.functor Y) ⟨i⟩ := by simpa
-    exact Mono.right_cancellation _ _ w
+    apply Mono.right_cancellation (f := Sigma.ι (fun i : β => Y i) i)
+    rw [← Sigma.ι_map (fun i => f i), ← Sigma.ι_map (fun i => g i)]
+    simp only [total] at w
+    rw [w]
 
 end GradedObject
 
