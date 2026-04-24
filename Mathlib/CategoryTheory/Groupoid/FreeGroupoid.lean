@@ -142,15 +142,26 @@ section UniversalProperty
 
 variable {V' : Type u'} [Groupoid V']
 
+private theorem pathsOf_obj_eq (X : Quiver.Symmetrify V) :
+    (Paths.of (Quiver.Symmetrify V)).obj X = X := rfl
+
+private theorem pathsLift_symmetrifyLift_obj_eq (φ : V ⥤q V') (X : Paths (Quiver.Symmetrify V)) :
+    (Paths.lift (Quiver.Symmetrify.lift φ)).obj X = (Quiver.Symmetrify.lift φ).obj X := rfl
+
+private theorem paths_id_eq_nil {X : Paths (Quiver.Symmetrify V)} :
+    (𝟙 X : X ⟶ X) = Quiver.Path.nil := rfl
+
+private theorem paths_comp_eq_comp {X Y Z : Paths (Quiver.Symmetrify V)}
+    (p : X ⟶ Y) (q : Y ⟶ Z) : p ≫ q = p.comp q := rfl
+
 /-- The lift of a prefunctor to a groupoid, to a functor from `FreeGroupoid V` -/
 def lift (φ : V ⥤q V') : Quiver.FreeGroupoid V ⥤ V' :=
   CategoryTheory.Quotient.lift _ (Paths.lift <| Quiver.Symmetrify.lift φ) <| by
     rintro _ _ _ _ ⟨X, Y, f⟩
-    -- Porting note: `simp` does not work, so manually `rewrite`
-    erw [Paths.lift_nil, Paths.lift_cons, Quiver.Path.comp_nil, Paths.lift_toPath,
-      Quiver.Symmetrify.lift_reverse]
-    symm
-    apply Groupoid.comp_inv
+    simp only [pathsOf_obj_eq, pathsLift_symmetrifyLift_obj_eq, paths_id_eq_nil,
+      paths_comp_eq_comp, Quiver.Path.comp_toPath_eq_cons, Paths.lift_nil, Paths.lift_cons,
+      Paths.lift_toPath, Quiver.Symmetrify.lift_reverse, Groupoid.reverse_eq_inv,
+      Groupoid.comp_inv]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem lift_spec (φ : V ⥤q V') : of V ⋙q (lift φ).toPrefunctor = φ := by
