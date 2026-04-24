@@ -95,6 +95,13 @@ nonrec theorem map_sum {X Y : C} {α : Type*} (f : α → (X ⟶ Y)) (s : Finset
     F.map (∑ a ∈ s, f a) = ∑ a ∈ s, F.map (f a) :=
   map_sum F.mapAddHom f s
 
+omit [Preadditive C] [Preadditive D] [F.Additive] in
+private lemma comp_map_add {G : D ⥤ E} {X Y : C} (f g : X ⟶ Y) :
+    G.map (F.map f) + G.map (F.map g) = (F ⋙ G).map f + (F ⋙ G).map g := rfl
+
+private lemma mapBicone_id {J : Type*} {f : J → C} (b : Limits.Bicone f) :
+    𝟙 (F.mapBicone b).pt = 𝟙 (F.obj b.pt) := rfl
+
 variable {F}
 
 lemma additive_of_iso {G : C ⥤ D} (e : F ≅ G) : G.Additive := by
@@ -115,9 +122,10 @@ lemma additive_of_full_essSurj_comp [Full F] [EssSurj F] (G : D ⥤ E)
     simp only [← cancel_mono (G.map (F.objObjPreimageIso Y).inv),
       ← cancel_epi (G.map (F.objObjPreimageIso X).hom),
       Preadditive.add_comp, Preadditive.comp_add, ← Functor.map_comp]
-    erw [← hf', ← hg', ← (F ⋙ G).map_add]
-    dsimp
-    rw [F.map_add]
+    rw [← hf', ← hg', ← F.map_add]
+    rw [comp_map_add]
+    rw [← (F ⋙ G).map_add]
+    rw [← Functor.comp_map F G (f' + g')]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma additive_of_comp_faithful
@@ -202,7 +210,8 @@ instance (priority := 100) preservesFiniteBiproductsOfAdditive [Additive F] :
       { preserves := fun hb =>
           ⟨isBilimitOfTotal _ (by
             simp_rw [F.mapBicone_π, F.mapBicone_ι, ← F.map_comp]
-            erw [← F.map_sum, ← F.map_id, IsBilimit.total hb])⟩ } }
+            rw [mapBicone_id]
+            rw [← F.map_sum, ← F.map_id, IsBilimit.total hb])⟩ } }
 
 instance (priority := 100) preservesFiniteCoproductsOfAdditive [Additive F] :
     PreservesFiniteCoproducts F where
