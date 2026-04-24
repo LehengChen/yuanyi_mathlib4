@@ -275,6 +275,14 @@ def equivSetOf : Weight R L M ≃ {χ : L → R | genWeightSpace M χ ≠ ⊥} w
   left_inv w := by simp
   right_inv w := by simp
 
+lemma iSup_genWeightSpace_eq_iSup_equivSetOf :
+    (⨆ χ : Weight R L M, genWeightSpace M χ) =
+      ⨆ χ : Weight R L M, genWeightSpace M (↑((equivSetOf R L M) χ) : L → R) := rfl
+
+lemma iSup_genWeightSpace_setOf_eq_subtype :
+    (⨆ χ : {χ : L → R | genWeightSpace M χ ≠ ⊥}, genWeightSpace M (χ : L → R)) =
+      ⨆ χ : {χ : L → R // genWeightSpace M χ ≠ ⊥}, genWeightSpace M (χ : L → R) := rfl
+
 lemma genWeightSpaceOf_ne_bot (χ : Weight R L M) (x : L) :
     genWeightSpaceOf M (χ x) x ≠ ⊥ := by
   have : ⨅ x, genWeightSpaceOf M (χ x) x ≠ ⊥ := χ.genWeightSpace_ne_bot
@@ -760,9 +768,11 @@ lemma iSup_genWeightSpace_eq_top [IsTriangularizable K L M] :
 
 lemma iSup_genWeightSpace_eq_top' [IsTriangularizable K L M] :
     ⨆ χ : Weight K L M, genWeightSpace M χ = ⊤ := by
-  have := iSup_genWeightSpace_eq_top K L M
-  erw [← iSup_ne_bot_subtype, ← (Weight.equivSetOf K L M).iSup_comp] at this
-  exact this
+  rw [Weight.iSup_genWeightSpace_eq_iSup_equivSetOf]
+  rw [(Weight.equivSetOf K L M).iSup_comp
+    (g := fun χ : {χ : L → K | genWeightSpace M χ ≠ ⊥} => genWeightSpace M (χ : L → K))]
+  rw [Weight.iSup_genWeightSpace_setOf_eq_subtype]
+  rw [iSup_ne_bot_subtype, iSup_genWeightSpace_eq_top K L M]
 
 lemma eq_iSup_inf_genWeightSpace [IsTriangularizable K L M] (N : LieSubmodule K L M) :
     N = ⨆ χ : Weight K L M, N ⊓ genWeightSpace M χ := by
