@@ -130,11 +130,15 @@ of the module `N`. -/
 noncomputable def finsupp : Presentation A (ι →₀ N) :=
   (directSum (fun (_ : ι) ↦ pres)).ofLinearEquiv (finsuppLequivDFinsupp _).symm
 
+lemma finsupp_var_eq_symm_directSum_var (i : ι) (g : pres.G) :
+    (finsupp pres ι).var ⟨i, g⟩ =
+      (finsuppLequivDFinsupp A).symm ((directSum (fun (_ : ι) ↦ pres)).var ⟨i, g⟩) := rfl
+
 @[simp]
 lemma finsupp_var (i : ι) (g : pres.G) :
     (finsupp pres ι).var ⟨i, g⟩ = Finsupp.single i (pres.var g) := by
   apply (finsuppLequivDFinsupp A).injective
-  erw [(finsuppLequivDFinsupp A).apply_symm_apply]
+  rw [finsupp_var_eq_symm_directSum_var, (finsuppLequivDFinsupp A).apply_symm_apply]
   rw [directSum_var, finsuppLequivDFinsupp_apply_apply, Finsupp.toDFinsupp_single]
   rfl
 
