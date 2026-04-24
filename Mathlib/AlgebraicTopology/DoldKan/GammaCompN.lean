@@ -137,6 +137,12 @@ lemma N₂Γ₂ToKaroubiIso_hom_app (X : ChainComplex C ℕ) :
   rw [Splitting.ι_desc_assoc, assoc]
   apply id_comp
 
+lemma Γ₀_splitting_N (K : ChainComplex C ℕ) (n : ℕ) :
+    (Γ₀.splitting K).N n = K.X n := rfl
+
+lemma Γ₀_splitting_cofan_pt (K : ChainComplex C ℕ) (Δ : SimplexCategoryᵒᵖ) :
+    ((Γ₀.splitting K).cofan Δ).pt = Γ₀.Obj.obj₂ K Δ := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma N₂Γ₂ToKaroubiIso_inv_app (X : ChainComplex C ℕ) :
@@ -148,7 +154,7 @@ lemma N₂Γ₂ToKaroubiIso_inv_app (X : ChainComplex C ℕ) :
   apply (Γ₀.splitting X).hom_ext'
   intro A
   rw [Splitting.ι_desc]
-  erw [comp_id, id_comp]
+  simp only [Γ₀_splitting_N, Γ₀_splitting_cofan_pt, id_comp, comp_id]
 
 /-- The counit isomorphism of the Dold-Kan equivalence for additive categories. -/
 def N₂Γ₂ : Γ₂ ⋙ N₂ ≅ 𝟭 (Karoubi (ChainComplex C ℕ)) :=
