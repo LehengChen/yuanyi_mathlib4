@@ -262,8 +262,8 @@ lemma shiftFunctorAdd'_assoc (a₁ a₂ a₃ a₁₂ a₂₃ a₁₂₃ : A)
   dsimp [shiftFunctorAdd, shiftFunctor]
   simp only [obj_μ_inv_app, Discrete.addMonoidal_associator, eqToIso.hom, eqToHom_map,
     eqToHom_app]
-  erw [δ_μ_app_assoc, Category.assoc]
-  rfl
+  simp only [MonoidalCategoryStruct.tensorObj]
+  rw [δ_μ_app_assoc, Category.assoc]
 
 lemma shiftFunctorAdd_assoc (a₁ a₂ a₃ : A) :
     shiftFunctorAdd C (a₁ + a₂) a₃ ≪≫
@@ -625,9 +625,10 @@ set_option backward.isDefEq.respectTransparency false in
 /-- When shifts are indexed by an additive commutative monoid, then shifts commute. -/
 theorem shiftComm' (i j : A) :
     f⟦i⟧'⟦j⟧' = (shiftComm _ _ _).hom ≫ f⟦j⟧'⟦i⟧' ≫ (shiftComm _ _ _).hom := by
-  erw [← shiftComm_symm Y i j, ← ((shiftFunctorComm C i j).hom.naturality_assoc f)]
-  dsimp
-  simp only [Iso.hom_inv_id_app, Functor.comp_obj, Category.comp_id]
+  rw [← shiftComm_symm Y i j]
+  simp only [shiftComm, Iso.app_hom, Iso.symm_hom, Iso.app_inv, ← Functor.comp_map,
+    ← ((shiftFunctorComm C i j).hom.naturality_assoc f), Iso.hom_inv_id_app,
+    Category.comp_id]
 
 @[reassoc]
 theorem shiftComm_hom_comp (i j : A) :
@@ -771,7 +772,7 @@ def hasShift :
         simp only [Functor.comp_obj, Functor.map_comp, map_add_hom_app,
           Category.assoc, Iso.inv_hom_id_app_assoc, NatTrans.naturality_assoc, Functor.comp_map,
           Iso.inv_hom_id_app, Category.comp_id]
-        erw [(i m₃).hom.naturality]
+        simp only [← Functor.comp_map, ← Functor.comp_obj, (i m₃).hom.naturality]
         rw [Functor.comp_map, map_add_hom_app,
           Functor.map_comp, Functor.map_comp, Iso.inv_hom_id_app_assoc,
           ← Functor.map_comp_assoc _ ((i (m₁ + m₂)).inv.app X), Iso.inv_hom_id_app,
@@ -785,7 +786,7 @@ def hasShift :
           Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp, Iso.inv_hom_id_app,
           Category.comp_id, map_comp, eqToHom_map]
         congr 1
-        erw [(i n).hom.naturality]
+        rw [← Functor.comp_map, (i n).hom.naturality]
         simp)
       add_zero_hom_app := fun n X => hF.map_injective (by
         have := dcongr_arg (fun a => (i a).hom.app X) (add_zero n)
