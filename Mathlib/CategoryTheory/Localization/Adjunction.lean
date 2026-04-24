@@ -94,27 +94,43 @@ noncomputable def localization : G' ⊣ F' :=
       left_triangle := by
         apply natTrans_ext L₁ W₁
         intro X₁
-        have eq := congr_app adj.left_triangle X₁
-        dsimp at eq
         rw [NatTrans.comp_app, NatTrans.comp_app, whiskerRight_app, Localization.ε_app,
           Functor.associator_hom_app, id_comp, whiskerLeft_app, G'.map_comp, G'.map_comp,
           assoc, assoc]
-        erw [(Localization.η adj L₁ L₂ W₂ G' F').naturality, Localization.η_app,
-          assoc, assoc, ← G'.map_comp_assoc, ← G'.map_comp_assoc, assoc, Iso.hom_inv_id_app,
-          comp_id, (CatCommSq.iso G L₁ L₂ G').inv.naturality_assoc, ← L₂.map_comp_assoc, eq,
-          L₂.map_id, id_comp, Iso.inv_hom_id_app]
+        simp only [← Functor.comp_map F' G', ← Functor.comp_obj L₁ G']
+        rw [(Localization.η adj L₁ L₂ W₂ G' F').naturality, Localization.η_app,
+          assoc, assoc, ← G'.map_comp_assoc, ← G'.map_comp_assoc, assoc, Iso.hom_inv_id_app]
+        simp only [Functor.comp_obj]
+        rw [comp_id]
+        simp only [← Functor.comp_map L₁ G']
+        rw [(CatCommSq.iso G L₁ L₂ G').inv.naturality_assoc]
+        simp only [Functor.comp_map]
+        rw [← L₂.map_comp_assoc, adj.left_triangle_components X₁]
+        simp only [Functor.id_obj]
+        rw [L₂.map_id, id_comp]
+        simp only [Functor.id_map]
+        rw [Iso.inv_hom_id_app]
         rfl
       right_triangle := by
         apply natTrans_ext L₂ W₂
         intro X₂
-        have eq := congr_app adj.right_triangle X₂
-        dsimp at eq
         rw [NatTrans.comp_app, NatTrans.comp_app, whiskerLeft_app, whiskerRight_app,
           Localization.η_app, Functor.associator_inv_app, id_comp, F'.map_comp, F'.map_comp]
-        erw [← (Localization.ε _ _ _ _ _ _).naturality_assoc, Localization.ε_app,
-          assoc, assoc, ← F'.map_comp_assoc, Iso.hom_inv_id_app, F'.map_id, id_comp,
-          ← NatTrans.naturality, ← L₁.map_comp_assoc, eq, L₁.map_id, id_comp,
-          Iso.inv_hom_id_app]
+        simp only [← Functor.comp_map G' F', ← Functor.comp_obj L₂ F']
+        rw [← (Localization.ε _ _ _ _ _ _).naturality_assoc]
+        simp only [Functor.comp_obj]
+        rw [Localization.ε_app,
+          assoc, assoc, ← F'.map_comp_assoc, Iso.hom_inv_id_app]
+        simp only [Functor.comp_obj]
+        rw [F'.map_id, id_comp]
+        simp only [← Functor.comp_map L₂ F']
+        rw [← NatTrans.naturality]
+        simp only [Functor.comp_map]
+        rw [← L₁.map_comp_assoc, adj.right_triangle_components X₂]
+        simp only [Functor.id_obj]
+        rw [L₁.map_id, id_comp]
+        simp only [Functor.id_map]
+        rw [Iso.inv_hom_id_app]
         rfl }
 
 @[simp]
