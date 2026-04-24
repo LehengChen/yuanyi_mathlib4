@@ -88,23 +88,31 @@ private noncomputable def limitOfSurjectionsSurjective.preimage
     | 0 => a
     | n + 1 => (hF n (preimage a n)).choose
 
+private lemma limitOfSurjectionsSurjective.preimage_succ (a : F.obj ⟨0⟩) (n : ℕ) :
+    preimage hF a (n + 1) = (hF n (preimage hF a n)).choose := rfl
+
+private lemma limitOfSurjectionsSurjective.opHom_eq {m n : ℕ} (h : m ≤ n) :
+    (Opposite.op (ULift.up (PLift.up h) : m ⟶ n) : Opposite.op n ⟶ Opposite.op m) =
+      (homOfLE h).op := rfl
+
 include hF in
 open limitOfSurjectionsSurjective in
 /-- Auxiliary lemma. Use `limit_of_surjections_surjective` instead. -/
 lemma surjective_π_app_zero_of_surjective_map_aux :
     Function.Surjective ((limitCone F).π.app ⟨0⟩) := by
   intro a
-  refine ⟨⟨fun ⟨n⟩ ↦ preimage hF a n, ?_⟩, rfl⟩
+  use ⟨fun ⟨n⟩ ↦ preimage hF a n, ?_⟩
+  · rfl
   intro ⟨n⟩ ⟨m⟩ ⟨⟨⟨(h : m ≤ n)⟩⟩⟩
   induction h with
   | refl =>
-    erw [CategoryTheory.Functor.map_id, types_id_apply]
+    rw [opHom_eq (Nat.le_refl m)]
+    simp only [homOfLE_refl, op_id, CategoryTheory.Functor.map_id, types_id_apply]
   | @step p h ih =>
     rw [← ih]
-    have h' : m ≤ p := h
-    erw [CategoryTheory.Functor.map_comp (f := (homOfLE (Nat.le_succ p)).op) (g := (homOfLE h').op),
-      types_comp_apply, (hF p _).choose_spec]
-    rfl
+    rw [opHom_eq (Nat.le.step h), opHom_eq h]
+    rw [← homOfLE_comp h (Nat.le_succ p), op_comp]
+    simp [preimage_succ, (hF p _).choose_spec]
 
 set_option backward.isDefEq.respectTransparency false in
 /--
