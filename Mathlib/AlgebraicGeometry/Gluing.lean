@@ -357,6 +357,44 @@ def fromGlued : 𝒰.gluedCover.glued ⟶ X := by
 theorem ι_fromGlued (x : 𝒰.I₀) : 𝒰.gluedCover.ι x ≫ 𝒰.fromGlued = 𝒰.f x :=
   Multicoequalizer.π_desc _ _ _ _ _
 
+private theorem gluedCover_f_apply_top_left (i j : 𝒰.I₀) {Z : TopCat}
+    {w : forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)) ≫
+      forgetToTop.map (𝒰.f i) =
+        forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j)) ≫
+          forgetToTop.map (𝒰.f j)}
+    (g : Z ⟶ (PullbackCone.mk (forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)))
+      (forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j))) w).pt) (z : Z) :
+    (𝒰.gluedCover.f i j) (g z) =
+      (g ≫ (PullbackCone.mk (forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)))
+        (forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j))) w).π.app
+          WalkingCospan.left) z :=
+  rfl
+
+private theorem gluedCover_t_f_apply_top (i j : 𝒰.I₀) {Z : TopCat}
+    {w : forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)) ≫
+      forgetToTop.map (𝒰.f i) =
+        forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j)) ≫
+          forgetToTop.map (𝒰.f j)}
+    (g : Z ⟶ (PullbackCone.mk (forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)))
+      (forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j))) w).pt) (z : Z) :
+    (𝒰.gluedCover.t i j ≫ 𝒰.gluedCover.f j i) (g z) =
+      (g ≫ forgetToTop.map ((pullbackSymmetry (𝒰.f i) (𝒰.f j)).hom ≫
+        pullback.fst (𝒰.f j) (𝒰.f i))) z :=
+  rfl
+
+private theorem pullback_snd_top_map_eq_right (i j : 𝒰.I₀) {Z : TopCat}
+    {w : forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)) ≫
+      forgetToTop.map (𝒰.f i) =
+        forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j)) ≫
+          forgetToTop.map (𝒰.f j)}
+    (g : Z ⟶ (PullbackCone.mk (forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)))
+      (forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j))) w).pt) (z : Z) :
+    (g ≫ forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j))) z =
+      (g ≫ (PullbackCone.mk (forgetToTop.map (pullback.fst (𝒰.f i) (𝒰.f j)))
+        (forgetToTop.map (pullback.snd (𝒰.f i) (𝒰.f j))) w).π.app
+          WalkingCospan.right) z :=
+  rfl
+
 theorem fromGlued_injective : Function.Injective 𝒰.fromGlued := by
   intro x y h
   obtain ⟨i, x, rfl⟩ := 𝒰.gluedCover.ι_jointly_surjective x
@@ -366,15 +404,18 @@ theorem fromGlued_injective : Function.Injective 𝒰.fromGlued := by
   rw [ι_fromGlued, ι_fromGlued] at h
   let e :=
     (TopCat.pullbackConeIsLimit _ _).conePointUniqueUpToIso
-      (isLimitOfHasPullbackOfPreservesLimit Scheme.forgetToTop (𝒰.f i) (𝒰.f j))
+      (isLimitOfHasPullbackOfPreservesLimit forgetToTop (𝒰.f i) (𝒰.f j))
   rw [𝒰.gluedCover.ι_eq_iff]
   use e.hom ⟨⟨x, y⟩, h⟩
   constructor
-  · erw [← ConcreteCategory.comp_apply e.hom,
-      IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.left]
+  · rw [gluedCover_f_apply_top_left]
+    simp only
+    rw [IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.left]
     rfl
-  · erw [← ConcreteCategory.comp_apply e.hom, pullbackSymmetry_hom_comp_fst,
-      IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.right]
+  · rw [gluedCover_t_f_apply_top, pullbackSymmetry_hom_comp_fst,
+      pullback_snd_top_map_eq_right]
+    simp only
+    rw [IsLimit.conePointUniqueUpToIso_hom_comp _ _ WalkingCospan.right]
     rfl
 
 set_option backward.isDefEq.respectTransparency false in
