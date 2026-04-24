@@ -313,14 +313,13 @@ noncomputable abbrev OrthogonalFamily.decomposition
   decompose' x := DFinsupp.equivFunOnFintype.symm fun i => (V i).orthogonalProjection x
   left_inv x := by
     dsimp only
-    letI := fun i => Classical.decEq (V i)
-    rw [DirectSum.coeAddMonoidHom, DirectSum.toAddMonoid, DFinsupp.liftAddHom_apply]
-    -- This used to be `rw`, but we need `erw` after https://github.com/leanprover/lean4/pull/2644
-    erw [DFinsupp.sumAddHom_apply]; rw [DFinsupp.sum_eq_sum_fintype]
-    · simp_rw [Equiv.apply_symm_apply, AddSubmonoidClass.coe_subtype]
-      exact hV.sum_projection_of_mem_iSup _ ((h.ge :) Submodule.mem_top)
+    letI := Classical.decEq E
+    rw [DirectSum.coeAddMonoidHom_eq_dfinsuppSum]
+    rw [DFinsupp.sum_eq_sum_fintype]
+    · simp only [Equiv.apply_symm_apply, Submodule.coe_orthogonalProjection_apply,
+        hV.sum_projection_of_mem_iSup _ ((h.ge :) Submodule.mem_top)]
     · intro i
-      exact map_zero _
+      simp
   right_inv x := by
     dsimp only
     simp_rw [hV.projection_directSum_coeAddHom, DFinsupp.equivFunOnFintype_symm_coe]
