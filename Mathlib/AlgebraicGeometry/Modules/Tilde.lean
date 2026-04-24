@@ -265,7 +265,8 @@ noncomputable def Scheme.Modules.fromTildeΓNatTrans :
       moduleSpecΓFunctor, Sheaf.forget]
     simp only [← ModuleCat.hom_comp, Functor.map_comp]
     congr 1
-    erw [tilde.toOpen_map_app_assoc, toOpen_fromTildeΓ_app N (PrimeSpectrum.basicOpen r.unop),
+    rw [TopCat.Sheaf.comp_app, TopCat.Sheaf.comp_app, tilde.toOpen_map_app_assoc,
+      toOpen_fromTildeΓ_app N (PrimeSpectrum.basicOpen r.unop),
       toOpen_fromTildeΓ_app_assoc M (PrimeSpectrum.basicOpen r.unop),
       ← (modulesSpecToSheaf.map f).hom.naturality]
 
