@@ -38,6 +38,10 @@ open Opposite
 
 variable {C : Type u₁} [Category.{u₂} C] {I : Type v₁} [Category.{v₂} I]
 
+private lemma comp_yoneda_obj_eq_comp_coyoneda_evaluation {J : Type*} [Category J]
+    (G : J ⥤ Cᵒᵖ) (A : C) :
+    G ⋙ yoneda.obj A = (G ⋙ coyoneda) ⋙ (evaluation C (Type u₂)).obj A := rfl
+
 section HomCocontinuousCovariant
 
 variable (F : I ⥤ C) [HasColimit F]
@@ -76,9 +80,12 @@ lemma colimitHomIsoLimitYoneda_hom_comp_π [HasLimitsOfShape Iᵒᵖ (Type u₂)
     (colimitHomIsoLimitYoneda F A).hom ≫ limit.π (F.op ⋙ yoneda.obj A) ⟨i⟩ =
       (yoneda.obj A).map (colimit.ι F i).op := by
   simp only [colimitHomIsoLimitYoneda, Iso.trans_hom, Iso.app_hom, Category.assoc]
-  erw [limitObjIsoLimitCompEvaluation_hom_π]
-  change ((coyonedaOpColimitIsoLimitCoyoneda F).hom ≫ _).app A = _
-  rw [coyonedaOpColimitIsoLimitCoyoneda_hom_comp_π, Functor.flip_map_app]
+  simp only [comp_yoneda_obj_eq_comp_coyoneda_evaluation]
+  rw [limitObjIsoLimitCompEvaluation_hom_π]
+  rw [← Functor.flip_map_app]
+  rw [← NatTrans.congr_app (coyonedaOpColimitIsoLimitCoyoneda_hom_comp_π F i) A]
+  rw [NatTrans.vcomp_app']
+  simp
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
@@ -127,9 +134,12 @@ lemma colimitHomIsoLimitYoneda'_hom_comp_π [HasLimitsOfShape I (Type u₂)] (A 
       (yoneda.obj A).map (colimit.ι F ⟨i⟩).op := by
   simp only [colimitHomIsoLimitYoneda', Iso.trans_hom,
     Iso.app_hom, Category.assoc]
-  erw [limitObjIsoLimitCompEvaluation_hom_π]
-  change ((coyonedaOpColimitIsoLimitCoyoneda' F).hom ≫ _).app A = _
-  rw [coyonedaOpColimitIsoLimitCoyoneda'_hom_comp_π, Functor.flip_map_app]
+  simp only [comp_yoneda_obj_eq_comp_coyoneda_evaluation]
+  rw [limitObjIsoLimitCompEvaluation_hom_π]
+  rw [← Functor.flip_map_app]
+  rw [← NatTrans.congr_app (coyonedaOpColimitIsoLimitCoyoneda'_hom_comp_π F i) A]
+  rw [NatTrans.vcomp_app']
+  simp
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
