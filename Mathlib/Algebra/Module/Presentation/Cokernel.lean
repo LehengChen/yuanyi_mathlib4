@@ -79,6 +79,23 @@ def cokernelRelations : Relations A where
     | .inl r => pres₂.relation r
     | .inr i => data.lift i
 
+private lemma lc_cokernelRelation_inl {N : Type*} [AddCommMonoid N] [Module A N]
+    (v : pres₂.G → N) (r : pres₂.R) :
+    (Finsupp.linearCombination A (fun g : (pres₂.cokernelRelations data).G ↦ v g))
+      ((pres₂.cokernelRelations data).relation (Sum.inl r)) =
+        (Finsupp.linearCombination A v) (pres₂.relation r) := rfl
+
+private lemma lc_cokernelRelation_inr {N : Type*} [AddCommMonoid N] [Module A N]
+    (v : pres₂.G → N) (i : ι) :
+    (Finsupp.linearCombination A (fun g : (pres₂.cokernelRelations data).G ↦ v g))
+      ((pres₂.cokernelRelations data).relation (Sum.inr i)) =
+        (Finsupp.linearCombination A v) (data.lift i) := rfl
+
+private lemma lc_mkQ_comp_apply {α : Type*} (p : Submodule A M₂)
+    (v : α → M₂) (l : α →₀ A) :
+    (Finsupp.linearCombination A (fun g ↦ p.mkQ (v g))) l =
+      (Finsupp.linearCombination A (p.mkQ ∘ v)) l := rfl
+
 /-- The obvious solution in `M₂ ⧸ LinearMap.range f` to the equations in
 `pres₂.cokernelRelations data`. -/
 @[simps]
@@ -87,11 +104,19 @@ def cokernelSolution :
   var g := Submodule.mkQ _ (pres₂.var g)
   linearCombination_var_relation := by
     intro x
-    erw [← Finsupp.apply_linearCombination]
     obtain (r | i) := x
-    · erw [pres₂.linearCombination_var_relation]
-      dsimp
-    · erw [data.π_lift]
+    · rw [lc_cokernelRelation_inl
+        (v := fun g : pres₂.G => f.range.mkQ (pres₂.var g))]
+      rw [lc_mkQ_comp_apply]
+      rw [← Finsupp.apply_linearCombination]
+      rw [pres₂.linearCombination_var_relation]
+      simp
+    · rw [lc_cokernelRelation_inr
+        (v := fun g : pres₂.G => f.range.mkQ (pres₂.var g))]
+      rw [lc_mkQ_comp_apply]
+      rw [← Finsupp.apply_linearCombination]
+      rw [← Relations.Solution.π]
+      rw [data.π_lift]
       simp
 
 variable (hg₁ : Submodule.span A (Set.range g₁) = ⊤)
