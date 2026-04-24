@@ -591,29 +591,32 @@ instance (x : PrimeSpectrum.Top R) :
 variable (R M) in
 def modulePresheafStalkIso (x : PrimeSpectrum.Top R) :
     ↑(TopCat.Presheaf.stalk (moduleStructurePresheaf R M).presheaf x) ≃ₗ[R]
-      (structurePresheafInModuleCat R M).stalk x where
-  __ := (Limits.colimit.isoColimitCocone ⟨_, Limits.isColimitOfPreserves (forget₂ (ModuleCat R) Ab)
-    (Limits.colimit.isColimit ((OpenNhds.inclusion x).op ⋙
-      structurePresheafInModuleCat R M))⟩:).addCommGroupIsoToAddEquiv
-  map_smul' r m := by
-    let α : TopCat.Presheaf.stalk (moduleStructurePresheaf R M).presheaf x ≅
+      (structurePresheafInModuleCat R M).stalk x :=
+  let α : TopCat.Presheaf.stalk (moduleStructurePresheaf R M).presheaf x ≅
       (forget₂ _ _).obj ((structurePresheafInModuleCat R M).stalk x) :=
       Limits.colimit.isoColimitCocone ⟨_, Limits.isColimitOfPreserves (forget₂ (ModuleCat R) Ab)
       (Limits.colimit.isColimit ((OpenNhds.inclusion x).op ⋙
         structurePresheafInModuleCat R M))⟩
-    obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist _ _ m
-    have : TopCat.Presheaf.germ (moduleStructurePresheaf R M).presheaf U x hxU ≫ α.hom =
-        (forget₂ _ _).map ((structurePresheafInModuleCat R M).germ U x hxU) :=
-      Limits.colimit.isoColimitCocone_ι_hom (C := Ab) ..
-    have (m : _) : α.hom (TopCat.Presheaf.germ (moduleStructurePresheaf R M).presheaf U x hxU m) =
-        (structurePresheafInModuleCat R M).germ U x hxU m := congr($this m)
-    change α.hom (r • germₗ M U x hxU _) =
-      r • (show (structurePresheafInModuleCat R M).stalk x from _)
-    rw [← map_smul]
-    refine (this _).trans ?_
-    dsimp [toStalk]
-    erw [this]
-    exact ((structurePresheafInModuleCat R M).germ U x hxU).hom.map_smul _ _
+  { __ := α.addCommGroupIsoToAddEquiv
+    map_smul' r m := by
+      obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.germ_exist _ _ m
+      have : TopCat.Presheaf.germ (moduleStructurePresheaf R M).presheaf U x hxU ≫ α.hom =
+          (forget₂ _ _).map ((structurePresheafInModuleCat R M).germ U x hxU) :=
+        Limits.colimit.isoColimitCocone_ι_hom (C := Ab) ..
+      have (m : _) :
+          AddCommGrpCat.Hom.hom α.hom
+              (TopCat.Presheaf.germ (moduleStructurePresheaf R M).presheaf U x hxU m) =
+            (structurePresheafInModuleCat R M).germ U x hxU m := congr($this m)
+      change α.hom (r • germₗ M U x hxU _) =
+        r • (show (structurePresheafInModuleCat R M).stalk x from _)
+      rw [← map_smul]
+      refine (this _).trans ?_
+      dsimp [toStalk]
+      rw [Iso.addCommGroupIsoToAddEquiv_apply]
+      simp only [map_smul]
+      congr 1
+      symm
+      apply this }
 
 instance (x : PrimeSpectrum.Top R) :
     Module ((structurePresheafInCommRingCat R).stalk x)
@@ -841,9 +844,7 @@ def commRingCatStalkEquivModuleStalk (x : PrimeSpectrum.Top R) :
     refine congr($this _).trans ?_
     refine (((structurePresheafInCommRingCat R).germ U x hxU).hom.map_mul _ _).trans ?_
     congr 1
-    · dsimp [toStalk]
-      erw [← (structurePresheafInCommRingCat R).germ_res_apply (homOfLE (le_top : U ≤ ⊤)) _ hxU]
-      rfl
+    · simp [algebraMap_germ_apply]
     · exact congr($this _).symm
 
 public instance (x : PrimeSpectrum.Top R) :
