@@ -176,18 +176,34 @@ instance commShiftOp [CommShift F A] :
     ext
     simp only [op_obj, comp_obj, Iso.symm_hom, NatIso.op_inv, NatTrans.op_app,
       CommShift.isoZero_inv_app, op_comp, CommShift.isoZero_hom_app]
-    erw [oppositeShiftFunctorZero_inv_app, oppositeShiftFunctorZero_hom_app]
+    rw [oppositeShiftFunctorZero_inv_app, oppositeShiftFunctorZero_hom_app]
     rfl
   commShiftIso_add a b := by
     rw [commShiftIso_add]
     ext
     simp only [op_obj, comp_obj, Iso.symm_hom, NatIso.op_inv, NatTrans.op_app,
       CommShift.isoAdd_inv_app, op_comp, Category.assoc, CommShift.isoAdd_hom_app]
-    erw [oppositeShiftFunctorAdd_inv_app, oppositeShiftFunctorAdd_hom_app]
+    rw [oppositeShiftFunctorAdd_inv_app, oppositeShiftFunctorAdd_hom_app]
     rfl
 
 lemma commShiftOp_iso_eq [CommShift F A] (a : A) :
     (OppositeShift.functor A F).commShiftIso a = (NatIso.op (F.commShiftIso a)).symm := rfl
+
+lemma commShiftUnop_shiftFunctorZero_inv_app_unop (X : C) :
+    ((@shiftFunctorZero Cᵒᵖ A _ _ (inferInstanceAs (HasShift (OppositeShift C A) A))).inv.app
+      (Opposite.op X)).unop = (shiftFunctorZero C A).hom.app X := rfl
+
+lemma commShiftUnop_shiftFunctorZero_hom_app_unop (X : D) :
+    ((@shiftFunctorZero Dᵒᵖ A _ _ (inferInstanceAs (HasShift (OppositeShift D A) A))).hom.app
+      (Opposite.op X)).unop = (shiftFunctorZero D A).inv.app X := rfl
+
+lemma commShiftUnop_shiftFunctorAdd_inv_app_unop (a b : A) (X : C) :
+    ((@shiftFunctorAdd Cᵒᵖ A _ _ (inferInstanceAs (HasShift (OppositeShift C A) A)) a b).inv.app
+      (Opposite.op X)).unop = (shiftFunctorAdd C a b).hom.app X := rfl
+
+lemma commShiftUnop_shiftFunctorAdd_hom_app_unop (a b : A) (X : D) :
+    ((@shiftFunctorAdd Dᵒᵖ A _ _ (inferInstanceAs (HasShift (OppositeShift D A) A)) a b).hom.app
+      (Opposite.op X)).unop = (shiftFunctorAdd D a b).inv.app X := rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /--
@@ -203,15 +219,16 @@ def commShiftUnop
     ext
     simp only [comp_obj, NatIso.removeOp_hom, Iso.symm_hom, NatTrans.removeOp_app, op_obj,
       CommShift.isoZero_inv_app, unop_comp, CommShift.isoZero_hom_app]
-    erw [oppositeShiftFunctorZero_hom_app, oppositeShiftFunctorZero_inv_app]
-    rfl
+    simp [OppositeShift.functor, commShiftUnop_shiftFunctorZero_inv_app_unop,
+      commShiftUnop_shiftFunctorZero_hom_app_unop]
   commShiftIso_add a b := by
     rw [commShiftIso_add]
     ext
     simp only [comp_obj, NatIso.removeOp_hom, Iso.symm_hom, NatTrans.removeOp_app, op_obj,
       CommShift.isoAdd_inv_app, unop_comp, Category.assoc,
       CommShift.isoAdd_hom_app]
-    erw [oppositeShiftFunctorAdd_hom_app, oppositeShiftFunctorAdd_inv_app]
+    simp [OppositeShift.functor, commShiftUnop_shiftFunctorAdd_inv_app_unop,
+      commShiftUnop_shiftFunctorAdd_hom_app_unop]
     rfl
 
 end Functor
