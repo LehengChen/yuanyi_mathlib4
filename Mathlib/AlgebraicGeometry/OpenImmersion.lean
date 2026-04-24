@@ -282,6 +282,9 @@ def IsOpenImmersion.opensEquiv {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion
   left_inv _ := Opens.ext (Set.preimage_image_eq _ f.isOpenEmbedding.injective)
   right_inv U := Subtype.ext (Opens.ext (Set.image_preimage_eq_of_subset U.2))
 
+lemma Spec.map_range {R S : CommRingCat.{u}} (f : R ⟶ S) :
+    Set.range ⇑(Spec.map f) = Set.range (PrimeSpectrum.comap f.hom) := rfl
+
 namespace Scheme
 
 instance isOpenImmersion_SpecMap_localizationAway {R : CommRingCat.{u}} (f : R) :
@@ -324,7 +327,8 @@ theorem exists_affine_mem_range_and_range_subset
     Spec.map (CommRingCat.ofHom (algebraMap R (Localization.Away r))) ≫ ⟨e.inv ≫ X.ofRestrict _⟩
   refine ⟨.of (Localization.Away r), f, inferInstance, ?_⟩
   rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp]
-  erw [PrimeSpectrum.localization_away_comap_range (Localization.Away r) r]
+  rw [Spec.map_range, CommRingCat.hom_ofHom,
+    PrimeSpectrum.localization_away_comap_range (Localization.Away r) r]
   exact ⟨⟨_, hr, congr(($(e.hom_inv_id).base ⟨x, hxV⟩).1)⟩, Set.image_subset_iff.mpr hr'⟩
 
 end Scheme
@@ -590,16 +594,23 @@ instance : PreservesLimit (cospan f g) Scheme.forget := by delta Scheme.forget; 
 
 instance : PreservesLimit (cospan g f) Scheme.forget := by delta Scheme.forget; infer_instance
 
+lemma forgetToTop_map_snd_range_eq {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) :
+    { y : Y | ∃ x : X, Scheme.forgetToTop.map f x = Scheme.forgetToTop.map g y } =
+      g ⁻¹' Set.range f := rfl
+
+lemma forgetToTop_map_fst_range_eq {X Y Z : Scheme.{u}} (f : X ⟶ Z) (g : Y ⟶ Z) :
+    { x : Y | ∃ y : X, Scheme.forgetToTop.map g x = Scheme.forgetToTop.map f y } =
+      { x : Y | ∃ y : X, g x = f y } := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 theorem range_pullbackSnd :
     Set.range (pullback.snd f g) = g ⁻¹ᵁ f.opensRange := by
   rw [← show _ = (pullback.snd f g).base from
     PreservesPullback.iso_hom_snd Scheme.forgetToTop f g, TopCat.coe_comp, Set.range_comp,
-    Set.range_eq_univ.mpr, ← @Set.preimage_univ _ _ (pullback.fst f.base g.base)]
+    Set.range_eq_univ.mpr]
   -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): was `rw`
-  · erw [TopCat.pullback_snd_image_fst_preimage]
-    rw [Set.image_univ]
-    rfl
+  · rw [Set.image_univ, TopCat.pullback_snd_range, forgetToTop_map_snd_range_eq]
+    simp [Scheme.Hom.opensRange]
   rw [← TopCat.epi_iff_surjective]
   infer_instance
 
@@ -617,10 +628,10 @@ theorem range_pullbackFst :
     Set.range (pullback.fst g f) = g ⁻¹ᵁ f.opensRange := by
   rw [← show _ = (pullback.fst g f).base from
     PreservesPullback.iso_hom_fst Scheme.forgetToTop g f, TopCat.coe_comp, Set.range_comp,
-    Set.range_eq_univ.mpr, ← @Set.preimage_univ _ _ (pullback.snd g.base f.base)]
+    Set.range_eq_univ.mpr]
   -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): was `rw`
-  · erw [TopCat.pullback_fst_image_snd_preimage]
-    rw [Set.image_univ]
+  · rw [Set.image_univ, TopCat.pullback_fst_range, forgetToTop_map_fst_range_eq]
+    simp [Scheme.Hom.opensRange, eq_comm]
     rfl
   rw [← TopCat.epi_iff_surjective]
   infer_instance
