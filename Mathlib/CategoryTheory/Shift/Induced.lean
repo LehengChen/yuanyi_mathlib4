@@ -112,8 +112,7 @@ noncomputable def induced : HasShift D A :=
         simp only [Induced.add_hom_app_obj, eq, shiftFunctorAdd_zero_add_hom_app,
           Functor.map_comp, eqToHom_map, Category.assoc, eqToHom_trans_assoc,
           eqToHom_refl, Category.id_comp, eqToHom_app, Induced.zero_inv_app_obj]
-        erw [← NatTrans.naturality_assoc, Iso.hom_inv_id_app_assoc]
-        rfl
+        simp only [← Functor.comp_map, ← NatTrans.naturality_assoc, Iso.hom_inv_id_app_assoc]
       add_zero_hom_app := fun n => by
         suffices (Induced.add F s i n 0).hom =
             eqToHom (by rw [add_zero]; rfl) ≫ whiskerLeft (s n) (Induced.zero F s i).inv by
@@ -122,12 +121,11 @@ noncomputable def induced : HasShift D A :=
         apply ((whiskeringLeft C D D).obj F).map_injective
         ext X
         dsimp
-        erw [Induced.add_hom_app_obj, dcongr_arg (fun a => (i a).hom.app X) (add_zero n),
+        rw [Induced.add_hom_app_obj, dcongr_arg (fun a => (i a).hom.app X) (add_zero n),
           ← cancel_mono ((s 0).map ((i n).hom.app X)), Category.assoc,
           Category.assoc, Category.assoc, Category.assoc, Category.assoc,
-          Category.assoc, ← (s 0).map_comp, Iso.inv_hom_id_app, Functor.map_id, Category.comp_id,
-          ← NatTrans.naturality, Induced.zero_inv_app_obj,
-          shiftFunctorAdd_add_zero_hom_app]
+          Category.assoc, ← (s 0).map_comp, Iso.inv_hom_id_app]
+        simp only [← NatTrans.naturality, shiftFunctorAdd_add_zero_hom_app]
         simp [eqToHom_map, eqToHom_app]
       assoc_hom_app := fun m₁ m₂ m₃ => by
         suffices (Induced.add F s i (m₁ + m₂) m₃).hom ≫
@@ -148,13 +146,14 @@ noncomputable def induced : HasShift D A :=
         rw [← cancel_mono ((s m₃).map ((s m₂).map ((i m₁).hom.app X)))]
         simp only [Induced.add_hom_app_obj, Category.assoc, Functor.map_comp]
         slice_lhs 4 5 =>
-          erw [← Functor.map_comp, Iso.inv_hom_id_app, Functor.map_id]
-        erw [Category.id_comp]
+          simp only [← Functor.map_comp, Iso.inv_hom_id_app, Functor.map_id, Functor.comp_obj]
+        simp only [Category.id_comp, Category.assoc, Functor.comp_obj]
         slice_lhs 6 7 =>
-          erw [← Functor.map_comp, ← Functor.map_comp, Iso.inv_hom_id_app,
-            (s m₂).map_id, (s m₃).map_id]
-        erw [Category.comp_id, ← NatTrans.naturality_assoc, reassoc_of% eq,
-          dcongr_arg (fun a => (i a).hom.app X) (add_assoc m₁ m₂ m₃).symm]
+          simp only [Functor.comp_obj, ← Functor.map_comp, Iso.inv_hom_id_app, Functor.map_id]
+        simp only [Category.comp_id, Functor.comp_obj, ← Functor.comp_map,
+          ← NatTrans.naturality_assoc]
+        simp only [Functor.comp_map, reassoc_of% eq]
+        rw [dcongr_arg (fun a => (i a).hom.app X) (add_assoc m₁ m₂ m₃).symm]
         simp only [Functor.comp_obj, eqToHom_map, eqToHom_app, NatTrans.naturality_assoc,
           Induced.add_hom_app_obj, Functor.comp_map, Category.assoc, Iso.inv_hom_id_app_assoc,
           eqToHom_trans_assoc, eqToHom_refl, Category.id_comp, Category.comp_id,
