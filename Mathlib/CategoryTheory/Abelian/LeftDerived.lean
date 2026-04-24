@@ -87,8 +87,8 @@ lemma ProjectiveResolution.isoLeftDerivedToHomotopyCategoryObj_inv_naturality
         (Q.isoLeftDerivedToHomotopyCategoryObj F).inv := by
   dsimp [Functor.leftDerivedToHomotopyCategory, isoLeftDerivedToHomotopyCategoryObj]
   rw [assoc, ← Functor.map_comp, iso_inv_naturality f P Q φ comm, Functor.map_comp]
-  erw [(F.mapHomotopyCategoryFactors (ComplexShape.down ℕ)).inv.naturality_assoc]
-  rfl
+  simp only [← Functor.comp_map]
+  rw [(F.mapHomotopyCategoryFactors (ComplexShape.down ℕ)).inv.naturality_assoc]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -131,8 +131,10 @@ lemma ProjectiveResolution.isoLeftDerivedObj_hom_naturality
   rw [assoc, ← Functor.map_comp_assoc,
     ProjectiveResolution.isoLeftDerivedToHomotopyCategoryObj_hom_naturality f P Q φ comm F,
     Functor.map_comp, assoc]
-  erw [(HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality]
-  rfl
+  rw [Functor.comp_map,
+    ← Functor.comp_map (F := HomotopyCategory.quotient D (ComplexShape.down ℕ))]
+  rw [(HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality]
+  simp only [HomologicalComplex.homologyFunctor_map]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc]
@@ -151,9 +153,10 @@ lemma ProjectiveResolution.isoLeftDerivedObj_inv_naturality
 lemma Functor.isZero_leftDerived_obj_projective_succ
     (F : C ⥤ D) [F.Additive] (n : ℕ) (X : C) [Projective X] :
     IsZero ((F.leftDerived (n + 1)).obj X) := by
-  refine IsZero.of_iso ?_ ((ProjectiveResolution.self X).isoLeftDerivedObj F (n + 1))
-  erw [← HomologicalComplex.exactAt_iff_isZero_homology]
-  exact ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero))
+  apply IsZero.of_iso (e := (ProjectiveResolution.self X).isoLeftDerivedObj F (n + 1))
+  rw [HomologicalComplex.homologyFunctor_obj,
+    ← HomologicalComplex.exactAt_iff_isZero_homology]
+  apply ShortComplex.exact_of_isZero_X₂ _ (F.map_isZero (by apply isZero_zero))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- We can compute a left derived functor on a morphism using a descent of that morphism
@@ -193,7 +196,7 @@ lemma ProjectiveResolution.leftDerivedToHomotopyCategory_app_eq
   dsimp [isoLeftDerivedToHomotopyCategoryObj, Functor.mapHomotopyCategoryFactors,
     NatTrans.leftDerivedToHomotopyCategory]
   rw [assoc]
-  erw [id_comp, comp_id]
+  simp only [HomotopyCategory.quotient_obj_as, id_comp, comp_id]
   obtain ⟨β, hβ⟩ := (HomotopyCategory.quotient _ _).map_surjective (iso P).hom
   rw [← hβ]
   dsimp
@@ -246,7 +249,8 @@ lemma leftDerived_app_eq
   dsimp [NatTrans.leftDerived, isoLeftDerivedObj]
   rw [ProjectiveResolution.leftDerivedToHomotopyCategory_app_eq α P,
     Functor.map_comp, Functor.map_comp, assoc]
-  erw [← (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality_assoc
+  rw [← HomologicalComplex.homologyFunctor_map]
+  rw [← (HomotopyCategory.homologyFunctorFactors D (ComplexShape.down ℕ) n).hom.naturality_assoc
     ((NatTrans.mapHomologicalComplex α (ComplexShape.down ℕ)).app P.complex)]
   simp only [Functor.comp_map, Iso.hom_inv_id_app_assoc]
 
@@ -305,7 +309,8 @@ noncomputable def Functor.fromLeftDerivedZero (F : C ⥤ D) [F.Additive] :
       (projectiveResolution X) (projectiveResolution Y)
       (ProjectiveResolution.lift f _ _) (by simp),
       ← HomologicalComplex.homologyι_naturality_assoc]
-    erw [← NatTrans.naturality_assoc]
+    rw [← HomologicalComplex.homologyFunctor_map]
+    rw [← NatTrans.naturality_assoc]
     rfl
 
 set_option backward.isDefEq.respectTransparency false in
@@ -325,7 +330,8 @@ lemma ProjectiveResolution.fromLeftDerivedZero_eq
       (P.isoLeftDerivedToHomotopyCategoryObj F).inv), ← Functor.map_comp_assoc,
       Iso.inv_hom_id, Functor.map_id, id_comp, ← h₁, h₂,
       ← HomologicalComplex.homologyι_naturality_assoc]
-  erw [← NatTrans.naturality_assoc]
+  rw [← HomologicalComplex.homologyFunctor_map]
+  rw [← NatTrans.naturality_assoc]
   rfl
 
 instance (F : C ⥤ D) [F.Additive] (X : C) [Projective X] :
