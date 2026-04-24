@@ -145,8 +145,8 @@ theorem Equivalence.isIdempotentComplete {D : Type*} [Category* D] (ε : C ≌ D
     (h : IsIdempotentComplete C) : IsIdempotentComplete D := by
   refine ⟨?_⟩
   intro X' p hp
-  let φ := ε.counitIso.symm.app X'
-  erw [split_iff_of_iso φ p (φ.inv ≫ p ≫ φ.hom)
+  let φ : X' ≅ (ε.inverse ⋙ ε.functor).obj X' := ε.counitIso.symm.app X'
+  rw [split_iff_of_iso φ p (φ.inv ≫ p ≫ φ.hom)
       (by
         slice_rhs 1 2 => rw [φ.hom_inv_id]
         rw [id_comp])]
