@@ -42,6 +42,15 @@ attribute [simp] MonoidalPreadditive.whiskerLeft_zero MonoidalPreadditive.zero_w
 attribute [simp] MonoidalPreadditive.whiskerLeft_add MonoidalPreadditive.add_whiskerRight
 
 variable {C}
+
+omit [Preadditive C] in
+theorem tensorLeft_obj_comp {J : Type} (X : C) (f : J → C) :
+    (tensorLeft X).obj ∘ f = fun j => X ⊗ f j := rfl
+
+omit [Preadditive C] in
+theorem tensorRight_obj_comp {J : Type} (X : C) (f : J → C) :
+    (tensorRight X).obj ∘ f = fun j => f j ⊗ X := rfl
+
 variable [MonoidalPreadditive C]
 
 namespace MonoidalPreadditive
@@ -154,7 +163,7 @@ theorem leftDistributor_hom {J : Type} [Fintype J] (X : C) (f : J → C) :
   classical
   ext
   dsimp [leftDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
+  simp only [tensorLeft_obj_comp, biproduct.lift_π]
   simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
     Finset.sum_dite_eq', Finset.mem_univ, ite_true, eqToHom_refl, Category.comp_id]
 
@@ -223,7 +232,7 @@ theorem rightDistributor_hom {J : Type} [Fintype J] (f : J → C) (X : C) :
   classical
   ext
   dsimp [rightDistributor, Functor.mapBiproduct, Functor.mapBicone]
-  erw [biproduct.lift_π]
+  simp only [tensorRight_obj_comp, biproduct.lift_π]
   simp only [Preadditive.sum_comp, Category.assoc, biproduct.ι_π, comp_dite, comp_zero,
     Finset.sum_dite_eq', Finset.mem_univ, eqToHom_refl, Category.comp_id, ite_true]
 
