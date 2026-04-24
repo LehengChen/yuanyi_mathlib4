@@ -116,8 +116,10 @@ lemma hInv_hInv (h : CatCommSq T.functor L R B.functor) :
   ext X
   rw [← cancel_mono (B.functor.map (L.map (T.unitIso.hom.app X)))]
   rw [← Functor.comp_map]
-  erw [← h.iso.hom.naturality (T.unitIso.hom.app X)]
   rw [hInv_iso_hom_app]
+  simp only [Equivalence.symm_inverse]
+  rw [← h.iso.hom.naturality (X := X) (Y := (T.functor ⋙ T.inverse).obj X)
+    (T.unitIso.hom.app X)]
   simp only [Equivalence.symm_functor]
   rw [hInv_iso_inv_app]
   dsimp
