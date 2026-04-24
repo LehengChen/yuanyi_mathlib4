@@ -26,6 +26,15 @@ norm, algebra norm
 
 @[expose] public section
 
+namespace RingNorm
+
+variable {S : Type*} [NonUnitalRing S]
+
+private lemma toRingSeminorm_apply (f : RingNorm S) (s : S) :
+    f.toRingSeminorm s = f s := rfl
+
+end RingNorm
+
 /-- An algebra norm on an `R`-algebra `S` is a ring norm on `S` compatible with the
 action of `R`. -/
 structure AlgebraNorm (R : Type*) [SeminormedCommRing R] (S : Type*) [Ring S] [Algebra R S] extends
@@ -63,8 +72,7 @@ instance : FunLike (AlgebraNorm R S) S ℝ where
     cases f; cases f'; congr
     simp only at h
     ext s
-    erw [h]
-    rfl
+    rw [← RingNorm.toRingSeminorm_apply, h, RingNorm.toRingSeminorm_apply]
 
 set_option linter.style.whitespace false in -- manual alignment is not recognised
 instance algebraNormClass : AlgebraNormClass (AlgebraNorm R S) R S where
