@@ -256,13 +256,18 @@ theorem evalAt_eq (x : X) : ⟦H.evalAt x⟧ = hcast (H.apply_zero x).symm ≫
   simp only [map_eq]
   apply Path.Homotopic.hpath_hext; intro; rfl
 
+private theorem evalAt_fromTop_right (x : X) :
+    (⟦H.evalAt x⟧ : (πₘ (TopCat.ofHom f)).obj (fromTop x) ⟶ fromTop (g x)) =
+      (⟦H.evalAt x⟧ : fromTop (f x) ⟶ fromTop (g x)) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 -- Finally, we show `d = f(p) ≫ H₁ = H₀ ≫ g(p)`
 theorem eq_diag_path : (πₘ (TopCat.ofHom f)).map p ≫ ⟦H.evalAt x₁⟧ = H.diagonalPath' p ∧
     (⟦H.evalAt x₀⟧ ≫ (πₘ (TopCat.ofHom g)).map p :
     fromTop (f x₀) ⟶ fromTop (g x₁)) = H.diagonalPath' p := by
   rw [H.apply_zero_path, H.apply_one_path, H.evalAt_eq]
-  erw [H.evalAt_eq]
+  rw [H.evalAt_fromTop_right x₁]
+  rw [H.evalAt_eq]
   dsimp only [prodToProdTopI]
   constructor
   · slice_lhs 2 4 => rw [eqToHom_trans, eqToHom_refl] -- Porting note: this ↓ `simp` didn't do this
