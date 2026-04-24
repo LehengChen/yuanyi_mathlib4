@@ -35,14 +35,17 @@ theorem map_dvd_iff_dvd_symm (f : F) {a : α} {b : β} :
   obtain ⟨c, rfl⟩ : ∃ c, f c = b := EquivLike.surjective f b
   simp [map_dvd_iff]
 
+@[simp]
+private theorem mulEquivClass_toMulEquiv_apply (f : F) (a : α) :
+    (f : α ≃* β) a = f a := rfl
+
 theorem MulEquiv.decompositionMonoid (f : F) [DecompositionMonoid β] : DecompositionMonoid α where
   primal a b c h := by
     rw [← map_dvd_iff f, map_mul] at h
     obtain ⟨a₁, a₂, h⟩ := DecompositionMonoid.primal _ h
     refine ⟨symm f a₁, symm f a₂, ?_⟩
     simp_rw [← map_dvd_iff f, ← map_mul, eq_symm_apply]
-    iterate 2 erw [(f : α ≃* β).apply_symm_apply]
-    exact h
+    simp [h.1, h.2.1, ← h.2.2]
 
 /--
 If `G` is a `LeftCancelSemiGroup`, left multiplication by `g` yields an equivalence between `G`
