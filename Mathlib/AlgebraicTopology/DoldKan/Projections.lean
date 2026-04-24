@@ -82,6 +82,9 @@ theorem Q_succ (q : ℕ) : (Q (q + 1) : K[X] ⟶ _) = Q q - P q ≫ Hσ q := by
   simp only [Q, P_succ, comp_add, comp_id]
   abel
 
+@[simp]
+lemma natTransHσ_app (q : ℕ) (X : SimplicialObject C) : (natTransHσ q).app X = Hσ q := rfl
+
 /-- All the `Q q` coincide with `0` in degree 0. -/
 @[simp]
 theorem Q_f_0_eq (q : ℕ) : ((Q q).f 0 : X _⦋0⦌ ⟶ X _⦋0⦌) = 0 := by
@@ -162,9 +165,7 @@ def natTransP (q : ℕ) : alternatingFaceMapComplex C ⟶ alternatingFaceMapComp
       simp only [P_zero, id_comp, comp_id]
     | succ q hq =>
       simp only [P_succ, add_comp, comp_add, assoc, comp_id, hq, reassoc_of% hq]
-      -- `erw` is needed to see through `natTransHσ q).app = Hσ q`
-      erw [(natTransHσ q).naturality f]
-      rfl
+      simp only [← natTransHσ_app q, (natTransHσ q).naturality f]
 
 set_option backward.isDefEq.respectTransparency false in -- This is needed in AlgebraicTopology/DoldKan/Decomposition.lean
 @[reassoc (attr := simp)]
