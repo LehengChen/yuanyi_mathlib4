@@ -71,7 +71,8 @@ lemma ι_mapBifunctorAssociator_hom (i₁ : I₁) (i₂ : I₂) (i₃ : I₃) (j
   dsimp [mapBifunctorAssociator]
   rw [ι_mapBifunctorComp₁₂MapObjIso_inv_assoc, ιMapTrifunctorMapObj,
     ι_mapMap_assoc, mapTrifunctorMapNatTrans_app_app_app]
-  erw [ι_mapBifunctorComp₂₃MapObjIso_hom]
+  simp only [← mapTrifunctor_obj]
+  rw [← ιMapTrifunctorMapObj, ι_mapBifunctorComp₂₃MapObjIso_hom]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
