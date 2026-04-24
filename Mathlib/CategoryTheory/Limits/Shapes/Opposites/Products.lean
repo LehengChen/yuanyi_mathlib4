@@ -85,6 +85,12 @@ section OppositeCoproducts
 
 variable {α : Type*} {Z : α → C}
 
+lemma Fan.π_app_eq_proj (f : Fan Z) (j : α) :
+    f.π.app (Discrete.mk j) = f.proj j := rfl
+
+lemma Cofan.ι_app_eq_inj (c : Cofan Z) (j : α) :
+    c.ι.app (Discrete.mk j) = c.inj j := rfl
+
 section
 variable [HasCoproduct Z]
 
@@ -178,7 +184,8 @@ theorem desc_op_comp_opCoproductIsoProduct'_hom {c : Cofan Z} {f : Fan (op <| Z 
   refine (Iso.eq_comp_inv _).mp (Quiver.Hom.unop_inj (hc.hom_ext (fun ⟨j⟩ ↦ Quiver.Hom.op_inj ?_)))
   simp only [unop_op, Discrete.functor_obj, const_obj_obj, Quiver.Hom.unop_op, IsColimit.fac,
     Cofan.op, unop_comp, op_comp, op_unop, Quiver.Hom.op_unop, Category.assoc]
-  erw [opCoproductIsoProduct'_inv_comp_inj, IsLimit.fac]
+  simp only [Cofan.ι_app_eq_inj, opCoproductIsoProduct'_inv_comp_inj,
+    Fan.IsLimit.lift_proj]
   rfl
 
 theorem desc_op_comp_opCoproductIsoProduct_hom [HasCoproduct Z] {X : C} (π : (a : α) → Z a ⟶ X) :
@@ -274,7 +281,8 @@ theorem opProductIsoCoproduct'_inv_comp_lift {f : Fan Z} {c : Cofan (op <| Z ·)
   refine (Iso.inv_comp_eq _).mpr (Quiver.Hom.unop_inj (hf.hom_ext (fun ⟨j⟩ ↦ Quiver.Hom.op_inj ?_)))
   simp only [Discrete.functor_obj, unop_op, Quiver.Hom.unop_op, IsLimit.fac, Fan.op, unop_comp,
     Category.assoc, op_comp, op_unop, Quiver.Hom.op_unop]
-  erw [← Category.assoc, proj_comp_opProductIsoCoproduct'_hom, IsColimit.fac]
+  simp only [Fan.π_app_eq_proj, ← Category.assoc, proj_comp_opProductIsoCoproduct'_hom,
+    Cofan.IsColimit.inj_desc]
   rfl
 
 theorem opProductIsoCoproduct_inv_comp_lift [HasProduct Z] {X : C} (π : (a : α) → X ⟶ Z a) :
