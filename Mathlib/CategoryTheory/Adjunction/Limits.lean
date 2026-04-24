@@ -266,6 +266,18 @@ theorem has_limits_of_equivalence (E : D ⥤ C) [E.IsEquivalence] [HasLimitsOfSi
 
 end PreservationLimits
 
+private lemma unopOpUnopOpMap {E : Type*} [Category E] {J : Type u} [Category.{v} J]
+    (K : J ⥤ E) {j j' : J} (f : j ⟶ j') :
+    (unop (op (unop (op K)))).map f = K.map f := rfl
+
+private lemma constObjMap {E : Type*} [Category E] {J : Type u} [Category.{v} J]
+    (X : E) {j j' : J} (f : j ⟶ j') :
+    ((const J).obj X).map f = 𝟙 (((const J).obj X).obj j) := rfl
+
+private lemma constOpObjMap {E : Type*} [Category E] {J : Type u} [Category.{v} J]
+    (X : Eᵒᵖ) {j j' : J} (f : j ⟶ j') :
+    (unop ((const J).op.obj X)).map f = 𝟙 ((unop ((const J).op.obj X)).obj j') := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- auxiliary construction for `coconesIso` -/
 @[simp]
@@ -282,8 +294,13 @@ def coconesIsoComponentInv {J : Type u} [Category.{v} J] {K : J ⥤ C} (Y : D)
     (t : (G ⋙ (cocones J C).obj (op K)).obj Y) : ((cocones J D).obj (op (K ⋙ F))).obj Y where
   app j := (adj.homEquiv (K.obj j) Y).symm (t.app j)
   naturality j j' f := by
-    erw [← adj.homEquiv_naturality_left_symm, ← adj.homEquiv_naturality_right_symm, t.naturality]
-    simp
+    simp only [comp_obj, const_obj_obj, Functor.comp_map, ← adj.homEquiv_naturality_left_symm,
+      const_obj_map, ← adj.homEquiv_naturality_right_symm, map_id, Category.comp_id,
+      EmbeddingLike.apply_eq_iff_eq]
+    rw [← unopOpUnopOpMap K f]
+    rw [← Category.comp_id (t.app j)]
+    rw [← constObjMap (G.obj Y) f]
+    apply t.naturality
 
 /-- auxiliary construction for `conesIso` -/
 @[simp]
@@ -291,8 +308,11 @@ def conesIsoComponentHom {J : Type u} [Category.{v} J] {K : J ⥤ D} (X : Cᵒ�
     (t : (Functor.op F ⋙ (cones J D).obj K).obj X) : ((cones J C).obj (K ⋙ G)).obj X where
   app j := (adj.homEquiv (unop X) (K.obj j)) (t.app j)
   naturality j j' f := by
-    erw [← adj.homEquiv_naturality_right, ← t.naturality, Category.id_comp, Category.id_comp]
-    rfl
+    simp only [op_obj, const_obj_obj, comp_obj, const_obj_map, Category.id_comp, Functor.comp_map,
+      ← adj.homEquiv_naturality_right, EmbeddingLike.apply_eq_iff_eq]
+    rw [← Category.id_comp (t.app j')]
+    rw [← constOpObjMap (F.op.obj X) f]
+    apply t.naturality
 
 /-- auxiliary construction for `conesIso` -/
 @[simp]
@@ -300,7 +320,12 @@ def conesIsoComponentInv {J : Type u} [Category.{v} J] {K : J ⥤ D} (X : Cᵒ�
     (t : ((cones J C).obj (K ⋙ G)).obj X) : (Functor.op F ⋙ (cones J D).obj K).obj X where
   app j := (adj.homEquiv (unop X) (K.obj j)).symm (t.app j)
   naturality j j' f := by
-    erw [← adj.homEquiv_naturality_right_symm, ← t.naturality, Category.id_comp, Category.id_comp]
+    simp only [op_obj, const_obj_obj, const_obj_map, Category.id_comp,
+      ← adj.homEquiv_naturality_right_symm, EmbeddingLike.apply_eq_iff_eq]
+    rw [← Functor.comp_map]
+    rw [← Category.id_comp (t.app j')]
+    rw [← constOpObjMap X f]
+    apply t.naturality
 
 end ArbitraryUniverse
 
