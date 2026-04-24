@@ -28,6 +28,16 @@ section
 
 open CategoryTheory.Limits
 
+@[simp]
+theorem tensorLeft_map_coequalizer_π {X Y Z : C} (f g : X ⟶ Y) [HasCoequalizer f g] :
+    (tensorLeft Z).map (coequalizer.π f g) = Z ◁ coequalizer.π f g :=
+  rfl
+
+@[simp]
+theorem tensorRight_map_coequalizer_π {X Y Z : C} (f g : X ⟶ Y) [HasCoequalizer f g] :
+    (tensorRight Z).map (coequalizer.π f g) = coequalizer.π f g ▷ Z :=
+  rfl
+
 variable [HasCoequalizers C]
 
 section
@@ -192,6 +202,10 @@ variable {R S T : Mon C} (P : Bimod R S) (Q : Bimod S T)
 noncomputable def X : C :=
   coequalizer (P.actRight ▷ Q.X) ((α_ _ _ _).hom ≫ (P.X ◁ Q.actLeft))
 
+theorem X_eq :
+    X P Q = coequalizer (P.actRight ▷ Q.X) ((α_ _ _ _).hom ≫ (P.X ◁ Q.actLeft)) :=
+  rfl
+
 section
 
 variable [∀ X : C, PreservesColimitsOfSize.{0, 0} (tensorLeft X)]
@@ -220,7 +234,8 @@ set_option backward.isDefEq.respectTransparency false in
 theorem whiskerLeft_π_actLeft :
     (R.X ◁ coequalizer.π _ _) ≫ actLeft P Q =
       (α_ _ _ _).inv ≫ (P.actLeft ▷ Q.X) ≫ coequalizer.π _ _ := by
-  erw [map_π_preserves_coequalizer_inv_colimMap (tensorLeft _)]
+  rw [actLeft, ← tensorLeft_map_coequalizer_π,
+    map_π_preserves_coequalizer_inv_colimMap (tensorLeft _)]
   simp only [Category.assoc]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -280,7 +295,8 @@ set_option backward.isDefEq.respectTransparency false in
 theorem π_tensor_id_actRight :
     (coequalizer.π _ _ ▷ T.X) ≫ actRight P Q =
       (α_ _ _ _).hom ≫ (P.X ◁ Q.actRight) ≫ coequalizer.π _ _ := by
-  erw [map_π_preserves_coequalizer_inv_colimMap (tensorRight _)]
+  rw [actRight, ← tensorRight_map_coequalizer_π,
+    map_π_preserves_coequalizer_inv_colimMap (tensorRight _)]
   simp only [Category.assoc]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -433,6 +449,13 @@ variable [∀ X : C, PreservesColimitsOfSize.{0, 0} (tensorLeft X)]
 variable [∀ X : C, PreservesColimitsOfSize.{0, 0} (tensorRight X)]
 variable {R S T U : Mon C} (P : Bimod R S) (Q : Bimod S T) (L : Bimod T U)
 
+theorem π_tensorBimod_actLeft_eq :
+    coequalizer.π (P.actRight ▷ TensorBimod.X Q L)
+        ((α_ _ _ _).hom ≫ P.X ◁ TensorBimod.actLeft Q L) =
+      coequalizer.π (P.actRight ▷ (Q.tensorBimod L).X)
+        ((α_ _ _ _).hom ≫ P.X ◁ (Q.tensorBimod L).actLeft) :=
+  rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- An auxiliary morphism for the definition of the underlying morphism of the forward component of
 the associator isomorphism. -/
@@ -491,9 +514,15 @@ theorem hom_left_act_hom' :
   slice_rhs 1 3 =>
     rw [← whiskerLeft_comp, ← whiskerLeft_comp, π_tensor_id_preserves_coequalizer_inv_desc,
       whiskerLeft_comp, whiskerLeft_comp]
-  slice_rhs 3 4 => erw [TensorBimod.whiskerLeft_π_actLeft P (Q.tensorBimod L)]
-  slice_rhs 2 3 => erw [associator_inv_naturality_right]
-  slice_rhs 3 4 => erw [whisker_exchange]
+  slice_rhs 3 4 =>
+    simp only [← TensorBimod.X_eq, π_tensorBimod_actLeft_eq]
+    rw [TensorBimod.whiskerLeft_π_actLeft P (Q.tensorBimod L)]
+  slice_rhs 2 3 =>
+    simp only [← TensorBimod.X_eq, ← tensorBimod_X]
+    rw [associator_inv_naturality_right]
+  slice_rhs 3 4 =>
+    simp only [← TensorBimod.X_eq, ← tensorBimod_X]
+    rw [whisker_exchange]
   monoidal
 
 set_option backward.isDefEq.respectTransparency false in
@@ -515,8 +544,12 @@ theorem hom_right_act_hom' :
   slice_rhs 1 3 =>
     rw [← comp_whiskerRight, ← comp_whiskerRight, π_tensor_id_preserves_coequalizer_inv_desc,
       comp_whiskerRight, comp_whiskerRight]
-  slice_rhs 3 4 => erw [TensorBimod.π_tensor_id_actRight P (Q.tensorBimod L)]
-  slice_rhs 2 3 => erw [associator_naturality_middle]
+  slice_rhs 3 4 =>
+    simp only [← TensorBimod.X_eq, π_tensorBimod_actLeft_eq]
+    rw [TensorBimod.π_tensor_id_actRight P (Q.tensorBimod L)]
+  slice_rhs 2 3 =>
+    simp only [← TensorBimod.X_eq, ← tensorBimod_X]
+    rw [associator_naturality_middle]
   dsimp
   slice_rhs 3 4 =>
     rw [← whiskerLeft_comp, TensorBimod.π_tensor_id_actRight, whiskerLeft_comp, whiskerLeft_comp]
