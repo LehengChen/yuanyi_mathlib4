@@ -158,6 +158,12 @@ noncomputable def freeYonedaCoproductMk (m : M.Elements) :
     M.freeYonedaCoproduct.obj m.1 :=
   (M.ιFreeYonedaCoproduct m).app _ (ModuleCat.freeMk (𝟙 _))
 
+private lemma fromFreeYonedaCoproduct_app_mk_comp (m : M.Elements) :
+    M.fromFreeYonedaCoproduct.app _ (M.freeYonedaCoproductMk m) =
+      (ConcreteCategory.hom
+        ((M.ιFreeYonedaCoproduct m).app m.1 ≫ M.fromFreeYonedaCoproduct.app m.1))
+        (ModuleCat.freeMk (𝟙 _)) := rfl
+
 @[reassoc (attr := simp)]
 lemma ι_fromFreeYonedaCoproduct (m : M.Elements) :
     M.ιFreeYonedaCoproduct m ≫ M.fromFreeYonedaCoproduct = m.fromFreeYoneda := by
@@ -168,13 +174,13 @@ lemma ι_fromFreeYonedaCoproduct_apply (m : M.Elements) (X : Cᵒᵖ) (x : m.fre
       m.fromFreeYoneda.app X x :=
   congr_fun ((evaluation R X ⋙ forget _).congr_map (M.ι_fromFreeYonedaCoproduct m)) x
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma fromFreeYonedaCoproduct_app_mk (m : M.Elements) :
     M.fromFreeYonedaCoproduct.app _ (M.freeYonedaCoproductMk m) = m.2 := by
-  dsimp [freeYonedaCoproductMk]
-  erw [M.ι_fromFreeYonedaCoproduct_apply m]
-  rw [m.fromFreeYoneda_app_apply]
+  rw [M.fromFreeYonedaCoproduct_app_mk_comp]
+  rw [← comp_app, M.ι_fromFreeYonedaCoproduct]
+  rw [Elements.fromFreeYoneda]
+  rw [freeYonedaEquiv_symm_app]
 
 instance : Epi M.fromFreeYonedaCoproduct :=
   epi_of_surjective (fun X m ↦ ⟨M.freeYonedaCoproductMk (M.elementsMk X m),
