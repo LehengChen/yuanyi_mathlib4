@@ -315,12 +315,22 @@ def Cofan.isColimitTrans {X : α → C} (c : Cofan X) (hc : IsColimit c)
   · exact fun t ↦ hc.desc (Cofan.mk _ fun a ↦ (hs a).desc (Cofan.mk t.pt (fun b ↦ t.inj ⟨a, b⟩)))
   · intro t ⟨a, b⟩
     simp only [mk_pt, cofan_mk_inj, Category.assoc]
-    erw [hc.fac, (hs a).fac]
+    rw [← Cofan.IsColimit.fac (hs a) (fun b ↦ t.inj ⟨a, b⟩) b]
+    simp only [cofan_mk_inj]
+    rw [← Cofan.IsColimit.desc]
+    rw [Cofan.IsColimit.fac]
     rfl
   · intro t m h
     refine hc.hom_ext fun ⟨a⟩ ↦ (hs a).hom_ext fun ⟨b⟩ ↦ ?_
-    erw [hc.fac, (hs a).fac]
-    simpa using h ⟨a, b⟩
+    simp only [Cofan.inj, Cofan.mk_ι_app, Cofan.mk_pt, Category.assoc] at h ⊢
+    simp only [h ⟨a, b⟩, Discrete.functor_obj_eq_as, Functor.const_obj_obj]
+    rw [← Cofan.inj]
+    rw [← Cofan.IsColimit.fac (hs a) (fun b ↦ t.inj ⟨a, b⟩) b]
+    simp only [cofan_mk_inj]
+    rw [← Cofan.IsColimit.desc]
+    rw [← Cofan.inj]
+    rw [Cofan.IsColimit.fac]
+    rfl
 
 /-- Construct a morphism between categorical products (indexed by the same type)
 from a family of morphisms between the factors.
@@ -886,10 +896,8 @@ theorem Sigma.ι_reindex_hom (b : β) :
   simp only [HasColimit.isoOfEquivalence_hom_π, Functor.id_obj, Discrete.functor_obj,
     Function.comp_apply, Discrete.equivalence_functor, Discrete.equivalence_inverse,
     Functor.comp_obj, Discrete.natIso_inv_app, Iso.refl_inv, Category.id_comp]
-  have h := colimit.w (Discrete.functor f) (Discrete.eqToHom' (ε.apply_symm_apply (ε b)))
-  simp only [Discrete.functor_obj] at h
-  erw [← h, eqToHom_map, eqToHom_map, eqToHom_trans_assoc]
-  all_goals { simp }
+  rw [← colimit.w (Discrete.functor f) (Discrete.eqToHom' (ε.apply_symm_apply (ε b)))]
+  simp [Discrete.equivalence, eqToHom_map]
 
 set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
