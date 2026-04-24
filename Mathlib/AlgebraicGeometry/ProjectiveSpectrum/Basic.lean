@@ -141,13 +141,17 @@ noncomputable
 def basicOpenToSpec : (basicOpen 𝒜 f).toScheme ⟶ Spec (.of <| Away 𝒜 f) :=
   (basicOpen 𝒜 f).toSpecΓ ≫ Spec.map (awayToSection 𝒜 f)
 
+lemma basicOpen_toSpecΓ :
+    Scheme.Opens.toSpecΓ (basicOpen 𝒜 f) =
+      (basicOpen 𝒜 f).toScheme.toSpecΓ ≫ Spec.map (basicOpen 𝒜 f).topIso.inv := rfl
+
 lemma basicOpenToSpec_app_top :
     (basicOpenToSpec 𝒜 f).app ⊤ = (Scheme.ΓSpecIso _).hom ≫ awayToSection 𝒜 f ≫
       (basicOpen 𝒜 f).topIso.inv := by
   rw [basicOpenToSpec]
+  rw [basicOpen_toSpecΓ]
   simp only [Scheme.Hom.comp_base, TopologicalSpace.Opens.map_comp_obj,
     TopologicalSpace.Opens.map_top, Scheme.Hom.comp_app, Scheme.Opens.topIso_inv, eqToHom_op]
-  erw [Scheme.Hom.comp_app]
   simp
 
 /-- The structure map `Proj A ⟶ Spec A₀`. -/
@@ -223,16 +227,24 @@ lemma awayι_toSpecZero : awayι 𝒜 f f_deg hm ≫ toSpecZero 𝒜 =
 variable {f}
 variable {m' : ℕ} {g : A} (g_deg : g ∈ 𝒜 m') (hm' : 0 < m') {x : A} (hx : x = f * g)
 
+lemma awayMap_awayToSection_val_apply (a : CommRingCat.of (Away 𝒜 f))
+    (p : Opposite.unop (Opposite.op (basicOpen 𝒜 x))) :
+    (((CommRingCat.Hom.hom
+      (CommRingCat.ofHom (awayMap 𝒜 g_deg hx) ≫ awayToSection 𝒜 x)) a).val p).val =
+      (((ProjectiveSpectrum.Proj.awayToSection 𝒜 x).hom'
+        ((CommRingCat.Hom.hom (CommRingCat.ofHom (awayMap 𝒜 g_deg hx))) a)).val
+          (p : Opposite.unop (Opposite.op (ProjectiveSpectrum.basicOpen 𝒜 x)))).val := rfl
+
 @[reassoc]
 lemma awayMap_awayToSection :
     CommRingCat.ofHom (awayMap 𝒜 g_deg hx) ≫ awayToSection 𝒜 x =
       awayToSection 𝒜 f ≫ (Proj 𝒜).presheaf.map (homOfLE (basicOpen_mono _ _ _ ⟨_, hx⟩)).op := by
   ext a
   apply Subtype.ext
-  ext ⟨i, hi⟩
+  ext ⟨p, hp⟩
   obtain ⟨⟨n, a, ⟨b, hb'⟩, i, rfl : _ = b⟩, rfl⟩ := mk_surjective a
-  simp only [homOfLE_leOfHom, CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply]
-  erw [ProjectiveSpectrum.Proj.awayToSection_apply]
+  rw [awayMap_awayToSection_val_apply]
+  rw [ProjectiveSpectrum.Proj.awayToSection_apply]
   rw [CommRingCat.hom_ofHom, val_awayMap_mk, Localization.mk_eq_mk', IsLocalization.map_mk',
     ← Localization.mk_eq_mk']
   refine Localization.mk_eq_mk_iff.mpr ?_
