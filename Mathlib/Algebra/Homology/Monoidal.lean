@@ -286,6 +286,11 @@ noncomputable instance monoidalCategoryStruct :
   leftUnitor K := leftUnitor K
   rightUnitor K := rightUnitor K
 
+@[local simp]
+lemma monoidal_tensorObj_X (K₁ K₂ : HomologicalComplex C c) :
+    @MonoidalCategoryStruct.tensorObj (GradedObject I C) _
+      (inferInstance : MonoidalCategoryStruct (GradedObject I C)) K₁.X K₂.X = (K₁ ⊗ K₂).X := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The structure which allows to construct the monoidal category structure
 on `HomologicalComplex C c` from the monoidal category structure on
@@ -297,34 +302,30 @@ noncomputable def Monoidal.inducingFunctorData :
   whiskerLeft_eq K₁ K₂ L₂ g := by
     dsimp [forget]
     rw [comp_id]
-    erw [id_comp]
+    rw [id_comp]
     rfl
   whiskerRight_eq {K₁ L₁} f K₂ := by
     dsimp [forget]
     rw [comp_id]
-    erw [id_comp]
+    rw [id_comp]
     rfl
   tensorHom_eq {K₁ L₁ K₂ L₂} f g := by
     dsimp [forget]
     rw [comp_id]
-    erw [id_comp]
+    rw [id_comp]
     rfl
   associator_eq K₁ K₂ K₃ := by
     dsimp [forget]
-    simp only [tensorHom_id, whiskerRight_tensor, id_whiskerRight,
-      id_comp, Iso.inv_hom_id, comp_id, assoc]
-    erw [id_whiskerRight]
-    rw [id_comp]
-    erw [id_comp]
+    simp
     rfl
   leftUnitor_eq K := by
-    dsimp
-    erw [id_comp]
+    dsimp [forget]
+    rw [id_comp]
     rfl
   rightUnitor_eq K := by
-    dsimp
+    dsimp [forget]
     rw [assoc]
-    erw [id_comp]
+    rw [id_comp]
     rfl
 
 noncomputable instance monoidalCategory : MonoidalCategory (HomologicalComplex C c) :=
