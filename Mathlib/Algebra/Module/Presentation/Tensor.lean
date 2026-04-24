@@ -23,6 +23,16 @@ namespace Module
 
 open TensorProduct
 
+private lemma comp_sectL {α β γ : Type*} (f : α × β → γ) (b : β) :
+    f ∘ ⇑(Function.Embedding.sectL α b) = fun a ↦ f (a, b) := rfl
+
+private lemma comp_sectR {α β γ : Type*} (f : α × β → γ) (a : α) :
+    f ∘ ⇑(Function.Embedding.sectR a β) = fun b ↦ f (a, b) := rfl
+
+private lemma applyₗ_comp {R M M₂ α : Type*} [CommSemiring R] [AddCommMonoid M]
+    [Module R M] [AddCommMonoid M₂] [Module R M₂] (v : M) (f : α → M →ₗ[R] M₂) :
+    ⇑(LinearMap.applyₗ v) ∘ f = fun a ↦ f a v := rfl
+
 variable {A : Type u} [CommRing A] {M₁ : Type v₁} {M₂ : Type v₂}
   [AddCommGroup M₁] [AddCommGroup M₂] [Module A M₁] [Module A M₂]
 
@@ -41,6 +51,14 @@ noncomputable def tensor :
         (relations₁.relation r₁)
     | .inr ⟨g₁, r₂⟩ => Finsupp.embDomain (Function.Embedding.sectR g₁ relations₂.G)
         (relations₂.relation r₂)
+
+private lemma tensor_relation_inl (r₁ : relations₁.R) (g₂ : relations₂.G) :
+    (relations₁.tensor relations₂).relation (.inl ⟨r₁, g₂⟩) =
+      Finsupp.embDomain (Function.Embedding.sectL relations₁.G g₂) (relations₁.relation r₁) := rfl
+
+private lemma tensor_relation_inr (g₁ : relations₁.G) (r₂ : relations₂.R) :
+    (relations₁.tensor relations₂).relation (.inr ⟨g₁, r₂⟩) =
+      Finsupp.embDomain (Function.Embedding.sectR g₁ relations₂.G) (relations₂.relation r₂) := rfl
 
 namespace Solution
 
@@ -73,18 +91,21 @@ noncomputable def isPresentationCoreTensor :
     { var := fun g₁ ↦ h₂.desc
         { var := fun g₂ ↦ s.var ⟨g₁, g₂⟩
           linearCombination_var_relation := fun r₂ ↦ by
-            erw [← Finsupp.linearCombination_embDomain A
-              (Function.Embedding.sectR g₁ relations₂.G)]
-            exact s.linearCombination_var_relation (.inr ⟨g₁, r₂⟩) }
+            rw [← comp_sectR s.var g₁,
+              ← Finsupp.linearCombination_embDomain A (Function.Embedding.sectR g₁ relations₂.G),
+              ← tensor_relation_inr relations₁ relations₂ g₁ r₂]
+            apply s.linearCombination_var_relation }
       linearCombination_var_relation := fun r₁ ↦ h₂.postcomp_injective (by
         ext g₂
         dsimp
-        erw [Finsupp.apply_linearCombination A (LinearMap.applyₗ (solution₂.var g₂))]
-        have := s.linearCombination_var_relation (.inl ⟨r₁, g₂⟩)
-        erw [Finsupp.linearCombination_embDomain] at this
-        convert this
-        ext g₁
-        simp) })
+        rw [← LinearMap.applyₗ_apply_apply]
+        rw [Finsupp.apply_linearCombination A (LinearMap.applyₗ (solution₂.var g₂))]
+        rw [applyₗ_comp]
+        simp only [IsPresentation.desc_var]
+        rw [← comp_sectL s.var g₂,
+          ← Finsupp.linearCombination_embDomain A (Function.Embedding.sectL relations₁.G g₂),
+          ← tensor_relation_inl relations₁ relations₂ r₁ g₂]
+        apply s.linearCombination_var_relation) })
   postcomp_desc _ := by aesop
   postcomp_injective h := curry_injective (h₁.postcomp_injective (by
     ext g₁ : 2
