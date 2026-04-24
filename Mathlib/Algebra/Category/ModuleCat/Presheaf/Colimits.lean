@@ -29,6 +29,10 @@ variable {C : Type u₁} [Category.{v₁} C] {R : Cᵒᵖ ⥤ RingCat.{u}}
 
 section Colimits
 
+@[simp] lemma comp_evaluation_restrictScalars {X Y : Cᵒᵖ} (f : X ⟶ Y) :
+    F ⋙ evaluation R Y ⋙ ModuleCat.restrictScalars (R.map f).hom =
+      (F ⋙ evaluation R Y) ⋙ ModuleCat.restrictScalars (R.map f).hom := rfl
+
 variable [∀ {X Y : Cᵒᵖ} (f : X ⟶ Y), PreservesColimit (F ⋙ evaluation R Y)
   (ModuleCat.restrictScalars (R.map f).hom)]
 
@@ -75,17 +79,17 @@ noncomputable def colimitPresheafOfModules : PresheafOfModules R where
     dsimp
     rw [ι_colimMap_assoc, Functor.whiskerLeft_app, restriction_app]
     -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (𝟙 X)).hom)]
+    rw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (𝟙 X)).hom)]
     rw [ModuleCat.restrictScalarsId'App_inv_naturality, map_id]
     dsimp)
   map_comp {X Y Z} f g := colimit.hom_ext (fun j => by
     dsimp
     rw [ι_colimMap_assoc, Functor.whiskerLeft_app, restriction_app, assoc, ι_colimMap_assoc]
     -- Here we should rewrite using `Functor.assoc` but that gives a "motive is type-incorrect"
-    erw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (f ≫ g)).hom),
+    rw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map (f ≫ g)).hom),
       ι_preservesColimitIso_inv_assoc (G := ModuleCat.restrictScalars (R.map f).hom)]
     rw [← Functor.map_comp_assoc, ι_colimMap_assoc]
-    erw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map g).hom)]
+    rw [ι_preservesColimitIso_inv (G := ModuleCat.restrictScalars (R.map g).hom)]
     rw [map_comp, ModuleCat.restrictScalarsComp'_inv_app, assoc, assoc,
       Functor.whiskerLeft_app, Functor.whiskerLeft_app, restriction_app, restriction_app]
     simp only [Functor.map_comp, assoc]
