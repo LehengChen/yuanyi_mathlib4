@@ -43,18 +43,32 @@ structure HomObj (A : C ⥤ Type w) where
   naturality {c d : C} (f : c ⟶ d) (a : A.obj c) :
     F.map f ≫ app d (A.map f a) = app c a ≫ G.map f := by cat_disch
 
+private lemma homObjEquiv_invFun_naturality_left (F G A : C ⥤ Type w) {X Y : C} (f : X ⟶ Y)
+    (a : F ⊗ A ⟶ G) (x : F.obj X) (y : A.obj X) : (F.map f ≫ (fun x ↦ a.app Y (x, A.map f y))) x =
+      ((F ⊗ A).map f ≫ a.app Y) (x, y) := rfl
+
+private lemma homObjEquiv_invFun_naturality_right (F G A : C ⥤ Type w) {X Y : C}
+    (f : X ⟶ Y) (a : F ⊗ A ⟶ G) (x : F.obj X) (y : A.obj X) :
+    ((fun x ↦ a.app X (x, y)) ≫ G.map f) x = (a.app X ≫ G.map f) (x, y) := rfl
+
 /-- When `F`, `G`, and `A` are all functors `C ⥤ Type w`, then `HomObj F G A` is in
 bijection with `F ⊗ A ⟶ G`. -/
 @[simps]
 def homObjEquiv (F G A : C ⥤ Type w) : (HomObj F G A) ≃ (F ⊗ A ⟶ G) where
   toFun a := ⟨fun X ⟨x, y⟩ ↦ a.app X y x, fun X Y f ↦ by
     ext ⟨x, y⟩
-    erw [congr_fun (a.naturality f y) x]
-    rfl ⟩
+    simp only [Monoidal.tensorObj_map, tensor_apply, types_comp_apply]
+    rw [← types_comp_apply (F.map f) (a.app Y (A.map f y)) x]
+    rw [← types_comp_apply (a.app X y) (G.map f) x]
+    rw [congr_fun (a.naturality f y) x] ⟩
   invFun a := ⟨fun X y x ↦ a.app X (x, y), fun φ y ↦ by
     ext x
-    erw [congr_fun (a.naturality φ) (x, y)]
-    rfl ⟩
+    simp only [types_comp_apply]
+    rw [← types_comp_apply (F.map φ) (fun x ↦ a.app _ (x, A.map φ y)) x]
+    rw [← types_comp_apply (fun x ↦ a.app _ (x, y)) (G.map φ) x]
+    rw [homObjEquiv_invFun_naturality_left F G A φ a x y]
+    rw [homObjEquiv_invFun_naturality_right F G A φ a x y]
+    rw [congr_fun (a.naturality φ) (x, y)] ⟩
   left_inv _ := by aesop
   right_inv _ := by aesop
 
