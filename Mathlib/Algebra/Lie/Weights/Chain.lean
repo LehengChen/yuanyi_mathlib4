@@ -64,6 +64,11 @@ variable {R L : Type*} [CommRing R] [LieRing L] [LieAlgebra R L]
 
 namespace LieModule
 
+omit [LieAlgebra R L] [LieModule R L M] in
+private lemma trace_lieSubmodule_restrict_eq_trace_toSubmodule_restrict (N : LieSubmodule R L M)
+    (f : Module.End R M) (h : MapsTo f N N) :
+    LinearMap.trace R N (f.restrict h) = LinearMap.trace R (N : Submodule R M) (f.restrict h) := rfl
+
 section IsNilpotent
 
 variable [LieRing.IsNilpotent L] (χ₁ χ₂ : L → R) (p q : ℤ)
@@ -236,9 +241,10 @@ lemma exists_forall_mem_corootSpace_smul_add_eq_zero
   -- The lines below illustrate the cost of treating `LieSubmodule` as both a
   -- `Submodule` and a `LieSubmodule` simultaneously.
   #adaptation_note /-- 2025-06-18 (https://github.com/leanprover/lean4/issues/8804).
-    The `erw` causes a kernel timeout if there is no `subst`. -/
+    The `subst` avoids a kernel timeout in the next trace decomposition. -/
   subst a b N
-  erw [LinearMap.trace_eq_sum_trace_restrict_of_eq_biSup _ h₁ h₂ (genWeightSpaceChain M α χ p q) h₃]
+  rw [trace_lieSubmodule_restrict_eq_trace_toSubmodule_restrict]
+  rw [LinearMap.trace_eq_sum_trace_restrict_of_eq_biSup _ h₁ h₂ (genWeightSpaceChain M α χ p q) h₃]
   simp_rw [LieSubmodule.toEnd_restrict_eq_toEnd]
   convert_to _ =
     ∑ k ∈ Finset.Ioo p q, (LinearMap.trace R { x // x ∈ (genWeightSpace M (k • α + χ)) })
