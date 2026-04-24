@@ -99,7 +99,7 @@ lemma compatibilityCounit_of_compatibilityUnit (h : CompatibilityUnit adj e₁ e
   dsimp
   rw [adj.homEquiv_unit, adj.homEquiv_unit, G.map_comp, adj.unit_naturality_assoc, ← eq]
   simp only [assoc, ← Functor.map_comp, Iso.inv_hom_id_app_assoc]
-  erw [← e₂.inv.naturality]
+  rw [← Functor.comp_map, ← e₂.inv.naturality]
   dsimp
   simp only [right_triangle_components, ← Functor.map_comp_assoc, Functor.map_id, id_comp,
     Iso.hom_inv_id_app, Functor.comp_obj]
@@ -114,8 +114,9 @@ lemma compatibilityUnit_right (h : CompatibilityUnit adj e₁ e₂) (Y : D) :
     e₂.inv.app Y = adj.unit.app _ ≫ G.map (e₁.hom.app _) ≫ G.map ((adj.counit.app _)⟦a⟧') := by
   have := h (G.obj Y)
   rw [← cancel_mono (e₂.inv.app _), assoc, assoc, Iso.hom_inv_id_app] at this
-  erw [comp_id] at this
-  rw [← assoc, ← this, assoc]; erw [← e₂.inv.naturality]
+  simp only [Functor.comp_obj, comp_id] at this
+  rw [← assoc, ← this, assoc]
+  rw [← Functor.comp_map, ← e₂.inv.naturality]
   rw [← cancel_mono (e₂.hom.app _)]
   simp only [Functor.comp_obj, Iso.inv_hom_id_app, Functor.id_obj, Functor.comp_map, assoc, comp_id,
     ← (shiftFunctor C a).map_comp, right_triangle_components, Functor.map_id]
@@ -188,7 +189,7 @@ lemma compatibilityUnit_isoAdd (h : CompatibilityUnit adj e₁ e₂)
     Functor.map_comp, assoc, unit_naturality_assoc]
   slice_rhs 5 6 => rw [← G.map_comp, Iso.inv_hom_id_app]
   simp only [Functor.comp_obj, Functor.map_id, id_comp, assoc]
-  erw [f₂.hom.naturality_assoc]
+  rw [← Functor.comp_map, f₂.hom.naturality_assoc]
   rw [← reassoc_of% this, ← cancel_mono ((shiftFunctorAdd C a b).hom.app _),
     assoc, assoc, assoc, assoc, assoc, assoc, Iso.inv_hom_id_app_assoc, Iso.inv_hom_id_app]
   dsimp
@@ -367,7 +368,8 @@ lemma compatibilityUnit_iso (a : A) :
   dsimp
   simp only [comp_id, homEquiv_counit, Functor.map_comp, assoc, counit_naturality,
     counit_naturality_assoc, left_triangle_components_assoc]
-  erw [← NatTrans.naturality_assoc]
+  rw (occs := .pos [2]) [← Functor.comp_map]
+  rw [← NatTrans.naturality_assoc]
   dsimp
   rw [shift_shiftFunctorCompIsoId_hom_app, Iso.inv_hom_id_app_assoc,
     Functor.commShiftIso_hom_naturality_assoc, ← Functor.map_comp,
