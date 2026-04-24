@@ -66,6 +66,16 @@ universe u
 
 open CategoryTheory Opposite TopologicalSpace CategoryTheory.Limits AlgebraicGeometry
 
+namespace AlgebraicGeometry
+namespace AffineScheme
+
+@[simp]
+lemma forgetToScheme_map_ofHom {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (f : X ⟶ Y) :
+    forgetToScheme.map (ofHom f) = f := rfl
+
+end AffineScheme
+end AlgebraicGeometry
+
 namespace RingHom
 
 variable (P : ∀ {R S : Type u} [CommRing R] [CommRing S], (R →+* S) → Prop)
@@ -75,8 +85,8 @@ theorem IsStableUnderBaseChange.pullback_fst_appTop
     (hP : IsStableUnderBaseChange P) (hP' : RespectsIso P)
     {X Y S : Scheme} [IsAffine X] [IsAffine Y] [IsAffine S] (f : X ⟶ S) (g : Y ⟶ S)
     (H : P g.appTop.hom) : P (pullback.fst f g).appTop.hom := by
-  -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): change `rw` to `erw`
-  erw [← PreservesPullback.iso_inv_fst AffineScheme.forgetToScheme (AffineScheme.ofHom f)
+  rw [← AffineScheme.forgetToScheme_map_ofHom f, ← AffineScheme.forgetToScheme_map_ofHom g,
+    ← PreservesPullback.iso_inv_fst AffineScheme.forgetToScheme (AffineScheme.ofHom f)
       (AffineScheme.ofHom g)]
   rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp, hP'.cancel_right_isIso,
     AffineScheme.forgetToScheme_map]
