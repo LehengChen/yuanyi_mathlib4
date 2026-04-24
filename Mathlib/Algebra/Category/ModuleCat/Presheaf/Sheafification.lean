@@ -116,6 +116,12 @@ lemma toSheaf_map_sheafificationHomEquiv_symm
   rw [Equiv.apply_symm_apply, Adjunction.homEquiv_unit, Equiv.symm_apply_apply]
   rfl
 
+lemma sheafificationHomEquiv_map_comp {P : PresheafOfModules.{v} R₀} {M N : SheafOfModules.{v} R}
+    (f : (sheafification α).obj P ⟶ M) (g : M ⟶ N) :
+    (sheafificationHomEquiv α (f ≫ g) :
+      P ⟶ (SheafOfModules.forget R ⋙ restrictScalars α).obj N) =
+      sheafificationHomEquiv α f ≫ (SheafOfModules.forget R ⋙ restrictScalars α).map g := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Given a locally bijective morphism `α : R₀ ⟶ R.val` where `R₀` is a presheaf of rings
 and `R` a sheaf of rings, this is the adjunction
@@ -127,14 +133,15 @@ noncomputable def sheafificationAdjunction :
       homEquiv_naturality_left_symm := fun {P₀ Q₀ N} f g ↦ by
         apply (SheafOfModules.toSheaf _).map_injective
         rw [Functor.map_comp]
-        erw [toSheaf_map_sheafificationHomEquiv_symm,
+        simp only [Functor.comp_obj]
+        rw [toSheaf_map_sheafificationHomEquiv_symm,
           toSheaf_map_sheafificationHomEquiv_symm α g]
         rw [Functor.map_comp]
         apply (CategoryTheory.sheafificationAdjunction J
           AddCommGrpCat.{v}).homEquiv_naturality_left_symm
       homEquiv_naturality_right := fun {P₀ M N} f g ↦ by
         apply (toPresheaf _).map_injective
-        erw [toPresheaf_map_sheafificationHomEquiv] }
+        simp only [Functor.comp_obj, Functor.comp_map, sheafificationHomEquiv_map_comp] }
 
 lemma sheafificationAdjunction_homEquiv_apply {P : PresheafOfModules.{v} R₀}
     {F : SheafOfModules.{v} R} (f : (sheafification α).obj P ⟶ F) :
