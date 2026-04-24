@@ -258,8 +258,8 @@ lemma le_of_iSup_eq_top {I J : X.IdealSheafData} {ι : Type*}
   dsimp
   simp +instances only [← Submodule.restrictScalars_localized' Γ(X, X.basicOpen (r j)),
     Ideal.localized'_eq_map, RingHom.algebraMap_toAlgebra]
-  erw [I.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j)),
-    J.map_ideal (U := ⟨_, V.2.basicOpen _⟩) (X.basicOpen_le (r j))]
+  rw [I.map_ideal' (U := ⟨_, V.2.basicOpen _⟩) (homOfLE (X.basicOpen_le (r j))).op,
+    J.map_ideal' (U := ⟨_, V.2.basicOpen _⟩) (homOfLE (X.basicOpen_le (r j))).op]
   delta algebra_section_section_basicOpen
   rw! [e]
   rw [← I.map_ideal (V := (U _)) (X.basicOpen_le _), ← J.map_ideal (V := (U _)) (X.basicOpen_le _)]
@@ -507,6 +507,10 @@ section ofIsClosed
 
 open _root_.PrimeSpectrum TopologicalSpace
 
+private lemma spec_map_preimage_zeroLocus {R S : CommRingCat.{u}} (F : R ⟶ S) (s : Set R) :
+    ⇑(Spec.map F) ⁻¹' PrimeSpectrum.zeroLocus s =
+      PrimeSpectrum.comap F.hom ⁻¹' PrimeSpectrum.zeroLocus s := rfl
+
 /-- The radical of an ideal sheaf. -/
 @[simps! ideal]
 def radical (I : IdealSheafData X) : IdealSheafData X :=
@@ -593,7 +597,7 @@ noncomputable nonrec def vanishingIdeal (Z : Closeds X) : IdealSheafData X :=
         rw [← vanishingIdeal_closure,
           ← this.isOpenMap.preimage_closure_eq_closure_preimage this.continuous, e] at hx
         rw [← vanishingIdeal_closure, e]
-        erw [preimage_comap_zeroLocus] at hx
+        rw [spec_map_preimage_zeroLocus, preimage_comap_zeroLocus] at hx
         rwa [← PrimeSpectrum.zeroLocus_span, ← Ideal.map, vanishingIdeal_zeroLocus_eq_radical,
           ← RingHom.algebraMap_toAlgebra (X.presheaf.map _).hom,
           ← IsLocalization.map_radical (.powers f), ← vanishingIdeal_zeroLocus_eq_radical] at hx)
