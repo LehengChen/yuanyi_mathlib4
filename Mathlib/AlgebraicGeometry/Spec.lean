@@ -124,7 +124,7 @@ theorem Spec.sheafedSpaceMap_comp {R S T : CommRingCat.{u}} (f : R ⟶ S) (g : S
     -- Porting note: was one liner
     -- `dsimp, rw category_theory.functor.map_id, rw category.comp_id, erw comap_comp f g, refl`
     rw [NatTrans.comp_app, sheafedSpaceMap_hom_c_app, Functor.whiskerRight_app, eqToHom_refl]
-    erw [(sheafedSpaceObj T).presheaf.map_id]
+    rw [NatTrans.id_app, (sheafedSpaceObj T).presheaf.map_id]
     dsimp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply]
     rw [comap_comp]
     rfl
