@@ -701,6 +701,10 @@ theorem real_inner_div_norm_mul_norm_eq_neg_one_of_ne_zero_of_neg_mul {x : F} {r
     mul_assoc, abs_of_neg hr, neg_mul, div_neg_eq_neg_div, div_self]
   exact mul_ne_zero hr.ne (mul_self_ne_zero.2 (norm_ne_zero_iff.2 hx))
 
+private lemma core_normSq_toCore_eq_re_inner (x : E) :
+    letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
+    @InnerProductSpace.Core.normSq 𝕜 E _ _ _ _ x = re ⟪x, x⟫ := rfl
+
 variable (𝕜) in
 theorem norm_inner_eq_norm_tfae (x y : E) :
     List.TFAE [‖⟪x, y⟫‖ = ‖x‖ * ‖y‖,
@@ -714,7 +718,8 @@ theorem norm_inner_eq_norm_tfae (x y : E) :
       try positivity
     simp only [@norm_sq_eq_re_inner 𝕜] at h
     letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
-    erw [← InnerProductSpace.Core.cauchy_schwarz_aux (𝕜 := 𝕜) (F := E)] at h
+    rw [← core_normSq_toCore_eq_re_inner x, ← core_normSq_toCore_eq_re_inner y] at h
+    rw [← InnerProductSpace.Core.cauchy_schwarz_aux (𝕜 := 𝕜) (F := E)] at h
     rw [InnerProductSpace.Core.normSq_eq_zero, sub_eq_zero] at h
     rw [div_eq_inv_mul, mul_smul, h, inv_smul_smul₀]
     rwa [inner_self_ne_zero]
