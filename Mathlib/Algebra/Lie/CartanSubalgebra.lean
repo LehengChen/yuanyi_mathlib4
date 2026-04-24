@@ -67,6 +67,9 @@ theorem ucs_eq_self_of_isCartanSubalgebra (H : LieSubalgebra R L) [H.IsCartanSub
   | zero => simp
   | succ k ih => simp [ih]
 
+private lemma isNilpotent_toLieSubmodule_eq :
+    LieRing.IsNilpotent H = LieModule.IsNilpotent H H.toLieSubmodule := rfl
+
 theorem isCartanSubalgebra_iff_isUcsLimit : H.IsCartanSubalgebra ↔ H.toLieSubmodule.IsUcsLimit := by
   constructor
   · intro h
@@ -81,11 +84,8 @@ theorem isCartanSubalgebra_iff_isUcsLimit : H.IsCartanSubalgebra ↔ H.toLieSubm
   · rintro ⟨k, hk⟩
     exact
       { nilpotent := by
-          dsimp only [LieRing.IsNilpotent]
-          -- The instance for the second `H` in the goal is `lieRingSelfModule`
-          -- but `rw` expects it to be `H.toLieSubmodule.instLieRingModuleSubtypeMem`,
-          -- and these are not reducibly defeq.
-          erw [H.toLieSubmodule.isNilpotent_iff_exists_lcs_eq_bot]
+          rw [isNilpotent_toLieSubmodule_eq H,
+            H.toLieSubmodule.isNilpotent_iff_exists_lcs_eq_bot]
           use k
           rw [_root_.eq_bot_iff, LieSubmodule.lcs_le_iff, hk k (le_refl k)]
         self_normalizing := by
