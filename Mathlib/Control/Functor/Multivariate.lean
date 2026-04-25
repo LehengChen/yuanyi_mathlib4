@@ -154,12 +154,15 @@ private def f :
     ⟨x.val, cast (by grind [PredLast]) x.property⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
+private theorem PredLast'_fs_eq_const (i : Fin2 n) (x : (α ::: β) (Fin2.fs i)) :
+    PredLast' α pp (Fin2.fs i) x = TypeVec.const True (α ::: β) (Fin2.fs i) x := rfl
+
 private def g :
     ∀ n α,
       (fun i : Fin2 (n + 1) => { p_1 : (α ::: β) i // PredLast α pp p_1 }) ⟹ fun i : Fin2 (n + 1) =>
         { p_1 // ofRepeat (PredLast' α pp i p_1) }
   | _, α, Fin2.fs i, x =>
-    ⟨x.val, cast (by simp only [PredLast]; erw [const_iff_true]) x.property⟩
+    ⟨x.val, cast (by simp only [PredLast, PredLast'_fs_eq_const, const_iff_true]) x.property⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
 theorem LiftP_PredLast_iff {β} (P : β → Prop) (x : F (α ::: β)) :
@@ -177,24 +180,26 @@ theorem LiftP_PredLast_iff {β} (P : β → Prop) (x : F (α ::: β)) :
 
 variable (rr : β → β → Prop)
 
-set_option backward.isDefEq.respectTransparency false in
+private theorem RelLast'_fs_eq_repeatEq (i : Fin2 n) (x y : (α ::: β) (Fin2.fs i)) :
+    RelLast' α rr (Fin2.fs i) (TypeVec.prod.mk (Fin2.fs i) x y) =
+      repeatEq (α ::: β) (Fin2.fs i) (TypeVec.prod.mk (Fin2.fs i) x y) := rfl
+
 private def f' :
     ∀ n α,
       (fun i : Fin2 (n + 1) =>
           { p_1 : _ × _ // ofRepeat (RelLast' α rr i (TypeVec.prod.mk _ p_1.fst p_1.snd)) }) ⟹
         fun i : Fin2 (n + 1) => { p_1 : (α ::: β) i × _ // RelLast α rr p_1.fst p_1.snd }
   | _, α, Fin2.fs i, x =>
-    ⟨x.val, cast (by simp only [RelLast]; erw [repeatEq_iff_eq]) x.property⟩
+    ⟨x.val, cast (by simp only [RelLast, RelLast'_fs_eq_repeatEq, repeatEq_iff_eq]) x.property⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
-set_option backward.isDefEq.respectTransparency false in
 private def g' :
     ∀ n α,
       (fun i : Fin2 (n + 1) => { p_1 : (α ::: β) i × _ // RelLast α rr p_1.fst p_1.snd }) ⟹
         fun i : Fin2 (n + 1) =>
         { p_1 : _ × _ // ofRepeat (RelLast' α rr i (TypeVec.prod.mk _ p_1.1 p_1.2)) }
   | _, α, Fin2.fs i, x =>
-    ⟨x.val, cast (by simp only [RelLast]; erw [repeatEq_iff_eq]) x.property⟩
+    ⟨x.val, cast (by simp only [RelLast, RelLast'_fs_eq_repeatEq, repeatEq_iff_eq]) x.property⟩
   | _, _, Fin2.fz, x => ⟨x.val, x.property⟩
 
 theorem LiftR_RelLast_iff (x y : F (α ::: β)) :
