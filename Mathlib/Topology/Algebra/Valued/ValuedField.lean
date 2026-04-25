@@ -352,6 +352,12 @@ lemma extensionValuation_apply_coe (x : K) :
     Valued.extensionValuation (x : hat K) = v x := by
   rw [extensionValuation_toFun, extension_extends, Valuation.restrict_def, embedding_restrict₀]
 
+lemma valuation_restrict₀_apply (w : Valuation (hat K) Γ₀) (x : hat K) :
+    (restrict₀ w) x = (restrict₀ w.toMonoidWithZeroHom) x := rfl
+
+lemma valuation_valueGroup₀_zero (w : Valuation (hat K) Γ₀) :
+    (0 : ValueGroup₀ w) = (0 : ValueGroup₀ w.toMonoidWithZeroHom) := rfl
+
 @[simp]
 lemma extension_eq_zero_iff {x : hat K} : extension x = 0 ↔ x = 0 := by
   suffices extensionValuation x = 0 ↔ x = 0 by
@@ -428,7 +434,7 @@ noncomputable def valueGroup₀_hom_extensionValuation :
   map_zero' := by simp [Valuation.restrict_def]
   map_one' := by
     rw [← embedding_strictMono.injective.eq_iff, Valuation.restrict_def, map_one]
-    erw [embedding_restrict₀] -- Should disappear when `ValueGroup₀` takes a `MonoidWithZeroHom`.
+    rw [valuation_restrict₀_apply, embedding_restrict₀]
     simp only [Valuation.toMonoidWithZeroHom_coe_eq_coe,
       extensionValuation_toFun, extension_extends, ← map_one (embedding (f := hv.v))]
     rw [embedding_strictMono.injective.eq_iff]
@@ -507,8 +513,11 @@ noncomputable def valueGroup₀_equiv_extensionValuation :
         rw [← hy_def] at hy
         simpa [← hy] using hb0
       simp only [h0, ↓reduceDIte,  h0', WithZero.coe_inj, Subtype.mk.injEq, Units.mk0_inj] at this
-      erw [embedding_strictMono.injective.eq_iff, extension_extends, extension_extends] at this
-      simp only [Valuation.restrict_def, Algebra.algebraMap_self, RingHom.id_apply] at this
+      rw [embedding_strictMono.injective.eq_iff, UniformSpace.Completion.algebraMap_def,
+        Algebra.algebraMap_self, RingHom.id_apply, extension_extends,
+        UniformSpace.Completion.algebraMap_def, Algebra.algebraMap_self, RingHom.id_apply,
+        extension_extends] at this
+      simp only [Valuation.restrict_def] at this
       rw [hx, hy] at this
       exact this
   · intro x
@@ -517,7 +526,8 @@ noncomputable def valueGroup₀_equiv_extensionValuation :
     use extension k'
     simp only [valueGroup₀_hom_extensionValuation, Valuation.restrict_def, coe_mk, ZeroHom.coe_mk]
     rw [← hk', ← embedding_strictMono.injective.eq_iff]
-    erw [embedding_restrict₀, embedding_restrict₀]
+    rw [valuation_restrict₀_apply, valuation_restrict₀_apply, embedding_restrict₀,
+      embedding_restrict₀]
     simp only [Valuation.toMonoidWithZeroHom_coe_eq_coe,
       extensionValuation_toFun, extension_extends]
     rw [embedding_strictMono.injective.eq_iff]
@@ -587,9 +597,11 @@ lemma valuedCompletion_surjective_iff :
         · simp at H
         · obtain ⟨r, hr⟩ := h γ
           have hr' : restrict₀ valuedCompletion.v r ≠ 0 := by
-            erw [ne_eq, ← embedding_strictMono.injective.eq_iff, embedding_restrict₀ r, hr,
-              map_zero]
-            exact hγ
+            rw [ne_eq, ← embedding_strictMono.injective.eq_iff]
+            rw [valuation_restrict₀_apply, embedding_restrict₀]
+            simp only [Valuation.toMonoidWithZeroHom_coe_eq_coe, hr]
+            rw [valuation_valueGroup₀_zero, map_zero]
+            simp [hγ]
           convert isClosed_univ.sdiff (isOpen_sphere (hat K) hr') using 1
           ext x
           simp only [← hr, mem_setOf_eq, mem_diff, mem_univ, true_and, ← v.restrict_def,
