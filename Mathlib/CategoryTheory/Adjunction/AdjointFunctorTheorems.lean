@@ -69,15 +69,13 @@ section GeneralAdjointFunctorTheorem
 variable {D : Type u₁} [Category.{v₁} D]
 variable (G : D ⥤ C)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- If `G : D ⥤ C` is a right adjoint it satisfies the solution set condition. -/
 theorem solutionSetCondition_of_isRightAdjoint [G.IsRightAdjoint] : SolutionSetCondition.{w} G := by
   intro A
-  refine
-    ⟨PUnit, fun _ => G.leftAdjoint.obj A, fun _ => (Adjunction.ofIsRightAdjoint G).unit.app A, ?_⟩
+  use PUnit, fun _ => G.leftAdjoint.obj A, fun _ => (Adjunction.ofIsRightAdjoint G).unit.app A
   intro B h
-  refine ⟨PUnit.unit, ((Adjunction.ofIsRightAdjoint G).homEquiv _ _).symm h, ?_⟩
-  rw [← Adjunction.homEquiv_unit, Equiv.apply_symm_apply]
+  use PUnit.unit, G.leftAdjoint.map h ≫ (Adjunction.ofIsRightAdjoint G).counit.app B
+  simp [Functor.map_comp]
 
 /-- The general adjoint functor theorem says that if `G : D ⥤ C` preserves limits and `D` has them,
 if `G` satisfies the solution set condition then `G` is a right adjoint.
