@@ -87,7 +87,18 @@ lemma conjugateEquiv_leftAdjointCompIso_inv (e₀₁₂ : G₂₁ ⋙ G₁₀ �
 
 end
 
-set_option backward.isDefEq.respectTransparency false in
+section
+
+variable {L : C₀ ⥤ C₁} {R : C₁ ⥤ C₀} {K : C₁ ⥤ C₁}
+variable (a : L ⊣ R) {X : C₀} {Y Z : C₁}
+variable (f : L.obj X ⟶ Y) (ε : K.obj Y ⟶ Z)
+
+private lemma leftAdjointCompIso_comp_id_aux :
+    K.map (L.map (a.unit.app X ≫ R.map f) ≫ a.counit.app Y) ≫ ε = K.map f ≫ ε :=
+  congr_arg (K.map · ≫ ε) ((a.homEquiv X Y).left_inv f)
+
+end
+
 lemma leftAdjointCompIso_comp_id
     {F₀₁ : C₀ ⥤ C₁} {F₁₁' : C₁ ⥤ C₁} {G₁₀ : C₁ ⥤ C₀} {G₁'₁ : C₁ ⥤ C₁}
     (adj₀₁ : F₀₁ ⊣ G₁₀) (adj₁₁' : F₁₁' ⊣ G₁'₁)
@@ -97,8 +108,11 @@ lemma leftAdjointCompIso_comp_id
       isoWhiskerLeft _ (leftAdjointIdIso adj₁₁' e₁'₁) ≪≫ rightUnitor F₀₁ := by
   subst h
   ext X₀
-  simp [leftAdjointCompIso_hom_app, leftAdjointIdIso_hom_app,
-    ← Functor.map_comp_assoc, -Functor.map_comp]
+  simp only [comp_obj, leftAdjointCompIso_hom_app, Iso.trans_inv, isoWhiskerRight_inv,
+    NatTrans.comp_app, id_obj, leftUnitor_inv_app, whiskerRight_app, Category.id_comp,
+    ← Functor.map_comp_assoc, Iso.trans_hom, isoWhiskerLeft_hom, whiskerLeft_app,
+    leftAdjointIdIso_hom_app, rightUnitor_hom_app, Category.comp_id]
+  apply leftAdjointCompIso_comp_id_aux
 
 lemma leftAdjointCompIso_id_comp
     {F₀₀' : C₀ ⥤ C₀} {F₀'₁ : C₀ ⥤ C₁} {G₀'₀ : C₀ ⥤ C₀} {G₁₀' : C₁ ⥤ C₀}
