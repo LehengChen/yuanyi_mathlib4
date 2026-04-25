@@ -75,39 +75,41 @@ noncomputable def shortComplex : ShortComplex (C ⥤ C) where
   f := Φ.ι
   g := Φ.π
 
-instance : Mono Φ.shortComplex.f := by dsimp; infer_instance
-instance : Epi Φ.shortComplex.g := by dsimp; infer_instance
+instance : Mono Φ.shortComplex.f := by
+  apply (inferInstance : Mono Φ.ι)
+instance : Epi Φ.shortComplex.g := by
+  apply (inferInstance : Epi Φ.π)
 
-lemma shortExact_shortComplex : Φ.shortComplex.ShortExact where
-  exact := ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)
+lemma shortExact_shortComplex : Φ.shortComplex.ShortExact := by
+  constructor
+  apply ShortComplex.exact_of_g_is_cokernel _ (cokernelIsCokernel _)
 
 /-- The kernel fork `KernelFork.ofι Φ.ι Φ.ι_π` exhibits `Φ.ι : Φ.r ⟶ 𝟭 C` as the kernel
 of the canonical projection `Φ.π : 𝟭 C ⟶ Φ.quotient`. -/
 noncomputable def isLimitKernelFork : IsLimit (KernelFork.ofι _ Φ.ι_π) :=
   Φ.shortExact_shortComplex.fIsKernel
 
-set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 lemma ι_π_app (X : C) : Φ.ι.app X ≫ Φ.π.app X = 0 := by
-  simp [← NatTrans.comp_app]
+  rw [← NatTrans.comp_app]
+  simp
 
-set_option backward.isDefEq.respectTransparency false in
 /-- For `X : C`, the short complex `Φ.r.obj X ⟶ X ⟶ Φ.quotient.obj X` obtained by evaluating
 `Φ.shortComplex` at `X`. -/
 @[simps]
 noncomputable def shortComplexObj (X : C) : ShortComplex C where
   f := Φ.ι.app X
   g := Φ.π.app X
+  zero := Φ.ι_π_app X
 
-set_option backward.isDefEq.respectTransparency false in
-instance (X : C) : Mono (Φ.shortComplexObj X).f := by dsimp; infer_instance
+instance (X : C) : Mono (Φ.shortComplexObj X).f := by
+  apply CategoryTheory.Functor.map_mono ((evaluation C C).obj X) Φ.ι
 
-set_option backward.isDefEq.respectTransparency false in
-instance (X : C) : Epi (Φ.shortComplexObj X).g := by dsimp; infer_instance
+instance (X : C) : Epi (Φ.shortComplexObj X).g := by
+  apply CategoryTheory.Functor.map_epi ((evaluation C C).obj X) Φ.π
 
-lemma shortExact_shortComplexObj (X : C) : (Φ.shortComplexObj X).ShortExact where
-  exact :=
-    (ShortComplex.ShortExact.map_of_exact Φ.shortExact_shortComplex ((evaluation C C).obj X)).exact
+lemma shortExact_shortComplexObj (X : C) : (Φ.shortComplexObj X).ShortExact := by
+  apply ShortComplex.ShortExact.map_of_exact Φ.shortExact_shortComplex ((evaluation C C).obj X)
 
 /-- For `X : C`, the kernel fork `KernelFork.ofι (Φ.ι.app X) (Φ.ι_π_app X)` exhibits
 `Φ.ι.app X : Φ.r.obj X ⟶ X` as the kernel of the projection `Φ.π.app X : X ⟶ Φ.quotient.obj X`. -/
@@ -131,8 +133,9 @@ noncomputable def colon : Preradical C :=
 /-- The second projection of the pullback defining the colon preradical. -/
 noncomputable def colonπ : (colon Φ Ψ).r ⟶ Φ.quotient ⋙ Ψ.r := pullback.snd _ _
 
-set_option backward.isDefEq.respectTransparency false in
-instance : Epi (colonπ Φ Ψ) := by dsimp [colonπ]; infer_instance
+instance : Epi (colonπ Φ Ψ) := by
+  rw [colonπ]
+  apply Abelian.epi_pullback_of_epi_f
 
 instance (X : C) : Epi ((colonπ Φ Ψ).app X) := instEpiAppOfFunctor (Φ.colonπ Ψ) X
 
@@ -144,7 +147,8 @@ lemma isPullback_colon :
 lemma isPullback_colon_obj (Φ Ψ : Preradical C) (X : C) :
     IsPullback ((Φ.colon Ψ).ι.app X) ((Φ.colonπ Ψ).app X)
       (Φ.π.app X) (Ψ.ι.app (Φ.quotient.obj X)) := by
-  simpa using (isPullback_colon Φ Ψ).map ((evaluation _ _).obj X)
+  convert (isPullback_colon Φ Ψ).map ((evaluation _ _).obj X) using 1
+  simp
 
 @[reassoc]
 lemma colon_ι_app_π_app (Φ Ψ : Preradical C) (X : C) :
@@ -162,38 +166,55 @@ lemma toColon_hom_left_colonπ :
   simp [toColon]
 
 @[reassoc (attr := simp)]
+lemma toColon_hom_left_colon_ι : (toColon Φ Ψ).hom.left ≫ (Φ.colon Ψ).ι = Φ.ι :=
+  Over.w (toColon Φ Ψ).hom
+
+@[reassoc (attr := simp)]
 lemma toColon_hom_left_app_colonπ_app (X : C) :
     (toColon Φ Ψ).hom.left.app X ≫ (colonπ Φ Ψ).app X = 0 :=
   NatTrans.congr_app (toColon_hom_left_colonπ Φ Ψ) X
 
-set_option backward.isDefEq.respectTransparency false in
 @[reassoc (attr := simp)]
 lemma toColon_hom_left_app_colon_ι_app (X : C) :
     (Φ.toColon Ψ).hom.left.app X ≫ (Φ.colon Ψ).ι.app X = Φ.ι.app X := by
-  rw [← NatTrans.comp_app, Over.w]
+  rw [← NatTrans.comp_app, toColon_hom_left_colon_ι]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- For `X : C`, the morphism `(toColon Φ Ψ)` is an isomorphism if and only if
 `(Ψ.r.obj (Φ.quotient.obj X))` is the zero object. -/
 theorem isIso_toColon_hom_left_app_iff {Φ Ψ : Preradical C} {X : C} :
     IsIso ((toColon Φ Ψ).hom.left.app X) ↔ IsZero (Ψ.r.obj (Φ.quotient.obj X)) := by
   constructor <;> intro h
-  · exact IsZero.of_epi_eq_zero ((colonπ Φ Ψ).app X)
-      (zero_of_epi_comp ((toColon Φ Ψ).hom.left.app X) (by simp))
-  · obtain ⟨inv, hinv⟩ :=
-      KernelFork.IsLimit.lift' (Φ.isLimitKernelForkObj X) ((colon Φ Ψ).ι.app X) (by
-        rw [colon_ι_app_π_app, h.eq_zero_of_tgt ((colonπ Φ Ψ).app X), zero_comp])
-    dsimp at hinv
-    refine ⟨inv, ?_, ?_⟩
-    · simp [← cancel_mono (Φ.ι.app X), hinv]
-    · simp [← cancel_mono ((Φ.colon Ψ).ι.app X), hinv]
+  · apply IsZero.of_epi_eq_zero ((colonπ Φ Ψ).app X)
+    apply zero_of_epi_comp ((toColon Φ Ψ).hom.left.app X)
+    rw [toColon_hom_left_app_colonπ_app]
+  · let inv : (Φ.colon Ψ).r.obj X ⟶ Φ.r.obj X :=
+      (KernelFork.IsLimit.lift' (Φ.isLimitKernelForkObj X) ((colon Φ Ψ).ι.app X) (by
+        rw [colon_ι_app_π_app, h.eq_zero_of_tgt ((colonπ Φ Ψ).app X)]
+        simp)).1
+    let hinv : inv ≫ Φ.ι.app X = (Φ.colon Ψ).ι.app X := by
+      rw [← KernelFork.ι_ofι (Φ.π.app X) (Φ.ι.app X) (Φ.ι_π_app X)]
+      apply (KernelFork.IsLimit.lift' (Φ.isLimitKernelForkObj X) ((colon Φ Ψ).ι.app X) (by
+        rw [colon_ι_app_π_app, h.eq_zero_of_tgt ((colonπ Φ Ψ).app X)]
+        simp)).2
+    apply IsIso.mk
+    apply Exists.intro inv
+    constructor
+    · rw [← cancel_mono (Φ.ι.app X)]
+      rw [Category.assoc, hinv]
+      rw [toColon_hom_left_app_colon_ι_app]
+      simp
+    · rw [← cancel_mono ((Φ.colon Ψ).ι.app X)]
+      rw [Category.assoc, toColon_hom_left_app_colon_ι_app]
+      rw [← hinv]
+      simp
 
 /-- The morphism `(toColon Φ Ψ)` is an isomorphism if and only if `Φ.quotient ⋙ Ψ.r` is the zero
 object. -/
 theorem isIso_toColon_iff {Φ Ψ : Preradical C} :
     IsIso (toColon Φ Ψ) ↔ IsZero (Φ.quotient ⋙ Ψ.r) := by
-  simpa [MonoOver.isIso_iff_isIso_hom_left, isZero_iff (Φ.quotient ⋙ Ψ.r),
-    NatTrans.isIso_iff_isIso_app] using forall_congr' fun x ↦ isIso_toColon_hom_left_app_iff
+  rw [MonoOver.isIso_iff_isIso_hom_left, isZero_iff (Φ.quotient ⋙ Ψ.r),
+    NatTrans.isIso_iff_isIso_app]
+  simp [isIso_toColon_hom_left_app_iff]
 
 end Preradical
 
