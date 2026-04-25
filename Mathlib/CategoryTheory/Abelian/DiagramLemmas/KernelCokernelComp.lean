@@ -206,10 +206,20 @@ noncomputable abbrev kernelCokernelCompSequence : ComposableArrows C 5 :=
 instance : Mono ((kernelCokernelCompSequence f g).map' 0 1) := by
   dsimp; infer_instance
 
-set_option backward.isDefEq.respectTransparency false in
+lemma kernelCokernelCompSequence_map'_four_five :
+    (kernelCokernelCompSequence f g).map' 4 5 =
+      cokernel.map (f ≫ g) g f (𝟙 _) (by simp) := rfl
+
+lemma cokernel_desc_π_eq_coequalizer : cokernel.desc (f ≫ g) (cokernel.π g) (by simp) =
+    cokernel.desc (f ≫ g) (coequalizer.π g 0) (by simp [coequalizer_as_cokernel]) := by
+  simp [coequalizer_as_cokernel]
+
 instance : Epi ((kernelCokernelCompSequence f g).map' 4 5) := by
-  dsimp [ComposableArrows.Precomp.map]
-  infer_instance
+  rw [kernelCokernelCompSequence_map'_four_five]
+  simp only [cokernel.map, id_comp]
+  rw [cokernel_desc_π_eq_coequalizer]
+  apply @cokernel.desc_epi C _ _ X Z (f ≫ g) _ (coequalizer g 0) (coequalizer.π g 0) _
+    (@coequalizer.π_epi C _ Y Z g 0 _)
 
 lemma kernelCokernelCompSequence_exact :
     (kernelCokernelCompSequence f g).Exact :=
