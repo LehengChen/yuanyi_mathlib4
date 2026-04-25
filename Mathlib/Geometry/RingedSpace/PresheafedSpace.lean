@@ -79,9 +79,10 @@ theorem Hom.ext {X Y : PresheafedSpace C} (α β : Hom X Y) (w : α.base = β.ba
   dsimp at w
   subst w
   dsimp at h
-  erw [whiskerRight_id', comp_id] at h
-  subst h
-  rfl
+  congr
+  ext U
+  rw [← h]
+  simp
 
 -- TODO including `injections` would make tidy work earlier.
 theorem hext {X Y : PresheafedSpace C} (α β : Hom X Y) (w : α.base = β.base) (h : α.c ≍ β.c) :
@@ -182,6 +183,9 @@ theorem congr_app {X Y : PresheafedSpace C} {α β : X ⟶ Y} (h : α = β) (U) 
   subst h
   simp
 
+theorem natTrans_app_op_map_id {X : TopCat} {F G : X.Presheaf C} (α : F ⟶ G)
+    (U : Opens X) : α.app (op ((Opens.map (𝟙 X)).obj U)) = α.app (op U) := rfl
+
 section
 
 variable (C)
@@ -241,7 +245,9 @@ def sheafIsoOfIso (H : X ≅ Y) : Y.2 ≅ H.hom.base _* X.2 where
       ((forget C).congr_map H.inv_hom_id.symm)) U)).op
     rw [id_c, NatTrans.id_app, id_comp, eqToHom_map, comp_c_app] at eq₁
     rw [eqToHom_op, eqToHom_map] at eq₂
-    erw [eq₂, reassoc_of% eq₁]
+    simp only [forget_map, id_base, comp_base, natTrans_app_op_map_id,
+      Opens.map_comp_obj] at eq₁ eq₂ ⊢
+    rw [eq₂, reassoc_of% eq₁]
     simp
 
 instance base_isIso_of_iso (f : X ⟶ Y) [IsIso f] : IsIso f.base :=
