@@ -70,6 +70,10 @@ instance : Preregular Stonean := Stonean.toCompHaus.reflects_preregular
 example : Precoherent Stonean.{u} := inferInstance
 
 -- TODO: prove this for `Type*`
+theorem jointlySurjective_toCompHaus {α : Type} {B : Stonean.{u}} (X : α → Stonean.{u})
+    (π : (a : α) → (X a ⟶ B)) : (∀ b : Stonean.toCompHaus.obj B,
+      ∃ a x, Stonean.toCompHaus.map (π a) x = b) = (∀ b : B, ∃ a x, π a x = b) := rfl
+
 open List in
 theorem effectiveEpiFamily_tfae
     {α : Type} [Finite α] {B : Stonean.{u}}
@@ -81,13 +85,19 @@ theorem effectiveEpiFamily_tfae
     ] := by
   tfae_have 2 → 1
   | _ => by
-    simpa [← effectiveEpi_desc_iff_effectiveEpiFamily, (effectiveEpi_tfae (Sigma.desc π)).out 0 1]
+    rw [← effectiveEpi_desc_iff_effectiveEpiFamily,
+      ((Stonean.effectiveEpi_tfae (Sigma.desc π)).out 0 1 :)]
+    infer_instance
   tfae_have 1 → 2 := fun _ ↦ inferInstance
   tfae_have 3 ↔ 1 := by
-    erw [((CompHaus.effectiveEpiFamily_tfae
+    rw [← Stonean.jointlySurjective_toCompHaus X π, ((CompHaus.effectiveEpiFamily_tfae
       (fun a ↦ Stonean.toCompHaus.obj (X a)) (fun a ↦ Stonean.toCompHaus.map (π a))).out 2 0 :)]
-    exact ⟨fun h ↦ Stonean.toCompHaus.finite_effectiveEpiFamily_of_map _ _ h,
-      fun _ ↦ inferInstance⟩
+    constructor
+    · intro h
+      apply Stonean.toCompHaus.finite_effectiveEpiFamily_of_map
+      assumption
+    · intro _
+      infer_instance
   tfae_finish
 
 theorem effectiveEpiFamily_of_jointly_surjective
