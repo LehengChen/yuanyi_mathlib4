@@ -239,11 +239,30 @@ lemma preservesMonomorphisms : L.PreservesMonomorphisms where
 lemma preservesEpimorphisms : L.PreservesEpimorphisms where
   preserves f _ := by simpa only [epi_map_iff _ P] using P.epiModSerre_of_epi f
 
-set_option backward.isDefEq.respectTransparency false in
+omit [Abelian C] P [P.IsSerreClass] [Preadditive D] in
+lemma mapArrowIso_hom_w {X Y : D} (f : X ⟶ Y) (g : Arrow C) (e : L.mapArrow.obj g ≅ Arrow.mk f) :
+    L.map g.hom ≫ e.hom.right = e.hom.left ≫ f := by
+  simp only [Functor.mapArrow_obj] at e; apply (Arrow.w_mk e.hom).symm
+
+omit [Abelian C] P [P.IsSerreClass] [Preadditive D] in
+lemma mapArrowIso_inv_w {X Y : D} (f : X ⟶ Y) (g : Arrow C) (e : L.mapArrow.obj g ≅ Arrow.mk f) :
+    f ≫ e.inv.right = e.inv.left ≫ L.map g.hom := by
+  simp only [Functor.mapArrow_obj] at e; apply (Arrow.w_mk e.inv).symm
+
+omit P [P.IsSerreClass] in
+lemma mono_kernelFork_map_ι [L.PreservesMonomorphisms] {X Y : C} (f : X ⟶ Y) :
+    Mono (Fork.ι ((KernelFork.ofι (kernel.ι f) (kernel.condition f)).map L)) := by
+  rw [KernelFork.map_ι, KernelFork.ι_ofι]; apply Functor.map_mono L (kernel.ι f)
+
+omit P [P.IsSerreClass] in
+lemma epi_cokernelCofork_map_π [L.PreservesEpimorphisms] {X Y : C} (f : X ⟶ Y) :
+    Epi (Cofork.π ((CokernelCofork.ofπ (cokernel.π f) (cokernel.condition f)).map L)) := by
+  rw [CokernelCofork.map_π, CokernelCofork.π_ofπ]; apply Functor.map_epi L (cokernel.π f)
+
 lemma mono_iff {X Y : D} (f : X ⟶ Y) :
     Mono f ↔ ∃ (X' Y' : C) (f' : X' ⟶ Y') (_ : Mono f'),
       Nonempty (Arrow.mk (L.map f') ≅ Arrow.mk f) := by
-  have := preservesMonomorphisms L P
+  letI := preservesMonomorphisms L P
   have := Localization.essSurj_mapArrow L P.isoModSerre
   refine ⟨fun _ ↦ ?_, ?_⟩
   · suffices ∀ ⦃X Y : C⦄ (f : X ⟶ Y) (_ : Mono (L.map f)),
@@ -256,18 +275,19 @@ lemma mono_iff {X Y : D} (f : X ⟶ Y) :
     intro X Y f hf
     rw [mono_map_iff L P] at hf
     refine ⟨_, _, Abelian.image.ι f, inferInstance, ⟨Iso.symm ?_⟩⟩
-    have := Localization.inverts L P.isoModSerre _ hf.isoModSerre_factorThruImage
-    exact Arrow.isoMk (asIso (L.map (Abelian.factorThruImage f))) (Iso.refl _)
+    exact Arrow.isoMk
+      (@asIso D _ _ _ (L.map (Abelian.factorThruImage f))
+        (Localization.inverts L P.isoModSerre _ hf.isoModSerre_factorThruImage))
+      (Iso.refl _)
       (by simp [← L.map_comp])
   · rintro ⟨X', Y', f', _, ⟨e⟩⟩
     exact ((MorphismProperty.monomorphisms D).arrow_mk_iso_iff e).1
       (by simpa using inferInstanceAs (Mono (L.map f')))
 
-set_option backward.isDefEq.respectTransparency false in
 lemma epi_iff {X Y : D} (f : X ⟶ Y) :
     Epi f ↔ ∃ (X' Y' : C) (f' : X' ⟶ Y') (_ : Epi f'),
       Nonempty (Arrow.mk (L.map f') ≅ Arrow.mk f) := by
-  have := preservesEpimorphisms L P
+  letI := preservesEpimorphisms L P
   have := Localization.essSurj_mapArrow L P.isoModSerre
   refine ⟨fun _ ↦ ?_, ?_⟩
   · suffices ∀ ⦃X Y : C⦄ (f : X ⟶ Y) (_ : Epi (L.map f)),
@@ -280,16 +300,17 @@ lemma epi_iff {X Y : D} (f : X ⟶ Y) :
     intro X Y f hf
     rw [epi_map_iff L P] at hf
     refine ⟨_, _, Abelian.factorThruImage f, inferInstance, ⟨?_⟩⟩
-    have := Localization.inverts L P.isoModSerre _ hf.isoModSerre_image_ι
-    refine Arrow.isoMk (Iso.refl _) (asIso (L.map (Abelian.image.ι f))) (by simp [← L.map_comp])
+    exact Arrow.isoMk (Iso.refl _)
+      (@asIso D _ _ _ (L.map (Abelian.image.ι f))
+        (Localization.inverts L P.isoModSerre _ hf.isoModSerre_image_ι))
+      (by simp [← L.map_comp])
   · rintro ⟨X', Y', f', _, ⟨e⟩⟩
     exact ((MorphismProperty.epimorphisms D).arrow_mk_iso_iff e).1
       (by simpa using inferInstanceAs (Epi (L.map f')))
 
-set_option backward.isDefEq.respectTransparency false in
 lemma preservesKernel {X Y : C} (f : X ⟶ Y) :
     PreservesLimit (parallelPair f 0) L := by
-  have := preservesMonomorphisms L P
+  letI := preservesMonomorphisms L P
   have := Localization.essSurj L P.isoModSerre
   suffices ∀ (W : D) (z : W ⟶ L.obj X) (hz : z ≫ L.map f = 0),
       ∃ (l : W ⟶ L.obj (kernel f)), l ≫ L.map (kernel.ι f) = z from
@@ -298,7 +319,11 @@ lemma preservesKernel {X Y : C} (f : X ⟶ Y) :
         (Fork.IsLimit.ofExistsUnique
           (fun s ↦ existsUnique_of_exists_of_unique
             (this _ _ (KernelFork.condition s))
-            (fun _ _ h₁ h₂ ↦ by simpa [cancel_mono] using h₁.trans h₂.symm))))
+            (fun _ _ h₁ h₂ ↦ by
+              letI := mono_kernelFork_map_ι L f
+              rw [← cancel_mono
+                (Fork.ι ((KernelFork.ofι (kernel.ι f) (kernel.condition f)).map L))]
+              rw [h₁, h₂]))))
   intro W w hw
   wlog hw' : ∃ (Z : C) (hZ : W = L.obj Z) (z : Z ⟶ X), w = eqToHom hZ ≫ L.map z
       generalizing W
@@ -318,10 +343,9 @@ lemma preservesKernel {X Y : C} (f : X ⟶ Y) :
   rw [← Category.assoc] at fac
   exact ⟨inv (L.map t) ≫ L.map (kernel.lift _ _ fac), by simp [← Functor.map_comp]⟩
 
-set_option backward.isDefEq.respectTransparency false in
 lemma preservesCokernel {X Y : C} (f : X ⟶ Y) :
     PreservesColimit (parallelPair f 0) L := by
-  have := preservesEpimorphisms L P
+  letI := preservesEpimorphisms L P
   have := Localization.essSurj L P.isoModSerre
   suffices ∀ (W : D) (z : L.obj Y ⟶ W) (hz : L.map f ≫ z = 0),
       ∃ (l : L.obj (cokernel f) ⟶ W), L.map (cokernel.π  f) ≫ l = z from
@@ -330,7 +354,11 @@ lemma preservesCokernel {X Y : C} (f : X ⟶ Y) :
         (Cofork.IsColimit.ofExistsUnique
           (fun s ↦ existsUnique_of_exists_of_unique
             (this _ _ (CokernelCofork.condition s))
-            (fun _ _ h₁ h₂ ↦ by simpa [cancel_epi] using h₁.trans h₂.symm))))
+            (fun _ _ h₁ h₂ ↦ by
+              letI := epi_cokernelCofork_map_π L f
+              rw [← cancel_epi
+                (Cofork.π ((CokernelCofork.ofπ (cokernel.π f) (cokernel.condition f)).map L))]
+              rw [h₁, h₂]))))
   intro W w hw
   wlog hw' : ∃ (Z : C) (hZ : L.obj Z = W) (z : Y ⟶ Z), w = L.map z ≫ eqToHom hZ
       generalizing W
@@ -349,29 +377,29 @@ lemma preservesCokernel {X Y : C} (f : X ⟶ Y) :
   have := Localization.inverts L P.isoModSerre t ht
   exact ⟨L.map (cokernel.desc _ _ fac) ≫ inv (L.map t), by simp [← L.map_comp_assoc]⟩
 
-set_option backward.isDefEq.respectTransparency false in
 lemma hasKernels : HasKernels D where
   has_limit f := by
     obtain ⟨g, ⟨e⟩⟩ :=
       (Localization.essSurj_mapArrow L P.isoModSerre).mem_essImage (Arrow.mk f)
-    have := preservesKernel L P g.hom
+    letI := preservesKernel L P g.hom
     have : HasLimit (parallelPair (L.map g.hom) 0) :=
       ⟨_, (KernelFork.isLimitMapConeEquiv _ L).1
         (isLimitOfPreserves L (kernelIsKernel g.hom))⟩
-    exact hasLimit_of_iso (show parallelPair (L.map g.hom) 0 ≅ _ from
-      parallelPair.ext (Arrow.leftFunc.mapIso e) (Arrow.rightFunc.mapIso e))
+    exact hasLimit_of_iso (F := parallelPair (L.map g.hom) 0) (G := parallelPair f 0)
+      (parallelPair.ext (Arrow.leftFunc.mapIso e) (Arrow.rightFunc.mapIso e)
+        (mapArrowIso_hom_w L f g e) (by simp))
 
-set_option backward.isDefEq.respectTransparency false in
 lemma hasCokernels : HasCokernels D where
   has_colimit f := by
     obtain ⟨g, ⟨e⟩⟩ :=
       (Localization.essSurj_mapArrow L P.isoModSerre).mem_essImage (Arrow.mk f)
-    have := preservesCokernel L P g.hom
+    letI := preservesCokernel L P g.hom
     have : HasColimit (parallelPair (L.map g.hom) 0) :=
       ⟨_, (CokernelCofork.isColimitMapCoconeEquiv _ L).1
         (isColimitOfPreserves L (cokernelIsCokernel g.hom))⟩
-    exact hasColimit_of_iso (show _ ≅ parallelPair (L.map g.hom) 0 from
-      parallelPair.ext (Arrow.leftFunc.mapIso e.symm) (Arrow.rightFunc.mapIso e.symm))
+    exact hasColimit_of_iso (F := parallelPair (L.map g.hom) 0) (G := parallelPair f 0)
+      (parallelPair.ext (Arrow.leftFunc.mapIso e.symm) (Arrow.rightFunc.mapIso e.symm)
+        (mapArrowIso_inv_w L f g e) (by simp))
 
 lemma hasEqualizers : HasEqualizers D :=
   have := hasKernels L P
@@ -466,11 +494,10 @@ lemma inverseImage_isomorphisms :
 
 variable (G : D ⥤ E)
 
-set_option backward.isDefEq.respectTransparency false in
 lemma preservesFiniteLimits_comp_iff :
     PreservesFiniteLimits (L ⋙ G) ↔ PreservesFiniteLimits G := by
   letI := abelian L P
-  have := preservesFiniteLimits L P
+  letI := preservesFiniteLimits L P
   refine ⟨fun _ ↦ ?_, fun _ ↦ comp_preservesFiniteLimits _ _⟩
   have := (Localization.functor_additive_iff L P.isoModSerre G).mpr
     (L ⋙ G).additive_of_preserves_binary_products
@@ -485,14 +512,14 @@ lemma preservesFiniteLimits_comp_iff :
             (KernelFork.isLimitMapConeEquiv _ (L ⋙ G)
               (isLimitOfPreserves (L ⋙ G) (kernelIsKernel f'.hom))))
   exact preservesLimit_of_iso_diagram G
-    (show parallelPair (L.map f'.hom) 0 ≅ parallelPair f 0 from
-      parallelPair.ext (Arrow.leftFunc.mapIso iso) (Arrow.rightFunc.mapIso iso))
+    (K₁ := parallelPair (L.map f'.hom) 0) (K₂ := parallelPair f 0)
+    (parallelPair.ext (Arrow.leftFunc.mapIso iso) (Arrow.rightFunc.mapIso iso)
+      (mapArrowIso_hom_w L f f' iso) (by simp))
 
-set_option backward.isDefEq.respectTransparency false in
 lemma preservesFiniteColimits_comp_iff :
     PreservesFiniteColimits (L ⋙ G) ↔ PreservesFiniteColimits G := by
   letI := abelian L P
-  have := preservesFiniteColimits L P
+  letI := preservesFiniteColimits L P
   refine ⟨fun _ ↦ ?_, fun _ ↦ comp_preservesFiniteColimits _ _⟩
   have := (Localization.functor_additive_iff L P.isoModSerre G).mpr (by
     have := preservesBinaryBiproducts_of_preservesBinaryCoproducts (L ⋙ G)
@@ -508,8 +535,9 @@ lemma preservesFiniteColimits_comp_iff :
             (CokernelCofork.isColimitMapCoconeEquiv _ (L ⋙ G)
               (isColimitOfPreserves (L ⋙ G) (cokernelIsCokernel f'.hom))))
   exact preservesColimit_of_iso_diagram G
-    (show parallelPair (L.map f'.hom) 0 ≅ parallelPair f 0 from
-      parallelPair.ext (Arrow.leftFunc.mapIso iso) (Arrow.rightFunc.mapIso iso))
+    (K₁ := parallelPair (L.map f'.hom) 0) (K₂ := parallelPair f 0)
+    (parallelPair.ext (Arrow.leftFunc.mapIso iso) (Arrow.rightFunc.mapIso iso)
+      (mapArrowIso_hom_w L f f' iso) (by simp))
 
 lemma exactFunctor_comp_iff :
     exactFunctor _ _ (L ⋙ G) ↔ exactFunctor _ _ G := by
