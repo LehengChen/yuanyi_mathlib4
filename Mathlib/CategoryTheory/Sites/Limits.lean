@@ -53,6 +53,37 @@ noncomputable section
 
 section
 
+private lemma sheafToPresheaf_comp_obj_map (F : K ⥤ Sheaf J D) (k : K)
+    {X Y : Cᵒᵖ} (f : X ⟶ Y) :
+    (F.obj k).obj.map f = ((F ⋙ sheafToPresheaf J D).obj k).map f := rfl
+
+private lemma cover_index_fst_sheafToPresheaf {X : C} (W : J.Cover X)
+    (F : K ⥤ Sheaf J D) (k : K) (i : W.shape.R) :
+    (W.index (F.obj k).obj).fst i = ((F ⋙ sheafToPresheaf J D).obj k).map i.r.g₁.op := rfl
+
+private lemma cover_index_snd_sheafToPresheaf {X : C} (W : J.Cover X)
+    (F : K ⥤ Sheaf J D) (k : K) (i : W.shape.R) :
+    (W.index (F.obj k).obj).snd i = ((F ⋙ sheafToPresheaf J D).obj k).map i.r.g₂.op := rfl
+
+private lemma const_obj_obj_map (P : Cᵒᵖ ⥤ D) (k : K) {X Y : Cᵒᵖ} (f : X ⟶ Y) :
+    P.map f = (((Functor.const K).obj P).obj k).map f := rfl
+
+private lemma evaluation_mapCone_π_app (F : K ⥤ Sheaf J D)
+    (E : Cone (F ⋙ sheafToPresheaf J D)) (X : C) (k : K) :
+    (E.π.app k).app (op X) = (((evaluation Cᵒᵖ D).obj (op X)).mapCone E).π.app k := rfl
+
+private lemma cover_index_left_const_obj {X : C} (W : J.Cover X) (P : Cᵒᵖ ⥤ D)
+    (k : K) (i : W.shape.L) :
+    (W.index P).left i = (((Functor.const K).obj P).obj k).obj (op i.Y) := rfl
+
+private lemma cover_index_left_sheafToPresheaf {X : C} (W : J.Cover X)
+    (F : K ⥤ Sheaf J D) (k : K) (i : W.shape.L) :
+    (W.index (F.obj k).obj).left i = ((F ⋙ sheafToPresheaf J D).obj k).obj (op i.Y) := rfl
+
+private lemma cover_index_right_sheafToPresheaf {X : C} (W : J.Cover X)
+    (F : K ⥤ Sheaf J D) (k : K) (i : W.shape.R) :
+    (W.index (F.obj k).obj).right i = ((F ⋙ sheafToPresheaf J D).obj k).obj (op i.r.Z) := rfl
+
 /-- An auxiliary definition to be used below.
 
 Whenever `E` is a cone of shape `K` of sheaves, and `S` is the multifork associated to a
@@ -70,8 +101,14 @@ def multiforkEvaluationCone (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPreshe
         Multifork.ofι _ S.pt (fun i => S.ι i ≫ (E.π.app k).app (op i.Y))
           (by
             intro i
-            simp only [Category.assoc]
-            erw [← (E.π.app k).naturality, ← (E.π.app k).naturality]
+            simp only [Category.assoc, cover_index_left_sheafToPresheaf,
+              cover_index_right_sheafToPresheaf, cover_index_fst_sheafToPresheaf,
+              cover_index_snd_sheafToPresheaf, GrothendieckTopology.Cover.shape_fst,
+              GrothendieckTopology.Cover.shape_snd]
+            simp only [cover_index_left_const_obj W E.pt k i.fst,
+              cover_index_left_const_obj W E.pt k i.snd]
+            rw [← (E.π.app k).naturality (f := i.r.g₁.op),
+              ← (E.π.app k).naturality (f := i.r.g₂.op)]
             dsimp
             simp only [← Category.assoc]
             congr 1
@@ -84,7 +121,7 @@ def multiforkEvaluationCone (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPreshe
         intro ii
         rw [Presheaf.IsSheaf.amalgamate_map, Category.assoc, ← (F.map f).hom.naturality, ←
           Category.assoc, Presheaf.IsSheaf.amalgamate_map]
-        erw [Category.assoc, ← E.w f]
+        rw [Category.assoc, ← E.w f]
         cat_disch }
 
 variable [HasLimitsOfShape K D]
@@ -106,10 +143,11 @@ def isLimitMultiforkOfIsLimit (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPres
       apply (isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op i.Y)) hE).hom_ext
       intro k
       dsimp [Multifork.ofι]
-      erw [Category.assoc, (E.π.app k).naturality]
+      rw [const_obj_obj_map E.pt k i.f.op, Category.assoc, (E.π.app k).naturality]
       dsimp
       rw [← Category.assoc]
-      erw [(isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac
+      rw [evaluation_mapCone_π_app F E X k]
+      rw [(isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac
         (multiforkEvaluationCone F E X W S)]
       dsimp [multiforkEvaluationCone, Presheaf.isLimitOfIsSheaf]
       rw [Presheaf.IsSheaf.amalgamate_map])
@@ -118,14 +156,16 @@ def isLimitMultiforkOfIsLimit (F : K ⥤ Sheaf J D) (E : Cone (F ⋙ sheafToPres
       apply (isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).hom_ext
       intro k
       dsimp
-      erw [(isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac]
+      rw [evaluation_mapCone_π_app F E X k]
+      rw [(isLimitOfPreserves ((evaluation Cᵒᵖ D).obj (op X)) hE).fac]
       apply Presheaf.IsSheaf.hom_ext (F.obj k).2 W
       intro i
       dsimp only [multiforkEvaluationCone, Presheaf.isLimitOfIsSheaf]
       rw [(F.obj k).property.amalgamate_map]
-      dsimp [Multifork.ofι]
-      change _ = S.ι i ≫ _
-      erw [← hm, Category.assoc, ← (E.π.app k).naturality, Category.assoc]
+      rw [Multifork.ι_ofι]
+      rw [← evaluation_mapCone_π_app F E X k]
+      rw [← hm, Category.assoc, sheafToPresheaf_comp_obj_map F k i.f.op,
+        ← (E.π.app k).naturality, Category.assoc]
       rfl)
 
 /-- If `E` is a cone which is a limit on the level of presheaves,
