@@ -301,6 +301,8 @@ protected theorem snoc {s₁ s₂ : CompositionSeries X} {x₁ x₂ : X} {hsat�
 theorem length_eq {s₁ s₂ : CompositionSeries X} (h : Equivalent s₁ s₂) : s₁.length = s₂.length := by
   simpa using Fintype.card_congr h.choose
 
+private lemma toFun_last (s : CompositionSeries X) : s.toFun (Fin.last s.length) = s.last := rfl
+
 theorem snoc_snoc_swap {s : CompositionSeries X} {x₁ x₂ y₁ y₂ : X} {hsat₁ : IsMaximal s.last x₁}
     {hsat₂ : IsMaximal s.last x₂} {hsaty₁ : IsMaximal (snoc s x₁ hsat₁).last y₁}
     {hsaty₂ : IsMaximal (snoc s x₂ hsat₂).last y₂} (hr₁ : Iso (s.last, x₁) (x₂, y₂))
@@ -315,20 +317,21 @@ theorem snoc_snoc_swap {s : CompositionSeries X} {x₁ x₂ y₁ y₂ : X} {hsat
     intro i
     dsimp only [e]
     refine Fin.lastCases ?_ (fun i => ?_) i
-    · erw [Equiv.swap_apply_left, snoc_castSucc,
-      show (snoc s x₁ hsat₁).toFun (Fin.last _) = x₁ from last_snoc _ _ _, Fin.succ_last,
-      show ((s.snoc x₁ hsat₁).snoc y₁ hsaty₁).toFun (Fin.last _) = y₁ from last_snoc _ _ _,
-      snoc_castSucc, snoc_castSucc, Fin.succ_castSucc, snoc_castSucc, Fin.succ_last,
-      show (s.snoc _ hsat₂).toFun (Fin.last _) = x₂ from last_snoc _ _ _]
-      exact hr₂
+    · rw (transparency := .default) [Equiv.swap_apply_left, snoc_castSucc,
+        last_snoc', Fin.succ_last, last_snoc', snoc_castSucc, snoc_castSucc, toFun_last,
+        Fin.succ_castSucc, snoc_castSucc, Fin.succ_last, last_snoc']
+      assumption
     · refine Fin.lastCases ?_ (fun i => ?_) i
-      · erw [Equiv.swap_apply_right, snoc_castSucc, snoc_castSucc, snoc_castSucc,
-          Fin.succ_castSucc, snoc_castSucc, Fin.succ_last, last_snoc', last_snoc', last_snoc']
-        exact hr₁
-      · erw [Equiv.swap_apply_of_ne_of_ne h2 h1, snoc_castSucc, snoc_castSucc,
-          snoc_castSucc, snoc_castSucc, Fin.succ_castSucc, snoc_castSucc,
+      · rw (transparency := .default) [Equiv.swap_apply_right, snoc_castSucc, snoc_castSucc,
+          snoc_castSucc, Fin.succ_castSucc, snoc_castSucc, Fin.succ_last, last_snoc',
+          last_snoc', last_snoc']
+        simp only [RelSeries.singleton_length, Nat.add_zero]
+        rw [toFun_last]
+        assumption
+      · rw (transparency := .default) [Equiv.swap_apply_of_ne_of_ne h2 h1, snoc_castSucc,
+          snoc_castSucc, snoc_castSucc, snoc_castSucc, Fin.succ_castSucc, snoc_castSucc,
           Fin.succ_castSucc, snoc_castSucc, snoc_castSucc, snoc_castSucc]
-        exact (s.step i).iso_refl⟩
+        simp [(s.step i).iso_refl]⟩
 
 end Equivalent
 
