@@ -90,7 +90,7 @@ lemma iso_hom_app (a : A) (X : C) :
   dsimp only [iso, natIsoLift]
   rw [natTransLift_app]
   dsimp
-  erw [comp_id, id_comp, id_comp, id_comp, Functor.map_id, comp_id]
+  simp only [lift_obj_functor_obj, comp_id, id_comp, Functor.map_id]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -101,7 +101,7 @@ lemma iso_inv_app (a : A) (X : C) :
   dsimp only [iso, natIsoLift]
   rw [natTransLift_app]
   dsimp
-  erw [id_comp, comp_id, comp_id, comp_id, Functor.map_id, id_comp]
+  simp only [lift_obj_functor_obj, comp_id, id_comp, Functor.map_id]
 
 attribute [irreducible] iso
 
@@ -138,9 +138,8 @@ noncomputable instance liftCommShift :
     congr 1
     rw [← cancel_epi ((shiftFunctor (Quotient r) b ⋙ lift r F hF).map
       (NatTrans.app (Functor.commShiftIso (functor r) a).hom X))]
-    erw [(LiftCommShift.iso F r hF b).hom.naturality_assoc
-      (((functor r).commShiftIso a).hom.app X), LiftCommShift.iso_hom_app,
-      ← Functor.map_comp_assoc, Iso.hom_inv_id_app]
+    simp only [Functor.comp_obj, NatTrans.naturality_assoc]
+    simp only [LiftCommShift.iso_hom_app, ← Functor.map_comp_assoc]
     dsimp
     simp only [Functor.comp_obj, assoc, ← Functor.map_comp_assoc, Iso.inv_hom_id_app,
       Functor.map_id, id_comp, Iso.hom_inv_id_app, lift_obj_functor_obj]
