@@ -543,6 +543,9 @@ variable {p : ℕ} [Fact p.Prime]
 def mk : PadicSeq p → ℚ_[p] :=
   Quotient.mk'
 
+theorem quot_mk_eq_mk (f : PadicSeq p) : (⟦f⟧ : ℚ_[p]) = mk f :=
+  rfl
+
 variable (p)
 
 theorem zero_def : (0 : ℚ_[p]) = ⟦0⟧ := rfl
@@ -601,8 +604,8 @@ def padicNormE {p : ℕ} [hp : Fact p.Prime] : AbsoluteValue ℚ_[p] ℚ where
   map_mul' q r := Quotient.inductionOn₂ q r <| PadicSeq.norm_mul
   nonneg' q := Quotient.inductionOn q <| PadicSeq.norm_nonneg
   eq_zero' q := Quotient.inductionOn q fun r ↦ by
-    erw [Padic.zero_def, Quotient.eq]
-    exact PadicSeq.norm_zero_iff r
+    rw [Quotient.lift_mk, Padic.zero_def, Padic.quot_mk_eq_mk, Padic.quot_mk_eq_mk,
+      Padic.mk_eq, PadicSeq.norm_zero_iff]
   add_le' q r := by
     trans
       max ((Quotient.lift PadicSeq.norm <| @PadicSeq.norm_equiv _ _) q)
