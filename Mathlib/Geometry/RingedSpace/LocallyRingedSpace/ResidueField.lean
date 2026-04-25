@@ -98,6 +98,11 @@ a morphism of residue fields in the other direction. -/
 def residueFieldMap (x : X) : Y.residueField (f.base x) ⟶ X.residueField x :=
   CommRingCat.ofHom (IsLocalRing.ResidueField.map (f.stalkMap x).hom)
 
+lemma evaluation_comp_residueFieldMap (V : Opens Y) (x : X) (hx : f.base x ∈ V) :
+    Y.evaluation ⟨f.base x, hx⟩ ≫ residueFieldMap f x =
+      (Y.presheaf.germ V (f.base x) hx ≫ f.stalkMap x) ≫
+        CommRingCat.ofHom (IsLocalRing.residue (X.presheaf.stalk x)) := rfl
+
 lemma residue_comp_residueFieldMap_eq_stalkMap_comp_residue (x : X) :
     CommRingCat.ofHom (IsLocalRing.residue (Y.presheaf.stalk (f.base x))) ≫
       residueFieldMap f x = f.stalkMap x ≫
@@ -123,13 +128,8 @@ lemma residueFieldMap_comp {Z : LocallyRingedSpace.{u}} (g : Y ⟶ Z) (x : X) :
 lemma evaluation_naturality {V : Opens Y} (x : (Opens.map f.base).obj V) :
     Y.evaluation ⟨f.base x, x.property⟩ ≫ residueFieldMap f x.val =
       f.c.app (op V) ≫ X.evaluation x := by
-  dsimp only [LocallyRingedSpace.evaluation,
-    LocallyRingedSpace.residueFieldMap]
-  rw [Category.assoc]
-  ext a
-  simp only [CommRingCat.comp_apply]
-  erw [IsLocalRing.ResidueField.map_residue]
-  rw [LocallyRingedSpace.stalkMap_germ_apply]
+  rw [evaluation_comp_residueFieldMap, LocallyRingedSpace.stalkMap_germ, Category.assoc,
+    LocallyRingedSpace.evaluation]
   rfl
 
 lemma evaluation_naturality_apply {V : Opens Y} (x : (Opens.map f.base).obj V)
