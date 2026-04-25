@@ -67,6 +67,10 @@ lemma liftToDiagramLimitObjAux_fac {X : C} {K : Type s} [SmallCategory K]
       Multiequalizer.ι ((unop W).index (F.obj k)) i :=
   IsLimit.fac _ _ _
 
+lemma diagramFunctor_flip_comp_evaluation {X : C} {K : Type s} [SmallCategory K]
+    (F : K ⥤ Cᵒᵖ ⥤ D) (k : K) :
+    J.diagram (F.obj k) X = (F ⋙ J.diagramFunctor D X).flip ⋙ (evaluation _ _).obj k := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- An auxiliary definition to be used in the proof of the fact that
 `J.diagramFunctor D X` preserves limits. -/
@@ -81,8 +85,9 @@ abbrev liftToDiagramLimitObj {X : C} {K : Type s} [SmallCategory K] [HasLimitsOf
       ext k
       dsimp
       simp only [Category.assoc, NatTrans.naturality, liftToDiagramLimitObjAux_fac_assoc]
-      erw [Multiequalizer.condition]
-      rfl)
+      simp only [← GrothendieckTopology.Cover.index_fst, ← GrothendieckTopology.Cover.index_snd,
+        ← GrothendieckTopology.Cover.shape_fst, ← GrothendieckTopology.Cover.shape_snd,
+        Multiequalizer.condition])
 
 set_option backward.isDefEq.respectTransparency false in
 instance preservesLimit_diagramFunctor
@@ -148,7 +153,7 @@ def liftToPlusObjLimitObj {K : Type s} [SmallCategory K] [FinCategory K]
         rw [← Iso.eq_comp_inv, Category.assoc, ← Iso.inv_comp_eq]
         refine colimit.hom_ext (fun w => ?_)
         dsimp [plusMap]
-        erw [colimit.ι_map_assoc,
+        simp only [diagramFunctor_flip_comp_evaluation, colimMap_eq, colimit.ι_map_assoc,
           colimitObjIsoColimitCompEvaluation_ι_inv (F ⋙ J.diagramFunctor D X).flip w j,
           colimitObjIsoColimitCompEvaluation_ι_inv_assoc (F ⋙ J.diagramFunctor D X).flip w i]
         rw [← (colimit.ι (F ⋙ J.diagramFunctor D X).flip w).naturality]
@@ -181,8 +186,7 @@ theorem liftToPlusObjLimitObj_fac {K : Type s} [SmallCategory K] [FinCategory K]
   rw [limit.lift_π, Category.assoc]
   congr 1
   rw [← Iso.comp_inv_eq]
-  erw [colimit.ι_desc]
-  rfl
+  simp only [diagramFunctor_flip_comp_evaluation, colimitObjIsoColimitCompEvaluation_ι_inv]
 
 set_option backward.isDefEq.respectTransparency false in
 instance preservesLimitsOfShape_plusFunctor
@@ -202,9 +206,10 @@ instance preservesLimitsOfShape_plusFunctor
     congr 1
     refine colimit.hom_ext (fun k => ?_)
     dsimp [plusMap, plusObj]
-    erw [colimit.ι_map, colimit.ι_desc_assoc, limit.lift_π]
+    rw [colimMap_eq, colimit.ι_map]
+    simp only [HasColimit.isoOfNatIso_ι_hom_assoc]
+    simp only [HasLimit.isoOfNatIso_inv_π]
     conv_lhs => dsimp
-    simp only [Category.assoc]
     rw [ι_colimitLimitIso_limit_π_assoc]
     simp only [colimitObjIsoColimitCompEvaluation_ι_app_hom]
     conv_lhs =>
