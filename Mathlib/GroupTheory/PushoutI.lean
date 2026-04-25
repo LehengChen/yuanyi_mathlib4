@@ -328,6 +328,10 @@ theorem prod_cons {i} (g : G i) (w : NormalWord d) (hmw : w.fstIdx ≠ some i)
     (hgr : g ∉ (φ i).range) : (cons g w hmw hgr).prod = of i g * w.prod := by
   simp [prod, cons, ← of_apply_eq_base φ i, equiv_fst_eq_mul_inv, mul_assoc]
 
+@[simp]
+theorem range_one_mk {i : ι} (h : (1 : G i) ∈ (φ i).range) :
+    (⟨1, h⟩ : (φ i).range) = 1 := rfl
+
 variable [DecidableEq ι] [∀ i, DecidableEq (G i)]
 
 /-- Given a word in `CoprodI`, if every letter is in the transversal and when
@@ -360,8 +364,7 @@ theorem eq_one_of_smul_normalized (w : CoprodI.Word G) {i : ι} (h : H)
         Prod.ext_iff] at h
       rcases h with ⟨h₁, h₂⟩
       rw [h₂, equiv_one (d.compl i) (one_mem _) (d.one_mem _)] at h₁
-      erw [mul_one] at h₁
-      simp only [((injective_iff_map_eq_one' _).1 (d.injective i))] at h₁
+      simp only [range_one_mk, mul_one, ((injective_iff_map_eq_one' _).1 (d.injective i))] at h₁
       contradiction
     · rw [Word.equivPair_head]
       dsimp
