@@ -124,6 +124,16 @@ abbrev toTopGlueData : TopCat.GlueData :=
   { f_open := fun i j => (D.f_open i j).base_open
     toGlueData := 𝖣.mapGlueData (forget C) }
 
+theorem toTopGlueData_f (i j : D.J) : D.toTopGlueData.f i j = (D.f i j).base := rfl
+
+theorem toTopGlueData_U (i : D.J) : D.toTopGlueData.U i = (D.U i).carrier := rfl
+
+theorem toTopGlueData_V (i j : D.J) : D.toTopGlueData.V (i, j) = (D.V (i, j)).carrier :=
+  rfl
+
+theorem vPullbackCone_fst [HasLimits C] (i j : D.J) :
+    (𝖣.vPullbackCone i j).fst = D.f i j := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 theorem ι_isOpenEmbedding [HasLimits C] (i : D.J) : IsOpenEmbedding (𝖣.ι i).base := by
   rw [← show _ = (𝖣.ι i).base from 𝖣.ι_gluedIso_inv (PresheafedSpace.forget _) _, TopCat.coe_comp]
@@ -160,12 +170,17 @@ theorem f_invApp_f_app (i j k : D.J) (U : Opens (D.V (i, j)).carrier) :
   rw [← cancel_epi (inv ((D.f_open i j).invApp _ U)), IsIso.inv_hom_id_assoc,
     IsOpenImmersion.inv_invApp]
   simp_rw [Category.assoc]
-  erw [(π₁ i, j, k).c.naturality_assoc, reassoc_of% this, ← Functor.map_comp_assoc,
-    IsOpenImmersion.inv_naturality_assoc, IsOpenImmersion.app_invApp_assoc, ←
-    (D.V (i, k)).presheaf.map_comp, ← (D.V (i, k)).presheaf.map_comp]
+  simp only [Functor.op_obj, unop_op]
+  rw [(π₁ i, j, k).c.naturality_assoc, reassoc_of% this]
+  simp only [Functor.op_obj, unop_op, TopCat.Presheaf.pushforward_obj_map]
+  rw [← Functor.map_comp_assoc, IsOpenImmersion.inv_naturality_assoc]
+  simp only [unop_op, comp_base, Opens.map_comp_obj]
+  rw [IsOpenImmersion.app_invApp_assoc, ← (D.V (i, k)).presheaf.map_comp, ←
+    (D.V (i, k)).presheaf.map_comp]
   convert (Category.comp_id _).symm
-  erw [(D.V (i, k)).presheaf.map_id]
-  rfl
+  simp only [TopCat.Presheaf.pushforward_obj_obj]
+  rw [← (D.V (i, k)).presheaf.map_id]
+  congr 1
 
 set_option backward.isDefEq.respectTransparency false in
 /-- We can prove the `eq` along with the lemma. Thus this is bundled together here, and the
@@ -277,13 +292,13 @@ theorem opensImagePreimageMap_app' (i j k : D.J) (U : Opens (D.U i).carrier) :
   · delta opensImagePreimageMap
     simp_rw [Category.assoc]
     rw [(D.f j k).c.naturality, f_invApp_f_app_assoc]
-    · erw [← (D.V (j, k)).presheaf.map_comp]
-      · simp_rw [← Category.assoc]
-        erw [← comp_c_app, ← comp_c_app]
-        · simp_rw [Category.assoc]
-          dsimp only [Functor.op, unop_op, Quiver.Hom.unop_op]
+    simp only [Functor.op_obj, unop_op, TopCat.Presheaf.pushforward_obj_map]
+    · rw [← (D.V (j, k)).presheaf.map_comp]
+      · rw [← PresheafedSpace.comp_c_app_assoc]
+        simp only [← Opens.map_comp_obj, ← comp_base]
+        rw [← PresheafedSpace.comp_c_app_assoc]
+        · dsimp only [Functor.op, unop_op, Quiver.Hom.unop_op]
           rw [eqToHom_map (Opens.map _), eqToHom_op, eqToHom_trans]
-          congr
 
 /-- The red and the blue arrows in ![this diagram](https://i.imgur.com/mBzV1Rx.png) commute. -/
 theorem opensImagePreimageMap_app (i j k : D.J) (U : Opens (D.U i).carrier) :
@@ -410,7 +425,8 @@ theorem ιInvApp_π {i : D.J} (U : Opens (D.U i).carrier) :
   change D.opensImagePreimageMap i i U = _
   dsimp [opensImagePreimageMap]
   rw [congr_app (D.t_id _), id_c_app, ← Functor.map_comp]
-  erw [IsOpenImmersion.inv_naturality_assoc, IsOpenImmersion.app_inv_app'_assoc]
+  simp only [Category.id_comp, Functor.op_obj, unop_op]
+  rw [IsOpenImmersion.inv_naturality_assoc, IsOpenImmersion.app_inv_app'_assoc]
   · simp only [eqToHom_op, ← Functor.map_comp]
     rfl
   · rw [Set.range_eq_univ.mpr _]
@@ -432,18 +448,20 @@ theorem π_ιInvApp_π (i j : D.J) (U : Opens (D.U i).carrier) :
             (Quiver.Hom.op (WalkingMultispan.Hom.snd (i, j))) ≫ 𝟙 _) ..]
   · simp_rw [Category.assoc]
     rw [limit.w_assoc]
-    erw [limit.lift_π_assoc]
+    simp only [ιInvApp]
+    rw [limit.lift_π_assoc]
     rw [Category.comp_id, Category.comp_id]
     change _ ≫ _ ≫ (_ ≫ _) ≫ _ = _
     rw [congr_app (D.t_id _), id_c_app]
     simp_rw [Category.assoc]
     rw [← Functor.map_comp_assoc]
-    -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11224): change `rw` to `erw`
-    erw [IsOpenImmersion.inv_naturality_assoc]
-    erw [IsOpenImmersion.app_invApp_assoc]
+    simp only [Category.id_comp, Functor.op_obj, unop_op]
+    rw [IsOpenImmersion.inv_naturality_assoc]
+    rw [IsOpenImmersion.app_invApp_assoc]
     iterate 3 rw [← Functor.map_comp_assoc]
     rw [NatTrans.naturality_assoc]
-    erw [← (D.V (i, j)).presheaf.map_comp]
+    simp only [TopCat.Presheaf.pushforward_obj_map, Functor.op_obj, unop_op]
+    rw [← (D.V (i, j)).presheaf.map_comp]
     convert
       limit.w (componentwiseDiagram 𝖣.diagram.multispan _)
         (Quiver.Hom.op (WalkingMultispan.Hom.fst (i, j)))
@@ -452,7 +470,9 @@ theorem π_ιInvApp_π (i j : D.J) (U : Opens (D.U i).carrier) :
     change Mono ((_ ≫ D.f j i).c.app _)
     rw [comp_c_app]
     apply +allowSynthFailures mono_comp
-    · erw [D.ι_image_preimage_eq i j U]
+    · simp only [MultispanShape.prod_snd, unop_op, Multicoequalizer.multicofork_ι_app_right']
+      rw [← CategoryTheory.GlueData.ι]
+      rw [D.ι_image_preimage_eq i j U]
       infer_instance
     · have : IsIso (D.t i j).c := by apply c_isIso_of_iso
       infer_instance
@@ -484,7 +504,10 @@ instance componentwise_diagram_π_isIso (i : D.J) (U : Opens (D.U i).carrier) :
 set_option backward.isDefEq.respectTransparency false in
 instance ιIsOpenImmersion (i : D.J) : IsOpenImmersion (𝖣.ι i) where
   base_open := D.ι_isOpenEmbedding i
-  c_iso U := by erw [← colimitPresheafObjIsoComponentwiseLimit_hom_π]; infer_instance
+  c_iso U := by
+    simp only [CategoryTheory.GlueData.ι]
+    rw [← colimitPresheafObjIsoComponentwiseLimit_hom_π]
+    infer_instance
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The following diagram is a pullback, i.e. `Vᵢⱼ` is the intersection of `Uᵢ` and `Uⱼ` in `X`.
@@ -498,7 +521,11 @@ def vPullbackConeIsLimit (i j : D.J) : IsLimit (𝖣.vPullbackCone i j) :=
   PullbackCone.isLimitAux' _ fun s => by
     refine ⟨?_, ?_, ?_, ?_⟩
     · refine PresheafedSpace.IsOpenImmersion.lift (D.f i j) s.fst ?_
-      erw [← D.toTopGlueData.preimage_range j i]
+      simp only [CategoryTheory.GlueData.vPullbackCone]
+      simp only [PullbackCone.mk_pt]
+      rw [← D.toTopGlueData_f i j]
+      simp only [← D.toTopGlueData_U i, ← D.toTopGlueData_V i j]
+      rw [← D.toTopGlueData.preimage_range j i]
       have :
         s.fst.base ≫ D.toTopGlueData.ι i =
           s.snd.base ≫ D.toTopGlueData.ι j := by
@@ -508,14 +535,14 @@ def vPullbackConeIsLimit (i j : D.J) : IsLimit (𝖣.vPullbackCone i j) :=
         rw [comp_base, comp_base] at this
         replace this := reassoc_of% this
         exact this _
-      simp only [mapGlueData_U, forget_obj]
       rw [← Set.image_subset_iff, ← Set.image_univ, ← Set.image_comp, Set.image_univ,
         ← TopCat.coe_comp, this, TopCat.coe_comp, ← Set.image_univ, Set.image_comp]
       exact Set.image_subset_range _ _
     · apply IsOpenImmersion.lift_fac
     · rw [← cancel_mono (𝖣.ι j), Category.assoc, ← (𝖣.vPullbackCone i j).condition]
       conv_rhs => rw [← s.condition]
-      erw [IsOpenImmersion.lift_fac_assoc]
+      rw [D.vPullbackCone_fst i j]
+      rw [IsOpenImmersion.lift_fac_assoc]
     · intro m e₁ _
       rw [← cancel_mono (D.f i j)]
       simp only [lift_fac]
