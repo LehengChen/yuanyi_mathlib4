@@ -107,10 +107,7 @@ noncomputable def associatesMulEquivIsPrincipal :
   __ := associatesEquivIsPrincipal R
   map_mul' _ _ := by
     rw [Subtype.ext_iff]
-    -- This `erw` is needed to see through `{I // IsPrincipal I} = ↑(isPrincipalSubmonoid R)`:
-    -- we can redefine `associatesEquivIsPrincipal` to get rid of this `erw` but then we'd need
-    -- to add one in `associatesNonZeroDivisorsEquivIsPrincipal`.
-    erw [associatesEquivIsPrincipal_mul]
+    rw [Equiv.toFun_as_coe, associatesEquivIsPrincipal_mul]
     rfl
 
 variable (R) in
