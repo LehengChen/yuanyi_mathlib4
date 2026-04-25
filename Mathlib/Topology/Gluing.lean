@@ -172,6 +172,10 @@ theorem eqvGen_of_π_eq
     colimit.isoColimitCocone_ι_hom, Category.id_comp] at this
   exact Quot.eq.1 this
 
+private theorem invImage_sigmaIsoSigma_hom_diagram_right :
+    InvImage D.Rel (sigmaIsoSigma D.U).hom =
+      InvImage D.Rel (sigmaIsoSigma D.diagram.right).hom := rfl
+
 theorem ι_eq_iff_rel (i j : D.J) (x : D.U i) (y : D.U j) :
     𝖣.ι i x = 𝖣.ι j y ↔ D.Rel ⟨i, x⟩ ⟨j, y⟩ := by
   constructor
@@ -183,19 +187,22 @@ theorem ι_eq_iff_rel (i j : D.J) (x : D.U i) (y : D.U j) :
     rw [←
       show _ = Sigma.mk j y from ConcreteCategory.congr_hom (sigmaIsoSigma.{_, u} D.U).inv_hom_id _]
     change InvImage D.Rel (sigmaIsoSigma.{_, u} D.U).hom _ _
+    rw [invImage_sigmaIsoSigma_hom_diagram_right]
     rw [← (InvImage.equivalence _ _ D.rel_equiv).eqvGen_iff]
     refine Relation.EqvGen.mono ?_ (D.eqvGen_of_π_eq h :)
     rintro _ _ ⟨x⟩
     obtain ⟨⟨⟨i, j⟩, y⟩, rfl⟩ :=
       (ConcreteCategory.bijective_of_isIso (sigmaIsoSigma.{u, u} _).inv).2 x
-    unfold InvImage MultispanIndex.fstSigmaMap MultispanIndex.sndSigmaMap
+    unfold InvImage
     rw [sigmaIsoSigma_inv_apply]
-    -- `rw [← ConcreteCategory.comp_apply]` succeeds but rewrites the wrong expression
-    erw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, colimit.ι_desc_assoc,
-      ← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply, colimit.ι_desc_assoc]
-      -- previous line now `erw` after https://github.com/leanprover-community/mathlib4/pull/13170
-    erw [sigmaIsoSigma_hom_ι_apply, sigmaIsoSigma_hom_ι_apply]
-    exact ⟨y, ⟨rfl, rfl⟩⟩
+    rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply,
+      MultispanIndex.ι_fstSigmaMap_assoc, ← ConcreteCategory.comp_apply,
+      ← ConcreteCategory.comp_apply, MultispanIndex.ι_sndSigmaMap_assoc]
+    simp only [sigmaIsoSigma_hom_ι, CategoryTheory.GlueData.diagram_fst,
+      CategoryTheory.GlueData.diagram_snd, MultispanShape.prod_fst, MultispanShape.prod_snd,
+      ConcreteCategory.comp_apply]
+    use y
+    constructor <;> rfl
   · rintro ⟨z, e₁, e₂⟩
     dsimp only at *
     -- Porting note: there were `subst e₁` and `subst e₂`, instead of the `rw`
