@@ -63,8 +63,7 @@ noncomputable def Triangle.shiftFunctor (n : ℤ) : Triangle C ⥤ Triangle C wh
         dsimp
         rw [Linear.units_smul_comp, Linear.comp_units_smul, ← Functor.map_comp_assoc, ← f.comm₃,
           Functor.map_comp, assoc, assoc]
-        erw [(shiftFunctorComm C 1 n).hom.naturality]
-        rfl }
+        simp only [← Functor.comp_map, (shiftFunctorComm C 1 n).hom.naturality] }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The canonical isomorphism `Triangle.shiftFunctor C 0 ≅ 𝟭 (Triangle C)`. -/
@@ -108,8 +107,8 @@ noncomputable def Triangle.shiftFunctorAdd' (a b n : ℤ) (h : a + b = n) :
         rw [Linear.units_smul_comp, Linear.comp_units_smul, Functor.map_units_smul,
           Linear.units_smul_comp, Linear.comp_units_smul, smul_smul, assoc,
           Functor.map_comp, assoc]
-        erw [← NatTrans.naturality_assoc]
-        simp only [shiftFunctorAdd'_eq_shiftFunctorAdd, Int.negOnePow_add,
+        simp only [← Functor.comp_map, ← NatTrans.naturality_assoc,
+          shiftFunctorAdd'_eq_shiftFunctorAdd, Int.negOnePow_add,
           shiftFunctorComm_hom_app_comp_shift_shiftFunctorAdd_hom_app, add_comm a]))
     (by cat_disch)
 
