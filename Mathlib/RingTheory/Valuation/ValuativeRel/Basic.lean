@@ -1175,6 +1175,11 @@ lemma embedding_embed_valuation_eq (γ : ValueGroupWithZero R) :
   induction γ using ValueGroupWithZero.ind
   simp [mk_eq_div]
 
+omit [ValuativeRel R] in
+lemma embedding_toMonoidWithZeroHom_restrict₀ (x : R) :
+    (embedding (f := v.toMonoidWithZeroHom) ((restrict₀ v) x) : Γ) =
+      embedding (f := v) ((restrict₀ v) x) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The map `embed v` is strictly monotone. -/
 lemma embed_strictMono [v.Compatible] : StrictMono (embed v) := by
@@ -1188,9 +1193,13 @@ lemma embed_strictMono [v.Compatible] : StrictMono (embed v) := by
   · rw [← map_mul, ← map_mul, (isEquiv (valuation R) v).lt_iff_lt] at h
     simp only [embed, coe_mk, ZeroHom.coe_mk, lift_valuation,
       OneMemClass.coe_one, map_one, div_one]
-    erw [embedding_restrict₀ a, embedding_restrict₀ b, embedding_restrict₀ r.1,
-      embedding_restrict₀ s.1]
-    simpa using h
+    rw [embedding_toMonoidWithZeroHom_restrict₀ v a, embedding_toMonoidWithZeroHom_restrict₀ v b,
+      embedding_toMonoidWithZeroHom_restrict₀ v r.1,
+      embedding_toMonoidWithZeroHom_restrict₀ v s.1]
+    rw [embedding_restrict₀ (f := v) a, embedding_restrict₀ (f := v) b,
+      embedding_restrict₀ (f := v) r.1, embedding_restrict₀ (f := v) s.1]
+    simp [map_mul] at h
+    simp [h]
   · simp [restrict₀_apply, embed]
   · simp [restrict₀_apply, embed]
 
