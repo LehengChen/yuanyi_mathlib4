@@ -48,6 +48,11 @@ variable [Algebra R P] [Algebra P S]
 section ofSection
 
 variable [Algebra R S] [IsScalarTower R P S]
+
+@[simp] lemma RingHom.ker_isScalarTower_toAlgHom :
+    RingHom.ker (F := P →ₐ[R] S) (IsScalarTower.toAlgHom R P S) =
+      RingHom.ker (F := P →+* S) (algebraMap P S) := rfl
+
 -- Suppose we have a section (as an algebra homomorphism) of `P →ₐ[R] S`.
 variable (g : S →ₐ[R] P)
 
@@ -119,11 +124,10 @@ lemma retractionOfSectionOfKerSqZero_tmul_D (s : S) (t : P) :
   letI := g.toRingHom.toAlgebra
   haveI := isScalarTower_of_section_of_ker_sqZero g hf' hg
   simp only [retractionOfSectionOfKerSqZero, LinearMap.coe_restrictScalars,
-    LinearMap.liftBaseChange_tmul, SetLike.val_smul_of_tower]
-  -- The issue is a mismatch between `RingHom.ker (algebraMap P S)` and
-  -- `RingHom.ker (IsScalarTower.toAlgHom R P S)`, but `rw` and `simp` can't rewrite it away...
-  erw [Derivation.liftKaehlerDifferential_comp_D]
-  exact mul_sub (g s) t (g (algebraMap P S t))
+    LinearMap.liftBaseChange_tmul, SetLike.val_smul_of_tower,
+    RingHom.ker_isScalarTower_toAlgHom]
+  rw [← mul_sub, Derivation.liftKaehlerDifferential_comp_D]
+  rfl
 
 lemma retractionOfSectionOfKerSqZero_comp_kerToTensor :
     (retractionOfSectionOfKerSqZero g hf' hg).comp (kerToTensor R P S) = LinearMap.id := by
