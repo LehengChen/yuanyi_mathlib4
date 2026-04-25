@@ -257,6 +257,10 @@ def isoLocallyConstantOfIsColimit
     lanPresheafExt (isoFinYoneda F ≪≫ (locallyConstantIsoFinYoneda F).symm) ≪≫
       lanPresheafNatIso fun _ ↦ isColimitLocallyConstantPresheafDiagram _ _
 
+lemma counitAppApp_fromPUnit (X : Profinite.{u}ᵒᵖ ⥤ Type (u + 1))
+    [PreservesFiniteProducts X] (S : Profinite.{u}ᵒᵖ) (i) :
+    counitAppApp.{u,u+1} S.unop X = (counitApp.{u,u+1} X).app ((fromPUnit S).obj i) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 lemma isoLocallyConstantOfIsColimit_inv (X : Profinite.{u}ᵒᵖ ⥤ Type (u + 1))
     [PreservesFiniteProducts X]
@@ -272,7 +276,7 @@ lemma isoLocallyConstantOfIsColimit_inv (X : Profinite.{u}ᵒᵖ ⥤ Type (u + 1
   suffices _ ≫ (isoFinYonedaComponents _ _).inv ≫ X.map g =
     (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X by
       simpa [locallyConstantIsoFinYoneda, isoFinYoneda, counitApp]
-  erw [(counitApp.{u, u + 1} X).naturality]
+  rw [counitAppApp_fromPUnit, (counitApp.{u, u + 1} X).naturality]
   simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
   congr
   ext f
@@ -531,6 +535,10 @@ def isoLocallyConstantOfIsColimit (hF : ∀ S : LightProfinite, IsColimit <|
     lanPresheafExt (isoFinYoneda F ≪≫ (locallyConstantIsoFinYoneda F).symm) ≪≫
       lanPresheafNatIso fun _ ↦ isColimitLocallyConstantPresheafDiagram _ _
 
+lemma counitAppApp_fromPUnit (X : LightProfinite.{u}ᵒᵖ ⥤ Type u)
+    [PreservesFiniteProducts X] (S : LightProfinite.{u}ᵒᵖ) (i) :
+    counitAppApp.{u,u} S.unop X = (counitApp.{u,u} X).app ((fromPUnit S).obj i) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 lemma isoLocallyConstantOfIsColimit_inv (X : LightProfinite.{u}ᵒᵖ ⥤ Type u)
     [PreservesFiniteProducts X] (hX : ∀ S : LightProfinite.{u}, (IsColimit <|
@@ -546,7 +554,7 @@ lemma isoLocallyConstantOfIsColimit_inv (X : LightProfinite.{u}ᵒᵖ ⥤ Type u
   suffices _ ≫ (isoFinYonedaComponents _ _).inv ≫ X.map g =
     (locallyConstantPresheaf _).map g ≫ counitAppApp (Opposite.unop S) X by
       simpa [locallyConstantIsoFinYoneda, isoFinYoneda, counitApp]
-  erw [(counitApp.{u, u} X).naturality]
+  rw [counitAppApp_fromPUnit, (counitApp.{u, u} X).naturality]
   simp only [← Category.assoc, op_obj, functorToPresheaves_obj_obj]
   congr
   ext f
