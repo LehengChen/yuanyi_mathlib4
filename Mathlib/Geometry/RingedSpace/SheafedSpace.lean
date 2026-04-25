@@ -239,11 +239,29 @@ noncomputable instance [HasLimits C] : PreservesColimits (forget.{_, _, v} C) wh
 
 section ConcreteCategory
 
-variable {FC : C → C → Type*} {CC : C → Type v} [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)]
+variable {FC : C → C → Type*} {CC : C → Type v}
+variable [instFunLike : ∀ X Y, FunLike (FC X Y) (CC X) (CC Y)]
 variable [instCC : ConcreteCategory.{v} C FC] [HasColimits C] [HasLimits C]
 variable [PreservesLimits (CategoryTheory.forget C)]
 variable [PreservesFilteredColimits (CategoryTheory.forget C)]
 variable [(CategoryTheory.forget C).ReflectsIsomorphisms]
+
+omit [HasLimits C] [PreservesLimits (CategoryTheory.forget C)]
+  [PreservesFilteredColimits (CategoryTheory.forget C)]
+  [(CategoryTheory.forget C).ReflectsIsomorphisms] in
+private lemma hom_stalk_ext_germ_apply
+    {X Y : SheafedSpace C} {f : (X : TopCat) ⟶ (Y : TopCat)}
+    {c : Y.presheaf ⟶ (pushforward C f).obj X.presheaf}
+    {U : Opens Y} {x : X} (hx : x ∈ (Opens.map f).obj U) (s) :
+    (ConcreteCategory.hom (X.sheaf.presheaf.germ ((Opens.map f).obj U) x hx))
+        ((ConcreteCategory.hom (c.app (op U))) s) =
+      let α : X.toPresheafedSpace ⟶ Y.toPresheafedSpace := { base := f, c }
+      @DFunLike.coe _ _ _ (instFunLike (((pushforward C α.base).obj
+        X.toPresheafedSpace.presheaf).obj (op U)) (X.toPresheafedSpace.presheaf.stalk x))
+        (ConcreteCategory.hom (X.toPresheafedSpace.presheaf.germ ((Opens.map α.base).obj U)
+          x hx))
+        ((ConcreteCategory.hom (α.c.app (op U))) s) :=
+  rfl
 
 attribute [local ext] DFunLike.ext in
 include instCC in
@@ -255,9 +273,12 @@ lemma hom_stalk_ext {X Y : SheafedSpace C} (f g : X ⟶ Y) (h : f.hom.base = g.h
   obtain rfl : f = g := h
   congr
   ext U s
-  refine section_ext X.sheaf _ _ _ fun x hx ↦
-    show X.presheaf.germ _ x _ _ = X.presheaf.germ _ x _ _ from ?_
-  erw [← PresheafedSpace.stalkMap_germ_apply ⟨f, fc⟩, ← PresheafedSpace.stalkMap_germ_apply ⟨f, gc⟩]
+  apply section_ext X.sheaf ((Opens.map f).obj U)
+  intro x hx
+  rw [hom_stalk_ext_germ_apply (c := fc) hx s, hom_stalk_ext_germ_apply (c := gc) hx s]
+  dsimp
+  rw [← PresheafedSpace.stalkMap_germ_apply ⟨f, fc⟩,
+    ← PresheafedSpace.stalkMap_germ_apply ⟨f, gc⟩]
   simp [h']
 
 attribute [local ext] DFunLike.ext in
