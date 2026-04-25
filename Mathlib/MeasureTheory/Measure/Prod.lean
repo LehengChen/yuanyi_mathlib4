@@ -123,7 +123,8 @@ theorem Measurable.map_prodMk_right {μ : Measure α} [SFinite μ] :
 @[fun_prop, measurability]
 theorem Measurable.lintegral_prod_right' [SFinite ν] :
     ∀ {f : α × β → ℝ≥0∞}, Measurable f → Measurable fun x => ∫⁻ y, f (x, y) ∂ν := by
-  have m := @measurable_prodMk_left
+  let m : ∀ {x : α}, Measurable (Prod.mk x : β → α × β) :=
+    @measurable_prodMk_left α β _ _
   refine Measurable.ennreal_induction (motive := fun f ↦ Measurable fun (x : α) ↦ ∫⁻ y, f (x, y) ∂ν)
     ?_ ?_ ?_
   · intro c s hs
@@ -132,12 +133,20 @@ theorem Measurable.lintegral_prod_right' [SFinite ν] :
     exact (measurable_measure_prodMk_left hs).const_mul _
   · rintro f g - hf - h2f h2g
     simp only [Pi.add_apply]
-    conv => enter [1, x]; erw [lintegral_add_left (hf.comp m)]
-    exact h2f.add h2g
+    conv =>
+      enter [1, x]
+      rw [lintegral_add_left
+        (Measurable.of_uncurry_left (f := fun x y => f (x, y)) hf (x := x))]
+    apply h2f.add h2g
   · intro f hf h2f h3f
     have : ∀ x, Monotone fun n y => f n (x, y) := fun x i j hij y => h2f hij (x, y)
-    conv => enter [1, x]; erw [lintegral_iSup (fun n => (hf n).comp m) (this x)]
-    exact .iSup h3f
+    conv =>
+      enter [1, x]
+      rw [lintegral_iSup
+        (fun n =>
+          Measurable.of_uncurry_left (f := fun x y => f n (x, y)) (hf n) (x := x))
+        (this x)]
+    apply Measurable.iSup h3f
 
 /-- The Lebesgue integral is measurable. This shows that the integrand of (the right-hand-side of)
   Tonelli's theorem is measurable.
