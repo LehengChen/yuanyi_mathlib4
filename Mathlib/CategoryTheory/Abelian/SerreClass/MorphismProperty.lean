@@ -146,15 +146,15 @@ instance : P.isoModSerre.IsMultiplicative := by
   dsimp only [isoModSerre]
   infer_instance
 
-set_option backward.isDefEq.respectTransparency false in
 instance : P.monoModSerre.IsStableUnderRetracts where
   of_retract {X' Y' X Y} f' f h hf :=
-    P.prop_of_mono (kernel.map f' f h.left.i h.right.i (by simp)) hf
+    P.prop_of_mono (kernel.map f' f h.left.i h.right.i (by
+      rw [h.left_i, h.right_i, Arrow.w_mk h.i])) hf
 
-set_option backward.isDefEq.respectTransparency false in
 instance : P.epiModSerre.IsStableUnderRetracts where
   of_retract {X' Y' X Y} f' f h hf :=
-    P.prop_of_epi (cokernel.map f f' h.left.r h.right.r (by simp)) hf
+    P.prop_of_epi (cokernel.map f f' h.left.r h.right.r (by
+      rw [h.left_r, h.right_r, Arrow.w_mk h.r])) hf
 
 instance : P.isoModSerre.IsStableUnderRetracts := by
   dsimp only [isoModSerre]
