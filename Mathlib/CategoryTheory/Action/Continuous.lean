@@ -173,6 +173,10 @@ def mapContAction (F : V ⥤ W) (H : ∀ X : ContAction V G, ((F.mapAction G).ob
     ContAction V G ⥤ ContAction W G :=
   ObjectProperty.lift _ (ObjectProperty.ι _ ⋙ F.mapAction G) H
 
+lemma mapContAction_obj_ρ (F : V ⥤ W)
+    (H : ∀ X : ContAction V G, ((F.mapAction G).obj X.obj).IsContinuous) (X : ContAction V G)
+    (g : G) : ((F.mapContAction G H).obj X).obj.ρ g = F.map (X.obj.ρ g) := rfl
+
 /-- Continuous version of `Functor.mapActionComp`. -/
 @[simps! hom inv]
 def mapContActionComp {T : Type*} [Category* T]
@@ -184,7 +188,6 @@ def mapContActionComp {T : Type*} [Category* T]
       Functor.mapContAction G F H ⋙ Functor.mapContAction G F' H' :=
   NatIso.ofComponents (fun _ ↦ Iso.refl _)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Continuous version of `Functor.mapActionCongr`. -/
 @[simps! hom inv]
 def mapContActionCongr
@@ -192,7 +195,10 @@ def mapContActionCongr
     (H : ∀ X : ContAction V G, ((F.mapAction G).obj X.obj).IsContinuous)
     (H' : ∀ X : ContAction V G, ((F'.mapAction G).obj X.obj).IsContinuous) :
     Functor.mapContAction G F H ≅ Functor.mapContAction G F' H' :=
-  NatIso.ofComponents (fun X ↦ ObjectProperty.isoMk _ (Action.mkIso (e.app X.obj.V) (by simp)))
+  NatIso.ofComponents (fun X ↦ ObjectProperty.isoMk _ (Action.mkIso (e.app X.obj.V) (fun g ↦ by
+    rw [Functor.mapContAction_obj_ρ, Functor.mapContAction_obj_ρ]
+    rw [Iso.app_hom]
+    simp [e.hom.naturality (X.obj.ρ g)])))
 
 end Functor
 
