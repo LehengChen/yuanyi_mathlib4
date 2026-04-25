@@ -116,6 +116,12 @@ instance : HasProp P (fiber r a) := inferInstanceAs (HasProp P (Subtype _))
 /-- The inclusion map from a component of the coproduct induced by `f` into `S`. -/
 def sigmaIncl : fiber r a ⟶ Q := ofHom _ (TopologicalSpace.Fiber.sigmaIncl _ a)
 
+lemma sigmaIncl_apply (x : fiber r a) : (TopCat.Hom.hom (sigmaIncl r a).hom) x = x.val := rfl
+
+omit [∀ (S : CompHausLike.{u} P) (p : S → Prop), HasProp P (Subtype p)] in
+lemma isTerminalPUnit_from_apply [HasProp P PUnit.{u + 1}] (S : CompHausLike.{u} P) (x : S) :
+    (CompHausLike.isTerminalPUnit.from S).hom.hom x = PUnit.unit := rfl
+
 /-- The canonical map from the coproduct induced by `f` to `S` as an isomorphism in
 `CompHausLike P`. -/
 noncomputable def sigmaIso [HasExplicitFiniteCoproducts.{u} P] : (finiteCoproduct (fiber r)) ≅ Q :=
@@ -306,6 +312,16 @@ noncomputable def unitIso : 𝟭 (Type max u w) ≅ functor.{u, w} P hs ⋙
   hom := unit P hs
   inv := { app := fun _ f ↦ f.toFun PUnit.unit }
 
+omit [∀ (S : CompHausLike.{u} P) (p : S → Prop), HasProp P (Subtype p)] in
+lemma map_unit_app_inv_apply (A : Type (max u w)) {S : CompHausLike.{u} P}
+    (f : LocallyConstant S A) (x : S) :
+    (unitIso P hs).inv.app A (f.map ((unit P hs).app A) x) = f x := rfl
+
+omit [∀ (S : CompHausLike.{u} P) (p : S → Prop), HasProp P (Subtype p)] in
+lemma locallyConstant_unitIso_inv_app_apply (A : Type (max u w))
+    (f : LocallyConstant PUnit.{u + 1} A) :
+    f PUnit.unit = (unitIso P hs).inv.app A f := rfl
+
 lemma adjunction_left_triangle [HasExplicitFiniteCoproducts.{u} P]
     (X : Type max u w) : functorToPresheaves.{u, w}.map ((unit P hs).app X) ≫
       ((counit P hs).app ((functor P hs).obj X)).hom = 𝟙 (functorToPresheaves.obj X) := by
@@ -318,11 +334,18 @@ lemma adjunction_left_triangle [HasExplicitFiniteCoproducts.{u} P]
     (X := ((functor P hs).obj X).obj) (Y := ((functor.{u, w} P hs).obj X).obj)
       (f.map ((unit P hs).app X))
   intro a
-  erw [incl_of_counitAppApp]
-  simp only [functor_obj_obj, functorToPresheaves_obj_obj, Functor.id_obj,
-    counitAppAppImage, functorToPresheaves_obj_map, Quiver.Hom.unop_op]
+  simp only [ObjectProperty.homMk_hom, counitApp_app, functorToPresheaves_map_app,
+    Functor.flip_obj_obj, ObjectProperty.ι_obj, functor_obj_obj, Functor.id_obj]
+  rw [incl_of_counitAppApp]
+  simp only [functorToPresheaves_obj_obj, counitAppAppImage, functorToPresheaves_obj_map,
+    Quiver.Hom.unop_op]
   ext x
-  erw [← map_eq_image _ a x]
+  simp only [LocallyConstant.coe_comap_apply]
+  rw [isTerminalPUnit_from_apply]
+  rw [sigmaIncl_apply]
+  rw [locallyConstant_unitIso_inv_app_apply (P := P) (hs := hs) X]
+  rw [← map_unit_app_inv_apply (P := P) (hs := hs) X f x.val]
+  rw [map_eq_image (f := map ((unit P hs).app X) f) (a := a) (x := x)]
   rfl
 
 /--
@@ -345,9 +368,11 @@ noncomputable def adjunction [HasExplicitFiniteCoproducts.{u} P] :
       inferInstanceAs (PreservesFiniteProducts X.obj)
     apply presheaf_ext ((unit P hs).app _ x)
     intro a
-    erw [incl_of_counitAppApp]
-    simp only [unit_app, counitAppAppImage, coe_const]
-    erw [← map_eq_image _ a ⟨PUnit.unit, by simp [mem_iff_eq_image, ← map_preimage_eq_image]⟩]
+    simp only [unit_app]
+    rw [incl_of_counitAppApp]
+    simp only [counitAppAppImage, coe_const]
+    rw [← map_eq_image (f := Function.const PUnit.{u + 1} x) (a := a)
+      (x := ⟨PUnit.unit, by simp [mem_iff_eq_image, ← map_preimage_eq_image]⟩)]
     rfl
 
 instance [HasExplicitFiniteCoproducts.{u} P] : IsIso (adjunction P hs).unit :=
