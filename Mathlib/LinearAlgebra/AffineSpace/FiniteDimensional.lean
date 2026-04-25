@@ -250,6 +250,10 @@ lemma AffineIndependent.card_le_finrank_succ [Fintype ι] {p : ι → P} (hp : A
   exact (affineIndependent_iff_le_finrank_vectorSpan _ _
     (tsub_add_cancel_of_le <| Nat.one_le_iff_ne_zero.2 Fintype.card_ne_zero).symm).1 hp
 
+private lemma vectorSpan_range_finset_coe (s : Finset V) :
+    vectorSpan k (Set.range (Subtype.val : s → V)) =
+      vectorSpan k (Set.range (Subtype.val : ((s : Set V) : Type _) → V)) := rfl
+
 open Finset in
 /-- If an affine independent finset is contained in the affine span of another finset, then its
 cardinality is at most the cardinality of that finset. -/
@@ -266,8 +270,7 @@ lemma AffineIndependent.card_le_card_of_subset_affineSpan {s t : Finset V}
   rw [AffineSubspace.affineSpan_coe, direction_affineSpan, direction_affineSpan,
     ← @Subtype.range_coe _ (s : Set V), ← @Subtype.range_coe _ (t : Set V)] at direction_le
   have finrank_le := add_le_add_left (Submodule.finrank_mono direction_le) 1
-  -- We use `erw` to elide the difference between `↥s` and `↥(s : Set V)}`
-  erw [hs.finrank_vectorSpan_add_one] at finrank_le
+  rw [← vectorSpan_range_finset_coe, hs.finrank_vectorSpan_add_one] at finrank_le
   simpa using finrank_le.trans <| finrank_vectorSpan_range_add_one_le _ _
 
 open Finset in
@@ -286,8 +289,7 @@ lemma AffineIndependent.card_lt_card_of_affineSpan_lt_affineSpan {s t : Finset V
   rw [direction_affineSpan, direction_affineSpan,
     ← @Subtype.range_coe _ (s : Set V), ← @Subtype.range_coe _ (t : Set V)] at dir_lt
   have finrank_lt := add_lt_add_left (Submodule.finrank_lt_finrank_of_lt dir_lt) 1
-  -- We use `erw` to elide the difference between `↥s` and `↥(s : Set V)}`
-  erw [hs.finrank_vectorSpan_add_one] at finrank_lt
+  rw [← vectorSpan_range_finset_coe, hs.finrank_vectorSpan_add_one] at finrank_lt
   simpa using finrank_lt.trans_le <| finrank_vectorSpan_range_add_one_le _ _
 
 /-- If the `vectorSpan` of a finite subset of an affinely independent
