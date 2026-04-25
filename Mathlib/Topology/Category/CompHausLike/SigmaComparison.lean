@@ -53,16 +53,19 @@ theorem sigmaComparison_eq_comp_isos : sigmaComparison X σ =
   ext x a
   simp only [Cofan.mk_pt, Fan.mk_pt, Functor.mapIso_hom,
     PreservesProduct.iso_hom, types_comp_apply, Types.productIso_hom_comp_eval_apply]
-  have := congrFun (piComparison_comp_π X (fun a ↦ ⟨of P (σ a)⟩) a)
-  simp only [types_comp_apply] at this
-  rw [this, ← FunctorToTypes.map_comp_apply]
+  rw [← types_comp_apply (piComparison X (fun a ↦ Opposite.op (of P (σ a))))
+    (Pi.π (fun a ↦ X.obj (Opposite.op (of P (σ a)))) a)]
+  rw [congrFun (piComparison_comp_π X (fun a ↦ ⟨of P (σ a)⟩) a),
+    ← FunctorToTypes.map_comp_apply]
   simp only [sigmaComparison]
   apply congrFun
   congr 2
   rw [← opCoproductIsoProduct_inv_comp_ι]
   simp only [Opposite.unop_op, unop_comp, Quiver.Hom.unop_op, Category.assoc]
   simp only [opCoproductIsoProduct, ← unop_comp, opCoproductIsoProduct'_comp_self]
-  erw [IsColimit.fac]
+  simp only [Iso.op_inv, Quiver.Hom.unop_op]
+  rw [← Cofan.mk_ι_app (∐ fun a ↦ of P (σ a)) (Sigma.ι fun a ↦ of P (σ a)) ⟨a⟩,
+    IsColimit.comp_coconePointUniqueUpToIso_inv]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
