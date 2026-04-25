@@ -97,6 +97,9 @@ theorem hom_ofHom {X Y : Type u} [UniformSpace X] [UniformSpace Y]
 theorem coe_comp {X Y Z : UniformSpaceCat} (f : X ⟶ Y) (g : Y ⟶ Z) : (f ≫ g : X → Z) = g ∘ f :=
   rfl
 
+@[simp] theorem hom_toFun {X Y : UniformSpaceCat} (f : X ⟶ Y) :
+    ⇑(ConcreteCategory.hom f) = (ConcreteCategory.hom f).1 := rfl
+
 theorem coe_id (X : UniformSpaceCat) : (𝟙 X : X → X) = id :=
   rfl
 
@@ -177,6 +180,9 @@ theorem hom_comp {X Y Z : CpltSepUniformSpace} (f : X ⟶ Y) (g : Y ⟶ Z) :
     ConcreteCategory.hom (f ≫ g) = ⟨g ∘ f, g.hom.hom.prop.comp f.hom.hom.prop⟩ :=
   rfl
 
+@[simp] theorem hom_toFun {X Y : CpltSepUniformSpace} (f : X ⟶ Y) :
+    ⇑(ConcreteCategory.hom f) = (ConcreteCategory.hom f).1 := rfl
+
 @[simp]
 theorem hom_id (X : CpltSepUniformSpace) :
     ConcreteCategory.hom (𝟙 X : X ⟶ X) = ⟨id, uniformContinuous_id⟩ :=
@@ -225,6 +231,10 @@ theorem extensionHom_val {X : UniformSpaceCat} {Y : CpltSepUniformSpace}
     (f : X ⟶ (forget₂ _ _).obj Y) (x) : (extensionHom f) x = Completion.extension f x :=
   rfl
 
+@[simp] theorem extensionHom_hom_apply {X : UniformSpaceCat} {Y : CpltSepUniformSpace}
+    (f : X ⟶ (forget₂ _ _).obj Y) (x : completionFunctor.obj X) :
+    (ConcreteCategory.hom (extensionHom f)).1 x = Completion.extension f.hom.1 x := rfl
+
 @[simp]
 theorem extension_comp_hom {X : UniformSpaceCat} {Y : CpltSepUniformSpace}
     (f : toUniformSpace (CpltSepUniformSpace.of (Completion X)) ⟶ toUniformSpace Y) :
@@ -249,8 +259,8 @@ noncomputable def adj : completionFunctor ⊣ forget₂ CpltSepUniformSpace Unif
               ‹_› _ }
       homEquiv_naturality_left_symm := fun {X' X Y} f g => by
         ext x
-        dsimp [-Function.comp_apply]
-        erw [Completion.extension_map (γ := Y) g.hom.2 f.hom.2]
+        simp [ConcreteCategory.hom_ofHom,
+          ← congr_fun (Completion.extension_map (γ := Y) g.hom.2 f.hom.2) x]
         rfl }
 
 noncomputable instance : Reflective (forget₂ CpltSepUniformSpace UniformSpaceCat) where
