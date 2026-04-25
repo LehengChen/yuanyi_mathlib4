@@ -100,7 +100,10 @@ theorem map_addHaar {ι E F : Type*} [Fintype ι] [NormedAddCommGroup E] [Normed
     map f b.addHaar = (b.map f.toLinearEquiv).addHaar := by
   rw [eq_comm, Basis.addHaar_eq_iff, Measure.map_apply f.continuous.measurable
     (PositiveCompacts.isCompact _).measurableSet, Basis.coe_parallelepiped, Basis.coe_map]
-  erw [← image_parallelepiped, f.toEquiv.preimage_image, addHaar_self]
+  rw [← LinearEquiv.coe_coe f.toLinearEquiv,
+    ← image_parallelepiped (f.toLinearEquiv : E →ₗ[ℝ] F)]
+  simp only [ContinuousLinearEquiv.coe_toLinearEquiv, LinearEquiv.coe_coe]
+  rw [f.injective.preimage_image, addHaar_self]
 
 end Module.Basis
 
