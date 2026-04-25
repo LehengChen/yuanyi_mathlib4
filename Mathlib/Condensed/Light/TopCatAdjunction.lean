@@ -135,6 +135,14 @@ instance : topCatToLightCondSet.Faithful := topCatAdjunction.faithful_R_of_epi_c
 
 open Sequential
 
+@[simp] private lemma continuousMapMkNat_apply_coe {Y : Type*} [TopologicalSpace Y]
+    (f : ℕ → Y) (y : Y) (h : Filter.Tendsto f Filter.atTop (nhds y)) (n : ℕ) :
+    OnePoint.continuousMapMkNat f y h n = f n := rfl
+
+@[simp] private lemma continuousMapMkNat_apply_infty {Y : Type*} [TopologicalSpace Y]
+    (f : ℕ → Y) (y : Y) (h : Filter.Tendsto f Filter.atTop (nhds y)) :
+    OnePoint.continuousMapMkNat f y h OnePoint.infty = y := rfl
+
 instance (X : LightCondSet.{u}) : SequentialSpace X.toTopCat := by
   apply SequentialSpace.coinduced
 
@@ -178,10 +186,12 @@ noncomputable def sequentialAdjunctionHomeo (X : TopCat.{0}) [SequentialSpace X]
     unfold SeqContinuous
     intro f p h
     let g := (topCatAdjunctionCounitEquiv X).invFun ∘ (OnePoint.continuousMapMkNat f p h)
-    change Filter.Tendsto (fun n : ℕ ↦ g n) _ _
-    erw [← OnePoint.continuous_iff_from_nat]
+    rw [Function.comp_def]
+    rw [← continuousMapMkNat_apply_infty f p h]
+    simp only [← continuousMapMkNat_apply_coe f p h]
+    apply (OnePoint.continuous_iff_from_nat g).mp
     let x : X.toLightCondSet.obj.obj ⟨(ℕ∪{∞})⟩ := OnePoint.continuousMapMkNat f p h
-    exact continuous_coinducingCoprod X.toLightCondSet x
+    apply continuous_coinducingCoprod X.toLightCondSet x
 
 /--
 The counit of the adjunction `lightCondSetToSequential ⊣ sequentialToLightCondSet`
