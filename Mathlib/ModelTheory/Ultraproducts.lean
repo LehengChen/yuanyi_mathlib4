@@ -89,6 +89,10 @@ theorem term_realize_cast {β : Type*} (x : β → ∀ a, M a) (t : L.Term β) :
   | var => rfl
   | func _ _ t_ih => simp only [Term.realize, t_ih]; rfl
 
+theorem coe_eq_comp {β : Type*} (x : β → ∀ a, M a) :
+    (fun i => (x i : (u : Filter α).Product M)) =
+      ((↑) : (∀ a, M a) → (u : Filter α).Product M) ∘ x := rfl
+
 variable [∀ a : α, Nonempty (M a)]
 
 theorem boundedFormula_realize_cast {β : Type*} {n : ℕ} (φ : L.BoundedFormula β n)
@@ -102,15 +106,16 @@ theorem boundedFormula_realize_cast {β : Type*} {n : ℕ} (φ : L.BoundedFormul
     have h2 : ∀ a : α, (Sum.elim (fun i : β => x i a) fun i => v i a) = fun i => Sum.elim x v i a :=
       fun a => funext fun i => Sum.casesOn i (fun i => rfl) fun i => rfl
     simp only [BoundedFormula.Realize, h2]
-    erw [(Sum.comp_elim ((↑) : (∀ a, M a) → (u : Filter α).Product M) x v).symm,
-      term_realize_cast, term_realize_cast]
-    exact Quotient.eq''
+    rw [coe_eq_comp x, coe_eq_comp v, ← Sum.comp_elim, ← coe_eq_comp (Sum.elim x v)]
+    simp only [term_realize_cast]
+    rw [Quotient.eq']
+    rfl
   | rel =>
     have h2 : ∀ a : α, (Sum.elim (fun i : β => x i a) fun i => v i a) = fun i => Sum.elim x v i a :=
       fun a => funext fun i => Sum.casesOn i (fun i => rfl) fun i => rfl
     simp only [BoundedFormula.Realize, h2]
-    erw [(Sum.comp_elim ((↑) : (∀ a, M a) → (u : Filter α).Product M) x v).symm]
-    conv_lhs => enter [2, i]; erw [term_realize_cast]
+    rw [coe_eq_comp x, coe_eq_comp v, ← Sum.comp_elim, ← coe_eq_comp (Sum.elim x v)]
+    simp only [term_realize_cast]
     apply relMap_quotient_mk'
   | imp _ _ ih ih' =>
     simp only [BoundedFormula.Realize, ih v, ih' v]
