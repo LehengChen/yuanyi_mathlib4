@@ -175,11 +175,15 @@ def toUnitMono (f : Part α →o Part α) : (Unit → Part α) →o Unit → Par
   toFun x u := f (x u)
   monotone' x y (h : x ≤ y) u := f.monotone <| h u
 
+theorem omegaCompletePartialOrder_ωSup (c : Chain (Part α)) :
+    Part.ωSup c = ωSup c := rfl
+
 theorem ωScottContinuous_toUnitMono (f : Part α → Part α) (hc : ωScottContinuous f) :
     ωScottContinuous (toUnitMono ⟨f,hc.monotone⟩) := .of_map_ωSup_of_orderHom fun _ => by
   ext ⟨⟩ : 1
   dsimp [OmegaCompletePartialOrder.ωSup]
-  erw [hc.map_ωSup]
+  rw [omegaCompletePartialOrder_ωSup]
+  rw [hc.map_ωSup]
   rw [Chain.map_comp]
   rfl
 
@@ -249,6 +253,10 @@ section Curry
 
 variable {f : (∀ a b, γ a b) → ∀ a b, γ a b}
 
+theorem uncurry_curry_eq_orderHom (hf : Monotone f) :
+    uncurry ∘ f ∘ curry =
+      ⇑((monotoneUncurry α β γ).comp ((⟨f, hf⟩ : _ →o _).comp (monotoneCurry α β γ))) := rfl
+
 theorem uncurry_curry_ωScottContinuous (hc : ωScottContinuous f) :
     ωScottContinuous <| (monotoneUncurry α β γ).comp <|
       (⟨f,hc.monotone⟩ : ((x : _) → (y : β x) → γ x y) →o (x : _) → (y : β x) → γ x y).comp <|
@@ -261,7 +269,9 @@ instance lawfulFix' [LawfulFix <| (x : Sigma β) → γ x.1 x.2] :
     LawfulFix ((x y : _) → γ x y) where
   fix_eq {_f} hc := by
     dsimp [fix]
-    conv_lhs => erw [LawfulFix.fix_eq (uncurry_curry_ωScottContinuous hc)]
+    conv_lhs =>
+      rw [uncurry_curry_eq_orderHom hc.monotone]
+      rw [LawfulFix.fix_eq (uncurry_curry_ωScottContinuous hc)]
     rfl
 
 end Pi
