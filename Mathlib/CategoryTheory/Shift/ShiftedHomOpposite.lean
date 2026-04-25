@@ -73,7 +73,7 @@ lemma opEquiv_symm_comp {a b : ℤ}
   rw [← Functor.map_comp_assoc, ← Functor.map_comp_assoc,
     ← Functor.map_comp_assoc]
   rw [← unop_comp_assoc]
-  erw [← NatTrans.naturality]
+  rw [← opShiftFunctorEquivalence_unitIso_inv_naturality]
   rfl
 
 /-- The bijection `ShiftedHom X Y a' ≃ (Opposite.op (Y⟦a⟧) ⟶ (Opposite.op X)⟦n⟧)`
@@ -94,6 +94,14 @@ lemma opEquiv'_apply {a' : ℤ} (f : ShiftedHom X Y a') (n a : ℤ) (h : n + a =
       opEquiv n (f ≫ (shiftFunctorAdd' C a n a' (by lia)).hom.app Y) := by
   rfl
 
+private lemma opShiftFunctorEquivalence_inverse_obj (X : Cᵒᵖ) (n : ℤ) :
+    (opShiftFunctorEquivalence C n).inverse.obj X =
+      Opposite.op ((shiftFunctor C n).obj X.unop) := rfl
+
+private lemma opShiftFunctorEquivalence_inverse_map {X Y : Cᵒᵖ} (f : X ⟶ Y) (n : ℤ) :
+    (opShiftFunctorEquivalence C n).inverse.map f =
+      ((shiftFunctor C n).map f.unop).op := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 lemma opEquiv'_symm_op_opShiftFunctorEquivalence_counitIso_inv_app_op_shift
     {n m : ℤ} (f : ShiftedHom X Y n) (g : ShiftedHom Y Z m)
@@ -106,7 +114,10 @@ lemma opEquiv'_symm_op_opShiftFunctorEquivalence_counitIso_inv_app_op_shift
   apply Quiver.Hom.op_inj
   simp only [assoc, Functor.map_comp, op_comp, Quiver.Hom.op_unop,
     opShiftFunctorEquivalence_unitIso_inv_naturality]
-  erw [(opShiftFunctorEquivalence C n).inverse_counitInv_comp_assoc (Opposite.op Y)]
+  simp only [← opShiftFunctorEquivalence_inverse_obj (C := C) (Opposite.op Y) n,
+    ← opShiftFunctorEquivalence_inverse_map (C := C)
+      ((opShiftFunctorEquivalence C n).counitIso.inv.app (Opposite.op Y)) n]
+  rw [(opShiftFunctorEquivalence C n).inverse_counitInv_comp_assoc (Opposite.op Y)]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma opEquiv'_symm_comp (f : Y ⟶ X) {n a : ℤ} (x : Opposite.op (Z⟦a⟧) ⟶ (Opposite.op X⟦n⟧))
