@@ -65,9 +65,11 @@ def diagramNatTrans {P Q : Cᵒᵖ ⥤ D} (η : P ⟶ Q) (X : C) : J.diagram P X
   app W :=
     Multiequalizer.lift _ _ (fun _ => Multiequalizer.ι _ _ ≫ η.app _) (fun i => by
       dsimp only
-      erw [Category.assoc, Category.assoc, ← η.naturality, ← η.naturality,
-        Multiequalizer.condition_assoc]
-      rfl)
+      rw [Category.assoc, Category.assoc]
+      rw [Cover.index_fst (unop W) Q i, Cover.index_snd (unop W) Q i]
+      rw [← η.naturality, ← η.naturality]
+      rw [← Cover.index_fst (unop W) P i, ← Cover.index_snd (unop W) P i]
+      rw [Multiequalizer.condition_assoc])
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -235,11 +237,12 @@ theorem plusMap_toPlus : J.plusMap (J.toPlus P) = J.toPlus (J.plusObj P) := by
   rw [ι_colimMap, ← colimit.w _ e.op, ← Category.assoc, ← Category.assoc]
   congr 1
   refine Multiequalizer.hom_ext _ _ _ (fun I => ?_)
-  erw [Multiequalizer.lift_ι]
+  simp only [diagramNatTrans_app, Multiequalizer.lift_ι]
   simp only [unop_op, op_unop, diagram_map, Category.assoc, limit.lift_π,
     Multifork.ofι_π_app]
   let ee : (J.pullback (I.map e).f).obj S.unop ⟶ ⊤ := homOfLE (OrderTop.le_top _)
-  erw [← colimit.w _ ee.op, ι_colimMap_assoc, colimit.ι_pre, diagramPullback_app,
+  dsimp [plusObj]
+  rw [← colimit.w _ ee.op, ι_colimMap_assoc, colimit.ι_pre, diagramPullback_app,
     ← Category.assoc, ← Category.assoc]
   congr 1
   refine Multiequalizer.hom_ext _ _ _ (fun II => ?_)
