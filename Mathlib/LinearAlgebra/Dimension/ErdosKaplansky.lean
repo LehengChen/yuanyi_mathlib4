@@ -34,6 +34,10 @@ section Cardinal
 variable (K)
 variable [DivisionRing K]
 
+private theorem Subfield.subtype_op_smul (L : Subfield K) (a : Lᵐᵒᵖ) (x : L) :
+    letI := Module.compHom K (RingHom.op L.subtype)
+    L.subtype (a • x) = a • (x : K) := rfl
+
 /-- Key lemma towards the Erdős-Kaplansky theorem from https://mathoverflow.net/a/168624 -/
 theorem max_aleph0_card_le_rank_fun_nat : max ℵ₀ #K ≤ Module.rank K (ℕ → K) := by
   have aleph0_le : ℵ₀ ≤ Module.rank K (ℕ → K) := (rank_finsupp_self K ℕ).symm.trans_le
@@ -79,7 +83,9 @@ theorem max_aleph0_card_le_rank_fun_nat : max ℵ₀ #K ≤ Module.rank K (ℕ �
   rw [Finset.sum_apply, map_sum] at eq0
   have : SMulCommClass Lᵐᵒᵖ K K := ⟨fun _ _ _ ↦ mul_assoc _ _ _⟩
   simp_rw [smul_comm _ (c i), ← Finset.smul_sum]
-  erw [eq0, smul_zero]
+  simp only [Pi.smul_apply, Subfield.subtype_op_smul] at eq0
+  rw [eq0]
+  simp only [Pi.zero_apply, map_zero, smul_zero]
 
 variable {K}
 
@@ -125,7 +131,7 @@ theorem lift_rank_lt_rank_dual' {V : Type v} [AddCommGroup V] [Module K V]
   rw [← b.mk_eq_rank'', rank_dual_eq_card_dual_of_aleph0_le_rank' h,
       ← (b.constr ℕ (M' := K)).toEquiv.cardinal_eq, mk_arrow]
   apply cantor'
-  erw [nat_lt_lift_iff, one_lt_iff_nontrivial]
+  rw [one_lt_lift_iff, one_lt_iff_nontrivial]
   infer_instance
 
 theorem lift_rank_lt_rank_dual {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
