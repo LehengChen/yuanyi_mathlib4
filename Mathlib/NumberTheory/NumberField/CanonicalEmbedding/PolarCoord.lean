@@ -382,6 +382,11 @@ private theorem volume_eq_two_pi_pow_mul_integral_aux
     simpa [if_neg (not_isReal_iff_isComplex.mpr hw)] using hx₂ w (Set.mem_univ w)
 
 open scoped Classical in
+private theorem indicator_const_prod_ofReal_apply [NumberField K] (s : Set (realSpace K))
+    (a : realSpace K) : s.indicator (fun _ ↦ ∏ w : {w // IsComplex w}, ENNReal.ofReal (a w.1)) a =
+      s.indicator (fun x ↦ ∏ w : {w // IsComplex w}, ENNReal.ofReal (x w.1)) a := rfl
+
+open scoped Classical in
 /--
 If the measurable set `A` is norm-stable at complex places in the sense that
 `normAtComplexPlaces⁻¹ (normAtComplexPlaces '' A) = A`, then its volume can be computed via an
@@ -401,7 +406,9 @@ theorem volume_eq_two_pi_pow_mul_integral [NumberField K]
       ← two_mul, Finset.prod_const, Finset.card_univ, ← Set.indicator_const_mul,
       ← Set.indicator_comp_right, Function.comp_def, Pi.one_apply, mul_one]
     rw [lintegral_mul_const' _ _ (ne_of_beq_false rfl).symm, mul_comm]
-    erw [setLIntegral_indicator (by convert hm.preimage mixedSpaceOfRealSpace.measurable)]
+    simp_rw [indicator_const_prod_ofReal_apply]
+    rw [setLIntegral_indicator
+      ((hA.symm ▸ hm).preimage (mixedSpaceOfRealSpace : realSpace K →L[ℝ] mixedSpace K).measurable)]
     rw [hA, volume_eq_two_pi_pow_mul_integral_aux hA]
     congr 1
     refine setLIntegral_congr (ae_eq_set_inter (by rfl) (Measure.ae_eq_set_pi fun w _ ↦ ?_))
