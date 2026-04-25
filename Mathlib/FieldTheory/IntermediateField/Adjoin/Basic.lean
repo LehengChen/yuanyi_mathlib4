@@ -478,6 +478,9 @@ theorem adjoin_eq_top_of_adjoin_eq_top [Algebra E K] [IsScalarTower F E K]
     rw [restrictScalars_top, ← top_le_iff, ← hprim, adjoin_le_iff,
       coe_restrictScalars, ← adjoin_le_iff]
 
+lemma algebraMap_eq_toSubring_subtype (K : IntermediateField F E) :
+    (algebraMap K E : K →+* E) = K.toSubring.subtype := rfl
+
 /-- If `E / F` is a finite extension such that `E = F(α)`, then for any intermediate field `K`, the
 `F` adjoin the coefficients of `minpoly K α` is equal to `K` itself. -/
 theorem adjoin_minpoly_coeff_of_exists_primitive_element
@@ -494,9 +497,8 @@ theorem adjoin_minpoly_coeff_of_exists_primitive_element
   have dvd_g : minpoly K' α ∣ g.toSubring K'.toSubring (subset_adjoin F _) := by
     apply minpoly.dvd
     rw [aeval_def, eval₂_eq_eval_map]
-    erw [g.map_toSubring K'.toSubring]
-    rw [eval_map_algebraMap]
-    exact minpoly.aeval K α
+    rw [algebraMap_eq_toSubring_subtype F K', g.map_toSubring K'.toSubring]
+    rw [eval_map_algebraMap, minpoly.aeval K α]
   have finrank_eq : ∀ K : IntermediateField F E, finrank K E = natDegree (minpoly K α) := by
     intro K
     have := adjoin.finrank (.of_finite K α)
