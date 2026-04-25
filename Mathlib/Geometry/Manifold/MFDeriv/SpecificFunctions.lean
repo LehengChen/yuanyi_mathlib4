@@ -572,6 +572,14 @@ theorem tangentMap_prod_right {p : TangentBundle I' M'} {x₀ : M} :
   simp only [tangentMap, mfderiv_prod_right, TotalSpace.mk_inj]
   rfl
 
+lemma mfderiv_prod_eq_add_comp_left {f : M × M' → M''} {p : M × M'} :
+    mfderiv% (fun z : M × M' ↦ f (z.1, p.2)) p =
+      mfderiv% (f ∘ fun z : M × M' ↦ (z.1, p.2)) p := rfl
+
+lemma mfderiv_prod_eq_add_comp_right {f : M × M' → M''} {p : M × M'} :
+    mfderiv% (fun z : M × M' ↦ f (p.1, z.2)) p =
+      mfderiv% (f ∘ fun z : M × M' ↦ (p.1, z.2)) p := rfl
+
 /-- The total derivative of a function in two variables is the sum of the partial derivatives.
   Note that to state this (without casts) we need to be able to see through the definition of
   `TangentSpace`. -/
@@ -580,7 +588,8 @@ theorem mfderiv_prod_eq_add {f : M × M' → M''} {p : M × M'}
     mfderiv% f p =
         mfderiv% (fun z : M × M' ↦ f (z.1, p.2)) p +
         mfderiv% (fun z : M × M' ↦ f (p.1, z.2)) p := by
-  erw [mfderiv_comp_of_eq hf (mdifferentiableAt_fst.prodMk mdifferentiableAt_const) rfl,
+  rw [mfderiv_prod_eq_add_comp_left, mfderiv_prod_eq_add_comp_right,
+    mfderiv_comp_of_eq hf (mdifferentiableAt_fst.prodMk mdifferentiableAt_const) rfl,
     mfderiv_comp_of_eq hf (mdifferentiableAt_const.prodMk mdifferentiableAt_snd) rfl,
     ← ContinuousLinearMap.comp_add,
     mdifferentiableAt_fst.mfderiv_prod mdifferentiableAt_const,
