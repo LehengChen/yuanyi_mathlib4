@@ -45,12 +45,11 @@ noncomputable def IsColimit.pullbackOfHasExactColimitsOfShape [HasPullbacks C]
     IsColimit (Cocone.mk _ (pullback.snd c.ι ((Functor.const J).map f))) := by
   suffices IsIso (colimMap (pullback.snd c.ι ((Functor.const J).map f))) from
     Cocone.isColimitOfIsIsoColimMapι _
-  have hpull := colim.map_isPullback (IsPullback.of_hasPullback c.ι ((Functor.const J).map f))
-  dsimp only [colim_obj, colim_map] at hpull
-  have := hc.isIso_colimMap_ι
-  apply hpull.isIso_snd_of_isIso
+  letI : IsIso (colim.map c.ι) := hc.isIso_colimMap_ι
+  apply
+    (colim.map_isPullback
+      (IsPullback.of_hasPullback c.ι ((Functor.const J).map f))).isIso_snd_of_isIso
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Detecting equality of morphisms factoring through a connected colimit by pulling back along
 the inclusions of the colimit. -/
 theorem IsColimit.pullback_hom_ext [HasPullbacks C] [HasColimitsOfShape J C]
@@ -58,9 +57,14 @@ theorem IsColimit.pullback_hom_ext [HasPullbacks C] [HasColimitsOfShape J C]
     {f : X ⟶ c.pt} {g h : c.pt ⟶ Y}
     (hf : ∀ j, pullback.snd (c.ι.app j) f ≫ f ≫ g = pullback.snd (c.ι.app j) f ≫ f ≫ h) :
     f ≫ g = f ≫ h := by
-  refine (hc.pullbackOfHasExactColimitsOfShape f).hom_ext (fun j => ?_)
-  rw [← cancel_epi (pullbackObjIso _ _ _).inv]
-  simpa using hf j
+  apply (hc.pullbackOfHasExactColimitsOfShape f).hom_ext
+  intro j
+  rw [← cancel_epi (pullbackObjIso c.ι ((Functor.const J).map f) j).inv]
+  simp only
+  rw [← Category.assoc, pullbackObjIso_inv_comp_snd]
+  rw [← Category.assoc, pullbackObjIso_inv_comp_snd]
+  simp only [Functor.const_map_app]
+  apply hf j
 
 /-- Detecting vanishing of a morphism factoring through a connected colimit by pulling back along
 the inclusions of the colimit. -/
@@ -68,8 +72,10 @@ theorem IsColimit.pullback_zero_ext [HasZeroMorphisms C] [HasPullbacks C] [HasCo
     [HasExactColimitsOfShape J C] {F : J ⥤ C} {c : Cocone F} (hc : IsColimit c) {X Y : C}
     {f : X ⟶ c.pt} {g : c.pt ⟶ Y} (hf : ∀ j, pullback.snd (c.ι.app j) f ≫ f ≫ g = 0) :
     f ≫ g = 0 := by
-  suffices f ≫ g = f ≫ 0 by simpa
-  exact hc.pullback_hom_ext (by simpa using hf)
+  rw [← comp_zero]
+  apply hc.pullback_hom_ext
+  intro j
+  simp only [hf j, comp_zero]
 
 /--
 If `c` is a cone over a functor `J ⥤ C` and `f : c.pt ⟶ X`, then for every `j : J` we can take
@@ -82,12 +88,20 @@ noncomputable def IsLimit.pushoutOfHasExactLimitsOfShape [HasPushouts C]
     IsLimit (Cone.mk _ (pushout.inr c.π ((Functor.const J).map f))) := by
   suffices IsIso (limMap (pushout.inr c.π ((Functor.const J).map f))) from
     Cone.isLimitOfIsIsoLimMapπ _
-  have hpush := lim.map_isPushout (IsPushout.of_hasPushout c.π ((Functor.const J).map f))
-  dsimp only [lim_obj, lim_map] at hpush
-  have := hc.isIso_limMap_π
-  apply hpush.isIso_inr_of_isIso
+  letI : IsIso (lim.map c.π) := hc.isIso_limMap_π
+  apply
+    (lim.map_isPushout
+      (IsPushout.of_hasPushout c.π ((Functor.const J).map f))).isIso_inr_of_isIso
 
-set_option backward.isDefEq.respectTransparency false in
+omit [IsConnected J] in
+private theorem inr_comp_pushoutObjIso_hom_const_assoc [HasPushouts C] {F : J ⥤ C}
+    {c : Cone F} {X Y : C} (k : Y ⟶ X) (f : c.pt ⟶ X) (j : J) :
+    (k ≫ (pushout.inr c.π ((Functor.const J).map f)).app j) ≫
+      (pushoutObjIso c.π ((Functor.const J).map f) j).hom =
+        k ≫ pushout.inr (c.π.app j) f := by
+  rw [Category.assoc]
+  apply congrArg (fun l => k ≫ l) (inr_comp_pushoutObjIso_hom c.π ((Functor.const J).map f) j)
+
 /-- Detecting equality of morphisms factoring through a connected limit by pushing out along
 the projections of the limit. -/
 theorem IsLimit.pushout_hom_ext [HasPushouts C] [HasLimitsOfShape J C]
@@ -95,9 +109,14 @@ theorem IsLimit.pushout_hom_ext [HasPushouts C] [HasLimitsOfShape J C]
     {g h : Y ⟶ c.pt} {f : c.pt ⟶ X}
     (hf : ∀ j, g ≫ f ≫ pushout.inr (c.π.app j) f = h ≫ f ≫ pushout.inr (c.π.app j) f) :
     g ≫ f = h ≫ f := by
-  refine (hc.pushoutOfHasExactLimitsOfShape f).hom_ext (fun j => ?_)
-  rw [← cancel_mono (pushoutObjIso _ _ _).hom]
-  simpa using hf j
+  apply (hc.pushoutOfHasExactLimitsOfShape f).hom_ext
+  intro j
+  rw [← cancel_mono (pushoutObjIso c.π ((Functor.const J).map f) j).hom]
+  simp only
+  rw [inr_comp_pushoutObjIso_hom_const_assoc]
+  rw [inr_comp_pushoutObjIso_hom_const_assoc]
+  simp only [Category.assoc]
+  apply hf j
 
 /-- Detecting vanishing of a morphism factoring through a connected limit by pushing out along the
 projections of the limit. -/
@@ -105,7 +124,9 @@ theorem IsLimit.pushout_zero_ext [HasZeroMorphisms C] [HasPushouts C] [HasLimits
     [HasExactLimitsOfShape J C] {F : J ⥤ C} {c : Cone F} (hc : IsLimit c) {X Y : C}
     {g : Y ⟶ c.pt} {f : c.pt ⟶ X} (hf : ∀ j, g ≫ f ≫ pushout.inr (c.π.app j) f = 0) :
     g ≫ f = 0 := by
-  suffices g ≫ f = 0 ≫ f by simpa
-  exact hc.pushout_hom_ext (by simpa using hf)
+  rw [← zero_comp]
+  apply hc.pushout_hom_ext
+  intro j
+  simp only [hf j, zero_comp]
 
 end CategoryTheory.Limits
