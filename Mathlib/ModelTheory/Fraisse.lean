@@ -333,23 +333,16 @@ theorem IsUltrahomogeneous.amalgamation_age (h : L.IsUltrahomogeneous M) :
   obtain ⟨g, hg⟩ := h (PM.comp NP).toHom.range (Nfg.range _)
     ((QM.comp NQ).comp (PM.comp NP).equivRange.symm.toEmbedding)
   let s := (g.toHom.comp PM.toHom).range ⊔ QM.toHom.range
-  refine ⟨Bundled.of s,
-    Embedding.comp (Substructure.inclusion le_sup_left)
-      (g.toEmbedding.comp PM).equivRange.toEmbedding,
-    Embedding.comp (Substructure.inclusion le_sup_right) QM.equivRange.toEmbedding,
+  refine ⟨⟨s, inferInstance⟩,
+    Embedding.codRestrict s (g.toEmbedding.comp PM)
+      (fun x => SetLike.le_def.mp le_sup_left (Hom.mem_range_self _ x)),
+    Embedding.codRestrict s QM (fun x => SetLike.le_def.mp le_sup_right (Hom.mem_range_self _ x)),
     ⟨(fg_iff_structure_fg _).1 (FG.sup (Pfg.range _) (Qfg.range _)), ⟨Substructure.subtype _⟩⟩, ?_⟩
   ext n
-  apply Subtype.ext
   have hgn := (Embedding.ext_iff.1 hg) ((PM.comp NP).equivRange n)
   simp only [Embedding.comp_apply, Equiv.coe_toEmbedding, Equiv.symm_apply_apply,
     Substructure.coe_subtype, Embedding.equivRange_apply] at hgn
-  simp only [Embedding.comp_apply, Equiv.coe_toEmbedding]
-  erw [Substructure.coe_inclusion, Substructure.coe_inclusion]
-  simp only [Embedding.equivRange_apply, hgn]
-  -- This used to be `simp only [...]` before https://github.com/leanprover/lean4/pull/2644
-  erw [Embedding.comp_apply, Equiv.coe_toEmbedding,
-    Embedding.equivRange_apply]
-  simp
+  simp only [Embedding.comp_apply, Equiv.coe_toEmbedding, Embedding.codRestrict_apply, hgn]
 
 theorem IsUltrahomogeneous.age_isFraisse [Countable M] (h : L.IsUltrahomogeneous M) :
     IsFraisse (L.age M) :=
