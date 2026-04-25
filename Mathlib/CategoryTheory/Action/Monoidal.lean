@@ -215,7 +215,11 @@ noncomputable def diagonalSuccIsoTensorDiagonal [Monoid G] (n : ℕ) :
 
 variable [Group G]
 
-set_option backward.isDefEq.respectTransparency false in
+private theorem one_ρ {H : Type*} [Monoid H] {C : Type*} [Category* C] {X : C} (h : H) :
+    (1 : H →* End X) h = 𝟙 X := rfl
+
+attribute [local simp] one_ρ
+
 /-- Given `X : Action (Type u) G` for `G` a group, then `G × X` (with `G` acting as left
 multiplication on the first factor and by `X.ρ` on the second) is isomorphic as a `G`-set to
 `G × X` (with `G` acting as left multiplication on the first factor and trivially on the second).
@@ -227,10 +231,12 @@ noncomputable def leftRegularTensorIso (X : Action (Type u) G) :
     toFun g := ⟨g.1, (X.ρ (g.1⁻¹ : G) g.2 : X.V)⟩
     invFun g := ⟨g.1, X.ρ g.1 g.2⟩
     left_inv _ := Prod.ext rfl <| by simp
-    right_inv _ := Prod.ext rfl <| by simp }) <| fun _ => by
+    right_inv _ := Prod.ext rfl <| by
+      simp }) <| fun _ => by
       ext _
       simp only [tensorObj_V, tensor_ρ, types_comp_apply, tensor_apply, ofMulAction_apply]
       simp
+      rfl
 
 /-- An isomorphism of `G`-sets `Gⁿ⁺¹ ≅ G × Gⁿ`, where `G` acts by left multiplication on `Gⁿ⁺¹` and
 `G` but trivially on `Gⁿ`. The map sends `(g₀, ..., gₙ) ↦ (g₀, (g₀⁻¹g₁, g₁⁻¹g₂, ..., gₙ₋₁⁻¹gₙ))`,
@@ -249,23 +255,29 @@ noncomputable def diagonalSuccIsoTensorTrivial :
 
 variable {G}
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem diagonalSuccIsoTensorTrivial_hom_hom_apply {n : ℕ} (f : Fin (n + 1) → G) :
     (diagonalSuccIsoTensorTrivial G n).hom.hom f =
       (f 0, fun i => (f (Fin.castSucc i))⁻¹ * f i.succ) := by
   induction n with
-  | zero => exact Prod.ext rfl (funext fun x => Fin.elim0 x)
+  | zero =>
+    apply Prod.ext
+    · simp [diagonalSuccIsoTensorTrivial, diagonalOneIsoLeftRegular, ofMulAction_V]
+    · funext x
+      nomatch x
   | succ n hn =>
-    refine Prod.ext rfl (funext fun x => ?_)
-    induction x using Fin.cases
-    <;> simp_all only [tensorObj_V, diagonalSuccIsoTensorTrivial, Iso.trans_hom, tensorIso_hom,
-      Iso.refl_hom, id_tensorHom, comp_hom, whiskerLeft_hom, types_comp_apply, whiskerLeft_apply,
-      leftRegularTensorIso_hom_hom, tensor_ρ, tensor_apply, ofMulAction_apply]
-    <;> simp [ofMulAction_V, types_tensorObj_def, Fin.tail]
+    apply Prod.ext
+    · simp [diagonalSuccIsoTensorTrivial]
+    · funext x
+      induction x using Fin.cases
+      <;> simp_all only [tensorObj_V, diagonalSuccIsoTensorTrivial, Iso.trans_hom, tensorIso_hom,
+        Iso.refl_hom, id_tensorHom, comp_hom, whiskerLeft_hom, types_comp_apply,
+        whiskerLeft_apply, leftRegularTensorIso_hom_hom, tensor_ρ, tensor_apply,
+        ofMulAction_apply]
+      <;> simp [ofMulAction_V, types_tensorObj_def, Fin.tail]
+      rfl
 
 attribute [local simp] types_tensorObj_def types_tensorUnit_def in
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem diagonalSuccIsoTensorTrivial_inv_hom_apply {n : ℕ} (g : G) (f : Fin n → G) :
     (diagonalSuccIsoTensorTrivial G n).inv.hom (g, f) =
@@ -282,6 +294,7 @@ theorem diagonalSuccIsoTensorTrivial_inv_hom_apply {n : ℕ} (g : G) (f : Fin n 
         tensorObj_V, types_comp_apply, leftRegularTensorIso_inv_hom, tensor_ρ, tensor_apply,
         ofMulAction_apply]
     <;> simp_all [types_tensorObj_def, mul_assoc, Fin.partialProd_succ', ofMulAction_V]
+    rfl
 
 end
 
@@ -296,15 +309,20 @@ variable {W : Type*} [Category* W] [MonoidalCategory V] [MonoidalCategory W]
 
 open Functor.LaxMonoidal Functor.OplaxMonoidal Functor.Monoidal
 
-set_option backward.isDefEq.respectTransparency false in
+omit [MonoidalCategory W] in
+private lemma mapAction_tensorUnit_ρ (g : G) :
+    ((F.mapAction G).obj (𝟙_ (Action V G))).ρ g = 𝟙 (F.obj (𝟙_ V)) := by
+  simp [Functor.mapAction]
+  rfl
+
 /-- A lax monoidal functor induces a lax monoidal functor between
 the categories of `G`-actions within those categories. -/
 instance [F.LaxMonoidal] : (F.mapAction G).LaxMonoidal where
   ε :=
     { hom := ε F
       comm := fun g => by
-        dsimp [FunctorCategoryEquivalence.inverse, Functor.mapAction]
-        rw [Category.id_comp, F.map_id, Category.comp_id] }
+        rw [tensorUnit_ρ, mapAction_tensorUnit_ρ]
+        simp }
   μ X Y :=
     { hom := μ F X.V Y.V
       comm := fun g => μ_natural F (X.ρ g) (Y.ρ g) }
@@ -315,21 +333,22 @@ instance [F.LaxMonoidal] : (F.mapAction G).LaxMonoidal where
   right_unitality _ := by ext; simp
 
 @[simp]
-lemma mapAction_ε_hom [F.LaxMonoidal] : (ε (F.mapAction G)).hom = ε F := rfl
+lemma mapAction_ε_hom [F.LaxMonoidal] : (ε (F.mapAction G)).hom = ε F := by
+  rfl
 
 @[simp]
 lemma mapAction_μ_hom [F.LaxMonoidal] (X Y : Action V G) :
-    (μ (F.mapAction G) X Y).hom = μ F X.V Y.V := rfl
+    (μ (F.mapAction G) X Y).hom = μ F X.V Y.V := by
+  rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- An oplax monoidal functor induces an oplax monoidal functor between
 the categories of `G`-actions within those categories. -/
 instance [F.OplaxMonoidal] : (F.mapAction G).OplaxMonoidal where
   η :=
     { hom := η F
       comm := fun g => by
-        dsimp [FunctorCategoryEquivalence.inverse, Functor.mapAction]
-        rw [map_id, Category.id_comp, Category.comp_id] }
+        rw [tensorUnit_ρ, mapAction_tensorUnit_ρ]
+        simp }
   δ X Y :=
     { hom := δ F X.V Y.V
       comm := fun g => (δ_natural F (X.ρ g) (Y.ρ g)).symm }
@@ -340,18 +359,20 @@ instance [F.OplaxMonoidal] : (F.mapAction G).OplaxMonoidal where
   oplax_right_unitality _ := by ext; simp
 
 @[simp]
-lemma mapAction_η_hom [F.OplaxMonoidal] : (η (F.mapAction G)).hom = η F := rfl
+lemma mapAction_η_hom [F.OplaxMonoidal] : (η (F.mapAction G)).hom = η F := by
+  rfl
 
 @[simp]
 lemma mapAction_δ_hom [F.OplaxMonoidal] (X Y : Action V G) :
-    (δ (F.mapAction G) X Y).hom = δ F X.V Y.V := rfl
+    (δ (F.mapAction G) X Y).hom = δ F X.V Y.V := by
+  rfl
 
 /-- A monoidal functor induces a monoidal functor between
 the categories of `G`-actions within those categories. -/
 instance [F.Monoidal] : (F.mapAction G).Monoidal where
-  η_ε := by ext; dsimp; rw [η_ε]
-  ε_η := by ext; dsimp; rw [ε_η]
-  μ_δ _ _ := by ext; dsimp; rw [μ_δ]
-  δ_μ _ _ := by ext; dsimp; rw [δ_μ]
+  η_ε := by ext; simp [η_ε]
+  ε_η := by ext; simp [ε_η]
+  μ_δ _ _ := by ext; simp [μ_δ]
+  δ_μ _ _ := by ext; simp [δ_μ]
 
 end CategoryTheory.Functor
