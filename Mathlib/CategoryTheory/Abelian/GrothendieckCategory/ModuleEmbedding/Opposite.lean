@@ -45,14 +45,16 @@ set_option backward.privateInPublic true in
 private noncomputable def generator : Cᵒᵖ :=
   ∐ (fun (X : D) => ∐ fun (_ : projectiveSeparator C ⟶ F.obj X) => projectiveSeparator C)
 
-set_option backward.isDefEq.respectTransparency false in
-private theorem exists_epi (X : D) : ∃ f : generator F ⟶ F.obj X, Epi f := by
-  classical
-  refine ⟨Sigma.desc (Pi.single X (𝟙 _)) ≫ Sigma.desc (fun f => f), ?_⟩
-  have h := (isSeparator_iff_epi (projectiveSeparator C)).1
-    isSeparator_projectiveSeparator (F.obj X)
-  suffices Epi (Sigma.desc (Pi.single X (𝟙 _))) from epi_comp' this h
-  exact SplitEpi.epi ⟨Sigma.ι (fun (X : D) => ∐ fun _ => projectiveSeparator C) X, by simp⟩
+private theorem exists_epi (X : D) : ∃ f : generator F ⟶ F.obj X, Epi f :=
+  letI := Classical.decEq D
+  ⟨Sigma.desc (Pi.single X (𝟙 _)) ≫ Sigma.desc (fun f => f),
+    epi_comp'
+      (SplitEpi.epi (SplitEpi.mk
+        (section_ := Sigma.ι (fun (X : D) => ∐ fun _ => projectiveSeparator C) X)
+        (id := (Sigma.ι_desc (Pi.single X (𝟙 _)) X).trans (by
+          rw [Pi.single_eq_same]))))
+      ((isSeparator_iff_epi (projectiveSeparator C)).1
+        isSeparator_projectiveSeparator (F.obj X))⟩
 
 private instance : Projective (generator F) := by
   rw [generator]
@@ -61,7 +63,7 @@ private instance : Projective (generator F) := by
 private theorem isSeparator [Nonempty D] : IsSeparator (generator F) := by
   apply isSeparator_sigma_of_isSeparator _ Classical.ofNonempty
   apply isSeparator_sigma_of_isSeparator _ 0
-  exact isSeparator_projectiveSeparator
+  apply isSeparator_projectiveSeparator
 
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
@@ -88,11 +90,9 @@ instance faithful_embedding [Nonempty D] : (embedding F).Faithful :=
 instance full_embedding [Nonempty D] [F.Full] : (F ⋙ embedding F).Full :=
   full_comp_preadditiveCoyonedaObj _ (isSeparator F) (exists_epi F)
 
-set_option backward.isDefEq.respectTransparency false in
 instance preservesFiniteLimits_embedding : PreservesFiniteLimits (embedding F) := by
   rw [embedding]
-  apply preservesFiniteLimits_of_preservesFiniteLimitsOfSize
-  infer_instance
+  apply PreservesLimits.preservesFiniteLimits (preadditiveCoyonedaObj (generator F))
 
 instance preservesFiniteColimits_embedding : PreservesFiniteColimits (embedding F) := by
   apply preservesFiniteColimits_preadditiveCoyonedaObj_of_projective
