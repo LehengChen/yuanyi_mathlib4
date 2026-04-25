@@ -381,7 +381,7 @@ theorem sheafHom_restrict_eq (α : G.op ⋙ ℱ ⟶ G.op ⋙ ℱ'.obj) :
   ext X
   apply yoneda.map_injective
   ext U
-  erw [yoneda.map_preimage]
+  simp only [Functor.whiskerLeft_app, sheafHom, yoneda.map_preimage]
   symm
   change (show (ℱ'.obj ⋙ coyoneda.obj (op (unop U))).obj (op (G.obj (unop X))) from _) = _
   apply sheaf_eq_amalgamation ℱ' (G.is_cover_of_isCoverDense _ _)
@@ -409,7 +409,7 @@ theorem sheafHom_eq (α : ℱ ⟶ ℱ'.obj) : sheafHom (whiskerLeft G.op α) = �
   ext X
   apply yoneda.map_injective
   ext U
-  erw [yoneda.map_preimage]
+  simp only [sheafHom, yoneda.map_preimage]
   symm
   change (show (ℱ'.obj ⋙ coyoneda.obj (op (unop U))).obj (op (unop X)) from _) = _
   apply sheaf_eq_amalgamation ℱ' (G.is_cover_of_isCoverDense _ _)
