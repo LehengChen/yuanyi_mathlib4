@@ -173,6 +173,10 @@ lemma rTensorAlgHom_apply_eq (p : MvPolynomial σ S ⊗[R] N) :
   rw [← AlgHom.toLinearMap_apply, rTensorAlgHom_toLinearMap]
   rfl
 
+lemma rTensor_apply_as_mvp (p : MvPolynomial σ S ⊗[R] N) :
+    @DFunLike.coe (MvPolynomial σ S ⊗[R] N ≃ₗ[S] MvPolynomial σ (S ⊗[R] N)) _
+      (fun _ ↦ MvPolynomial σ (S ⊗[R] N)) _ rTensor p = rTensor p := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor product of a polynomial algebra by an algebra
   is algebraically equivalent to a polynomial algebra -/
@@ -184,7 +188,8 @@ noncomputable def rTensorAlgEquiv :
     rw [← LinearEquiv.symm_apply_eq]
     exact finsuppLeft_symm_apply_single (R := R) (0 : σ →₀ ℕ) (1 : S) (1 : N)
   · intro x y
-    erw [← rTensorAlgHom_apply_eq (S := S)]
+    rw [rTensor_apply_as_mvp]
+    rw [← rTensorAlgHom_apply_eq (S := S)]
     simp only [map_mul, rTensorAlgHom_apply_eq]
     rfl
 
