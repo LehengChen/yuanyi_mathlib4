@@ -185,9 +185,7 @@ instance isAlgebraic : Algebra.IsAlgebraic k (AlgebraicClosure k) :=
           simp_rw [← eval_map, Monics.map_eq_prod, eval_prod, Polynomial.map_sub, eval_sub]
           apply Finset.prod_eq_zero (Finset.mem_univ fi.2)
           rw [map_C]
-          -- The `erw` is needed here because the `R` in `eval` is `AlgebraicClosure k`,
-          -- but this has been unfolded in the arguments of `eval`.
-          erw [eval_C]
+          rw [@eval_C (MvPolynomial (Vars k) k ⧸ maxIdeal k)]
           simp⟩
 
 instance : IsAlgClosure k (AlgebraicClosure k) := .of_splits fun f hf _ ↦ by
