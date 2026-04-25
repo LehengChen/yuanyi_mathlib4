@@ -56,7 +56,6 @@ lemma exact_shortComplex (h : IsPushout t l r b) : h.shortComplex.Exact :=
   h.shortComplex.exact_of_g_is_cokernel
     h.isColimitCokernelCofork
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Given a pushout square in an abelian category
 ```
 X₁ ⟶ X₂
@@ -71,12 +70,13 @@ at least if we allow a precomposition with an epimorphism `π : T' ⟶ T`. -/
 lemma hom_eq_add_up_to_refinements (h : IsPushout t l r b) {T : C} (x₄ : T ⟶ X₄) :
     ∃ (T' : C) (π : T' ⟶ T) (_ : Epi π) (x₂ : T' ⟶ X₂) (x₃ : T' ⟶ X₃),
       π ≫ x₄ = x₂ ≫ r + x₃ ≫ b := by
-  have := h.epi_shortComplex_g
-  obtain ⟨T', π, _, u, hu⟩ := surjective_up_to_refinements_of_epi h.shortComplex.g x₄
-  refine ⟨T', π, inferInstance, u ≫ biprod.fst, u ≫ biprod.snd, ?_⟩
-  simp only [hu, assoc, ← Preadditive.comp_add]
-  congr
-  cat_disch
+  obtain ⟨T', π, _, u, hu⟩ :=
+    (epi_iff_surjective_up_to_refinements (biprod.fst ≫ r + biprod.snd ≫ b)).1 (by
+      rw [← biprod.desc_eq]
+      rw [← CommSq.shortComplex_g h.toCommSq]
+      apply h.epi_shortComplex_g) x₄
+  use T', π, inferInstance, u ≫ biprod.fst, u ≫ biprod.snd
+  rw [hu, Preadditive.comp_add, assoc, assoc]
 
 /--
 Given a commutative diagram in an abelian category
@@ -146,7 +146,37 @@ lemma mono_cokernel_map_of_isPullback (sq : IsPullback t l r b) :
   obtain ⟨x₁, hx₁, rfl⟩ := sq.exists_lift (π₂ ≫ x₂) x₃ (by simpa)
   simp [← cancel_epi π₁, ← cancel_epi π₂, hx₂, ← reassoc_of% hx₁]
 
-set_option backward.isDefEq.respectTransparency false in
+private lemma cokernelShortComplex_f_eq (sq : IsPushout t l r b) :
+    (ShortComplex.mk _ _ sq.cokernelCofork.condition).f =
+      biprod.lift t (-l) := rfl
+
+private lemma cokernelShortComplex_g_eq (sq : IsPushout t l r b) :
+    (ShortComplex.mk _ _ sq.cokernelCofork.condition).g =
+      biprod.desc r b := rfl
+
+section
+
+variable (sq : IsPushout t l r b) {A₀ A₁ : C} {π : A₁ ⟶ A₀} {z : A₀ ⟶ kernel b}
+  {x₁ : A₁ ⟶ (ShortComplex.mk _ _ sq.cokernelCofork.condition).X₁}
+variable (hx₁ : π ≫ z ≫ kernel.ι b ≫ biprod.inr =
+  x₁ ≫ (ShortComplex.mk _ _ sq.cokernelCofork.condition).f)
+
+include hx₁
+
+private lemma cokernelShortComplex_f_fst_eq_zero : x₁ ≫ t = 0 := by
+  have hfst := hx₁.symm =≫ biprod.fst
+  rw [cokernelShortComplex_f_eq sq, assoc, assoc, assoc, assoc, biprod.lift_fst,
+    biprod.inr_fst, comp_zero, comp_zero] at hfst
+  rw [hfst, comp_zero]
+
+private lemma cokernelShortComplex_f_snd_eq : π ≫ z ≫ kernel.ι b = -x₁ ≫ l := by
+  have hsnd := hx₁ =≫ biprod.snd
+  rw [cokernelShortComplex_f_eq sq, assoc, assoc, assoc, assoc, biprod.lift_snd,
+    biprod.inr_snd, comp_id, Preadditive.comp_neg] at hsnd
+  rw [hsnd]
+
+end
+
 lemma epi_kernel_map_of_isPushout (sq : IsPushout t l r b) :
     Epi (kernel.map _ _ _ _ sq.w) := by
   rw [epi_iff_surjective_up_to_refinements]
@@ -154,11 +184,14 @@ lemma epi_kernel_map_of_isPushout (sq : IsPushout t l r b) :
   obtain ⟨A₁, π₁, _, x₁, hx₁⟩ := ((ShortComplex.mk _ _
     sq.cokernelCofork.condition).exact_of_g_is_cokernel
       sq.isColimitCokernelCofork).exact_up_to_refinements
-        (z ≫ kernel.ι _ ≫ biprod.inr) (by simp)
-  refine ⟨A₁, π₁, inferInstance, -kernel.lift _ x₁ ?_, ?_⟩
-  · simpa using hx₁.symm =≫ biprod.fst
-  · ext
-    simpa using hx₁ =≫ biprod.snd
+        (z ≫ kernel.ι _ ≫ biprod.inr) (by
+          rw [cokernelShortComplex_g_eq sq]
+          simp
+          rfl)
+  use A₁, π₁, inferInstance, -kernel.lift _ x₁ (by
+    rw [cokernelShortComplex_f_fst_eq_zero sq hx₁])
+  ext
+  simp [cokernelShortComplex_f_snd_eq sq hx₁]
 
 end Abelian
 
