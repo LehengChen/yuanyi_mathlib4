@@ -613,6 +613,10 @@ instance on `α →ᵤ[𝔖] β`. -/
 instance topologicalSpace : TopologicalSpace (α →ᵤ[𝔖] β) :=
   𝒱(α, β, 𝔖, _).toTopologicalSpace
 
+protected lemma uniformity_pi_uniformOnFun {δ : ι → Type*} [∀ i, UniformSpace (δ i)] :
+    𝓤 ((i : ι) → α →ᵤ[𝔖] δ i) = @uniformity ((i : ι) → α → δ i)
+      (@Pi.uniformSpace ι (fun i ↦ α → δ i) fun i ↦ 𝒱(α, δ i, 𝔖, _)) := rfl
+
 /-- The topology of `𝔖`-convergence is the infimum, for `S ∈ 𝔖`, of topology induced by the map
 of `S.restrict : (α →ᵤ[𝔖] β) → (↥S →ᵤ β)` of restriction to `S`, where `↥S →ᵤ β` is endowed with
 the topology of uniform convergence. -/
@@ -1064,7 +1068,9 @@ protected def uniformEquivProdArrow [UniformSpace γ] :
       apply_fun (fun u ↦ @uniformity (α →ᵤ[𝔖] β × γ) u) at H
       convert H.symm using 1
       rw [UniformOnFun.comap_eq, UniformOnFun.comap_eq]
-      erw [inf_uniformity]
+      rw [inf_uniformity
+        (u := (𝒱(α, β, 𝔖, _)).comap (fun x : α →ᵤ[𝔖] β × γ ↦ Prod.fst ∘ x))
+        (v := (𝒱(α, γ, 𝔖, _)).comap (fun x : α →ᵤ[𝔖] β × γ ↦ Prod.snd ∘ x))]
       rw [uniformity_comap, uniformity_comap]
       rfl
 -- the relevant diagram commutes by definition
@@ -1085,7 +1091,7 @@ protected def uniformEquivPiComm : (α →ᵤ[𝔖] ((i : ι) → δ i)) ≃ᵤ 
       _ _ (Equiv.piComm _) <| by
     constructor
     change comap (Prod.map Function.swap Function.swap) _ = _
-    erw [← uniformity_comap]
+    rw [UniformOnFun.uniformity_pi_uniformOnFun, ← uniformity_comap]
     congr
     rw [Pi.uniformSpace, UniformSpace.ofCoreEq_toCore, Pi.uniformSpace,
       UniformSpace.ofCoreEq_toCore, UniformSpace.comap_iInf, UniformOnFun.iInf_eq]
