@@ -497,12 +497,17 @@ section inTangentCoordinates
 
 variable {N : Type*}
 
+lemma inCoordinates_tangentBundleCore_model_space_eq (a b : H) (c d : H') (ϕ : E →L[𝕜] E') :
+    inCoordinates E (TangentSpace I) E' (TangentSpace I') a b c d ϕ =
+    inCoordinates E (tangentBundleCore I H).Fiber E' (tangentBundleCore I' H').Fiber a b c d ϕ:= rfl
+
 /-- The map `inCoordinates` for the tangent bundle is trivial on the model spaces -/
 theorem inCoordinates_tangent_bundle_core_model_space (x₀ x : H) (y₀ y : H') (ϕ : E →L[𝕜] E') :
     inCoordinates E (TangentSpace I) E' (TangentSpace I') x₀ x y₀ y ϕ = ϕ := by
-  erw [VectorBundleCore.inCoordinates_eq] <;> try trivial
-  simp_rw [tangentBundleCore_indexAt, tangentBundleCore_coordChange_model_space,
-    ContinuousLinearMap.id_comp, ContinuousLinearMap.comp_id]
+  rw [inCoordinates_tangentBundleCore_model_space_eq, VectorBundleCore.inCoordinates_eq] <;>
+    simp only [tangentBundleCore_indexAt, tangentBundleCore_baseSet, coe_achart,
+      chartAt_self_eq, OpenPartialHomeomorph.refl_source, tangentBundleCore_coordChange_model_space,
+      ContinuousLinearMap.id_comp, ContinuousLinearMap.comp_id, mem_univ]
 
 variable (I I') in
 /-- When `ϕ x` is a continuous linear map that changes vectors in charts around `f x` to vectors
