@@ -112,6 +112,10 @@ instance mono (f : MonoOver X) : Mono f.arrow :=
 
 instance {X : C} {f : MonoOver X} : Mono ((MonoOver.forget X).obj f).hom := f.mono
 
+@[reassoc]
+theorem w {f g : MonoOver X} (k : f ⟶ g) : k.hom.left ≫ g.arrow = f.arrow :=
+  Over.w _
+
 /-- The category of monomorphisms over X is a thin category,
 which makes defining its skeleton easy. -/
 instance isThin {X : C} : Quiver.IsThin (MonoOver X) := fun f g =>
@@ -120,12 +124,7 @@ instance isThin {X : C} : Quiver.IsThin (MonoOver X) := fun f g =>
     apply InducedCategory.hom_ext
     apply Over.OverMorphism.ext
     rw [← cancel_mono g.arrow]
-    erw [Over.w h₁.hom]
-    erw [Over.w h₂.hom]⟩
-
-@[reassoc]
-theorem w {f g : MonoOver X} (k : f ⟶ g) : k.hom.left ≫ g.arrow = f.arrow :=
-  Over.w _
+    rw [w h₁, w h₂]⟩
 
 /-- Convenience constructor for a morphism in monomorphisms over `X`. -/
 abbrev homMk {f g : MonoOver X} (h : f.obj.left ⟶ g.obj.left)
