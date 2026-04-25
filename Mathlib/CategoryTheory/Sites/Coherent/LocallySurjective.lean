@@ -40,6 +40,12 @@ namespace CategoryTheory
 variable {C : Type*} (D : Type*) [Category* C] [Category* D] {FD : D → D → Type*} {CD : D → Type w}
   [∀ X Y, FunLike (FD X Y) (CD X) (CD Y)] [ConcreteCategory.{w} D FD]
 
+private lemma map_cofan_op_eq_mapCone_π {α : Type*} (F : Cᵒᵖ ⥤ Type w) {X : C}
+    {Y : α → C} (π : (a : α) → Y a ⟶ X) (a : α) :
+    F.map (π a).op =
+      (F.mapCone (Cone.whisker (Discrete.opposite α).inverse
+        (Cocone.op (Cofan.mk X π)))).π.app ⟨a⟩ := rfl
+
 lemma regularTopology.isLocallySurjective_iff [Preregular C] {F G : Cᵒᵖ ⥤ D} (f : F ⟶ G) :
     Presheaf.IsLocallySurjective (regularTopology C) f ↔
       ∀ (X : C) (y : ToType (G.obj ⟨X⟩)), (∃ (X' : C) (φ : X' ⟶ X) (_ : EffectiveEpi φ)
@@ -82,9 +88,12 @@ lemma extensiveTopology.surjective_of_isLocallySurjective_sheaf_of_types [Finita
     Functor.mapCone_π_app, Cone.whisker_π, Cocone.op_π, Functor.whiskerLeft_app, NatTrans.op_app,
     Cofan.mk_ι_app]
   rw [← (h' a).choose_spec]
-  erw [← NatTrans.naturality_apply (φ := f)]
-  change f.app _ ((i.hom ≫ F.map (π a).op) y) = _
-  erw [IsLimit.map_π]
+  simp only [Types.hom_eq_coe, DFunLike.coe]
+  rw [← types_comp_apply (f.app (op X)) (G.map (π a).op) (i.hom y),
+    ← f.naturality (π a).op, types_comp_apply]
+  rw [← types_comp_apply i.hom (F.map (π a).op) y,
+    map_cofan_op_eq_mapCone_π F π a]
+  rw [IsLimit.conePointsIsoOfNatIso_hom_comp]
   rfl
 
 lemma extensiveTopology.presheafIsLocallySurjective_iff [FinitaryPreExtensive C] {F G : Cᵒᵖ ⥤ D}
