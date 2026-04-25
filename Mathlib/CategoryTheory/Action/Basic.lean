@@ -200,11 +200,18 @@ def inverse : (SingleObj G ⥤ V) ⥤ Action V G where
 def unitIso : 𝟭 (Action V G) ≅ functor ⋙ inverse :=
   NatIso.ofComponents fun M => mkIso (Iso.refl _)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Auxiliary definition for `functorCategoryEquivalence`. -/
 @[simps!]
 def counitIso : inverse ⋙ functor ≅ 𝟭 (SingleObj G ⥤ V) :=
-  NatIso.ofComponents fun M => NatIso.ofComponents fun _ => Iso.refl _
+  NatIso.ofComponents
+    (fun M => NatIso.ofComponents (fun _ => Iso.refl _) (by
+      rintro ⟨⟩ ⟨⟩ f
+      simp [functor, inverse]))
+    (by
+      intro X Y f
+      ext x
+      cases x
+      simp [functor, inverse])
 
 end FunctorCategoryEquivalence
 
@@ -223,6 +230,10 @@ def functorCategoryEquivalence : Action V G ≌ SingleObj G ⥤ V where
   inverse := inverse
   unitIso := unitIso
   counitIso := counitIso
+  functor_unitIso_comp X := by
+    ext x
+    cases x
+    simp [functor, inverse]
 
 instance : (FunctorCategoryEquivalence.functor (V := V) (G := G)).IsEquivalence :=
   (functorCategoryEquivalence V G).isEquivalence_functor
@@ -292,12 +303,11 @@ noncomputable instance preservesColimits_forget [HasColimits V] :
 -- TODO construct categorical images?
 end Forget
 
-set_option backward.isDefEq.respectTransparency false in
 theorem Iso.conj_ρ {M N : Action V G} (f : M ≅ N) (g : G) :
     N.ρ g = ((forget V G).mapIso f).conj (M.ρ g) := by
-      rw [Iso.conj_apply, Iso.eq_inv_comp]; simp [f.hom.comm]
+      rw [Iso.conj_apply]
+      simp [← f.inv.comm_assoc g]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Actions/representations of the trivial monoid are just objects in the ambient category. -/
 def actionPUnitEquivalence : Action V PUnit ≌ V where
   functor := forget V _
@@ -305,11 +315,18 @@ def actionPUnitEquivalence : Action V PUnit ≌ V where
     { obj := fun X => ⟨X, 1⟩
       map := fun f => ⟨f, fun ⟨⟩ => by simp⟩ }
   unitIso :=
-    NatIso.ofComponents fun X => mkIso (Iso.refl _) fun ⟨⟩ => by
-      simp only [Functor.id_obj, MonoidHom.one_apply, End.one_def, Functor.comp_obj,
-        forget_obj, Iso.refl_hom, Category.comp_id]
-      exact ρ_one X
-  counitIso := NatIso.ofComponents fun _ => Iso.refl _
+    NatIso.ofComponents
+      (fun X => mkIso (Iso.refl _) fun ⟨⟩ => by
+        simp only [Functor.id_obj, Functor.comp_obj, forget_obj, Iso.refl_hom,
+          Category.comp_id, Category.id_comp]
+        apply (ρ_one X).trans
+        rfl)
+      (by
+        intro X Y f
+        ext
+        simp)
+  counitIso := NatIso.ofComponents (fun _ => Iso.refl _) (by simp)
+  functor_unitIso_comp X := by simp
 
 @[deprecated (since := "2026-02-08")] alias actionPunitEquivalence := actionPUnitEquivalence
 
@@ -328,6 +345,10 @@ def res {G H : Type*} [Monoid G] [Monoid H] (f : G →* H) : Action V H ⥤ Acti
   map p :=
     { hom := p.hom
       comm := fun g => p.comm (f g) }
+
+lemma res_obj_ρ_apply_eq {G H : Type*} [Monoid G] [Monoid H] (f : G →* H)
+    (M : Action V H) (g : G) : ((res V f).obj M).ρ g = M.ρ (f g) :=
+  rfl
 
 /-- The natural isomorphism from restriction along the identity homomorphism to
 the identity functor on `Action V G`.
@@ -372,7 +393,6 @@ instance : (res V f).Faithful where
     ext
     rw [← res_map_hom _ f g₁, ← res_map_hom _ f g₂, h]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The functor from `Action V H` to `Action V G` induced by a monoid homomorphism
 `f : G →* H` is full if `f` is surjective. -/
 lemma full_res (f_surj : Function.Surjective f) : (res V f).Full where
@@ -381,9 +401,8 @@ lemma full_res (f_surj : Function.Surjective f) : (res V f).Full where
     · ext
       simp
     · obtain ⟨a, rfl⟩ := f_surj h
-      have : X.ρ (f a) = ((res V f).obj X).ρ a := rfl
-      rw [this, g.comm a]
-      simp
+      rw [← res_obj_ρ_apply_eq V f X a, ← res_obj_ρ_apply_eq V f Y a]
+      apply g.comm
 
 end Action
 
@@ -408,6 +427,14 @@ def mapAction (F : V ⥤ W) (G : Type*) [Monoid G] : Action V G ⥤ Action W G w
       comm := fun g => by dsimp; rw [← F.map_comp, f.comm, F.map_comp] }
   map_id M := by ext; simp only [Action.id_hom, F.map_id]
   map_comp f g := by ext; simp only [Action.comp_hom, F.map_comp]
+
+lemma mapAction_obj_ρ_apply_eq (F : V ⥤ W) (G : Type*) [Monoid G]
+    (M : Action V G) (g : G) : ((F.mapAction G).obj M).ρ g = F.map (M.ρ g) :=
+  rfl
+
+lemma mapAction_map_hom_eq (F : V ⥤ W) (G : Type*) [Monoid G]
+    {M N : Action V G} (f : M ⟶ N) : ((F.mapAction G).map f).hom = F.map f.hom :=
+  rfl
 
 instance (F : V ⥤ W) (G : Type*) [Monoid G] [F.Faithful] : (F.mapAction G).Faithful where
   map_injective eq := by
@@ -436,12 +463,19 @@ def mapActionComp {T : Type*} [Category* T] (F : V ⥤ W) (F' : W ⥤ T) :
     (F ⋙ F').mapAction G ≅ F.mapAction G ⋙ F'.mapAction G :=
   NatIso.ofComponents (fun X ↦ Iso.refl _)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- `Functor.mapAction` preserves isomorphisms of functors. -/
 @[simps! hom inv]
 def mapActionCongr {F F' : V ⥤ W} (e : F ≅ F') :
     F.mapAction G ≅ F'.mapAction G :=
-  NatIso.ofComponents (fun X ↦ Action.mkIso (e.app X.V))
+  NatIso.ofComponents
+    (fun X ↦ Action.mkIso (e.app X.V) fun g => by
+      rw [mapAction_obj_ρ_apply_eq, mapAction_obj_ρ_apply_eq, Iso.app_hom]
+      apply e.hom.naturality)
+    (by
+      intro X Y f
+      ext
+      rw [Action.comp_hom, Action.comp_hom, mapAction_map_hom_eq, mapAction_map_hom_eq]
+      apply e.hom.naturality)
 
 end Functor
 
