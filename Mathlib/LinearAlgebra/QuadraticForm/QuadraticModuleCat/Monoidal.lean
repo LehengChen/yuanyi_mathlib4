@@ -110,6 +110,9 @@ theorem hom_inv_associator {M N K : QuadraticModuleCat.{u} R} :
 @[simp] theorem toModuleCat_tensor (X Y : QuadraticModuleCat.{u} R) :
     (X ⊗ Y).toModuleCat = X.toModuleCat ⊗ Y.toModuleCat := rfl
 
+@[simp] theorem toModuleCat_tensorUnit :
+    (𝟙_ (QuadraticModuleCat.{u} R)).toModuleCat = 𝟙_ (ModuleCat.{u} R) := rfl
+
 theorem forget₂_map_associator_hom (X Y Z : QuadraticModuleCat.{u} R) :
     (forget₂ (QuadraticModuleCat R) (ModuleCat R)).map (α_ X Y Z).hom =
       (α_ X.toModuleCat Y.toModuleCat Z.toModuleCat).hom := rfl
@@ -127,14 +130,16 @@ instance instMonoidalCategory : MonoidalCategory (QuadraticModuleCat.{u} R) :=
         simp only [forget₂_obj, forget₂_map, Iso.refl_symm, Iso.trans_assoc, Iso.trans_hom,
           Iso.refl_hom, MonoidalCategory.tensorIso_hom, MonoidalCategory.tensorHom_id]
         dsimp only [toModuleCat_tensor, ModuleCat.of_coe]
-        erw [MonoidalCategory.id_whiskerRight]
+        simp only [toModuleCat_tensorUnit]
+        rw [MonoidalCategory.id_whiskerRight]
         simp
         rfl
       rightUnitor_eq := fun X => by
         simp only [forget₂_obj, forget₂_map, Iso.refl_symm, Iso.trans_assoc, Iso.trans_hom,
           Iso.refl_hom, MonoidalCategory.tensorIso_hom, MonoidalCategory.id_tensorHom]
         dsimp only [toModuleCat_tensor, ModuleCat.of_coe]
-        erw [MonoidalCategory.whiskerLeft_id]
+        simp only [toModuleCat_tensorUnit]
+        rw [MonoidalCategory.whiskerLeft_id]
         simp
         rfl
       associator_eq := fun X Y Z => by
