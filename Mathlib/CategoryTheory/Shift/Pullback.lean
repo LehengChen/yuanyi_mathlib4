@@ -70,6 +70,10 @@ isomorphism `shiftFunctor (PullbackShift C φ) a ≅ shiftFunctor C b`. -/
 def pullbackShiftIso (a : A) (b : B) (h : b = φ a) :
     shiftFunctor (PullbackShift C φ) a ≅ shiftFunctor C b := eqToIso (by subst h; rfl)
 
+lemma pullbackShiftMonoidalFunctor_eq :
+    shiftMonoidalFunctor (PullbackShift C φ) A =
+      Discrete.addMonoidalFunctor φ ⋙ shiftMonoidalFunctor C B := rfl
+
 variable {C}
 variable (X : PullbackShift C φ) (a₁ a₂ a₃ : A) (h : a₁ + a₂ = a₃) (b₁ b₂ b₃ : B)
   (h₁ : b₁ = φ a₁) (h₂ : b₂ = φ a₂) (h₃ : b₃ = φ a₃)
@@ -97,7 +101,8 @@ lemma pullbackShiftFunctorZero'_inv_app :
   rw [pullbackShiftFunctorZero_inv_app]
   simp only [Functor.id_obj, pullbackShiftIso, eqToIso.inv, eqToHom_app, shiftFunctorZero',
     Iso.trans_inv, NatTrans.comp_app, eqToIso_refl, Iso.refl_inv, NatTrans.id_app, assoc]
-  erw [comp_id]
+  simp only [shiftFunctor, pullbackShiftMonoidalFunctor_eq, Functor.comp_obj,
+    Discrete.addMonoidalFunctor_obj, comp_id]
 
 set_option backward.isDefEq.respectTransparency false in
 lemma pullbackShiftFunctorZero'_hom_app :
@@ -116,8 +121,9 @@ lemma pullbackShiftFunctorAdd'_inv_app :
   subst h₁ h₂ h
   obtain rfl : b₃ = φ a₁ + φ a₂ := by rw [h₃, φ.map_add]
   simp only [Functor.comp_obj, NatTrans.naturality_assoc]
-  erw [Functor.map_id, id_comp, id_comp, shiftFunctorAdd'_eq_shiftFunctorAdd,
-    shiftFunctorAdd'_eq_shiftFunctorAdd]
+  simp only [pullbackShiftIso, shiftFunctor, pullbackShiftMonoidalFunctor_eq, Functor.comp_obj,
+    Discrete.addMonoidalFunctor_obj, shiftFunctorAdd'_eq_shiftFunctorAdd, eqToIso_refl,
+    Iso.refl_hom, NatTrans.id_app, id_comp, Functor.map_id]
   change _ ≫ _ = _
   congr 1
   rw [Discrete.addMonoidalFunctor_μ]
