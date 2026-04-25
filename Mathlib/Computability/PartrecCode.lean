@@ -806,6 +806,9 @@ private def G (L : List (List (Option ℕ))) : Option (List (Option ℕ)) :=
               let x ← lup L (k, cf) (Nat.pair z m)
               x.casesOn (some m) fun _ => lup L (k', c) (Nat.pair z (m + 1)))
 
+private theorem some_natPair_eq (n : ℕ) : (fun y => some (Nat.pair n y)) = some ∘ Nat.pair n :=
+  rfl
+
 private theorem hG : Primrec G := by
   have a := (Primrec.ofNat (ℕ × Code)).comp (Primrec.list_length (α := List (Option ℕ)))
   have k := Primrec.fst.comp a
@@ -839,7 +842,7 @@ private theorem hG : Primrec G := by
       congr
       · ext p
         dsimp only []
-        erw [Option.bind_eq_bind, ← Option.map_eq_bind]
+        rw [Option.bind_eq_bind, some_natPair_eq, ← Option.map_eq_bind]
     refine Primrec.option_map ((hlup.comp <| L.pair <| (k.pair cg).pair n).comp Primrec.fst) ?_
     unfold Primrec₂
     exact Primrec₂.natPair.comp (Primrec.snd.comp Primrec.fst) Primrec.snd
