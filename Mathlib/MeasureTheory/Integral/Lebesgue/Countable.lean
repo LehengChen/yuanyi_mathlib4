@@ -238,8 +238,13 @@ theorem exists_pos_lintegral_lt_of_sigmaFinite (μ : Measure α) [SigmaFinite μ
   have hN_meas : Measurable N := measurableSet_spanningSetsIndex μ
   have hNs : ∀ n, N ⁻¹' {n} = s n := preimage_spanningSetsIndex_singleton μ
   refine ⟨δ ∘ N, fun x => δpos _, measurable_from_nat.comp hN_meas, ?_⟩
-  erw [lintegral_comp measurable_from_nat.coe_nnreal_ennreal hN_meas]
-  simpa [N, hNs, lintegral_countable', measurableSet_spanningSetsIndex, mul_comm] using δsum
+  rw [Function.comp_def (f := δ) (g := N),
+    ← Function.comp_def (f := fun n => (δ n : ℝ≥0∞)) (g := N),
+    lintegral_comp measurable_from_nat.coe_nnreal_ennreal hN_meas]
+  rw [lintegral_countable']
+  simp only [hN_meas, MeasurableSpace.measurableSet_top, map_apply, hNs]
+  rw [tsum_congr fun a => mul_comm (↑(δ a) : ℝ≥0∞) (μ (s a))]
+  simp [δsum]
 
 omit [MeasurableSpace α]
 
