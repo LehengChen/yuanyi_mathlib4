@@ -288,6 +288,11 @@ namespace Functor
 
 variable [G.IsContinuous J K]
 
+omit [G.IsCocontinuous J K] [∀ (F : Cᵒᵖ ⥤ A), G.op.HasPointwiseRightKanExtension F] in
+lemma sheafPushforwardContinuousCompSheafToPresheafIso_inv_app (F : Sheaf K A) :
+    (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).inv.app F =
+      𝟙 (G.op ⋙ F.obj) := rfl
+
 /--
 Given a functor between sites that is continuous and cocontinuous,
 the pushforward for the continuous functor `G` is left adjoint to
@@ -306,10 +311,10 @@ lemma sheafAdjunctionCocontinuous_unit_app_hom (F : Sheaf K A) :
     (fullyFaithfulSheafToPresheaf K A) (fullyFaithfulSheafToPresheaf J A)
     (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).symm
     (G.sheafPushforwardCocontinuousCompSheafToPresheafIso A J K).symm F).trans
-  dsimp
-  erw [Functor.map_id]
-  change _ ≫ 𝟙 _ ≫ 𝟙 _ = _
-  simp only [Category.comp_id]
+  dsimp [Functor.sheafPushforwardContinuous, ObjectProperty.lift,
+    Functor.sheafPushforwardCocontinuous]
+  simp only [sheafPushforwardContinuousCompSheafToPresheafIso_inv_app, Functor.map_id,
+    Category.comp_id]
 
 @[deprecated (since := "2026-03-05")]
 alias sheafAdjunctionCocontinuous_unit_app_val :=
@@ -339,9 +344,13 @@ lemma sheafAdjunctionCocontinuous_homEquiv_apply_hom {F : Sheaf K A} {H : Sheaf 
       (fullyFaithfulSheafToPresheaf K A) (fullyFaithfulSheafToPresheaf J A)
       (G.sheafPushforwardContinuousCompSheafToPresheafIso A J K).symm
       (G.sheafPushforwardCocontinuousCompSheafToPresheafIso A J K).symm f))).trans (by
-        dsimp
-        erw [Functor.map_id, Category.comp_id, Category.id_comp,
-          Adjunction.homEquiv_unit])
+        dsimp [Functor.sheafPushforwardContinuous, ObjectProperty.lift] at f
+        dsimp [Functor.sheafPushforwardContinuous, ObjectProperty.lift,
+          Functor.sheafPushforwardCocontinuous]
+        simp only [sheafPushforwardContinuousCompSheafToPresheafIso_inv_app,
+          Functor.map_id, Category.comp_id, Category.id_comp]
+        rw [← Adjunction.homEquiv_unit (G.op.ranAdjunction A) F.obj H.obj f.hom]
+        rfl)
 
 @[deprecated (since := "2026-03-05")]
 alias sheafAdjunctionCocontinuous_homEquiv_apply_val :=
