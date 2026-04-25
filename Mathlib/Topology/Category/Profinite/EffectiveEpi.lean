@@ -69,6 +69,11 @@ instance : Preregular Profinite.{u} := profiniteToCompHaus.reflects_preregular
 
 example : Precoherent Profinite.{u} := inferInstance
 
+@[simp] theorem jointlySurjective_profiniteToCompHaus_obj {α : Type} {B : Profinite.{u}}
+    (X : α → Profinite.{u}) (π : (a : α) → X a ⟶ B) :
+    (∀ b : profiniteToCompHaus.obj B, ∃ a x, profiniteToCompHaus.map (π a) x = b) =
+      (∀ b : B, ∃ a x, π a x = b) := rfl
+
 -- TODO: prove this for `Type*`
 open List in
 theorem effectiveEpiFamily_tfae
@@ -79,15 +84,20 @@ theorem effectiveEpiFamily_tfae
     , Epi (Sigma.desc π)
     , ∀ b : B, ∃ (a : α) (x : X a), π a x = b
     ] := by
-  tfae_have 2 → 1
-  | _ => by
-    simpa [← effectiveEpi_desc_iff_effectiveEpiFamily, (effectiveEpi_tfae (Sigma.desc π)).out 0 1]
+  tfae_have 2 → 1 := by
+    simp [← effectiveEpi_desc_iff_effectiveEpiFamily, (effectiveEpi_tfae (Sigma.desc π)).out 0 1]
   tfae_have 1 → 2 := fun _ ↦ inferInstance
   tfae_have 3 ↔ 1 := by
-    erw [((CompHaus.effectiveEpiFamily_tfae
-      (fun a ↦ profiniteToCompHaus.obj (X a)) (fun a ↦ profiniteToCompHaus.map (π a))).out 2 0 :)]
-    exact ⟨fun h ↦ profiniteToCompHaus.finite_effectiveEpiFamily_of_map _ _ h,
-      fun _ ↦ inferInstance⟩
+    rw [← jointlySurjective_profiniteToCompHaus_obj X π]
+    rw [((CompHaus.effectiveEpiFamily_tfae
+      (fun a ↦ profiniteToCompHaus.obj (X a))
+      (fun a ↦ profiniteToCompHaus.map (π a))).out 2 0 :)]
+    constructor
+    · intro h
+      apply profiniteToCompHaus.finite_effectiveEpiFamily_of_map X π
+      assumption
+    · intro h
+      infer_instance
   tfae_finish
 
 theorem effectiveEpiFamily_of_jointly_surjective
