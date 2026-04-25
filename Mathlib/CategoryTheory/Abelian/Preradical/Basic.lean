@@ -53,11 +53,11 @@ abbrev r : C ⥤ C := Φ.obj.left
 /-- The structure morphism `Φ.r ⟶ 𝟭 C` of a preradical `Φ`. -/
 abbrev ι : Φ.r ⟶ 𝟭 C := Φ.obj.hom
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma r_map_ι_app (X : C) : Φ.r.map (Φ.ι.app X) = Φ.ι.app (Φ.r.obj X) := by
-  rw [← cancel_mono (Φ.ι.app X)]
-  exact Φ.ι.naturality (Φ.ι.app X)
+  rw [← cancel_mono (Φ.ι.app ((𝟭 C).obj X))]
+  rw [Φ.ι.naturality]
+  simp
 
 /-- A preradical `Φ` is idempotent if `Φ.r ⋙ Φ.r ≅ Φ.r`. -/
 class IsIdempotent : Prop where
@@ -65,23 +65,30 @@ class IsIdempotent : Prop where
 
 attribute [instance] IsIdempotent.isIso_whiskerLeft_r_ι
 
-instance [Φ.IsIdempotent] (X : C) :
-    IsIso (Φ.ι.app (Φ.r.obj X)) :=
-  inferInstanceAs (IsIso ((Functor.whiskerLeft Φ.r Φ.ι).app X))
+omit [Abelian C] in
+private lemma whiskerLeft_ι_app {D : Type*} [Category* D] (F : D ⥤ C) (X : D) :
+    (Functor.whiskerLeft F Φ.ι).app X = Φ.ι.app (F.obj X) := rfl
 
-set_option backward.isDefEq.respectTransparency false in
+instance [Φ.IsIdempotent] (X : C) :
+    IsIso (Φ.ι.app (Φ.r.obj X)) := by
+  rw [← whiskerLeft_ι_app]
+  apply (inferInstanceAs (IsIso ((Functor.whiskerLeft Φ.r Φ.ι).app X)) :
+    IsIso ((Functor.whiskerLeft Φ.r Φ.ι).app X))
+
 instance [Φ.IsIdempotent] (X : C) :
     IsIso (Φ.r.map (Φ.ι.app X)) := by
   rw [r_map_ι_app]
-  infer_instance
+  rw [← whiskerLeft_ι_app]
+  apply (inferInstanceAs (IsIso ((Functor.whiskerLeft Φ.r Φ.ι).app X)) :
+    IsIso ((Functor.whiskerLeft Φ.r Φ.ι).app X))
 
-set_option backward.isDefEq.respectTransparency false in
 instance {D : Type*} [Category* D] (F : D ⥤ C) :
     Mono (Functor.whiskerLeft F Φ.ι) := by
   rw [NatTrans.mono_iff_mono_app]
-  intro
-  dsimp
-  infer_instance
+  intro X
+  rw [whiskerLeft_ι_app]
+  apply (inferInstanceAs (Mono (Φ.ι.app (F.obj X))) :
+    Mono (Φ.ι.app (F.obj X)))
 
 end Preradical
 
