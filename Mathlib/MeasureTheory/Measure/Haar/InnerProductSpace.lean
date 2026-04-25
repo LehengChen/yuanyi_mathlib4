@@ -43,6 +43,10 @@ def toMeasurableEquiv : E ≃ᵐ F := f.toHomeomorph.toMeasurableEquiv
 
 @[simp] lemma coe_symm_toMeasurableEquiv : ⇑f.toMeasurableEquiv.symm = f.symm := rfl
 
+omit [MeasurableSpace E] [BorelSpace E] [MeasurableSpace F] [BorelSpace F] in
+@[simp] lemma toContinuousLinearEquiv_toLinearEquiv :
+    f.toContinuousLinearEquiv.toLinearEquiv = f.toLinearEquiv := rfl
+
 end LinearIsometryEquiv
 
 variable [Fintype ι]
@@ -106,8 +110,13 @@ theorem OrthonormalBasis.measurePreserving_measurableEquiv (b : OrthonormalBasis
     MeasurePreserving b.measurableEquiv volume volume := by
   convert (b.measurableEquiv.symm.measurable.measurePreserving _).symm
   rw [← (EuclideanSpace.basisFun ι ℝ).addHaar_eq_volume]
-  erw [MeasurableEquiv.coe_toEquiv_symm, Basis.map_addHaar _ b.repr.symm.toContinuousLinearEquiv]
-  exact b.addHaar_eq_volume.symm
+  rw [OrthonormalBasis.measurableEquiv, Homeomorph.toMeasurableEquiv_symm_coe,
+    LinearIsometryEquiv.coe_symm_toHomeomorph,
+    ← LinearIsometryEquiv.coe_toContinuousLinearEquiv (e := b.repr.symm),
+    Basis.map_addHaar _ b.repr.symm.toContinuousLinearEquiv]
+  rw [← b.addHaar_eq_volume]
+  simp
+  rfl
 
 theorem OrthonormalBasis.measurePreserving_repr (b : OrthonormalBasis ι ℝ F) :
     MeasurePreserving b.repr volume volume := b.measurePreserving_measurableEquiv
@@ -173,9 +182,10 @@ theorem measurePreserving (f : E ≃ₗᵢ[ℝ] F) :
     MeasurePreserving f := by
   refine ⟨f.continuous.measurable, ?_⟩
   rcases exists_orthonormalBasis ℝ E with ⟨w, b, _hw⟩
-  erw [← OrthonormalBasis.addHaar_eq_volume b, ← OrthonormalBasis.addHaar_eq_volume (b.map f),
+  rw [← OrthonormalBasis.addHaar_eq_volume b, ← OrthonormalBasis.addHaar_eq_volume (b.map f),
+    ← LinearIsometryEquiv.coe_toContinuousLinearEquiv (e := f),
     Basis.map_addHaar _ f.toContinuousLinearEquiv]
-  congr
+  simp
 
 end LinearIsometryEquiv
 
