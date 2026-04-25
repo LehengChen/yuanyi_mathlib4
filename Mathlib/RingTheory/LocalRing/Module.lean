@@ -209,9 +209,10 @@ lemma exists_basis_of_basis_baseChange [Module.FinitePresentation R M]
       exact Subtype.val_injective
     · apply hi'.injective
       rw [LinearMap.baseChange_eq_ltensor]
-      erw [← LinearMap.comp_apply (i.lTensor k), ← LinearMap.lTensor_comp]
+      simp only [IsLocalRing.ResidueField]
+      rw [← LinearMap.comp_apply (i.lTensor (R ⧸ 𝔪)), ← LinearMap.lTensor_comp]
       rw [(LinearMap.exact_subtype_ker_map i).linearMap_comp_eq_zero]
-      simp only [LinearMap.lTensor_zero, LinearMap.zero_apply, map_zero]
+      simp only [LinearMap.lTensor_zero, LinearMap.zero_apply, LinearMap.map_zero]
   use Basis.ofRepr iequiv.symm
   intro j
   simp [iequiv, i]
