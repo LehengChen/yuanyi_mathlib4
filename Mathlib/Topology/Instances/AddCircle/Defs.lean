@@ -756,6 +756,10 @@ theorem equivIccQuot_comp_mk_eq_toIocMod :
     exact Quot.sound EndpointIdent.mk
   · simp_rw [(not_modEq_iff_toIcoMod_eq_toIocMod hp.out).1 h]
 
+private theorem equivIccQuot_toFun_comp_mk'_eq_comp_mk'' :
+    (equivIccQuot p a).toFun ∘ @Quotient.mk' 𝕜 (QuotientAddGroup.leftRel (zmultiples p)) =
+      equivIccQuot p a ∘ @Quotient.mk'' 𝕜 (QuotientAddGroup.leftRel (zmultiples p)) := rfl
+
 /-- The natural map from `[a, a + p] ⊂ 𝕜` with endpoints identified to `𝕜 / ℤ • p`, as a
 homeomorphism of topological spaces. -/
 def homeoIccQuot [TopologicalSpace 𝕜] [OrderTopology 𝕜] : 𝕋 ≃ₜ Quot (EndpointIdent p a) where
@@ -764,8 +768,10 @@ def homeoIccQuot [TopologicalSpace 𝕜] [OrderTopology 𝕜] : 𝕋 ≃ₜ Quot
     simp_rw [isQuotientMap_quotient_mk'.continuous_iff, continuous_iff_continuousAt,
       continuousAt_iff_continuous_left_right]
     intro x; constructor
-    on_goal 1 => erw [equivIccQuot_comp_mk_eq_toIocMod]
-    on_goal 2 => erw [equivIccQuot_comp_mk_eq_toIcoMod]
+    on_goal 1 =>
+      rw [equivIccQuot_toFun_comp_mk'_eq_comp_mk'', equivIccQuot_comp_mk_eq_toIocMod]
+    on_goal 2 =>
+      rw [equivIccQuot_toFun_comp_mk'_eq_comp_mk'', equivIccQuot_comp_mk_eq_toIcoMod]
     all_goals
       apply continuous_quot_mk.continuousAt.comp_continuousWithinAt
       rw [IsInducing.subtypeVal.continuousWithinAt_iff]
