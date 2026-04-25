@@ -149,6 +149,9 @@ theorem eval_app (S₁ S₂ : Sheaf typesGrothendieckTopology (Type u)) (f : S�
     eval S₂.1 α (f.hom.app (op α) s) x = f.hom.app (op PUnit) (eval S₁.1 α s x) :=
   (congr_fun (f.hom.naturality (↾fun _ : PUnit => x).op) s).symm
 
+theorem eval_yoneda_obj_id (X : Type u) :
+    eval (yoneda.obj X) X (𝟙 X) = (fun x (_ : PUnit) => x) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- `yoneda'` induces an equivalence of categories between `Type u` and
 `Sheaf typesGrothendieckTopology (Type u)`. -/
@@ -173,7 +176,7 @@ noncomputable def typeEquiv : Type u ≌ Sheaf typesGrothendieckTopology (Type u
     ext1
     apply yonedaEquiv.injective
     dsimp [yoneda', yonedaEquiv, evalEquiv]
-    erw [typesGlue_eval]
+    rw [Category.id_comp, ← eval_yoneda_obj_id, typesGlue_eval]
 
 instance subcanonical_typesGrothendieckTopology : typesGrothendieckTopology.{u}.Subcanonical :=
   GrothendieckTopology.Subcanonical.of_isSheaf_yoneda_obj _ fun _ => Presieve.isSheaf_yoneda'
