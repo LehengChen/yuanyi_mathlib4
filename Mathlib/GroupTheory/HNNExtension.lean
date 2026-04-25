@@ -152,6 +152,10 @@ theorem toSubgroup_one : toSubgroup A B 1 = A := rfl
 @[simp]
 theorem toSubgroup_neg_one : toSubgroup A B (-1) = B := rfl
 
+theorem toSubgroup_one_val (g : A) :
+    @Subtype.val G (fun x => x ∈ toSubgroup A B 1) (g : toSubgroup A B 1) =
+      @Subtype.val G (fun x => x ∈ A) g := rfl
+
 variable {A B}
 
 /-- To avoid duplicating code, we define `toSubgroup A B u` and `toSubgroupEquiv u`
@@ -177,6 +181,16 @@ theorem toSubgroupEquiv_neg_apply (u : ℤˣ) (a : toSubgroup A B u) :
   · simp [toSubgroup]
   · simp only [toSubgroup_neg_one, toSubgroupEquiv_neg_one, SetLike.coe_eq_coe]
     exact φ.apply_symm_apply a
+
+theorem toSubgroupEquiv_neg_one_symm_dfunlike_coe (φ : A ≃* B) :
+    @DFunLike.coe (B ≃* toSubgroup A B (- -1)) B (fun _ => toSubgroup A B (- -1)) _
+        φ.symm =
+      @DFunLike.coe (B ≃* A) B (fun _ => A) _ φ.symm := rfl
+
+theorem toSubgroupEquiv_neg_one_symm_full_dfunlike_coe (φ : A ≃* B) :
+    @DFunLike.coe (toSubgroup A B (-1) ≃* toSubgroup A B (- -1)) (toSubgroup A B (-1))
+        (fun _ => toSubgroup A B (- -1)) _ φ.symm =
+      @DFunLike.coe (B ≃* A) B (fun _ => A) _ φ.symm := rfl
 
 namespace NormalWord
 
@@ -229,6 +243,25 @@ structure _root_.HNNExtension.NormalWord (d : TransversalPair G A B) : Type _
   mem_set : ∀ (u : ℤˣ) (g : G), (u, g) ∈ toList → g ∈ d.set u
 
 variable {d : TransversalPair G A B}
+
+theorem compl_one_equiv_dfunlike_coe (d : TransversalPair G A B) :
+    @DFunLike.coe (G ≃ A × d.set 1) G (fun _ => A × d.set 1) _
+        ((d.compl 1 : IsComplement (A : Set G) (d.set 1)).equiv) =
+      @DFunLike.coe (G ≃ toSubgroup A B 1 × d.set 1) G
+        (fun _ => toSubgroup A B 1 × d.set 1) _ (d.compl 1).equiv := rfl
+
+theorem compl_one_equiv_subgroup_set_dfunlike_coe (d : TransversalPair G A B) :
+    @DFunLike.coe (G ≃ toSubgroup A B 1 × d.set 1) G
+        (fun _ => toSubgroup A B 1 × d.set 1) _ (d.compl 1).equiv =
+      @DFunLike.coe (G ≃ (toSubgroup A B 1 : Set G) × d.set 1) G
+        (fun _ => (toSubgroup A B 1 : Set G) × d.set 1) _ (d.compl 1).equiv := rfl
+
+theorem compl_neg_one_equiv_subgroup_set_dfunlike_coe (d : TransversalPair G A B) :
+    @DFunLike.coe (G ≃ toSubgroup A B (-1) × d.set (-1)) G
+        (fun _ => toSubgroup A B (-1) × d.set (-1)) _ (d.compl (-1)).equiv =
+      @DFunLike.coe (G ≃ (toSubgroup A B (-1) : Set G) × d.set (-1)) G
+        (fun _ => (toSubgroup A B (-1) : Set G) × d.set (-1)) _
+          (d.compl (-1)).equiv := rfl
 
 @[ext]
 theorem ext {w w' : NormalWord d}
@@ -443,13 +476,12 @@ theorem unitsSMul_neg (u : ℤˣ) (w : NormalWord d) :
       apply NormalWord.ext
       · -- This used to `simp [this]` before https://github.com/leanprover/lean4/pull/2644
         dsimp
-        conv_lhs => erw [IsComplement.equiv_mul_left]
-        rw [map_mul, Submonoid.coe_mul, toSubgroupEquiv_neg_apply, this]
+        rw [IsComplement.equiv_mul_left, map_mul, Submonoid.coe_mul, toSubgroupEquiv_neg_apply,
+          this]
         simp
       · -- The next two lines were not needed before https://github.com/leanprover/lean4/pull/2644
         dsimp
-        conv_lhs => erw [IsComplement.equiv_mul_left]
-        simp [Units.ext_iff, (d.compl (-u)).equiv_snd_eq_inv_mul, this,
+        simp [IsComplement.equiv_mul_left, Units.ext_iff, (d.compl (-u)).equiv_snd_eq_inv_mul, this,
           -SetLike.coe_sort_coe]
 
 /-- the equivalence given by multiplication on the left by `t` -/
@@ -482,11 +514,11 @@ theorem unitsSMul_one_group_smul (g : A) (w : NormalWord d) :
       mul_one, smul_cons]
     -- This used to be the end of the proof before https://github.com/leanprover/lean4/pull/2644
     congr 1
-    · conv_lhs => erw [IsComplement.equiv_mul_left]
-      simp_rw [toSubgroup_one]
-      simp only [SetLike.coe_sort_coe, map_mul, Subgroup.coe_mul]
-    conv_lhs => erw [IsComplement.equiv_mul_left]
-    rfl
+    · rw [← Subgroup.coe_mul, ← map_mul, SetLike.coe_eq_coe, EmbeddingLike.apply_eq_iff_eq]
+      rw [compl_one_equiv_dfunlike_coe, ← toSubgroup_one_val A B g,
+        compl_one_equiv_subgroup_set_dfunlike_coe d, IsComplement.equiv_mul_left]
+    rw [compl_one_equiv_dfunlike_coe, ← toSubgroup_one_val A B g,
+      compl_one_equiv_subgroup_set_dfunlike_coe d, IsComplement.equiv_mul_left]
 
 noncomputable instance : MulAction (HNNExtension G A B φ) (NormalWord d) :=
   MulAction.ofEndHom <| (MulAction.toEndHom (M := Equiv.Perm (NormalWord d))).comp
@@ -535,20 +567,24 @@ theorem prod_unitsSMul (u : ℤˣ) (w : NormalWord d) :
         -- simp [equiv_symm_eq_conj, mul_assoc].
         simp only [toSubgroup_neg_one, toSubgroupEquiv_neg_one, Units.val_neg, Units.val_one,
           Int.reduceNeg, zpow_neg, zpow_one, inv_inv]
-        erw [equiv_symm_eq_conj, mul_assoc, mul_assoc]
+        rw [toSubgroupEquiv_neg_one_symm_dfunlike_coe φ, equiv_symm_eq_conj, mul_assoc,
+          mul_assoc]
   · simp only [unitsSMulGroup, SetLike.coe_sort_coe, prod_cons, prod_group_smul, map_mul, map_inv]
     rcases Int.units_eq_one_or u with (rfl | rfl)
     · -- Before https://github.com/leanprover/lean4/pull/2644, this proof was just
       -- simp [equiv_eq_conj, mul_assoc, (d.compl _).equiv_snd_eq_inv_mul].
       simp only [toSubgroup_neg_one, toSubgroup_one, toSubgroupEquiv_one, equiv_eq_conj, mul_assoc,
         Units.val_one, zpow_one, inv_mul_cancel_left, mul_right_inj]
-      erw [(d.compl 1).equiv_snd_eq_inv_mul]
+      rw [compl_one_equiv_dfunlike_coe, compl_one_equiv_subgroup_set_dfunlike_coe d,
+        (d.compl 1).equiv_snd_eq_inv_mul]
       simp [mul_assoc]
     · -- Before https://github.com/leanprover/lean4/pull/2644, this proof was just
       -- simp [equiv_symm_eq_conj, mul_assoc, (d.compl _).equiv_snd_eq_inv_mul]
-      simp only [toSubgroup_neg_one, toSubgroupEquiv_neg_one, Units.val_neg, Units.val_one,
-        Int.reduceNeg, zpow_neg, zpow_one, mul_assoc]
-      erw [equiv_symm_eq_conj, (d.compl (-1)).equiv_snd_eq_inv_mul]
+      simp only [toSubgroupEquiv_neg_one, Units.val_neg, Units.val_one, Int.reduceNeg, zpow_neg,
+        zpow_one, mul_assoc]
+      rw [toSubgroupEquiv_neg_one_symm_full_dfunlike_coe φ, equiv_symm_eq_conj,
+        compl_neg_one_equiv_subgroup_set_dfunlike_coe d,
+        (d.compl (-1)).equiv_snd_eq_inv_mul]
       simp [mul_assoc]
 
 @[simp]
@@ -662,7 +698,8 @@ theorem exists_normalWord_prod_eq
         simp at this
       rw [List.map_cons, mul_smul, of_smul_eq_smul, NormalWord.group_smul_def,
         t_pow_smul_eq_unitsSMul, unitsSMul]
-      erw [dif_neg this]
+      rw [NormalWord.group_smul_def] at this
+      rw [dif_neg this]
       rw [← hw'2]
       simp [mul_assoc, unitsSMulGroup]
 
