@@ -355,11 +355,15 @@ theorem toDual_def {B : BilinForm K V} (b : B.Nondegenerate) {m n : V} : B.toDua
   rfl
 
 @[simp]
+theorem toDual_apply {B : BilinForm K V} (b : B.Nondegenerate) (m : V) :
+    B.toDual b m = B m := rfl
+
+@[simp]
 lemma apply_toDual_symm_apply {B : BilinForm K V} {hB : B.Nondegenerate}
     (f : Module.Dual K V) (v : V) :
     B ((B.toDual hB).symm f) v = f v := by
-  change B.toDual hB ((B.toDual hB).symm f) v = f v
-  simp only [LinearEquiv.apply_symm_apply]
+  rw [← toDual_apply hB]
+  simp
 
 @[deprecated (since := "2026-01-17")] alias nonDegenerateFlip_iff := nondegenerate_flip_iff
 
@@ -447,7 +451,8 @@ theorem comp_symmCompOfNondegenerate_apply (B₁ : BilinForm K V) {B₂ : BilinF
     B₂ (B₁.symmCompOfNondegenerate B₂ b₂ v) = B₁ v := by
   rw [symmCompOfNondegenerate]
   simp only [coe_comp, LinearEquiv.coe_coe, Function.comp_apply]
-  erw [LinearEquiv.apply_symm_apply (B₂.toDual b₂)]
+  rw [← toDual_apply b₂]
+  simp
 
 @[simp]
 theorem symmCompOfNondegenerate_left_apply (B₁ : BilinForm K V) {B₂ : BilinForm K V}
