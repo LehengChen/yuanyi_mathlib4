@@ -123,6 +123,11 @@ def _root_.CategoryTheory.Presieve.FamilyOfElements.SieveCompatible.cone :
   pt := E.unop
   π := (conesEquivSieveCompatibleFamily P S E).invFun ⟨x, hx⟩
 
+lemma conesEquivSieveCompatibleFamily_cone {E : A}
+    (π : (S.arrows.diagram.op ⋙ P).cones.obj (op E)) :
+    let e := conesEquivSieveCompatibleFamily P S (op E)
+    ((e π).2).cone = { pt := E, π := e.invFun (e.toFun π) } := rfl
+
 /-- Cone morphisms from the cone corresponding to a `SieveCompatible` family to the natural
     cone associated to a sieve `S` and a presheaf `P` are in 1-1 correspondence with amalgamations
     of the family. -/
@@ -146,11 +151,13 @@ theorem isLimit_iff_isSheafFor :
     rw [(homEquivAmalgamation hx).uniqueCongr.nonempty_congr] at hu
     exact (unique_subtype_iff_existsUnique _).1 hu
   · rintro h ⟨E, π⟩
-    let eqv := conesEquivSieveCompatibleFamily P S (op E)
-    rw [← eqv.left_inv π]
-    erw [(homEquivAmalgamation (eqv π).2).uniqueCongr.nonempty_congr]
+    rw [← (conesEquivSieveCompatibleFamily P S (op E)).left_inv π]
+    rw [← conesEquivSieveCompatibleFamily_cone π]
+    rw [(homEquivAmalgamation
+      ((conesEquivSieveCompatibleFamily P S (op E) π).2)).uniqueCongr.nonempty_congr]
     rw [unique_subtype_iff_existsUnique]
-    exact h _ _ (eqv π).2
+    apply h
+    apply ((conesEquivSieveCompatibleFamily P S (op E) π).2)
 
 /-- Given sieve `S` and presheaf `P : Cᵒᵖ ⥤ A`, their natural associated cone admits at most one
     morphism from every cone in the same category (i.e. over the same diagram),
@@ -529,9 +536,11 @@ def isLimitOfIsSheaf {X : C} (S : J.Cover X) (hP : IsSheaf J P) : IsLimit (S.mul
     rintro (E : Multifork _) m hm
     apply hP.hom_ext S
     intro I
-    erw [hm (WalkingMulticospan.left I)]
-    symm
-    apply hP.amalgamate_map
+    specialize hm (WalkingMulticospan.left I)
+    simp only [MulticospanIndex.multicospan_obj, GrothendieckTopology.Cover.shape_L,
+      GrothendieckTopology.Cover.index_left, Multifork.ofι_pt, Multifork.ofι_π_app,
+      Multifork.app_left_eq_ι] at hm
+    rw [hP.amalgamate_map, hm]
 
 theorem isSheaf_iff_multifork :
     IsSheaf J P ↔ ∀ (X : C) (S : J.Cover X), Nonempty (IsLimit (S.multifork P)) := by
