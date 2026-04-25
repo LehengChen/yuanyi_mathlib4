@@ -5,6 +5,7 @@ Authors: Sophie Morel, Joël Riou
 -/
 module
 
+public import Mathlib.CategoryTheory.Adjunction.Opposites
 public import Mathlib.CategoryTheory.Preadditive.Yoneda.Basic
 
 /-!
@@ -35,13 +36,25 @@ variable {C : Type u₁} {D : Type u₂} [Category.{v₁} C] [Category.{v₂} D]
 
 include adj
 
-set_option backward.isDefEq.respectTransparency false in
-lemma right_adjoint_additive [F.Additive] : G.Additive where
-  map_add {X Y} f g := (adj.homEquiv _ _).symm.injective (by simp [homEquiv_counit])
+omit [Preadditive C] [Preadditive D] in
+private lemma counit_naturality_plain {X Y : D} (f : X ⟶ Y) :
+    ((F.map (G.map f) ≫ adj.counit.app Y : F.obj (G.obj X) ⟶ Y) =
+      (adj.counit.app X ≫ f : F.obj (G.obj X) ⟶ Y)) :=
+  adj.counit_naturality f
 
-set_option backward.isDefEq.respectTransparency false in
-lemma left_adjoint_additive [G.Additive] : F.Additive where
-  map_add {X Y} f g := (adj.homEquiv _ _).injective (by simp [homEquiv_unit])
+private lemma right_adjoint_additive_aux [F.Additive] {X Y : D} (f g : X ⟶ Y) :
+    ((F.map (G.map (f + g)) ≫ adj.counit.app Y : F.obj (G.obj X) ⟶ Y) =
+      (F.map (G.map f + G.map g) ≫ adj.counit.app Y : F.obj (G.obj X) ⟶ Y)) := by
+  rw [counit_naturality_plain adj (f + g)]; rw [Functor.map_add]; simp [counit_naturality_plain]
+
+lemma right_adjoint_additive [F.Additive] : G.Additive where
+  map_add {X Y} f g := by
+    rw [← (adj.homEquiv (G.obj X) Y).symm.injective.eq_iff]
+    simp only [homEquiv_counit]
+    rw [right_adjoint_additive_aux adj f g]
+
+lemma left_adjoint_additive [G.Additive] : F.Additive :=
+  @Functor.unop_additive _ _ _ _ _ _ F.op ((Adjunction.op adj).right_adjoint_additive)
 
 variable [F.Additive]
 
@@ -53,8 +66,7 @@ Note that `F` is additive if and only if `G` is, by `Adjunction.right_adjoint_ad
 def homAddEquiv (X : C) (Y : D) : AddEquiv (F.obj X ⟶ Y) (X ⟶ G.obj Y) :=
   { adj.homEquiv _ _ with
     map_add' _ _ := by
-      have := adj.right_adjoint_additive
-      simp [homEquiv_apply] }
+      simp [homEquiv_apply, (adj.right_adjoint_additive).map_add] }
 
 @[simp]
 lemma homAddEquiv_apply (X : C) (Y : D) (f : F.obj X ⟶ Y) :
@@ -114,7 +126,7 @@ def compPreadditiveYonedaIso :
         (whiskeringRight _ _ _).obj AddCommGrpCat.uliftFunctor.{max v₁ v₂} :=
   NatIso.ofComponents
     (fun Y ↦ NatIso.ofComponents
-      (fun X ↦ (AddEquiv.ulift.trans ((adj.homAddEquiv (unop X) Y).symm.trans
+      (fun X ↦ (AddEquiv.ulift.trans ((adj.homAddEquiv (Opposite.unop X) Y).symm.trans
         AddEquiv.ulift.symm)).toAddCommGrpIso)
       (fun g ↦ by
         ext ⟨y⟩
