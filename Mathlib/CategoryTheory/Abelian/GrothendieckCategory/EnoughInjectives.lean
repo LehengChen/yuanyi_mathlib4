@@ -105,7 +105,6 @@ variable {G} (hG : IsSeparator G)
 
 include hG
 
-set_option backward.isDefEq.respectTransparency false in
 /-- If `p : X ⟶ Y` is a monomorphism that is not an isomorphism, there exists
 a subobject `X'` of `Y` containing `X` (but different from `X`) such that
 the inclusion `X ⟶ X'` is a pushout of a monomorphism in the family
@@ -127,13 +126,17 @@ lemma exists_pushouts
     pushout.inr _ _, ⟨Subobject.mk (pullback.snd p f)⟩,
     (IsPushout.of_hasPushout (pullback.fst p f) (pullback.snd p f)).of_iso
       ((Subobject.underlyingIso _).symm) (Iso.refl _) (Iso.refl _)
-      (Iso.refl _) (by simp) (by simp) (by simp) (by simp)⟩, ?_, ?_, by simp⟩
+      (Iso.refl _) (by simp) (by simp) (by simp) (by simp)⟩, ?_, ?_,
+      by rw [pushout.inl_desc]⟩
   · intro h
     rw [isIso_iff_yoneda_map_bijective] at h
     obtain ⟨a, ha⟩ := (h G).2 (pushout.inr _ _)
-    exact hf a (by simpa using ha =≫ pushout.desc p f pullback.condition)
+    simp only at ha
+    exact hf a (by
+      rw [yoneda_map_app, ← pushout.inl_desc p f pullback.condition,
+        ← Category.assoc, ha, pushout.inr_desc])
   · exact (IsPushout.of_hasPushout _ _).mono_of_isPullback_of_mono
-      (IsPullback.of_hasPullback p f) _ (by simp) (by simp)
+      (IsPullback.of_hasPullback p f) _ (by rw [pushout.inl_desc]) (by rw [pushout.inr_desc])
 
 lemma exists_larger_subobject {X : C} (A : Subobject X) (hA : A ≠ ⊤) :
     ∃ (A' : Subobject X) (h : A < A'),
@@ -177,15 +180,17 @@ lemma le_largerSubobject (A : Subobject X) :
     simp only [largerSubobject_top, le_refl]
   · exact (lt_largerSubobject hG A hA).le
 
-set_option backward.isDefEq.respectTransparency false in
 lemma pushouts_ofLE_le_largerSubobject (A : Subobject X) :
       (generatingMonomorphisms G).pushouts
         (Subobject.ofLE _ _ (le_largerSubobject hG A)) := by
   by_cases hA : A = ⊤
   · subst hA
-    have := (Subobject.isIso_arrow_iff_eq_top (largerSubobject hG (⊤ : Subobject X))).2 (by simp)
     exact (MorphismProperty.arrow_mk_iso_iff _
-      (Arrow.isoMk (asIso (Subobject.arrow _)) (asIso (Subobject.arrow _)) (by simp))).2
+      (Arrow.isoMk
+        (@asIso C _ _ _ ((⊤ : Subobject X).arrow) Subobject.top_arrow_isIso)
+        (@asIso C _ _ _ ((largerSubobject hG (⊤ : Subobject X)).arrow)
+          ((Subobject.isIso_arrow_iff_eq_top (largerSubobject hG (⊤ : Subobject X))).2
+            (by simp))) (by simp))).2
         (isomorphisms_le_pushouts_generatingMonomorphisms G (𝟙 X)
           (MorphismProperty.isomorphisms.infer_property _))
   · refine (MorphismProperty.arrow_mk_iso_iff _ ?_).1
@@ -265,7 +270,6 @@ end
 
 variable {A : C} {f : A ⟶ X} [Mono f]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- If `transfiniteIterate (largerSubobject hG) j (Subobject.mk f) = ⊤`,
 then the monomorphism `f` is a transfinite composition of pushouts of
 monomorphisms in the family `generatingMonomorphisms G`. -/
@@ -274,13 +278,16 @@ noncomputable def transfiniteCompositionOfShapeOfEqTop
     (hj : transfiniteIterate (largerSubobject hG) j (Subobject.mk f) = ⊤) :
     (generatingMonomorphisms G).pushouts.TransfiniteCompositionOfShape (Set.Iic j) f := by
   let t := transfiniteIterate (largerSubobject hG) j (Subobject.mk f)
-  have := (Subobject.isIso_arrow_iff_eq_top t).2 hj
   apply (transfiniteCompositionOfShapeMapFromBot hG (Subobject.mk f) j).ofArrowIso
   refine Arrow.isoMk ((Subobject.isoOfEq _ _ (transfiniteIterate_bot _ _) ≪≫
-    Subobject.underlyingIso f)) (asIso t.arrow) ?_
-  dsimp [MonoOver.forget]
-  rw [assoc, Subobject.underlyingIso_hom_comp_eq_mk, Subobject.ofLE_arrow,
-    Subobject.ofLE_arrow]
+    Subobject.underlyingIso f)) (@asIso C _ _ _ t.arrow
+      ((Subobject.isIso_arrow_iff_eq_top t).2 hj)) ?_
+  simp only [Functor.comp_obj, functorToMonoOver_obj, ObjectProperty.ι_obj, MonoOver.mk_obj,
+    Over.forget_obj, Over.mk_left, homOfLE_leOfHom, Functor.comp_map, functorToMonoOver_map,
+    ObjectProperty.ι_map, InducedCategory.homMk_hom, Over.forget_map, Over.homMk_left,
+    Arrow.mk_left, Arrow.mk_right, Iso.trans_hom, Subobject.isoOfEq_hom, Arrow.mk_hom,
+    assoc, Subobject.underlyingIso_hom_comp_eq_mk, Subobject.ofLE_arrow, asIso_hom]
+  rw [Subobject.ofLE_arrow]
 
 variable (f)
 
