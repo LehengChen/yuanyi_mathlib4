@@ -135,15 +135,18 @@ lemma Limits.CokernelCofork.IsColimit.comp_π_eq_zero_iff_up_to_refinements {f :
   · rintro ⟨A', π, hπ, x, fac⟩
     simp [← cancel_epi π, reassoc_of% fac, condition]
 
-set_option backward.isDefEq.respectTransparency false in
+private lemma ShortComplex.homologyπ_zero_iff_exists_toCycles {A : C} (z₂ : A ⟶ S.cycles) :
+    z₂ ≫ S.homologyπ = 0 ↔
+      ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁),
+        π ≫ z₂ = x₁ ≫ S.toCycles :=
+  CokernelCofork.IsColimit.comp_π_eq_zero_iff_up_to_refinements S.homologyIsCokernel z₂
+
 lemma ShortComplex.liftCycles_comp_homologyπ_eq_zero_iff_up_to_refinements
     {A : C} (x₂ : A ⟶ S.X₂) (hx₂ : x₂ ≫ S.g = 0) :
     S.liftCycles x₂ hx₂ ≫ S.homologyπ = 0 ↔
       ∃ (A' : C) (π : A' ⟶ A) (_ : Epi π) (x₁ : A' ⟶ S.X₁), π ≫ x₂ = x₁ ≫ S.f := by
-  have := CokernelCofork.IsColimit.comp_π_eq_zero_iff_up_to_refinements
-        S.homologyIsCokernel (S.liftCycles x₂ hx₂)
-  dsimp at this
-  simp [this, ← cancel_mono S.iCycles]
+  rw [ShortComplex.homologyπ_zero_iff_exists_toCycles]
+  simp [← cancel_mono S.iCycles]
 
 lemma ShortComplex.liftCycles_comp_homologyπ_eq_iff_up_to_refinements
     {A : C} (x₂ x₂' : A ⟶ S.X₂) (hx₂ : x₂ ≫ S.g = 0) (hx₂' : x₂' ≫ S.g = 0) :
