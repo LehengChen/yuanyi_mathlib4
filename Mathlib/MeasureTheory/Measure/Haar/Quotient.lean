@@ -52,6 +52,10 @@ open Set MeasureTheory TopologicalSpace MeasureTheory.Measure
 
 open scoped Pointwise NNReal ENNReal
 
+@[to_additive]
+private lemma quotient_mk_orbitRel_op_eq_quotientGroup_mk {G : Type*} [Group G] (Γ : Subgroup G) :
+    (@Quotient.mk G (MulAction.orbitRel Γ.op G)) = @QuotientGroup.mk G _ Γ := rfl
+
 section
 
 /-- Measurability of the action of the topological group `G` on the left-coset space `G / Γ`. -/
@@ -94,11 +98,10 @@ lemma MeasureTheory.QuotientMeasureEqMeasurePreimage.smulInvariantMeasure_quotie
     have meas_π : Measurable π := continuous_quotient_mk'.measurable
     obtain ⟨𝓕, h𝓕⟩ := hasFun.ExistsIsFundamentalDomain
     have h𝓕_translate_fundom : IsFundamentalDomain Γ.op (g • 𝓕) ν := h𝓕.smul_of_comm g
-    -- TODO: why `rw` fails with both of these rewrites?
-    erw [h𝓕.projection_respects_measure_apply (μ := μ)
+    rw [h𝓕.projection_respects_measure_apply (μ := μ)
       (meas_π (measurableSet_preimage (measurable_const_smul g) hA)),
       h𝓕_translate_fundom.projection_respects_measure_apply (μ := μ) hA]
-    change ν ((π ⁻¹' _) ∩ _) = ν ((π ⁻¹' _) ∩ _)
+    rw [quotient_mk_orbitRel_op_eq_quotientGroup_mk Γ]
     set π_preA := π ⁻¹' A
     have : π ⁻¹' ((fun x : G ⧸ Γ => g • x) ⁻¹' A) = (g * ·) ⁻¹' π_preA := by ext1; simp [π_preA]
     rw [this]
@@ -233,8 +236,8 @@ theorem MeasureTheory.QuotientMeasureEqMeasurePreimage.haarMeasure_quotient [Loc
     ne_top_of_lt <| QuotientMeasureEqMeasurePreimage.covolume_ne_top μ (ν := ν)
   obtain ⟨s, fund_dom_s⟩ := i
   rw [fund_dom_s.covolume_eq_volume] at finiteCovol
-  -- TODO: why `rw` fails?
-  erw [fund_dom_s.projection_respects_measure_apply μ K'.isCompact.measurableSet]
+  rw [fund_dom_s.projection_respects_measure_apply μ K'.isCompact.measurableSet]
+  rw [quotient_mk_orbitRel_op_eq_quotientGroup_mk Γ]
   apply IsHaarMeasure.smul
   · intro h
     have i' : IsOpenPosMeasure (ν : Measure G) := inferInstance
