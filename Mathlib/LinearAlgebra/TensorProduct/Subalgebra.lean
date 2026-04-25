@@ -65,7 +65,7 @@ def lTensorBot : (⊥ : Subalgebra R S) ⊗[R] A ≃ₐ[R] A := by
     obtain ⟨y', hy⟩ := Algebra.mem_bot.1 y.2
     replace hy : algebraMap R _ y' = y := Subtype.val_injective hy
     rw [← hx, ← hy, ← map_mul]
-    erw [(toSubmodule A).lTensorOne_tmul x' a,
+    rw [(toSubmodule A).lTensorOne_tmul x' a,
       (toSubmodule A).lTensorOne_tmul y' b,
       (toSubmodule A).lTensorOne_tmul (x' * y') (a * b)]
     rw [Algebra.mul_smul_comm, Algebra.smul_mul_assoc, smul_smul, mul_comm x' y']
@@ -98,7 +98,7 @@ def rTensorBot : A ⊗[R] (⊥ : Subalgebra R S) ≃ₐ[R] A := by
     obtain ⟨y', hy⟩ := Algebra.mem_bot.1 y.2
     replace hy : algebraMap R _ y' = y := Subtype.val_injective hy
     rw [← hx, ← hy, ← map_mul]
-    erw [(toSubmodule A).rTensorOne_tmul x' a,
+    rw [(toSubmodule A).rTensorOne_tmul x' a,
       (toSubmodule A).rTensorOne_tmul y' b,
       (toSubmodule A).rTensorOne_tmul (x' * y') (a * b)]
     rw [Algebra.mul_smul_comm, Algebra.smul_mul_assoc, smul_smul, mul_comm x' y']
@@ -129,6 +129,13 @@ theorem comm_trans_rTensorBot :
 
 end Subalgebra
 
+namespace AlgHom
+
+theorem toSubmodule_range {A B : Type*} [Semiring A] [Algebra R A] [Semiring B] [Algebra R B]
+    (f : A →ₐ[R] B) : Subalgebra.toSubmodule f.range = f.toLinearMap.range := rfl
+
+end AlgHom
+
 namespace Algebra.TensorProduct
 
 variable (R S T)
@@ -145,12 +152,14 @@ def linearEquivIncludeRange :
   (_root_.TensorProduct.ext' <| by
     rintro ⟨x', x, rfl : x ⊗ₜ 1 = x'⟩ ⟨y', y, rfl : 1 ⊗ₜ y = y'⟩
     rw [LinearMap.comp_apply, LinearMap.id_apply]
-    erw [Submodule.mulMap_tmul]
+    simp only [← AlgHom.toSubmodule_range]
+    rw [Submodule.mulMap_tmul]
     rw [tmul_mul_tmul, mul_one, one_mul, _root_.TensorProduct.map_tmul]
     rfl)
   (_root_.TensorProduct.ext' fun x y ↦ by
     rw [LinearMap.comp_apply, LinearMap.id_apply, _root_.TensorProduct.map_tmul]
-    erw [Submodule.mulMap_tmul]
+    simp only [← AlgHom.toSubmodule_range]
+    rw [Submodule.mulMap_tmul]
     change (x ⊗ₜ 1) * (1 ⊗ₜ y) = _
     rw [tmul_mul_tmul, mul_one, one_mul])
 
