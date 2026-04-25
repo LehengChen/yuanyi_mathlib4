@@ -634,6 +634,9 @@ instance {X : WithInitial C} : Unique (star ⟶ X) where
 def starInitial : Limits.IsInitial (star : WithInitial C) :=
   Limits.IsInitial.ofUnique _
 
+@[simp]
+lemma starInitial_to_incl_obj (x : C) : starInitial.to (incl.obj x) = PUnit.unit := rfl
+
 instance : Limits.HasInitial (WithInitial C) := Limits.hasInitial_of_unique star
 
 /-- The isomorphism between star and an abstract initial object of `WithInitial C` -/
@@ -696,7 +699,11 @@ def liftUnique {D : Type*} [Category* D] {Z : D} (F : C ⥤ D) (M : ∀ x : C, Z
       · cases f
         change G.map _ ≫ h.hom.app _ = hG.hom ≫ _
         symm
-        erw [← Iso.eq_inv_comp, ← Category.assoc, hh]
+        rw [← Iso.eq_inv_comp]
+        rw [← Category.assoc]
+        rw [← starInitial_to_incl_obj]
+        rw [← Iso.symm_hom hG]
+        rw [hh]
         simp
       · cases f
         change G.map (𝟙 _) ≫ hG.hom = hG.hom ≫ 𝟙 _
