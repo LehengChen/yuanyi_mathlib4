@@ -142,11 +142,10 @@ instance : (lim (J := Discrete ℕ) (C := LightCondMod R)).PreservesEpimorphisms
       intro ⟨n⟩
       simp only [lim_obj, lim_map, limMap, IsLimit.map, limit.isLimit_lift, limit.lift_π,
         Cone.postcompose_obj_pt, limit.cone_x, Cone.postcompose_obj_π, NatTrans.comp_app,
-        Functor.const_obj_obj, limit.cone_π, Pi.isoLimit, Limits.Pi.map, Category.assoc,
-        limit.conePointUniqueUpToIso_hom_comp, Pi.cone_pt, Pi.cone_π, Discrete.natTrans_app,
-        Discrete.functor_obj_eq_as]
-      erw [IsLimit.conePointUniqueUpToIso_inv_comp_assoc]
-      rfl
+        Functor.const_obj_obj, limit.cone_π, Limits.Pi.map, Category.assoc]
+      simp only [Pi.isoLimit_hom_π, limit.lift_π, Cone.postcompose_obj_π, NatTrans.comp_app,
+        Discrete.natTrans_app, Discrete.functor_obj_eq_as, limit.cone_π]
+      rw [Pi.isoLimit_inv_π_assoc]
     rw [this]
     infer_instance
 
