@@ -37,17 +37,19 @@ instance preservesHomology_preadditiveYonedaObj_of_injective (J : C) [hJ : Injec
   letI := (injective_iff_preservesEpimorphisms_preadditive_yoneda_obj' J).mp hJ
   apply Functor.preservesHomology_of_preservesEpis_and_kernels
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The preadditive Yoneda functor on `J` preserves colimits if `J` is injective. -/
 instance preservesFiniteColimits_preadditiveYonedaObj_of_injective (J : C) [hP : Injective J] :
     PreservesFiniteColimits (preadditiveYonedaObj J) := by
+  letI : @Functor.PreservesHomology _ _ _ _ _ _ (preadditiveYonedaObj J)
+      (Functor.preservesZeroMorphisms_of_additive (preadditiveYonedaObj J)) := by
+    letI := (injective_iff_preservesEpimorphisms_preadditive_yoneda_obj' J).mp hP
+    apply Functor.preservesHomology_of_preservesEpis_and_kernels
   apply Functor.preservesFiniteColimits_of_preservesHomology
 
 /-- An object is injective if its preadditive Yoneda functor preserves finite colimits. -/
 theorem injective_of_preservesFiniteColimits_preadditiveYonedaObj (J : C)
     [hP : PreservesFiniteColimits (preadditiveYonedaObj J)] : Injective J := by
   rw [injective_iff_preservesEpimorphisms_preadditive_yoneda_obj']
-  have := Functor.preservesHomologyOfExact (preadditiveYonedaObj J)
   infer_instance
 
 end CategoryTheory
