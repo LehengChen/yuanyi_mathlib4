@@ -54,26 +54,37 @@ variable {D : Type u₂} [Category.{v₂} D] [Abelian D]
 variable (F : C ⥤ D)
 variable (G : D ⥤ C) [Functor.PreservesZeroMorphisms G]
 
-set_option backward.isDefEq.respectTransparency false in
+omit [Preadditive C] [Abelian D] [Functor.PreservesZeroMorphisms G] in
+private theorem inv_app_map_hom_app (i : F ⋙ G ≅ 𝟭 C) {X Y : C} (f : X ⟶ Y) :
+    i.inv.app X ≫ G.map (F.map f) ≫ i.hom.app Y = f := by
+  rw (occs := .pos [2]) [← Functor.id_map f]
+  rw [← NatIso.naturality_1 i f, Functor.comp_map]
+  simp
+
 /-- No point making this an instance, as it requires `i`. -/
 theorem hasKernels [PreservesFiniteLimits G] (i : F ⋙ G ≅ 𝟭 C) : HasKernels C :=
   { has_limit {X Y} f := by
-      have : i.inv.app X ≫ G.map (F.map f) ≫ i.hom.app Y = f := by
-        simpa using NatIso.naturality_1 i f
-      rw [← this]
-      haveI : HasKernel (G.map (F.map f) ≫ i.hom.app _) := Limits.hasKernel_comp_mono _ _
-      apply Limits.hasKernel_iso_comp }
+      rw [← inv_app_map_hom_app F G i f]
+      letI mono_hom : Mono (i.hom.app Y) := inferInstance
+      letI iso_inv : IsIso (i.inv.app X) := inferInstance
+      letI : HasKernel (G.map (F.map f) ≫ i.hom.app Y) :=
+        @Limits.hasKernel_comp_mono C _ _ (G.obj (F.obj X)) (G.obj (F.obj Y)) ((𝟭 C).obj Y)
+          (G.map (F.map f)) inferInstance (i.hom.app Y) mono_hom
+      apply @Limits.hasKernel_iso_comp C _ _ ((𝟭 C).obj X) (G.obj (F.obj X)) ((𝟭 C).obj Y)
+        (i.inv.app X) (G.map (F.map f) ≫ i.hom.app Y) iso_inv inferInstance }
 
-set_option backward.isDefEq.respectTransparency false in
 /-- No point making this an instance, as it requires `i` and `adj`. -/
 theorem hasCokernels (i : F ⋙ G ≅ 𝟭 C) (adj : G ⊣ F) : HasCokernels C :=
   { has_colimit {X Y} f := by
-      have : PreservesColimits G := adj.leftAdjoint_preservesColimits
-      have : i.inv.app X ≫ G.map (F.map f) ≫ i.hom.app Y = f := by
-        simpa using NatIso.naturality_1 i f
-      rw [← this]
-      haveI : HasCokernel (G.map (F.map f) ≫ i.hom.app _) := Limits.hasCokernel_comp_iso _ _
-      apply Limits.hasCokernel_epi_comp }
+      letI : PreservesColimits G := adj.leftAdjoint_preservesColimits
+      rw [← inv_app_map_hom_app F G i f]
+      letI iso_hom : IsIso (i.hom.app Y) := inferInstance
+      letI epi_inv : Epi (i.inv.app X) := inferInstance
+      letI : HasCokernel (G.map (F.map f) ≫ i.hom.app Y) :=
+        @Limits.hasCokernel_comp_iso C _ _ (G.obj (F.obj X)) (G.obj (F.obj Y)) ((𝟭 C).obj Y)
+          (G.map (F.map f)) (i.hom.app Y) inferInstance iso_hom
+      apply @Limits.hasCokernel_epi_comp C _ _ (G.obj (F.obj X)) ((𝟭 C).obj Y)
+        (G.map (F.map f) ≫ i.hom.app Y) inferInstance ((𝟭 C).obj X) (i.inv.app X) epi_inv }
 
 end AbelianOfAdjunction
 
@@ -89,13 +100,14 @@ def abelianOfAdjunction {C : Type u₁} [Category.{v₁} C] [Preadditive C] [Has
     {D : Type u₂} [Category.{v₂} D] [Abelian D] (F : C ⥤ D)
     (G : D ⥤ C) [Functor.PreservesZeroMorphisms G] [PreservesFiniteLimits G] (i : F ⋙ G ≅ 𝟭 C)
     (adj : G ⊣ F) : Abelian C := by
-  haveI := hasKernels F G i
-  haveI := hasCokernels F G i adj
-  have : ∀ {X Y : C} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f) := by
+  letI := hasKernels F G i
+  letI := hasCokernels F G i adj
+  letI comparison_isIso :
+      ∀ {X Y : C} (f : X ⟶ Y), IsIso (Abelian.coimageImageComparison f) := by
     intro X Y f
     let arrowIso : Arrow.mk (G.map (F.map f)) ≅ Arrow.mk f :=
       ((Functor.mapArrowFunctor _ _).mapIso i).app (Arrow.mk f)
-    have : PreservesColimits G := adj.leftAdjoint_preservesColimits
+    letI : PreservesColimits G := adj.leftAdjoint_preservesColimits
     let iso : Arrow.mk (G.map (Abelian.coimageImageComparison (F.map f))) ≅
         Arrow.mk (Abelian.coimageImageComparison f) :=
       Abelian.PreservesCoimageImageComparison.iso G (F.map f) ≪≫
