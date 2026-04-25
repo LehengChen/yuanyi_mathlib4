@@ -217,6 +217,10 @@ def functorOfMonoidHom {X} [Monoid X] (f : End (root' T) →* X) :
     rw [comp_as_mul, ← f.map_mul]
     simp only [IsIso.inv_hom_id_assoc, loopOfHom, End.mul_def, Category.assoc]
 
+private theorem mem_compl_wideSubquiverEquivSetTotal {V : Type u} [Quiver V]
+    (H : WideSubquiver V) {a b : V} (e : a ⟶ b) :
+    (Total.mk a b e ∈ (wideSubquiverEquivSetTotal H)ᶜ) = (e ∉ H a b) := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 set_option backward.privateInPublic true in
 set_option backward.privateInPublic.warn false in
@@ -232,13 +236,18 @@ lemma endIsFree : IsFreeGroup (End (root' T)) :=
       let f' : Labelling (Generators G) X := fun a b e =>
         if h : e ∈ wideSubquiverSymmetrify T a b then 1 else f ⟨⟨a, b, e⟩, h⟩
       rcases unique_lift f' with ⟨F', hF', uF'⟩
-      refine ⟨F'.mapEnd _, ?_, ?_⟩
+      use
+        { toFun := F'.map
+          map_one' := by rw [End.one_def, F'.map_id, id_as_one]
+          map_mul' := by intros; rw [End.mul_def, F'.map_comp, comp_as_mul] }
+      constructor
       · suffices ∀ {x y} (q : x ⟶ y), F'.map (loopOfHom T q) = (F'.map q : X) by
           rintro ⟨⟨a, b, e⟩, h⟩
-          -- Work around the defeq `X = End (F'.obj (IsFreeGroupoid.SpanningTree.root' T))`
-          erw [Functor.mapEnd_apply]
+          dsimp
           rw [this, hF']
-          exact dif_neg h
+          dsimp [f']
+          rw [mem_compl_wideSubquiverEquivSetTotal] at h
+          rw [dif_neg h]
         intro x y q
         suffices ∀ {a} (p : Path (root T) a), F'.map (homOfPath T p) = 1 by
           simp only [this, treeHom, comp_as_mul, inv_as_inv, loopOfHom, inv_one, mul_one,
