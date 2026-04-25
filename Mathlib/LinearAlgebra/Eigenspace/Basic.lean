@@ -753,8 +753,8 @@ theorem genEigenspace_restrict (f : End R M) (p : Submodule R M) (k : ℕ∞) (�
     rw [pow_zero, pow_zero, Module.End.one_eq_id]
     apply (Submodule.ker_subtype _).symm
   | succ l ih =>
-    erw [pow_succ, pow_succ, LinearMap.ker_comp, LinearMap.ker_comp, ih, ← LinearMap.ker_comp,
-      LinearMap.comp_assoc]
+    simp only [pow_succ, Module.End.mul_eq_comp, LinearMap.ker_comp, ih]
+    rfl
 
 lemma _root_.Submodule.inf_genEigenspace (f : End R M) (p : Submodule R M) {k : ℕ∞} {μ : R}
     (hfp : ∀ x : M, x ∈ p → f x ∈ p) :
